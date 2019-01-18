@@ -7,13 +7,17 @@
 - also requires the following solutions in same folder:  RxSockets, MinimalContainer, StringEnums, Stringification.
 - demos provided for Console, Net Core, Windows Forms, WPF, and UWP.
 
+**Notes**
+
+TWS or Gateway must be running and API access enabled. To enable TWS API access, navigate to Edit -> Global Configuration -> API -> Settings and make sure the "Enable ActiveX and Socket Clients" option is checked.
+
 **Example**
 
 ```csharp
-// Create the InterReact client by connecting to TWS/Gateway using the default port and a random clientId
+// Create the InterReact client by connecting to TWS/Gateway using the default port and a random clientId.
 IInterReactClient client = await InterReactClient.Builder.BuildAsync();
 
-// Print all messages as strings to the console.
+// Convert all messages from IB to strings and write them to the console.
 client.Response.Stringify().Subscribe(
    onNext: Console.WriteLine, 
    onError: Console.WriteLine, 
