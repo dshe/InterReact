@@ -32,7 +32,7 @@ Contract contract = new Contract
 // Make a request to IB for the contract details using the contract object.
 IList<ContractDetails> contractDetailsList = await client.Services.ContractDetailsObservable(contract);
 
-// Take the first contract in the list.
+// Take the one contract in the list.
 ContractDetails contractDetails = contractDetailsList.Single();
 
 // Print the LongName of the contract to the console.
