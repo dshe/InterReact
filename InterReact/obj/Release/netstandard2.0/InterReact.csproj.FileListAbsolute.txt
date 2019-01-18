@@ -1,0 +1,4 @@
+C:\prg\myProjects\GitHub\InterReact\InterReact\obj\Release\netstandard2.0\InterReact.csprojAssemblyReference.cache
+C:\prg\myProjects\GitHub\InterReact\InterReact\obj\Release\netstandard2.0\InterReact.csproj.CoreCompileInputs.cache
+C:\prg\myProjects\GitHub\InterReact\InterReact\obj\Release\netstandard2.0\InterReact.AssemblyInfoInputs.cache
+C:\prg\myProjects\GitHub\InterReact\InterReact\obj\Release\netstandard2.0\InterReact.AssemblyInfo.cs

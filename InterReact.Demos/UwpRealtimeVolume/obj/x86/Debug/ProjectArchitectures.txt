@@ -1,0 +1,1 @@
+C:\prg\myProjects\GitHub\InterReact\InterReact.Demos\UwpRealtimeVolume\UwpRealtimeVolume.csproj;x86

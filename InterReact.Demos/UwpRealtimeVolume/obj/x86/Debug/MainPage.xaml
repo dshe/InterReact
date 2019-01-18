@@ -1,0 +1,58 @@
+﻿<Page x:ConnectionId='1'
+    x:Class="UwpRealtimeVolume.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:UwpRealtimeVolume"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:utility="using:UwpRealtimeVolume.Utility"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <utility:DoubleToColorConverter x:Key="DoubleToColorConverter"/>
+        <Style TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+        </Style>
+    </Page.Resources>
+
+    <Grid Margin="0,0,30,30">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Button Width="200" Height="100" Background="Aqua"></Button>
+        <TextBox x:ConnectionId='2'                                                                                                                     
+                     PlaceholderText="symbol" Width="100" Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
+        <TextBlock x:ConnectionId='3'                                           Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Right" />
+        <TextBlock x:ConnectionId='4'                                            FontWeight="Medium" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Center" />
+        <TextBlock Text="Bid" FontWeight="Medium" Grid.Row="2" Grid.Column="0" />
+        <TextBlock Text="Ask" FontWeight="Medium" Grid.Row="2" Grid.Column="1" />
+        <TextBlock Text="Last" FontWeight="Medium" Grid.Row="2" Grid.Column="2" />
+        <TextBlock Text="Change" FontWeight="Medium" Grid.Row="2" Grid.Column="3" />
+        <TextBlock x:ConnectionId='5'                                                                                                                                                             Grid.Row="3" Grid.Column="0" />
+        <TextBlock x:ConnectionId='6'                                                                                                                                                             Grid.Row="3" Grid.Column="1" />
+        <TextBlock x:ConnectionId='7'                                                                                                                                                               Grid.Row="3" Grid.Column="2" />
+        <TextBlock x:ConnectionId='8'                                                                                                                                                                     Grid.Row="3" Grid.Column="3" />
+        <TextBlock x:ConnectionId='9'                                              Grid.Row="4" Grid.Column="0" />
+        <TextBlock x:ConnectionId='10'                                              Grid.Row="4" Grid.Column="1" />
+        <TextBlock x:ConnectionId='11'                                               Grid.Row="4" Grid.Column="2" />
+        <TextBlock x:ConnectionId='12'                                             Grid.Row="4" Grid.Column="3" />
+        <TextBlock x:ConnectionId='13'                                             Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" />
+        <TextBlock x:ConnectionId='14'                                             Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" />
+        <TextBlock x:ConnectionId='15'                                                         Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="4" />
+    </Grid>
+
+</Page>
+
