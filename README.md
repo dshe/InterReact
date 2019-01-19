@@ -9,7 +9,7 @@
 
 **Notes**
 
-TWS or Gateway must be running and API access enabled. To enable TWS API access, navigate to Edit -> Global Configuration -> API -> Settings and make sure the "Enable ActiveX and Socket Clients" option is checked.
+TWS or Gateway must be running and API access mmust be enabled. To enable API access, navigate to Edit / Global Configuration / API / Settings and make sure the "Enable ActiveX and Socket Clients" option is checked.
 
 **Example**
 
@@ -17,11 +17,11 @@ TWS or Gateway must be running and API access enabled. To enable TWS API access,
 // Create the InterReact client by connecting to TWS/Gateway using the default port and a random clientId.
 IInterReactClient client = await InterReactClient.Builder.BuildAsync();
 
-// Convert all messages from IB to strings and write them to the console.
+// Convert all messages received from IB to strings and then write them to the console.
 client.Response.Stringify().Subscribe(
    onNext: Console.WriteLine, 
    onError: Console.WriteLine, 
-   onCompleted: () => Console.WriteLine("Completed.")\
+   onCompleted: () => Console.WriteLine("Completed.")
 );
 
 // Create a contract object.
