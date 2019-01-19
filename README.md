@@ -1,7 +1,7 @@
 ## InterReact&nbsp;&nbsp;[![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ***Reactive C# API to Interactive Brokers***
-- supports Interactive Brokers TWS/Gateway API 9.73
+- compatible with Interactive Brokers TWS/Gateway API 9.73
 - supports NetStandard 2.0
 - dependencies: Reactive Extensions, NodaTime.
 - also requires the following solutions in same folder:  RxSockets, MinimalContainer, StringEnums, Stringification.
@@ -9,7 +9,7 @@
 
 **Notes**
 
-TWS or Gateway must be running with API access enabled. With TWS, navigate to Edit / Global Configuration / API / Settings and make sure the "Enable ActiveX and Socket Clients" option is checked.
+TWS or Gateway must be running with API access enabled. In TWS, navigate to Edit / Global Configuration / API / Settings and make sure the "Enable ActiveX and Socket Clients" option is checked.
 
 **Example**
 
@@ -19,8 +19,8 @@ IInterReactClient client = await InterReactClient.Builder.BuildAsync();
 
 // Convert all messages received from IB to strings and then write them to the console.
 client.Response.Stringify().Subscribe(
-   onNext: Console.WriteLine, 
-   onError: Console.WriteLine, 
+   onNext:      Console.WriteLine, 
+   onError:     Console.WriteLine, 
    onCompleted: () => Console.WriteLine("Completed.")
 );
 
@@ -28,7 +28,7 @@ client.Response.Stringify().Subscribe(
 Contract contract = new Contract
 {
    SecurityType = SecurityType.Stock,
-   Symbol = "SPY",
+   Symbol   = "SPY",
    Currency = "USD",
    Exchange = "SMART"
 };
