@@ -9,7 +9,7 @@
 
 **Notes**
 
-TWS or Gateway must be running and API access mmust be enabled. To enable API access, navigate to Edit / Global Configuration / API / Settings and make sure the "Enable ActiveX and Socket Clients" option is checked.
+TWS or Gateway must be running with API access enabled. With TWS, navigate to Edit / Global Configuration / API / Settings and make sure the "Enable ActiveX and Socket Clients" option is checked.
 
 **Example**
 
