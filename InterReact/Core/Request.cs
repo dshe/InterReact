@@ -312,9 +312,9 @@ namespace InterReact.Core
         /// </summary>
         public void RequestHistoricalData(int requestId,
             Contract contract,
-            Instant endDate = default,
+            Instant  endDate = default,
             HistoricalDuration duration = null,
-            HistoricalBarSize barSize = null,
+            HistoricalBarSize  barSize = null,
             HistoricalDataType dataType = null,
             bool regularTradingHoursOnly = false,
             params Tag[] options)

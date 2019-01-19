@@ -42,16 +42,16 @@ namespace ConsoleHelloWorld
 
             // Print all messages as strings to the console and also observe any errors.
             client.Response.Stringify().Subscribe(
-                onNext: Console.WriteLine, 
-                onError: Console.WriteLine, 
+                onNext:            Console.WriteLine, 
+                onError:           Console.WriteLine, 
                 onCompleted: () => Console.WriteLine("Completed."));
 
             var contract = new Contract
             {
                 SecurityType = SecurityType.Stock,
-                Symbol = "SPY",
-                Currency = "USD",
-                Exchange = "SMART"
+                Symbol       = "SPY",
+                Currency     = "USD",
+                Exchange     = "SMART"
             };
 
             //client.Request.RequestCurrentTime();
@@ -70,4 +70,3 @@ namespace ConsoleHelloWorld
 
     }
 }
-

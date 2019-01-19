@@ -23,7 +23,7 @@ namespace InterReact.Core
         internal RequestMessage(Action<byte[], int, int> sendAction, Limiter limiter)
         {
             this.sendAction = sendAction;
-            this.limiter = limiter;
+            this.limiter    = limiter;
         }
 
         // V100Plus format: 4 byte message length prefix plus payload of null-terminated strings.

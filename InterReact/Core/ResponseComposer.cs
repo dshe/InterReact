@@ -26,8 +26,8 @@ namespace InterReact.Core
                 var responseComposer = new ResponseComposer(config, observer.OnNext);
 
                 return source.Subscribe(
-                    onNext: responseComposer.Compose,
-                    onError: observer.OnError,
+                    onNext:      responseComposer.Compose,
+                    onError:     observer.OnError,
                     onCompleted: observer.OnCompleted);
             });
         }
@@ -222,8 +222,8 @@ namespace InterReact.Core
             var tickPrice = new TickPrice
             {
                 RequestId = requestId,
-                TickType = priceTickType,
-                Price = price
+                TickType  = priceTickType,
+                Price     = price
             };
 
             if (version >= 3)
@@ -234,7 +234,7 @@ namespace InterReact.Core
                 {
                     var mask = new BitMask(i);
                     tickPrice.CanAutoExecute = mask[0];
-                    tickPrice.PastLimit = mask[1];
+                    tickPrice.PastLimit      = mask[1];
                 }
             }
 
@@ -254,8 +254,8 @@ namespace InterReact.Core
             return new TickSize
             {
                 RequestId = Read<int>(),
-                TickType = Read<TickType>(),
-                Size = Read<int>()
+                TickType  = Read<TickType>(),
+                Size      = Read<int>()
             };
         }
 
@@ -263,22 +263,22 @@ namespace InterReact.Core
         {
             IgnoreVersion();
             var requestId = Read<int>();
-            var tickType = Read<TickType>();
-            var value = Read<double>();
+            var tickType  = Read<TickType>();
+            var value     = Read<double>();
             if (tickType == TickType.Halted)
             {
                 return new TickHalted
                 {
                     RequestId = requestId,
-                    TickType = tickType,
-                    HaltType = value == 0 ? HaltType.NotHalted : HaltType.GeneralHalt
+                    TickType  = tickType,
+                    HaltType  = value == 0 ? HaltType.NotHalted : HaltType.GeneralHalt
                 };
             }
             return new TickGeneric
             {
                 RequestId = requestId,
-                TickType = tickType,
-                Value = value
+                TickType  = tickType,
+                Value     = value
             };
         }
 
@@ -286,21 +286,21 @@ namespace InterReact.Core
         {
             IgnoreVersion();
             var requestId = Read<int>();
-            var tickType = Read<TickType>();
-            var str = ReadString();
+            var tickType  = Read<TickType>();
+            var str       = ReadString();
 
             if (tickType == TickType.RealtimeVolume)
             {
                 var parts = str.Split(';');
                 return new TickRealtimeVolume
                 {
-                    RequestId = requestId,
-                    TickType = TickType.RealtimeVolume,
-                    Price = Parse<double>(parts[0]),
-                    Size = Parse<int>(parts[1]),
-                    Instant = Instant.FromUnixTimeMilliseconds(long.Parse(parts[2], NumberFormatInfo.InvariantInfo)),
-                    Volume = Parse<int>(parts[3]),
-                    Vwap = Parse<double>(parts[4]),
+                    RequestId  = requestId,
+                    TickType   = TickType.RealtimeVolume,
+                    Price      = Parse<double>(parts[0]),
+                    Size       = Parse<int>(parts[1]),
+                    Instant    = Instant.FromUnixTimeMilliseconds(long.Parse(parts[2], NumberFormatInfo.InvariantInfo)),
+                    Volume     = Parse<int>(parts[3]),
+                    Vwap       = Parse<double>(parts[4]),
                     SingleTrade = Parse<bool>(parts[5])
                 };
             }
@@ -309,15 +309,15 @@ namespace InterReact.Core
                 return new TickTime
                 {
                     RequestId = requestId,
-                    TickType = TickType.LastTimeStamp,
-                    Time = Instant.FromUnixTimeSeconds(long.Parse(str, NumberFormatInfo.InvariantInfo))
+                    TickType  = TickType.LastTimeStamp,
+                    Time      = Instant.FromUnixTimeSeconds(long.Parse(str, NumberFormatInfo.InvariantInfo))
                 };
             }
             return new TickString
             {
                 RequestId = requestId,
-                TickType = tickType,
-                Value = str
+                TickType  = tickType,
+                Value     = str
             };
         }
 
@@ -326,8 +326,8 @@ namespace InterReact.Core
             var version = GetVersion();
             var t = new TickOptionComputation
             {
-                RequestId = Read<int>(),
-                TickType = Read<TickType>(),
+                RequestId         = Read<int>(),
+                TickType          = Read<TickType>(),
                 ImpliedVolatility = Read<double?>()
             };
             if (t.ImpliedVolatility < 0)
@@ -369,15 +369,15 @@ namespace InterReact.Core
             IgnoreVersion();
             return new TickExchangeForPhysical
             {
-                RequestId = Read<int>(),
-                TickType = Read<TickType>(),
-                BasisPoints = Read<double>(),
+                RequestId            = Read<int>(),
+                TickType             = Read<TickType>(),
+                BasisPoints          = Read<double>(),
                 FormattedBasisPoints = ReadString(),
-                ImpliedFuturesPrice = Read<double>(),
-                HoldDays = Read<int>(),
-                FutureExpiry = ReadString(),
-                DividendImpact = Read<double>(),
-                DividendsToExpiry = Read<double>()
+                ImpliedFuturesPrice  = Read<double>(),
+                HoldDays             = Read<int>(),
+                FutureExpiry         = ReadString(),
+                DividendImpact       = Read<double>(),
+                DividendsToExpiry    = Read<double>()
             };
         }
 

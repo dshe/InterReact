@@ -11,15 +11,18 @@ namespace InterReact.Core
         internal static Random Random = new Random();
 
         public IClock Clock { get; internal set; } = SystemClock.Instance;
+
         public DateTimeZone SystemTimeZone { get; internal set; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
 
         public IPEndPoint IPEndPoint { get; internal set; } = new IPEndPoint(IPAddress.IPv6Loopback, 0);
+
         internal int[] Ports = { 4001, 4002, 7496, 7497 };
+
         public bool IsDemoAccount => IPEndPoint.Port == 4002 || IPEndPoint.Port == 7497;
 
         public int ClientId { get; internal set; } = Random.Next(1000, 1000000);
 
-        public int MaxRequestsPerSecond { get; internal set; } = 50;
+        public int    MaxRequestsPerSecond { get; internal set; } = 50;
         public string OptionalCapabilities { get; internal set; }
 
         /// <summary>
@@ -36,8 +39,9 @@ namespace InterReact.Core
         public const ServerVersion ServerVersionMax = ServerVersion.AggGroup;
 
         public string ManagedAccounts { get; internal set; }
-        public string Date { get; internal set; }
-        internal int NextIdValue; // set during login
+        public string Date            { get; internal set; }
+
+        internal int  NextIdValue; // set during login
 
         internal bool SupportsServerVersion(ServerVersion version) => version <= ServerVersionCurrent;
 
