@@ -4,8 +4,8 @@
 - compatible with Interactive Brokers TWS/Gateway API 9.73
 - supports NetStandard 2.0
 - dependencies: Reactive Extensions, NodaTime.
-- also requires the following solutions in same folder:  RxSockets, MinimalContainer, StringEnums, Stringification.
-- demos provided for Console, Net Core, Windows Forms, WPF, and UWP.
+- also references the following solutions in same folder: RxSockets, MinimalContainer, StringEnums, Stringification.
+- demo applications provided: Console, NET Core, Windows Forms, WPF, and UWP.
 
 **Notes**
 
@@ -19,8 +19,8 @@ IInterReactClient client = await InterReactClient.Builder.BuildAsync();
 
 // Convert all messages received from IB to strings and then write them to the console.
 client.Response.Stringify().Subscribe(
-   onNext:      Console.WriteLine, 
-   onError:     Console.WriteLine, 
+   onNext:            Console.WriteLine, 
+   onError:           Console.WriteLine, 
    onCompleted: () => Console.WriteLine("Completed.")
 );
 
@@ -28,9 +28,9 @@ client.Response.Stringify().Subscribe(
 Contract contract = new Contract
 {
    SecurityType = SecurityType.Stock,
-   Symbol   = "SPY",
-   Currency = "USD",
-   Exchange = "SMART"
+   Symbol       = "SPY",
+   Currency     = "USD",
+   Exchange     = "SMART"
 };
 
 // Make a request to IB for the contract details using the contract object.
