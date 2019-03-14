@@ -4,6 +4,7 @@ using System.Linq;
 using InterReact.Extensions;
 using InterReact.Messages;
 using InterReact.Tests.Utility;
+using Moq;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -13,10 +14,17 @@ namespace InterReact.Tests.UnitTests.Extensions
     {
         public ContractDetailsExpiryTest(ITestOutputHelper output) : base(output) {}
 
+
+        /*
         [Fact]
         public void Test_Empty_Expiry()
         {
-            var input = new List<ContractDetails> { new ContractDetails() };
+            var xx = new Mock<ContractDetails>();
+            xx.SetupGet<Contract>(x => new Contract());
+            //xx.Object.
+
+            //var input = new List<ContractDetails> { new ContractDetails() };
+            var input = new List<ContractDetails> { xx.Object };
             Assert.Throws<InvalidDataException>(() => ContractDetailsExpiryEx.ContractDetailsExpiryFilter(input, 0))
                 .WriteMessageTo(Write);
         }
@@ -55,5 +63,6 @@ namespace InterReact.Tests.UnitTests.Extensions
             output = ContractDetailsExpiryEx.ContractDetailsExpiryFilter(input, 5);
             Assert.True(!output.Any());
         }
+        */
     }
 }

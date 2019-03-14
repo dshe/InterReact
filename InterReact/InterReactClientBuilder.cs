@@ -23,7 +23,7 @@ namespace InterReact
 {
     public sealed class InterReactClientBuilder : EditorBrowsableNever
     {
-        private Config Config = new Config();
+        private readonly Config Config = new Config();
 
         /// <summary>
         /// Specify an IPAddress to connect to TWS/Gateway.
@@ -112,15 +112,15 @@ namespace InterReact
             }
         }
 
-        private async Task<IRxSocket> ConnectAsync(int timeout, CancellationToken ct)
+        private async Task<IRxSocketClient> ConnectAsync(int timeout, CancellationToken ct)
         {
-            (SocketError error, IRxSocket socket) result = default;
+            (SocketError error, IRxSocketClient? socket) result = default;
             foreach (var port in Config.Ports)
             {
                 Config.IPEndPoint.Port = port;
                 result = await TryConnectAsync(timeout, ct).ConfigureAwait(false);
                 if (result.error == SocketError.Success)
-                    return result.socket;
+                    return result.socket ?? throw new ArgumentNullException();
             }
             // SocketException is not thrown here because it does not have a message property.
             var ports = Config.Ports.Select(p => p.ToString()).JoinStrings(", ");
@@ -130,11 +130,11 @@ namespace InterReact
             throw new IOException(message, new SocketException((int)result.error));
         }
 
-        private async Task<(SocketError error, IRxSocket rxsocket)> TryConnectAsync(int timeout, CancellationToken ct)
+        private async Task<(SocketError error, IRxSocketClient? rxsocket)> TryConnectAsync(int timeout, CancellationToken ct)
         {
             try
             {
-                var rxsocket = await RxSocket.ConnectAsync(Config.IPEndPoint, timeout, ct).ConfigureAwait(false);
+                var rxsocket = await RxSocketClient.ConnectAsync(Config.IPEndPoint, timeout, ct).ConfigureAwait(false);
                 return (SocketError.Success, rxsocket);
             }
             catch (SocketException se) when (se.ErrorCode == (int)SocketError.ConnectionRefused)
@@ -147,7 +147,7 @@ namespace InterReact
             }
         }
 
-        private async Task Login(IRxSocket rxsocket, int timeout, CancellationToken ct)
+        private async Task Login(IRxSocketClient rxsocket, int timeout, CancellationToken ct)
         {
             var ts = timeout >= 0 ? TimeSpan.FromMilliseconds(timeout) : TimeSpan.MaxValue;
 

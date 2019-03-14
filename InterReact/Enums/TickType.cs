@@ -1,3 +1,5 @@
+using System;
+
 namespace InterReact.Enums
 {
     public enum TickType
@@ -328,29 +330,5 @@ namespace InterReact.Enums
         DelayedModelOption = 83,
         LastExchange = 84,
         LastRegTime = 85
-    }
-
-    internal static class TickTypeSize
-    {
-        internal static (bool success, TickType tickType) GetTickTypeSize(TickType tickType)
-        {
-            switch (tickType)
-            {
-                case TickType.BidPrice:
-                    return (true, TickType.BidSize);
-                case TickType.AskPrice:
-                    return (true, TickType.AskSize);
-                case TickType.LastPrice:
-                    return (true, TickType.LastSize);
-                case TickType.DelayedBidPrice:
-                    return (true, TickType.DelayedBidSize);
-                case TickType.DelayedAskPrice:
-                    return (true, TickType.DelayedAskSize);
-                case TickType.DelayedLastPrice:
-                    return (true, TickType.DelayedLastSize);
-                default:
-                    return (false, TickType.Undefined);
-            }
-        }
     }
 }

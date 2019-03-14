@@ -1,4 +1,5 @@
 ﻿using System;
+using InterReact.Core;
 using InterReact.Enums;
 using InterReact.Interfaces;
 
@@ -45,15 +46,20 @@ namespace InterReact.Messages
                 Message += $" Id={RequestId}.";
         }
 
-        internal Exception ToAlertException()
-            => new AlertException(this);
+        internal Exception ToAlertException() =>
+            new AlertException(this);
+
+        internal static Alert Create(ResponseReader c)
+        {
+            c.RequireVersion(2);
+            return new Alert(c.Read<int>(), c.Read<int>(), c.ReadString());
+        }
     }
 
     public sealed class AlertException : Exception
     {
         public Alert Alert { get; }
 
-        internal AlertException(Alert alert) : base(alert.Message)
-            => Alert = alert;
+        internal AlertException(Alert alert) : base(alert.Message) => Alert = alert;
     }
 }

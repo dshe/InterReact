@@ -12,17 +12,17 @@ namespace InterReact.Messages.Conditions
         /**
         * @brief Exchange where the symbol needs to be traded.
         */
-        public string Exchange { get; set; }
+        public string Exchange { get; set; } = "";
 
         /**
         * @brief Kind of instrument being monitored.
         */
-        public string SecType { get; set; }
+        public string SecType { get; set; } = "";
 
         /**
         * @brief Instrument's symbol
         */
-        public string Symbol { get; set; }
+        public string Symbol { get; set; } = "";
 
         private const string header = "trade occurs for ",
                      symbolSuffix = " symbol on ",
@@ -58,7 +58,7 @@ namespace InterReact.Messages.Conditions
             return true;
         }
 
-        internal override void Deserialize(ResponseComposer reader)
+        internal override void Deserialize(ResponseReader reader)
         {
             base.Deserialize(reader);
 

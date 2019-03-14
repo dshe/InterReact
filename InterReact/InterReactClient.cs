@@ -28,7 +28,7 @@ namespace InterReact
         public static Task<IInterReactClient> BuildAsync(int timeout = 1000, CancellationToken ct = default) =>
             new InterReactClientBuilder().BuildAsync(timeout, ct);
 
-        internal readonly IRxSocket rxSocket;
+        internal readonly IRxSocketClient rxSocket;
         public Config Config { get; }
         public Request Request { get; }
         public IObservable<object> Response { get; }
@@ -36,7 +36,7 @@ namespace InterReact
         public Task DisconnectAsync(CancellationToken ct) => rxSocket.DisconnectAsync(ct);
         public void Dispose() => rxSocket.Dispose();
 
-        internal InterReactClient(IRxSocket rxsocket, Config config, Request request, IObservable<object> response, Services services)
+        internal InterReactClient(IRxSocketClient rxsocket, Config config, Request request, IObservable<object> response, Services services)
         {
             rxSocket = rxsocket;
             Config = config;

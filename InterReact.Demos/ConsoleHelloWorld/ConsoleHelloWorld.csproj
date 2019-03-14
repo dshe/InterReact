@@ -47,11 +47,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.Reactive">
-      <Version>4.1.2</Version>
-    </PackageReference>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\..\InterReact\InterReact.csproj">
       <Project>{232776ec-0e94-4817-8e3e-ef3d2cf4ef81}</Project>
       <Name>InterReact</Name>

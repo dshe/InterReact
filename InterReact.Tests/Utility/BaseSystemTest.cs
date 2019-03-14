@@ -25,7 +25,7 @@ namespace InterReact.Tests.Utility
 
     public sealed class SystemTestFixture : IAsyncLifetime
     {
-        public IInterReactClient Client { get; private set; }
+        public IInterReactClient? Client { get; private set; }
 
         public SystemTestFixture()
         {
@@ -58,6 +58,8 @@ namespace InterReact.Tests.Utility
 
         protected BaseSystemTest(SystemTestFixture fixture, ITestOutputHelper output)
         {
+            if (fixture.Client == null)
+                throw new NullReferenceException(nameof(fixture.Client));
             Client = fixture.Client;
             Write = output.WriteLine;
             Id = Client.Request.NextId();

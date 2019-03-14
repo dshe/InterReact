@@ -23,6 +23,8 @@ namespace InterReact.Extensions
                 instance.Open = instance.High = instance.Low = value;
             else
             {
+                if (!instance.High.HasValue || !instance.Low.HasValue)
+                    throw new ArgumentNullException(nameof(instance));
                 instance.High = Math.Max(instance.High.Value, value);
                 instance.Low = Math.Min(instance.Low.Value, value);
             }

@@ -10,13 +10,30 @@ using NodaTime;
 
 namespace InterReact.Core
 {
-    public sealed partial class ResponseComposer
+    public sealed class ResponseParser
+    {
+        //internal T Parse<T>(string s)
+        //{
+
+        //}
+
+    }
+
+
+    public sealed class ResponseReader
     {
         private readonly static LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HH:mm");
         private readonly static LocalDateTimePattern DateTimePattern = LocalDateTimePattern.CreateWithInvariantCulture("yyyyMMdd HH:mm:ss");
+        internal readonly Config Config;
+        internal readonly Func<string> ReadString;
+        internal readonly Action<object> Output;
 
-        internal string ReadString() => 
-            enumerator.MoveNext() ? enumerator.Current : throw new IndexOutOfRangeException($"Message shorter than expected.");
+        internal ResponseReader(Config config, Func<string> readString, Action<object> output)
+        {
+            Config = config ?? throw new ArgumentNullException(nameof(config));
+            ReadString = readString ?? throw new ArgumentNullException(nameof(readString));
+            Output = output ?? throw new ArgumentNullException(nameof(output));
+        }
 
         internal T Read<T>() => Parse<T>(ReadString());
 
@@ -62,7 +79,8 @@ namespace InterReact.Core
             {
                 if (utype != typeof(int) && utype != typeof(long) && utype != typeof(double))
                     throw new InvalidDataException($"Parse: '{utype.Name}' nullable is not supported.");
-                if (s.Length == 0)
+                if (s.Length == 0) // !!!
+                    //return "";
                     return null;
                 type = utype;
             }
@@ -106,7 +124,7 @@ namespace InterReact.Core
                     throw new InvalidDataException($"ParseEnum<{type.Name}>('{numberString}') is not an integer.");
                 e = Enum.ToObject(type, number);
                 enumValues.Add(numberString, e);
-                output(new ResponseWarning($"ParseEnum<{type.Name}>('{numberString}') new value."));
+                Output(new ResponseWarning($"ParseEnum<{type.Name}>('{numberString}') new value."));
             }
             return e;
         }
@@ -121,16 +139,16 @@ namespace InterReact.Core
             if (e == null)
             {
                 e = StringEnum<T>.Add(s);
-                output(new ResponseWarning($"ReadStringEnum<{typeof(T).Name}>('{e}') added new value."));
+                Output(new ResponseWarning($"ReadStringEnum<{typeof(T).Name}>('{e}') added new value."));
             }
             return e;
         }
 
         /////////////////////////////////////////////////////////////////////
 
-        private void IgnoreVersion() => ReadString();
-        private int GetVersion() => Read<int>();
-        private int RequireVersion(int minimumVersion)
+        internal void IgnoreVersion() => ReadString();
+        internal int GetVersion() => Read<int>();
+        internal int RequireVersion(int minimumVersion)
         {
             var v = GetVersion();
             return (v >= minimumVersion) ? v : throw new InvalidDataException($"Invalid response version: {v} < {minimumVersion}.");

@@ -17,7 +17,10 @@ namespace InterReact.Tests.Utility
                 var sub = source.Subscribe(
                     onNext: message =>
                     {
-                        Write("OnNext: " + message.Stringify());
+                        if (message == null)
+                            Write("OnNext: null.");
+                        else
+                            Write("OnNext: " + message.Stringify());
                         observer.OnNext(message);
                     },
                     onError: ex =>

@@ -6,7 +6,7 @@ namespace InterReact.Utility
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
-        internal void PropertyChange(string propertyName = null) =>
+        internal void PropertyChange(string? propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 

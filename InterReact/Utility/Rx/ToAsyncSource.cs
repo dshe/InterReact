@@ -23,8 +23,8 @@ namespace InterReact.Utility.Rx
                 throw new ArgumentNullException(nameof(source));
 
             var gate = new object();
-            AsyncSubject<T> subject = null;
-            IDisposable connection = null;
+            AsyncSubject<T>? subject = null;
+            IDisposable? connection = null;
 
             var updated = Instant.MinValue;
             var complete = false;

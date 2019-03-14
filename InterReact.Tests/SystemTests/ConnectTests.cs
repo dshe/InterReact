@@ -32,18 +32,9 @@ namespace InterReact.Tests.SystemTests
         [Fact]
         public async Task T00_ConnectDefault()
         {
-            IInterReactClient client = null;
-            try
-            {
-                client = await InterReactClient.Builder.BuildAsync();
-                await TestClient(client);
-            }
-            finally
-            {
-                if (client != null)
-                    await client.DisconnectAsync();
-            }
-
+            IInterReactClient client = await InterReactClient.Builder.BuildAsync();
+            await TestClient(client);
+            await client.DisconnectAsync();
         }
 
         [Fact]

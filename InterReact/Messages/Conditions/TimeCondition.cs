@@ -28,7 +28,7 @@
         * @brief Time field used in conditional order logic. Valid format: YYYYMMDD HH:MM:SS
         */
 
-        public string Time { get; set; }
+        public string Time { get; set; } = "";
 
         protected override bool TryParse(string cond)
         {

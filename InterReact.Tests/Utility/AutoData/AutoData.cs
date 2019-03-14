@@ -17,7 +17,17 @@ namespace InterReact.Tests.Utility.AutoData
     {
         private static readonly Random Rand = new Random();
 
-        public static List<T> Create<T>(int count, Action<T> setAction = null)
+        public static List<T> Create<T>(int count)
+        {
+            var list = new List<T>();
+            for (var i = 0; i < count; i++)
+                list.Add(Create<T>());
+            return list;
+        }
+
+        public static T Create<T>() => (T)Create(typeof(T));
+
+        public static List<T> Create<T>(int count, Action<T> setAction)
         {
             var list = new List<T>();
             for (var i = 0; i < count; i++)
@@ -25,7 +35,7 @@ namespace InterReact.Tests.Utility.AutoData
             return list;
         }
 
-        public static T Create<T>(Action<T> setAction = null)
+        public static T Create<T>(Action<T> setAction)
         {
             var instance = (T)Create(typeof(T));
             setAction?.Invoke(instance);
@@ -121,7 +131,7 @@ namespace InterReact.Tests.Utility.AutoData
             }
         }
 
-        private static object DefaultValueOfType(Type type)
+        private static object? DefaultValueOfType(Type type)
         {
             if (type != typeof(string) && type.GetTypeInfo().IsValueType)
                 return Activator.CreateInstance(type);

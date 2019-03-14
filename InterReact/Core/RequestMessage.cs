@@ -19,7 +19,7 @@ namespace InterReact.Core
         private readonly Limiter limiter;
 
         [ContainerConstructor]
-        internal RequestMessage(IRxSocket rxSocket, Limiter limiter) : this(rxSocket.Send, limiter) { }
+        internal RequestMessage(IRxSocketClient rxSocket, Limiter limiter) : this(rxSocket.Send, limiter) { }
         internal RequestMessage(Action<byte[], int, int> sendAction, Limiter limiter)
         {
             this.sendAction = sendAction;
@@ -35,10 +35,10 @@ namespace InterReact.Core
 
         /////////////////////////////////////////////////////
 
-        internal RequestMessage Write(params object[] objs)
+        internal RequestMessage Write(params object?[]? objs)
         {
             if (objs == null)
-                strings.Add(null);
+                strings.Add(string.Empty);
             else if (objs.Length == 0)
                 throw new ArgumentException(nameof(objs));
             else foreach (var o in objs)
@@ -46,13 +46,16 @@ namespace InterReact.Core
             return this;
         }
 
-        private void WriteImpl(object o)
+        private void WriteImpl(object? o)
         {
+            if (o == null)
+            {
+                strings.Add(string.Empty);
+                return;
+            }
+
             switch (o)
             {
-                case null:
-                    strings.Add(null);
-                    return;
                 case string s:
                     strings.Add(s);
                     return;
@@ -80,7 +83,6 @@ namespace InterReact.Core
             {
                 if (utype != typeof(int) && utype != typeof(long) && utype != typeof(double))
                     throw new InvalidDataException($"Nullable '{utype.Name}' is not supported.");
-                type = utype;
                 o = Convert.ChangeType(o, utype);
             }
 
@@ -105,7 +107,7 @@ namespace InterReact.Core
             if (tags != null)
                 strings.Add(tags.Select(tag => $"{tag.Name}={tag.Value}").JoinStrings(";"));
             else
-                strings.Add(null);
+                strings.Add(string.Empty);
             return this;
         }
 

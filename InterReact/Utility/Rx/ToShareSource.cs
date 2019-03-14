@@ -10,7 +10,6 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Concurrency;
 
-
 namespace InterReact.Utility.Rx
 {
     internal static class ShareSourceEx
@@ -25,8 +24,8 @@ namespace InterReact.Utility.Rx
                 throw new ArgumentNullException(nameof(source));
 
             var gate = new object();
-            ReplaySubject<T> subject = null;
-            IDisposable connection = null;
+            ReplaySubject<T>? subject = null;
+            IDisposable? connection = null;
 
             return Observable.Create<T>(observer =>
             {

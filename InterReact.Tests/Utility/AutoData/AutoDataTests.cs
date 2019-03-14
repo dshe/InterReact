@@ -27,17 +27,17 @@ namespace InterReact.Tests.Utility.AutoData
         [Fact]
         public void Test_0()
         {
-            TestCreate<string>();
-            TestCreate<int>();
-            TestCreate<long>();
-            TestCreate<bool>();
-            TestCreate<SecurityType>();
+            //TestCreate<string>();
+            //TestCreate<int>();
+            //TestCreate<long>();
+            //TestCreate<bool>();
+            //TestCreate<SecurityType>();
             TestCreate<TestClass>();
-            TestCreate<ContractComboLeg>();
-            TestCreate<Contract>();
-            TestCreate<ContractDetails>();
-            TestCreate<List<Contract>>();
-            TestCreate<List<int>>();
+            //TestCreate<ContractComboLeg>();
+            //TestCreate<Contract>();
+            //TestCreate<ContractDetails>();
+            //TestCreate<List<Contract>>();
+            //TestCreate<List<int>>();
         }
 
         [Fact]

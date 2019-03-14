@@ -12,6 +12,7 @@ using NodaTime;
 using InterReact.Tests.Utility;
 using Xunit.Abstractions;
 
+/*
 namespace InterReact.Tests.UnitTests.Utility
 {
     public class ContractDetailsTimeTests : BaseUnitTest
@@ -91,3 +92,4 @@ namespace InterReact.Tests.UnitTests.Utility
         }
     }
 }
+*/

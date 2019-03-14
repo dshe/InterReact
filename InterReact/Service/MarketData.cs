@@ -27,7 +27,7 @@ namespace InterReact.Service
         /// Call Dispose() the value returned from Connect() to disconnect from the source, release all subscriptions and clear the cache.
         /// </summary>
         public IConnectableObservable<ITick> TickConnectableObservable(Contract contract,
-            IEnumerable<GenericTickType> genericTickTypes = null, bool marketDataOff = false, params Tag[] options)
+            IEnumerable<GenericTickType>? genericTickTypes = null, bool marketDataOff = false, params Tag[] options)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
@@ -80,7 +80,7 @@ namespace InterReact.Service
         /// This observable starts with the first subscription and completes when the last observer unsubscribes.
         /// </summary>
         public IObservable<RealtimeBar> RealtimeBarObservable(Contract contract,
-            RealtimeBarType whatToShow = null, bool regularTradingHours = true, params Tag[] options)
+            RealtimeBarType? whatToShow = null, bool regularTradingHours = true, params Tag[] options)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));

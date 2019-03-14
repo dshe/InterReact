@@ -6,7 +6,7 @@ namespace InterReact.Messages.Conditions
 	public abstract class ContractCondition : OperatorCondition
     {
         public int ConId { get; set; }
-        public string Exchange { get; set; }
+        public string Exchange { get; set; } = "";
 
         private const string Delimiter = " of ";
 
@@ -64,7 +64,7 @@ namespace InterReact.Messages.Conditions
             }
         }
 
-        internal override void Deserialize(ResponseComposer reader)
+        internal override void Deserialize(ResponseReader reader)
         {
             base.Deserialize(reader);
 

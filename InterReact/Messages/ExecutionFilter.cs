@@ -5,12 +5,12 @@ using NodaTime;
 
 namespace InterReact.Messages
 {
-    public sealed class ExecutionFilter // input + output
+    public sealed class ExecutionFilter // input
     {
         /// <summary>
         /// This is only relevant for Financial Advisor (FA) accounts.
         /// </summary>
-        public string Account { get; set; }
+        public string Account { get; set; } = "";
 
         /// <summary>
         /// Zero means no filtering on this field.
@@ -19,13 +19,13 @@ namespace InterReact.Messages
 
         public LocalDateTime Time { get; set; }
 
-        public string Symbol { get; set; }
+        public string Symbol { get; set; } = "";
 
         public SecurityType SecurityType { get; set; } = SecurityType.Undefined;
 
-        public string Exchange { get; set; }
+        public string Exchange { get; set; } = "";
 
-        public string Side { get; set; }
+        public string Side { get; set; } = "";
     }
 
 }

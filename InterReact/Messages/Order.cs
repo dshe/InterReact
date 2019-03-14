@@ -58,7 +58,7 @@ namespace InterReact.Messages
         /// <summary>
         /// The One-Cancels-All group identifier.
         /// </summary>
-        public string OcaGroup { get; set; }
+        public string OcaGroup { get; set; } = "";
 
         /// <summary>
         /// The One-Cancels-All type.
@@ -70,7 +70,7 @@ namespace InterReact.Messages
         /// Intended for institutional customers only, although all customers may use it to identify the API client
         /// that sent the order when multiple API clients are running.
         /// </summary>
-        public string OrderRef { get; set; }
+        public string OrderRef { get; set; } = "";
 
         /// <summary>
         /// If false, order will be created but not transmited.
@@ -110,14 +110,14 @@ namespace InterReact.Messages
         /// Specifies the date and time after which the order will be active.
         /// yyymmdd hh:mm:ss {optional Timezone}
         /// </summary>
-        public string GoodAfterTime { get; set; }
+        public string GoodAfterTime { get; set; } = "";
 
         /// <summary>
         /// The date and time until the order will be active.
         /// You must enter GTD as the time in force to use this string. 
         /// The trade's 'Good Till Date", format "YYYYMMDD hh:mm:ss (optional time zone)"
         /// </summary>
-        public string GoodUntilDate { get; set; }
+        public string GoodUntilDate { get; set; } = "";
 
         /// <summary>
         /// Precautionary constraints are defined on the TWS Presets page, and help ensure tha tyour price and size order Values are reasonable.
@@ -152,10 +152,10 @@ namespace InterReact.Messages
         /// </summary>
         public double? TrailingStopPercent { get; set; }
 
-        public string FinancialAdvisorGroup { get; set; }
-        public string FinancialAdvisorProfile { get; set; }
+        public string FinancialAdvisorGroup { get; set; } = "";
+        public string FinancialAdvisorProfile { get; set; } = "";
         public FinancialAdvisorAllocationMethod FinancialAdvisorMethod { get; set; } = FinancialAdvisorAllocationMethod.None;
-        public string FinancialAdvisorPercentage { get; set; }
+        public string FinancialAdvisorPercentage { get; set; } = "";
 
         public OrderOpenClose OpenClose { get; set; } = OrderOpenClose.Undefined;
         public OrderOrigin Origin { get; set; } = OrderOrigin.Undefined;
@@ -166,7 +166,7 @@ namespace InterReact.Messages
         /// </summary>
         public ShortSaleSlot ShortSaleSlot { get; set; }
 
-        public string DesignatedLocation { get; set; }
+        public string DesignatedLocation { get; set; } = "";
         public int ExemptCode { get; set; } = -1;
 
         /// <summary>
@@ -229,7 +229,7 @@ namespace InterReact.Messages
         /// </summary>
         public ReferencePriceType ReferencePriceType { get; set; }
 
-        public string DeltaNeutralOrderType { get; set; }
+        public string DeltaNeutralOrderType { get; set; } = "";
 
         public double? DeltaNeutralAuxPrice { get; set; }
         public int DeltaNeutralContractId { get; set; }
@@ -237,14 +237,14 @@ namespace InterReact.Messages
         /// <summary>
         /// Set when slot=2 only.
         /// </summary>
-        public string DeltaNeutralSettlingFirm { get; set; }
-        public string DeltaNeutralClearingAccount { get; set; }
-        public string DeltaNeutralClearingIntent { get; set; }
+        public string DeltaNeutralSettlingFirm { get; set; } = "";
+        public string DeltaNeutralClearingAccount { get; set; } = "";
+        public string DeltaNeutralClearingIntent { get; set; } = "";
 
-        public string DeltaNeutralOpenClose { get; set; }
+        public string DeltaNeutralOpenClose { get; set; } = "";
         public bool DeltaNeutralShortSale { get; set; }
         public int DeltaNeutralShortSaleSlot { get; set; }
-        public string DeltaNeutralDesignatedLocation { get; set; }
+        public string DeltaNeutralDesignatedLocation { get; set; } = "";
 
         /// <summary>
         /// EFP orders only.
@@ -272,25 +272,25 @@ namespace InterReact.Messages
         /// <summary>
         /// Beta value for beta hedge (in range 0-1), ratio for pair hedge.
         /// </summary>
-        public string HedgeParam { get; set; }
+        public string HedgeParam { get; set; } = "";
 
 
-        public string Account { get; set; }
-        public string SettlingFirm { get; set; }
+        public string Account { get; set; } = "";
+        public string SettlingFirm { get; set; } = "";
 
         /// <summary>
         /// True beneficiary of the order.
         /// </summary>
-        public string ClearingAccount { get; set; }
+        public string ClearingAccount { get; set; } = "";
 
         public ClearingIntent ClearingIntent { get; set; } = ClearingIntent.Default;
 
-        public string AlgoStrategy { get; set; }
+        public string AlgoStrategy { get; set; } = "";
         public List<Tag> AlgoParams { get; } = new List<Tag>(); // input + output
 
         public bool WhatIf { get; set; }
 
-        public string AlgoId { get; set; }
+        public string AlgoId { get; set; } = "";
 
         public bool NotHeld { get; set; }
 
@@ -301,18 +301,18 @@ namespace InterReact.Messages
         /// <summary>
         /// For GTC(good-till cancelled) orders.
         /// </summary>
-        public string ActiveStartTime { get; set; }
+        public string ActiveStartTime { get; set; } = "";
 
         /// <summary>
         /// For GTC orders.
         /// </summary>
-        public string ActiveStopTime { get; set; }
+        public string ActiveStopTime { get; set; } = "";
 
-        public string ScaleTable { get; set; }
+        public string ScaleTable { get; set; } = "";
 
-        public string ModelCode { get; set; }
+        public string ModelCode { get; set; } = "";
 
-        public string ExtOperator { get; set; }
+        public string ExtOperator { get; set; } = "";
 
         public double? CashQty { get; set; }
 
@@ -322,8 +322,8 @@ namespace InterReact.Messages
         public bool IsPeggedChangeAmountDecrease { get; set; }
         public double? PeggedChangeAmount { get; set; }
         public double? ReferenceChangeAmount { get; set; }
-        public string ReferenceExchange { get; set; }
-        public string AdjustedOrderType { get; set; }
+        public string ReferenceExchange { get; set; } = "";
+        public string AdjustedOrderType { get; set; } = "";
         public double? TriggerPrice { get; set; }
         public double? LmtPriceOffset { get; set; }
         public double? AdjustedStopPrice { get; set; }
@@ -333,6 +333,6 @@ namespace InterReact.Messages
         public IList<OrderCondition> Conditions { get; } = new List<OrderCondition>();
         public bool ConditionsIgnoreRegularTradingHours { get; set; }
         public bool ConditionsCancelOrder { get; set; }
-        public SoftDollarTier SoftDollarTier { get; set; }
+        public SoftDollarTier? SoftDollarTier { get; set; }
     }
 }

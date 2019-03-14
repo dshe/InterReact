@@ -27,7 +27,7 @@ namespace InterReact.Utility.Rx
         private readonly Dictionary<TKey,T> cache = new Dictionary<TKey, T>();
         private Subject<T> subject = new Subject<T>();
         private readonly IObservable<T> source;
-        private IDisposable connection;
+        private IDisposable? connection;
         private readonly Func<T, TKey> keySelector;
         private readonly bool sort;
 

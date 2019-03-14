@@ -24,7 +24,7 @@ namespace InterReact.Tests.UnitTests.Core
         [Fact]
         public void T03_String()
         {
-            Assert.Throws<ArgumentNullException>(() => reader.Parse<string>(null));
+            //Assert.Throws<ArgumentNullException>(() => reader.Parse<string>(null));
             Assert.Equal("", reader.Parse<string>(""));
             Assert.Equal("string", reader.Parse<string>("string"));
             Assert.Empty(alerts);
@@ -33,7 +33,7 @@ namespace InterReact.Tests.UnitTests.Core
         [Fact]
         public void T04_Bool()
         {
-            Assert.Throws<ArgumentNullException>(() => reader.Parse<bool>(null));
+            //Assert.Throws<ArgumentNullException>(() => reader.Parse<bool>(null));
             Assert.Throws<InvalidDataException>(() => reader.Parse<bool>(""));
             Assert.Throws<InvalidDataException>(() => reader.Parse<bool?>(""));
             Assert.Equal(false, reader.Parse<bool>("faLse"));
@@ -48,7 +48,7 @@ namespace InterReact.Tests.UnitTests.Core
         [Fact]
         public void T05_DateTime()
         {
-            Assert.Throws<ArgumentNullException>(() => reader.Parse<LocalTime>(null));
+            //Assert.Throws<ArgumentNullException>(() => reader.Parse<LocalTime>(null));
             Assert.Throws<UnparsableValueException> (() => reader.Parse<LocalTime>(""));
             Assert.Throws<InvalidDataException>(() => reader.Parse<LocalTime?>("10:30")); // nullable Date not supported
             reader.Parse<LocalTime>("10:30");
@@ -58,7 +58,7 @@ namespace InterReact.Tests.UnitTests.Core
         [Fact]
         public void T06_Char()
         {
-            Assert.Throws<ArgumentNullException>(() => reader.Parse<char>(null));
+            //Assert.Throws<ArgumentNullException>(() => reader.Parse<char>(null));
             Assert.Throws<InvalidDataException>(() => reader.Parse<char?>(""));
             Assert.Throws<InvalidDataException>(() => reader.Parse<char?>("A"));
             Assert.Throws<InvalidDataException>(() => reader.Parse<char>(""));
@@ -69,7 +69,7 @@ namespace InterReact.Tests.UnitTests.Core
         [Fact]
         public void T07_Number()
         {
-            Assert.Throws<ArgumentNullException>(() => reader.Parse<int>(null));
+            //Assert.Throws<ArgumentNullException>(() => reader.Parse<int>(null));
             //Assert.Throws<InvalidDataException>(() => reader.Parse<int>(""));
             Assert.Equal(0, reader.Parse<int>(""));
             Assert.Throws<InvalidDataException>(() => reader.Parse<int>("invalid"));
@@ -93,7 +93,7 @@ namespace InterReact.Tests.UnitTests.Core
         [Fact]
         public void T08_Enum()
         {
-            Assert.Throws<ArgumentNullException>(() => reader.Parse<TestEnum>(null));
+            //Assert.Throws<ArgumentNullException>(() => reader.Parse<TestEnum>(null));
             Assert.Throws<InvalidDataException>(() => reader.Parse<TestEnum>(""));
             Assert.Throws<InvalidDataException>(() => reader.Parse<TestEnum?>("2"));
             Assert.Equal(TestEnum.Two, reader.Parse<TestEnum>("2"));

@@ -5,7 +5,7 @@ using InterReact.Messages;
 using InterReact.Tests.Utility;
 using Xunit;
 using Xunit.Abstractions;
-
+/*
 namespace InterReact.Tests.UnitTests.Extensions
 {
     public class ContractDetailsSmartTest : BaseUnitTest
@@ -55,3 +55,4 @@ namespace InterReact.Tests.UnitTests.Extensions
 
     }
 }
+*/

@@ -3,6 +3,7 @@ using System.Linq;
 using InterReact.Core;
 using InterReact.Enums;
 
+
 namespace InterReact.Messages.Conditions
 {
 
@@ -13,31 +14,18 @@ namespace InterReact.Messages.Conditions
 
         public static OrderCondition Create(OrderConditionType type)
         {
-            OrderCondition rval = null;
-            switch (type)
+            var result = type switch
             {
-                case OrderConditionType.Execution:
-                    rval = new ExecutionCondition();
-                    break;
-                case OrderConditionType.Margin:
-                    rval = new MarginCondition();
-                    break;
-                case OrderConditionType.PercentChange:
-                    rval = new PercentChangeCondition();
-                    break;
-                case OrderConditionType.Price:
-                    rval = new PriceCondition();
-                    break;
-                case OrderConditionType.Time:
-                    rval = new TimeCondition();
-                    break;
-                case OrderConditionType.Volume:
-                    rval = new VolumeCondition();
-                    break;
-            }
-            if (rval != null)
-                rval.Type = type;
-            return rval;
+                OrderConditionType.Execution => new ExecutionCondition() as OrderCondition,
+                OrderConditionType.Margin => new MarginCondition(),
+                OrderConditionType.PercentChange => new PercentChangeCondition(),
+                OrderConditionType.Price => new PriceCondition(),
+                OrderConditionType.Time => new TimeCondition(),
+                OrderConditionType.Volume => new VolumeCondition(),
+                _ => throw new Exception("Invalid order condition")
+            };
+            result.Type = type;
+            return result;
         }
 
         internal virtual void Serialize(RequestMessage message)
@@ -45,7 +33,7 @@ namespace InterReact.Messages.Conditions
             message.Write(IsConjunctionConnection ? "a" : "o");
         }
 
-        internal virtual void Deserialize(ResponseComposer reader)
+        internal virtual void Deserialize(ResponseReader reader)
         {
             IsConjunctionConnection = reader.ReadString() == "a";
         }
@@ -56,7 +44,7 @@ namespace InterReact.Messages.Conditions
             return IsConjunctionConnection || cond == " or";
         }
 
-        internal static OrderCondition Parse(string cond)
+        internal static OrderCondition? Parse(string cond)
         {
             var conditions = Enum.GetValues(typeof(OrderConditionType)).OfType<OrderConditionType>().Select(t => Create(t)).ToList();
             return conditions.FirstOrDefault(c => c.TryParse(cond));

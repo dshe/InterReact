@@ -14,8 +14,11 @@ namespace InterReact.Tests.UnitTests.Analysis
     public class AttributeViewer : BaseUnitTest
     {
         private static readonly IEnumerable<TypeInfo> types =
-            typeof(InterReactClient).GetTypeInfo().Assembly
-            .DefinedTypes.Where(t => !t.Name.Contains("<>"));
+            typeof(InterReactClient)
+            .GetTypeInfo()
+            .Assembly
+            .DefinedTypes
+            .Where(t => !t.Name.Contains("<>"));
 
         public AttributeViewer(ITestOutputHelper output) : base(output) {}
 
@@ -31,8 +34,8 @@ namespace InterReact.Tests.UnitTests.Analysis
                 .GroupBy(x => x.a))
             {
                 Write(group.Key.ToString());
-                foreach (var a in group.OrderBy(x => x.ti.FullName))
-                    Write($"    {a.ti.FullName}");
+                foreach (var a in group.OrderBy(x => x.ti?.FullName))
+                    Write($"    {a.ti?.FullName}");
             }
         }
 
@@ -40,8 +43,10 @@ namespace InterReact.Tests.UnitTests.Analysis
         public void Find_Member_Attributes()
         {
             foreach (var group in types
-                .Select(t => t.DeclaredMembers.Where(m => !m.Name.StartsWith("<")).Select(m => new { t, m }))
+                .Select(t => t.DeclaredMembers.Where(m => !m.Name.StartsWith("<")).OfType<MemberInfo>().Select(m => (t, m)))
                 .SelectMany(x => x)
+                //.Where(x => x.m != null) //.OfType<(TypeInfo, MemberInfo)>()
+                
                 .Select(x => x.m.GetCustomAttributes(false).Select(q => new { type = x.t, method = x.m, attr = q }))
                 .SelectMany(x => x)
                 .Where(x => !(
@@ -53,8 +58,9 @@ namespace InterReact.Tests.UnitTests.Analysis
                 .GroupBy(x => x.attr))
             {
                 Write(group.Key.ToString());
-                foreach (var a in group.OrderBy(x=> x.type.FullName + x.method.Name))
-                    Write($"     {a.type.FullName}  {a.method.Name}");
+                foreach (var a in group.OrderBy(x=> x.type?.FullName + x.method?.Name))
+
+                    Write($"     {a.type?.FullName}  {a.method?.Name}");
             }
         }
 

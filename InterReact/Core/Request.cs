@@ -21,7 +21,7 @@ namespace InterReact.Core
         private readonly Config Config;
         internal Func<RequestMessage> CreateMessage;
 
-        internal Request(in Config config, Func<RequestMessage> createMessage)
+        internal Request(Config config, Func<RequestMessage> createMessage)
         {
             Config = config;
             CreateMessage = createMessage;
@@ -40,7 +40,7 @@ namespace InterReact.Core
         /// You can turn off regular market data so that only generic tick data is returned by also including the generic tick "mdoff".
         /// </summary>
         public void RequestMarketData(int requestId, Contract contract,
-            IEnumerable<GenericTickType> genericTickTypes = null, bool marketDataOff = false,
+            IEnumerable<GenericTickType>? genericTickTypes = null, bool marketDataOff = false,
             bool isSnapshot = false, params Tag[] options)
         {
             if (contract == null)
@@ -68,7 +68,7 @@ namespace InterReact.Core
             m.Send();
         }
 
-        private static string MakeGenericTicksList(IEnumerable<GenericTickType> genericTickTypes, bool marketDataOff = false)
+        private static string MakeGenericTicksList(IEnumerable<GenericTickType>? genericTickTypes, bool marketDataOff = false)
         {
             var strings = new List<string>();
             if (genericTickTypes != null && genericTickTypes.Any())
@@ -210,7 +210,7 @@ namespace InterReact.Core
                 m.Write(order.ExtOperator);
 
             if (Config.SupportsServerVersion(ServerVersion.SoftDollarTier))
-                m.Write(order.SoftDollarTier.Name, order.SoftDollarTier.Value);
+                m.Write(order.SoftDollarTier?.Name, order.SoftDollarTier?.Value);
 
             if (Config.SupportsServerVersion(ServerVersion.CashQty))
                 m.Write(order.CashQty);
@@ -228,7 +228,7 @@ namespace InterReact.Core
         /// Updates for all accounts are returned when accountCode is null.
         /// This information is updated every three minutes.
         /// </summary>
-        public void RequestAccountUpdates(bool start, string accountCode = null) =>
+        public void RequestAccountUpdates(bool start, string? accountCode = null) =>
             CreateMessage().Write(RequestCode.RequestAccountData, "2", start, accountCode).Send();
 
         /// <summary>
@@ -236,7 +236,7 @@ namespace InterReact.Core
         /// To view executions beyond the past 24 hours, open the trade log in TWS and, while the Trade Log is displayed, select the days to be returned.
         /// When ExecutionFilter is null, all executions are returned.
         /// </summary>
-        public void RequestExecutions(int requestId, ExecutionFilter filter = null) =>
+        public void RequestExecutions(int requestId, ExecutionFilter? filter = null) =>
             CreateMessage().Write(RequestCode.RequestExecutions, "3", requestId,
                 filter?.ClientId, filter?.Account,
                 filter == null ? null : LocalDateTimePattern.CreateWithInvariantCulture("yyyyMMdd-HH:mm:ss").Format(filter.Time),
@@ -313,9 +313,9 @@ namespace InterReact.Core
         public void RequestHistoricalData(int requestId,
             Contract contract,
             Instant  endDate = default,
-            HistoricalDuration duration = null,
-            HistoricalBarSize  barSize = null,
-            HistoricalDataType dataType = null,
+            HistoricalDuration? duration = null,
+            HistoricalBarSize?  barSize = null,
+            HistoricalDataType? dataType = null,
             bool regularTradingHoursOnly = false,
             params Tag[] options)
         {
@@ -401,7 +401,7 @@ namespace InterReact.Core
         /// <summary>
         /// Call this method to start receiving realtime bar data.
         /// </summary>
-        public void RequestRealTimeBars(int requestId, Contract contract, RealtimeBarType whatToShow = null,
+        public void RequestRealTimeBars(int requestId, Contract contract, RealtimeBarType? whatToShow = null,
             bool regularTradingHoursOnly = false, params Tag[] options)
         {
             if (contract == null)
@@ -424,11 +424,11 @@ namespace InterReact.Core
         /// There must be a subscription to Reuters Fundamental set up in Account Management before you can receive this data.
         /// IB: The method can handle conid specified in the Contract object, but not tradingClass or multiplier.
         /// </summary>
-        public void RequestFundamentalData(int requestId, Contract contract, FundamentalDataReportType reportType = null, params Tag[] options)
+        public void RequestFundamentalData(int requestId, Contract contract, FundamentalDataReportType? reportTypeN = null, params Tag[] options)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
-            reportType = reportType ?? FundamentalDataReportType.CompanyOverview;
+            var reportType = reportTypeN ?? FundamentalDataReportType.CompanyOverview;
             CreateMessage().Write(RequestCode.RequestFundamentalData, "3", requestId,
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.Exchange,
                 contract.PrimaryExchange, contract.Currency, contract.LocalSymbol,

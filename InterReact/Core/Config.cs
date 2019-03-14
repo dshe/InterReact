@@ -23,7 +23,7 @@ namespace InterReact.Core
         public int ClientId { get; internal set; } = Random.Next(1000, 1000000);
 
         public int    MaxRequestsPerSecond { get; internal set; } = 50;
-        public string OptionalCapabilities { get; internal set; }
+        public string? OptionalCapabilities { get; internal set; }
 
         /// <summary>
         /// The maximum version of the API supported by this client.
@@ -33,13 +33,13 @@ namespace InterReact.Core
         /// <summary>
         /// The version of the currently connected server.
         /// </summary>
-        public ServerVersion ServerVersionCurrent { get; internal set; }
+        public ServerVersion? ServerVersionCurrent { get; internal set; }
 
         public const ServerVersion ServerVersionMin = ServerVersion.UseV100Plus;
         public const ServerVersion ServerVersionMax = ServerVersion.AggGroup;
 
-        public string ManagedAccounts { get; internal set; }
-        public string Date            { get; internal set; }
+        public string? ManagedAccounts { get; internal set; }
+        public string? Date            { get; internal set; }
 
         internal int  NextIdValue; // set during login
 

@@ -16,11 +16,10 @@ namespace InterReact.Service
         /// <summary>
         /// Creates an observable which emits fundamental data for the company represented by the contract, then completes.
         /// </summary>
-        public IObservable<string> FundamentalDataObservable(Contract contract, FundamentalDataReportType reportType = null)
+        public IObservable<string> FundamentalDataObservable(Contract contract, FundamentalDataReportType? reportType = null)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
-            reportType = reportType ?? FundamentalDataReportType.CompanyOverview;
 
             return Response
                 .ToObservable<FundamentalData>(

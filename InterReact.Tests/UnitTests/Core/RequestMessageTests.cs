@@ -12,7 +12,7 @@ namespace InterReact.Tests.UnitTests.Core
 {
     public class RequestMessageTests : BaseUnitTest
     {
-        private readonly List<string> list = new List<string>();
+        private readonly List<string?> list = new List<string?>();
         private readonly RequestMessage requestMessage;
         private readonly Limiter limiter = new Limiter();
         private readonly Action<byte[], int, int> sendBytes;
@@ -40,7 +40,7 @@ namespace InterReact.Tests.UnitTests.Core
             requestMessage = new RequestMessage(sendBytes, limiter);
         }
 
-        private void AssertResult(params string[] strings)
+        private void AssertResult(params string?[]? strings)
         {
             if (strings == null)
             {

@@ -23,10 +23,10 @@ namespace InterReact.Service
         /// </summary>
         public IObservable<HistoricalBars> HistoricalDataObservable(
             Contract contract,
-            HistoricalBarSize barSize = null,
-            HistoricalDuration duration = null,
+            HistoricalBarSize? barSize = null,
+            HistoricalDuration? duration = null,
             Instant end = default,
-            HistoricalDataType dataType = null,
+            HistoricalDataType? dataType = null,
             bool regularTradingHoursOnly = true,
             params Tag[] options)
         {

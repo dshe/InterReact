@@ -1,4 +1,5 @@
-﻿using InterReact.Enums;
+﻿using InterReact.Core;
+using InterReact.Enums;
 using InterReact.StringEnums;
 
 namespace InterReact.Messages
@@ -20,7 +21,7 @@ namespace InterReact.Messages
         /// <summary>
         /// The exchange to which the order will be routed.
         /// </summary>
-        public string Exchange { get; set; }
+        public string Exchange { get; set; } = "";
 
         public ComboOpenClose OpenClose { get; set; } = ComboOpenClose.Undefined;
 
@@ -34,11 +35,25 @@ namespace InterReact.Messages
         /// <summary>
         /// Use only when ComboShortSaleSlot is ThirdParty.
         /// </summary>
-        public string DesignatedLocation { get; set; }
+        public string DesignatedLocation { get; set; } = "";
 
         /// <summary>
         /// Short Sale Exempt Code
         /// </summary>
         public int ExemptCode { get; set; } = -1;
+
+        public ContractComboLeg() { }
+
+        internal ContractComboLeg(ResponseReader c)
+        {
+            ContractId = c.Read<int>();
+            Ratio = c.Read<int>();
+            TradeAction = c.ReadStringEnum<TradeAction>();
+            Exchange = c.ReadString();
+            OpenClose = c.Read<ComboOpenClose>();
+            ComboShortSaleSlot = c.Read<ComboShortSaleSlot>();
+            DesignatedLocation = c.ReadString();
+            ExemptCode = c.Read<int>();
+        }
     }
 }

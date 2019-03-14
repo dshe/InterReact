@@ -15,9 +15,6 @@ namespace CoreClientServer
             var serverTask = new Client().Run(port);
             var clientTask = new Server().Run(port);
             await Task.WhenAll(clientTask, serverTask);
-
-            Console.WriteLine(Environment.NewLine + "press a key to exit...");
-            Console.ReadKey();
         }
 
         internal static void Write(string text, ConsoleColor color)

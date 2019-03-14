@@ -21,7 +21,7 @@ namespace InterReact.Utility.Rx
         // Continuous results (end=false): AccountUpdate, NewsBulletins
         // End type: not type T
         internal static IObservable<T> ToObservable<T>(
-            this IObservable<object> source, Action subscribe, Action unsubscribe = null, Func<object, bool> end = null)
+            this IObservable<object> source, Action subscribe, Action? unsubscribe = null, Func<object, bool>? end = null)
             where T : class
         {
             if (source == null)
@@ -82,7 +82,7 @@ namespace InterReact.Utility.Rx
         // End type: not type T
         internal static IObservable<T> ToObservable<T>(
             this IObservable<object> source, Func<int> nextId, Action<int> subscribe, 
-                Action<int> unsubscribe = null, Func<IHasRequestId, bool> end = null)
+                Action<int>? unsubscribe = null, Func<IHasRequestId, bool>? end = null)
             where T : class, IHasRequestId
         {
             if (source == null)

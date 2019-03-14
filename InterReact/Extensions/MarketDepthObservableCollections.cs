@@ -42,12 +42,7 @@ namespace InterReact.Extensions
                     switch (depth.Operation)
                     {
                         case MarketDepthOperation.Insert:
-                            list.Insert(depth.Position, new MarketDepthItem
-                            {
-                                Price = depth.Price,
-                                Size = depth.Size,
-                                MarketMaker = depth.MarketMaker
-                            });
+                            list.Insert(depth.Position, new MarketDepthItem(depth.Price, depth.Size, depth.MarketMaker));
                             break;
                         case MarketDepthOperation.Update:
                             var item = list[depth.Position];
@@ -89,22 +84,14 @@ namespace InterReact.Extensions
                 return source.Subscribe(
                     onNext: depth =>
                     {
-                        NotifyCollectionChangedEventArgs args = null;
-                        switch (depth.Operation)
+
+                        NotifyCollectionChangedEventArgs? args = depth.Operation switch
                         {
-                            case MarketDepthOperation.Insert:
-                                args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, depth, depth.Position);
-                                break;
-                            case MarketDepthOperation.Update:
-                                args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, depth, depth.Position);
-                                break;
-                            case MarketDepthOperation.Delete:
-                                args = new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, depth.Position);
-                                break;
-                            default:
-                                observer.OnError(new ArgumentOutOfRangeException(nameof(depth.Operation), depth.Operation, null));
-                                return;
-                        }
+                            MarketDepthOperation.Insert => new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Add, depth, depth.Position),
+                            MarketDepthOperation.Update => new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Replace, depth, depth.Position),
+                            MarketDepthOperation.Delete => new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Remove, depth.Position),
+                            _ => throw new ArgumentOutOfRangeException(nameof(depth.Operation), depth.Operation, null)
+                        };
                         observer.OnNext(args);
                     },
                     //onError: e => { },   // ???
@@ -173,7 +160,7 @@ namespace InterReact.Extensions
         {
             var o = Observable.Never<MarketDepth>();
 
-            var oo = o.ToNotifyCollectionChanged();
+            //var oo = o.ToNotifyCollectionChanged();
 
             //var xxx = Observable.FromEventPattern<NotifyCollectionChangedEventHandler, NotifyCollectionChangedEventArgs>(o);
         }
@@ -185,5 +172,7 @@ namespace InterReact.Extensions
         public double Price       { get; internal set; }
         public int    Size        { get; internal set; }
         public string MarketMaker { get; internal set; }
+        public MarketDepthItem(double price, int size, string marketMaker) =>
+            (Price, Size, MarketMaker) = (price, size, marketMaker);
     }
 }
