@@ -46,7 +46,7 @@ namespace InterReact.Service
         /// <summary>
         /// Creates an observable which, upon subscription, emits scanner results, then completes.
         /// </summary>
-        public IObservable<IReadOnlyList<ScannerDataItem>> ScannerObservable(ScannerSubscription subscription, params Tag[] options)
+        public IObservable<IList<ScannerDataItem>> ScannerObservable(ScannerSubscription subscription, IList<Tag>? subscriptionOptions = null, IList<Tag>? filterOptions = null)
         {
             if (subscription == null)
                 throw new ArgumentNullException(nameof(subscription));
@@ -54,7 +54,7 @@ namespace InterReact.Service
             return Response
                 .ToObservable<ScannerData>(
                     Request.NextId,
-                    requestId => Request.RequestScannerSubscription(requestId, subscription, options),
+                    requestId => Request.RequestScannerSubscription(requestId, subscription, subscriptionOptions, filterOptions),
                     Request.CancelScannerSubscription)
                 .Select(m => m.Items)
                 .ToShareSource();

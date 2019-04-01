@@ -45,10 +45,10 @@ namespace InterReact.Messages.Conditions
         public double Price { get; set; }
         public TriggerMethod TriggerMethod { get; set; }
 
-        internal override void Deserialize(ResponseReader reader)
+        internal override void Deserialize(ResponseComposer c)
         {
-            base.Deserialize(reader);
-            TriggerMethod = reader.Read<TriggerMethod>();
+            base.Deserialize(c);
+            TriggerMethod = c.ReadEnum<TriggerMethod>();
         }
 
         internal override void Serialize(RequestMessage message)

@@ -9,17 +9,17 @@ namespace InterReact.Messages
         public Contract Contract { get; }
         public double Position { get; }
         public double AverageCost { get; }
-        internal AccountPosition(ResponseReader c)
+        internal AccountPosition(ResponseComposer c)
         {
             c.RequireVersion(3);
             Account = c.ReadString();
             Contract = new Contract
             {
-                ContractId = c.Read<int>(),
+                ContractId = c.ReadInt(),
                 Symbol = c.ReadString(),
                 SecurityType = c.ReadStringEnum<SecurityType>(),
                 LastTradeDateOrContractMonth = c.ReadString(),
-                Strike = c.Read<double>(),
+                Strike = c.ReadDouble(),
                 Right = c.ReadStringEnum<RightType>(),
                 Multiplier = c.ReadString(),
                 Exchange = c.ReadString(),
@@ -27,13 +27,13 @@ namespace InterReact.Messages
                 LocalSymbol = c.ReadString(),
                 TradingClass = c.ReadString()
             };
-            Position = c.Read<double>(); // may be an int
-            AverageCost = c.Read<double>();
+            Position = c.ReadDouble(); // may be an int
+            AverageCost = c.ReadDouble();
        }
     }
 
     public sealed class AccountPositionEnd
     {
-        internal AccountPositionEnd(ResponseReader c) => c.IgnoreVersion();
+        internal AccountPositionEnd(ResponseComposer c) => c.IgnoreVersion();
     }
 }

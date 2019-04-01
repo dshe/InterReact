@@ -10,9 +10,9 @@ namespace InterReact.Service
         /// <summary>
         /// This function is still in development.
         /// </summary>
-        public IObservable<ContractDescriptions> ContractSymbolSearch(string pattern) =>
+        public IObservable<SymbolSamples> ContractSymbolSearch(string pattern) =>
             Response
-                .ToObservable<ContractDescriptions>(
+                .ToObservable<SymbolSamples>(
                     Request.NextId,
                     requestId => Request.RequestMatchingSymbols(requestId, pattern))
                 .ToShareSource();

@@ -13,7 +13,7 @@ namespace InterReact.Messages
         public string ExecutionId { get; }
 
         // Execution is set IF an Execution was received with the same ExecutionId.
-        public Execution Execution { get; }
+        public Execution Execution { get; } // (not part of IB Api)
 
         public int OrderId => Execution?.OrderId ?? -1;
         public int RequestId => Execution?.RequestId ?? -1;
@@ -21,7 +21,6 @@ namespace InterReact.Messages
         public double Commission { get; }
         public string Currency { get; }
         public double RealizedPnl { get; }
-       
         public double Yield { get; }
 
         /// <summary>
@@ -29,16 +28,16 @@ namespace InterReact.Messages
         /// </summary>
         public int YieldRedemptionDate { get; }
 
-        internal CommissionReport(ResponseReader c)
+        internal CommissionReport(ResponseComposer c)
         {
             c.IgnoreVersion();
             ExecutionId = c.ReadString();
             Execution = Execution.Executions[ExecutionId];
-            Commission = c.Read<double>();
+            Commission = c.ReadDouble();
             Currency = c.ReadString();
-            RealizedPnl = c.Read<double>();
-            Yield = c.Read<double>();
-            YieldRedemptionDate = c.Read<int>();
+            RealizedPnl = c.ReadDouble();
+            Yield = c.ReadDouble();
+            YieldRedemptionDate = c.ReadInt();
         }
     }
 }

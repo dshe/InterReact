@@ -10,7 +10,7 @@ namespace InterReact.Service
         private readonly Request Request;
         private readonly IObservable<object> Response;
 
-        internal Services(Config config, Request request, IObservable<object> response)
+        public Services(Config config, Request request, IObservable<object> response)
         {
             Config = config;
             Response = response;

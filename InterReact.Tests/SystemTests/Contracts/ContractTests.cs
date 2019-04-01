@@ -14,14 +14,14 @@ namespace InterReact.Tests.SystemTests.Contracts
         public ContractTests(SystemTestFixture fixture, ITestOutputHelper output) : base(fixture, output) { }
 
         [Fact]
-        public async Task TestRequestContractDetails()
+        public async Task TestRequestContractData()
         {
             var task = Client
                 .Response
-                .OfType<ContractDetailsEnd>()
+                .OfType<ContractDataEnd>()
                 .FirstAsync().ToTask();
 
-            Client.Request.RequestContractDetails(Id, Stock1);
+            Client.Request.RequestContractData(Id, Stock1);
 
             await task.Timeout();
         }

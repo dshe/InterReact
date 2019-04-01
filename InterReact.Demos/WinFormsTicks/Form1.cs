@@ -9,15 +9,18 @@ using InterReact.Interfaces;
 using InterReact.Messages;
 using InterReact.Enums;
 using InterReact.StringEnums;
-//using Stringifier;
+using System.Diagnostics;
+using InterReact.Utility;
+
+#nullable enable
 
 namespace WinFormsTicks
 {
     public partial class Form1 : Form
     {
         private readonly SynchronizationContext synchronizationContext;
-        private IInterReactClient client;
-        private IDisposable connection;
+        private IInterReactClient? client;
+        private IDisposable? connection;
 
         public Form1()
         {
@@ -29,7 +32,7 @@ namespace WinFormsTicks
         {
             try
             {
-                client = await InterReactClient.Builder.BuildAsync();
+                client = await new InterReactClientBuilder().BuildAsync();
             }
             catch (Exception exception)
             {
@@ -74,20 +77,22 @@ namespace WinFormsTicks
             try
             {
                 // Create the observable and capture the single contract details object to determine the full name of the contract.
-                var contractDetails = await client.Services.ContractDetailsObservable(contract).ContractDetailsSingle();
+                var contractData = await client!.Services.ContractDataObservable(contract).ContractDataSingle();
                 // Display the stock name in the title bar.
-                Text = $"{contractDetails.LongName} ({symbol})";
+                Text = $"{contractData.LongName} ({symbol})";
             }
             catch (Exception exception)
             {
-                MessageBox.Show($"ContractDetails exception:\n\n {exception.Message}", "InterReact");
+                MessageBox.Show($"ContractData exception:\n\n {exception.Message}", "InterReact");
                 return;
             }
+
+            client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
             // Create the object containing the observable which will emit realtime updates.
             var ticks = client.Services.TickConnectableObservable(contract);
 
-            SubscribeToTicks(ticks.ObserveOn(synchronizationContext));
+            SubscribeToTicks(ticks.Select(tick => TickUtility.Undelay(tick)).ObserveOn(synchronizationContext));
 
             connection = ticks.Connect();
         }
@@ -98,10 +103,13 @@ namespace WinFormsTicks
             synchronizedTicks.Subscribe(m => { }, ex => ShowMessage(ex.Message));
 
             var priceTicks = synchronizedTicks.OfType<TickPrice>();
+            priceTicks.Subscribe(x => Debug.WriteLine("Here is price: " + x.Price + " " + x.TickType));
 
             var bidPrices = priceTicks.Where(t => t.TickType == TickType.BidPrice).Select(t => t.Price);
             var askPrices = priceTicks.Where(t => t.TickType == TickType.AskPrice).Select(t => t.Price);
             var lastPrices = priceTicks.Where(t => t.TickType == TickType.LastPrice).Select(t => t.Price);
+
+            //lastPrices.Subscribe(x => Debug.WriteLine("Here is price: " + x));
 
             const string priceFormat = "N2";
             bidPrices.Select(p => p.ToString(priceFormat)).Subscribe(s => BidPrice.Text = s);

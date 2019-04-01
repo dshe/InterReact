@@ -64,12 +64,12 @@ namespace InterReact.Messages.Conditions
             }
         }
 
-        internal override void Deserialize(ResponseReader reader)
+        internal override void Deserialize(ResponseComposer c)
         {
-            base.Deserialize(reader);
+            base.Deserialize(c);
 
-            ConId = reader.Read<int>();
-            Exchange = reader.ReadString();
+            ConId = c.ReadInt();
+            Exchange = c.ReadString();
         }
 
         internal override void Serialize(RequestMessage message)

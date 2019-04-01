@@ -4,6 +4,7 @@ using InterReact.Interfaces;
 using InterReact.StringEnums;
 using InterReact.Utility;
 using NodaTime;
+using NodaTime.Text;
 
 namespace InterReact.Messages
 {
@@ -13,7 +14,7 @@ namespace InterReact.Messages
         public string Key { get; }
         public string Currency { get; }
         public string Value { get; }
-        internal AccountValue(ResponseReader c)
+        internal AccountValue(ResponseComposer c)
         {
             c.RequireVersion(2);
             Key = c.ReadString();
@@ -33,16 +34,16 @@ namespace InterReact.Messages
         public double AverageCost { get; }
         public double UnrealizedPnl { get; }
         public double RealizedPnl { get; }
-        internal PortfolioValue(ResponseReader c)
+        internal PortfolioValue(ResponseComposer c)
         {
             c.RequireVersion(8);
             Contract = new Contract
             {
-                ContractId = c.Read<int>(),
+                ContractId = c.ReadInt(),
                 Symbol = c.ReadString(),
                 SecurityType = c.ReadStringEnum<SecurityType>(),
                 LastTradeDateOrContractMonth = c.ReadString(),
-                Strike = c.Read<double>(),
+                Strike = c.ReadDouble(),
                 Right = c.ReadStringEnum<RightType>(),
                 Multiplier = c.ReadString(),
                 PrimaryExchange = c.ReadString(),
@@ -50,23 +51,24 @@ namespace InterReact.Messages
                 LocalSymbol = c.ReadString(),
                 TradingClass = c.ReadString()
             };
-            Position = c.Read<double>();
-            MarketPrice = c.Read<double>();
-            MarketValue = c.Read<double>();
-            AverageCost = c.Read<double>();
-            UnrealizedPnl = c.Read<double>();
-            RealizedPnl = c.Read<double>();
+            Position = c.ReadDouble();
+            MarketPrice = c.ReadDouble();
+            MarketValue = c.ReadDouble();
+            AverageCost = c.ReadDouble();
+            UnrealizedPnl = c.ReadDouble();
+            RealizedPnl = c.ReadDouble();
             Account = c.ReadString();
         }
     }
 
     public sealed class AccountUpdateTime : IAccountUpdate
     {
+        private static readonly LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HH:mm");
         public LocalTime Time { get; }
-        internal AccountUpdateTime(ResponseReader c)
+        internal AccountUpdateTime(ResponseComposer c)
         {
             c.IgnoreVersion();
-            Time = c.Read<LocalTime>();
+            Time = c.ReadLocalTime(TimePattern);
         }
     }
 
@@ -76,7 +78,7 @@ namespace InterReact.Messages
     public sealed class AccountUpdateEnd : IAccountUpdate
     {
         public string Account { get; }
-        internal AccountUpdateEnd(ResponseReader c)
+        internal AccountUpdateEnd(ResponseComposer c)
         {
             c.IgnoreVersion();
             Account = c.ReadString();

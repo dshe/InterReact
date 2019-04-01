@@ -8,10 +8,10 @@ namespace InterReact.Messages
         public int RequestId { get; }
         public int ArticleType { get;}
         public string ArticleText { get;}
-        internal NewsArticle(ResponseReader c)
+        internal NewsArticle(ResponseComposer c)
         {
-            RequestId = c.Read<int>();
-            ArticleType = c.Read<int>();
+            RequestId = c.ReadInt();
+            ArticleType = c.ReadInt();
             ArticleText = c.ReadString();
         }
     }

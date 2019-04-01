@@ -20,7 +20,7 @@ namespace InterReact.Tests.SystemTests.Orders
         [Fact]
         public async Task TestMarketPlaceOrder()
         {
-            if (!Client.Config.IsDemoAccount)
+            if (!Client.Config.IsDemoAccount())
                 throw new Exception("Cannot place order. Not the demo account");
 
             var task = Client.Response
@@ -44,7 +44,7 @@ namespace InterReact.Tests.SystemTests.Orders
         [Fact]
         public async Task TestPlaceLimitOrder()
         {
-            if (!Client.Config.IsDemoAccount)
+            if (!Client.Config.IsDemoAccount())
                 throw new Exception("Cannot place order. Not the demo account");
 
             // find the price

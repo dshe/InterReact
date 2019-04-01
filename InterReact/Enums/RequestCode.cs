@@ -10,12 +10,12 @@
         RequestAccountData = 6,
         RequestExecutions = 7,
         RequestIds = 8,
-        RequestContractDetails = 9,
+        RequestContractData = 9,
         RequestMarketDepth = 10,
         CancelMarketDepth = 11,
         RequestNewsBulletins = 12,
         CancelNewsBulletins = 13,
-        SetServerLogLevel = 14,
+        ChangeServerLogLevel = 14,
         RequestAutoOpenOrders = 15,
         RequestAllOpenOrders = 16,
         RequestManagedAccounts = 17,
@@ -62,7 +62,6 @@
         RequestFamilyCodes = 80,
         RequestMatchingSymbols = 81,
         RequestMktDepthExchanges = 82,
-
         RequestSmartComponents = 83,
         RequestNewsArticle = 84,
         RequestNewsProviders = 85,
@@ -70,5 +69,14 @@
         RequestHeadTimestamp = 87,
         RequestHistogramData = 88,
         CancelHistogramData = 89,
+        CancelHeadTimestamp = 90,
+        RequestMarketRule = 91,
+        ReqPnL = 92,
+        CancelPnL = 93,
+        ReqPnLSingle = 94,
+        CancelPnLSingle = 95,
+        ReqHistoricalTicks = 96,
+        ReqTickByTickData = 97,
+        CancelTickByTickData = 98
     }
 }

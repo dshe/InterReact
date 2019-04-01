@@ -15,7 +15,7 @@ namespace InterReact.Utility.Rx
         /// <summary>
         /// Returns an observable that shares a single subscription to an underlying sequence which produces a single result.
         /// The source is connected upon first subscription.
-        /// Used by ContractDetails.
+        /// Used by ContractData.
         /// </summary>
         internal static IObservable<T> ToAsyncSource<T>(this IObservable<T> source, Duration lifetime, IClock clock)
         {

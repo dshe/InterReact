@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Reactive.Linq;
 using InterReact.Extensions;
+using Microsoft.Extensions.Logging;
 
 namespace InterReact.Tests.Utility
 {
     public static class SpyEx
     {
-        public static IObservable<T> Spy<T>(this IObservable<T> source, Action<string> write, string name = "")
+        public static IObservable<T> Spy<T>(this IObservable<T> source, ILogger logger, string name = "")
         {
             Write("Create.");
 
@@ -25,11 +26,11 @@ namespace InterReact.Tests.Utility
                     },
                     onError: ex =>
                     {
-                        write("");
+                        Write("");
                         Write("OnError: " + ex.Message);
-                        write("");
-                        write(ex.ToString());
-                        write("");
+                        Write("");
+                        Write(ex.ToString());
+                        Write("");
                         observer.OnError(ex);
                     },
                     onCompleted: () =>
@@ -47,7 +48,7 @@ namespace InterReact.Tests.Utility
 
             // local
             void Write(string operation) =>
-                write($"{Environment.CurrentManagedThreadId:D2}{name} {operation}");
+                logger.LogDebug($"{Environment.CurrentManagedThreadId:D2}{name} {operation}");
         }
 
     }

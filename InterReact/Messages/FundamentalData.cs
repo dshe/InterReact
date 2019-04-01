@@ -7,13 +7,13 @@ namespace InterReact.Messages
     {
         public int RequestId { get; }
 
-        public string XmlData { get; }
+        public string Data { get; }
 
-        internal FundamentalData(ResponseReader c)
+        internal FundamentalData(ResponseComposer c)
         {
             c.IgnoreVersion();
-            RequestId = c.Read<int>();
-            XmlData = c.ReadString();
+            RequestId = c.ReadInt();
+            Data = c.ReadString();
         }
     }
 }

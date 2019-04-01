@@ -17,18 +17,18 @@ namespace InterReact.Messages
         public long Volume { get; }
         public double Wap { get; }
         public int Count { get; }
-        internal RealtimeBar(ResponseReader c)
+        internal RealtimeBar(ResponseComposer c)
         {
             c.IgnoreVersion();
-            RequestId = c.Read<int>();
+            RequestId = c.ReadInt();
             Time = Instant.FromUnixTimeSeconds(long.Parse(c.ReadString(), NumberFormatInfo.InvariantInfo));
-            Open = c.Read<double>();
-            High = c.Read<double>();
-            Low = c.Read<double>();
-            Close = c.Read<double>();
-            Volume = c.Read<long>();
-            Wap = c.Read<double>();
-            Count = c.Read<int>();
+            Open = c.ReadDouble();
+            High = c.ReadDouble();
+            Low = c.ReadDouble();
+            Close = c.ReadDouble();
+            Volume = c.ReadLong();
+            Wap = c.ReadDouble();
+            Count = c.ReadInt();
         }
     }
 }

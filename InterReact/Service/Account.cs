@@ -17,7 +17,7 @@ namespace InterReact.Service
 {
     public sealed partial class Services
     {
-        public IObservable<IReadOnlyList<string>> ManagedAccountsObservable =>
+        public IObservable<IList<string>> ManagedAccountsObservable =>
             Response
                 .ToObservable<ManagedAccounts>(Request.RequestManagedAccounts)
                 .Select(x => x.Accounts)
@@ -54,8 +54,8 @@ namespace InterReact.Service
         /// </summary>
         public IConnectableObservable<IAccountUpdate> AccountUpdatesConnectableObservable =>
             Response.ToObservable<IAccountUpdate>(
-                () => Request.RequestAccountUpdates(start: true),
-                () => Request.RequestAccountUpdates(start: false),
+                () => Request.RequestAccountData(start: true),
+                () => Request.RequestAccountData(start: false),
                 m => false)
             //.ToCacheSource(CacheKeySelector, sort: true);
             .Publish();

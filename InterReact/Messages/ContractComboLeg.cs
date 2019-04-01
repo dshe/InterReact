@@ -44,16 +44,16 @@ namespace InterReact.Messages
 
         public ContractComboLeg() { }
 
-        internal ContractComboLeg(ResponseReader c)
+        internal ContractComboLeg(ResponseComposer c)
         {
-            ContractId = c.Read<int>();
-            Ratio = c.Read<int>();
+            ContractId = c.ReadInt();
+            Ratio = c.ReadInt();
             TradeAction = c.ReadStringEnum<TradeAction>();
             Exchange = c.ReadString();
-            OpenClose = c.Read<ComboOpenClose>();
-            ComboShortSaleSlot = c.Read<ComboShortSaleSlot>();
+            OpenClose = c.ReadEnum<ComboOpenClose>();
+            ComboShortSaleSlot = c.ReadEnum<ComboShortSaleSlot>();
             DesignatedLocation = c.ReadString();
-            ExemptCode = c.Read<int>();
+            ExemptCode = c.ReadInt();
         }
     }
 }

@@ -11,63 +11,65 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Disposables;
 
+#nullable enable
+
 namespace InterReact.Utility
 {
     // use class/reference type to allow use of null to indicate no data
-    public sealed class ContractDetailsTimeEvent 
+    public sealed class ContractDataTimeEvent 
     {
         public ZonedDateTime      Time   { get; internal set; }
         public ContractTimeStatus Status { get; internal set; }
     }
 
-    public sealed class ContractDetailsTimePeriod
+    public sealed class ContractDataTimePeriod
     {
-        public ContractDetailsTimeEvent Previous { get; internal set; }
-        public ContractDetailsTimeEvent Next     { get; internal set; }
-        public ContractDetailsTimePeriod(ContractDetailsTimeEvent previous, ContractDetailsTimeEvent next)
+        public ContractDataTimeEvent? Previous { get; internal set; }
+        public ContractDataTimeEvent? Next     { get; internal set; }
+        public ContractDataTimePeriod(ContractDataTimeEvent? previous, ContractDataTimeEvent? next)
             => (Previous, Next) = (previous, next);
     }
 
-    public sealed class ContractDetailsTime
+    public sealed class ContractDataTime
     {
         private static readonly LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HHmm");
         private static readonly LocalDatePattern DatePattern = LocalDatePattern.CreateWithInvariantCulture("yyyyMMdd");
-        private readonly ContractDetails ContractDetails;
+        private readonly ContractData ContractData;
         private readonly IScheduler Sched;
         public DateTimeZone? TimeZone { get; } // null if not available
-        public IReadOnlyList<ContractDetailsTimeEvent> Events { get; } = new List<ContractDetailsTimeEvent>();
+        public IReadOnlyList<ContractDataTimeEvent> Events { get; } = new List<ContractDataTimeEvent>();
         // empty if no hours or timeZone
-        public IObservable<ContractDetailsTimePeriod> ContractTimeObservable { get; } // completes immediately if no timeZone or hours
+        public IObservable<ContractDataTimePeriod> ContractTimeObservable { get; } // completes immediately if no timeZone or hours
 
-        public ContractDetailsTime(ContractDetails contractDetails, IScheduler? scheduler = null)
+        public ContractDataTime(ContractData contractData, IScheduler? scheduler = null)
         {
-            ContractDetails = contractDetails ?? throw new ArgumentNullException(nameof(contractDetails));
+            ContractData = contractData ?? throw new ArgumentNullException(nameof(contractData));
             Sched = scheduler ?? Scheduler.CurrentThread;
             ContractTimeObservable = CreateContractTimeObservable();
-            var tzi = contractDetails.TimeZoneId;
+            var tzi = contractData.TimeZoneId;
             if (string.IsNullOrEmpty(tzi)) // for expired Future Options there is no TimeZoneId(?)
                 return;
             TimeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull(tzi) ?? throw new ArgumentException($"TimeZoneId '{tzi}' not found.");
             Events = GetList();
         }
 
-        private List<ContractDetailsTimeEvent> GetList()
+        private List<ContractDataTimeEvent> GetList()
         {
             // sorted list is used to ensure that dates are unique and to maintain order
             var list = new SortedList<LocalDateTime, ContractTimeStatus>();
 
-            foreach (var (start, end) in GetSessions(ContractDetails.TradingHours))
+            foreach (var (start, end) in GetSessions(ContractData.TradingHours))
             {
                 list.Add(start, ContractTimeStatus.Trading);
                 list.Add(end,   ContractTimeStatus.Closed);
             }
-            foreach (var (start, end) in GetSessions(ContractDetails.LiquidHours))
+            foreach (var (start, end) in GetSessions(ContractData.LiquidHours))
             {
                 var previous = list.Where(x => x.Key < end).LastOrDefault();
                 list.Add(start, ContractTimeStatus.Liquid);
                 list.Add(end, previous.Value == ContractTimeStatus.Trading ? ContractTimeStatus.Trading: ContractTimeStatus.Closed);
             }
-            return list.Select(x => new ContractDetailsTimeEvent { Time = x.Key.InZoneLeniently(TimeZone), Status = x.Value }).ToList();
+            return list.Select(x => new ContractDataTimeEvent { Time = x.Key.InZoneLeniently(TimeZone), Status = x.Value }).ToList();
         }
 
         private static List<(LocalDateTime start, LocalDateTime end)> GetSessions(string s)
@@ -108,14 +110,14 @@ namespace InterReact.Utility
         }
 
         // get the current time from the scheduler
-        public ContractDetailsTimePeriod? Get() => Get(Instant.FromDateTimeOffset(Sched.Now));
+        public ContractDataTimePeriod? Get() => Get(Instant.FromDateTimeOffset(Sched.Now));
 
-        public ContractDetailsTimePeriod? Get(Instant dt)
+        public ContractDataTimePeriod? Get(Instant dt)
         {
             if (!Events.Any())
                 return null;
 
-            return new ContractDetailsTimePeriod(
+            return new ContractDataTimePeriod(
                 Events.Where(x => x.Time.ToInstant() <= dt).LastOrDefault(),
                 Events.Where(x => x.Time.ToInstant() >  dt).FirstOrDefault());
         }
@@ -123,9 +125,9 @@ namespace InterReact.Utility
         /// <summary>
         /// Creates an observable which emits Contract time events for the specified contract details.
         /// </summary>
-        private IObservable<ContractDetailsTimePeriod> CreateContractTimeObservable()
+        private IObservable<ContractDataTimePeriod> CreateContractTimeObservable()
         {
-            return Observable.Create<ContractDetailsTimePeriod>(observer =>
+            return Observable.Create<ContractDataTimePeriod>(observer =>
             {
                 var initialResult = Get();
                 if (initialResult != null)

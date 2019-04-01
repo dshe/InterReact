@@ -21,7 +21,7 @@ namespace InterReact.Core
         private readonly Config Config;
         internal Func<RequestMessage> CreateMessage;
 
-        internal Request(Config config, Func<RequestMessage> createMessage)
+        public Request(Config config, Func<RequestMessage> createMessage)
         {
             Config = config;
             CreateMessage = createMessage;
@@ -40,8 +40,8 @@ namespace InterReact.Core
         /// You can turn off regular market data so that only generic tick data is returned by also including the generic tick "mdoff".
         /// </summary>
         public void RequestMarketData(int requestId, Contract contract,
-            IEnumerable<GenericTickType>? genericTickTypes = null, bool marketDataOff = false,
-            bool isSnapshot = false, params Tag[] options)
+            IList<GenericTickType>? genericTickTypes = null, bool marketDataOff = false,
+            bool isSnapshot = false, IList<Tag>? options = null)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
@@ -59,16 +59,16 @@ namespace InterReact.Core
                 foreach (var leg in contract.ComboLegs)
                     m.Write(leg.ContractId, leg.Ratio, leg.TradeAction, leg.Exchange);
             }
-            m.Write(contract.Undercomp != null);
-            if (contract.Undercomp != null)
-                m.Write(contract.Undercomp.ContractId, contract.Undercomp.Delta, contract.Undercomp.Price);
+            m.Write(contract.DeltaNeutralContract != null);
+            if (contract.DeltaNeutralContract != null)
+                m.Write(contract.DeltaNeutralContract.ContractId, contract.DeltaNeutralContract.Delta, contract.DeltaNeutralContract.Price);
             m.Write(MakeGenericTicksList(genericTickTypes, marketDataOff), isSnapshot);
-            m.WriteTagsAsOneString(options);
-
-            m.Send();
+            if (Config.SupportsServerVersion(ServerVersion.SmartComponents))
+                m.Write(false); // regulatory snapshot ($.01)
+            m.Write(Tag.Combine(options)).Send();
         }
 
-        private static string MakeGenericTicksList(IEnumerable<GenericTickType>? genericTickTypes, bool marketDataOff = false)
+        private static string MakeGenericTicksList(IList<GenericTickType>? genericTickTypes, bool marketDataOff = false)
         {
             var strings = new List<string>();
             if (genericTickTypes != null && genericTickTypes.Any())
@@ -81,7 +81,7 @@ namespace InterReact.Core
         public void CancelMarketData(int requestId) => 
             CreateMessage().Write(RequestCode.CancelMarketData, "1", requestId).Send();
 
-        public void PlaceOrder(int orderId, Order order, Contract contract)
+        public void PlaceOrder(int orderId, Order order, Contract contract) // the monster
         {
             if (order == null)
                 throw new ArgumentNullException(nameof(order));
@@ -95,16 +95,15 @@ namespace InterReact.Core
 
             var m = CreateMessage();
 
-            m.Write(RequestCode.PlaceOrder, "45", orderId,
+            m.Write(RequestCode.PlaceOrder);
+            if (Config.ServerVersionCurrent < ServerVersion.OrderContainer)
+                m.Write("45");
+
+            m.Write(orderId,
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
                 contract.Strike, contract.Right, contract.Multiplier, contract.Exchange, contract.PrimaryExchange,
                 contract.Currency, contract.LocalSymbol, contract.TradingClass,
-                contract.SecurityIdType, contract.SecurityId, order.TradeAction);
-
-            if (Config.SupportsServerVersion(ServerVersion.FractionalPositions))
-                m.Write(order.TotalQuantity);
-            else
-                m.Write((int) order.TotalQuantity);
+                contract.SecurityIdType, contract.SecurityId, order.TradeAction, order.TotalQuantity);
 
             m.Write(order.OrderType,
                 order.LimitPrice, order.AuxPrice,
@@ -128,10 +127,9 @@ namespace InterReact.Core
                     m.Write(tag.Name, tag.Value);
             }
             m.Write("", // deprecated SharesAllocation field
-                order.DiscretionaryAmount,
-                order.GoodAfterTime, order.GoodUntilDate,
-                order.FinancialAdvisorGroup, order.FinancialAdvisorMethod, order.FinancialAdvisorPercentage,
-                order.FinancialAdvisorProfile);
+                order.DiscretionaryAmount, order.GoodAfterTime, order.GoodUntilDate,
+                order.FinancialAdvisorGroup, order.FinancialAdvisorMethod,
+                order.FinancialAdvisorPercentage, order.FinancialAdvisorProfile);
 
             if (Config.SupportsServerVersion(ServerVersion.ModelsSupport))
                 m.Write(order.ModelCode);
@@ -164,18 +162,19 @@ namespace InterReact.Core
 
             m.Write(order.ScaleTable, order.ActiveStartTime, order.ActiveStopTime, order.HedgeType);
 
+            m.Write(order.HedgeType);
             if (order.HedgeType != HedgeType.Undefined)
                 m.Write(order.HedgeParam);
 
             m.Write(order.OptOutSmartRouting, order.ClearingAccount, order.ClearingIntent, order.NotHeld);
-            m.Write(contract.Undercomp != null);
+            m.Write(contract.DeltaNeutralContract != null);
 
-            if (contract.Undercomp != null)
-                m.Write(contract.Undercomp.ContractId, contract.Undercomp.Delta,
-                    contract.Undercomp.Price);
+            m.Write(contract.DeltaNeutralContract != null);
+            if (contract.DeltaNeutralContract != null)
+                m.Write(contract.DeltaNeutralContract.ContractId, contract.DeltaNeutralContract.Delta,
+                    contract.DeltaNeutralContract.Price);
 
             m.Write(order.AlgoStrategy);
-
             if (!string.IsNullOrEmpty(order.AlgoStrategy))
             {
                 m.Write(order.AlgoParams.Count);
@@ -183,11 +182,8 @@ namespace InterReact.Core
                     m.Write(tag.Name, tag.Value);
             }
 
-            m.Write(order.AlgoId, order.WhatIf)
-                .WriteTagsAsOneString(order.MiscOptions)
-                .Write(order.Solicited);
-
-            m.Write(order.RandomizeSize, order.RandomizePrice);
+            m.Write(order.AlgoId, order.WhatIf, Tag.Combine(order.MiscOptions))
+                .Write(order.Solicited).Write(order.RandomizeSize, order.RandomizePrice);
 
             if (Config.SupportsServerVersion(ServerVersion.PeggedToBenchmark))
             {
@@ -215,6 +211,21 @@ namespace InterReact.Core
             if (Config.SupportsServerVersion(ServerVersion.CashQty))
                 m.Write(order.CashQty);
 
+            if (Config.SupportsServerVersion(ServerVersion.DecisionMaker))
+                m.Write(order.Mifid2DecisionMaker, order.Mifid2DecisionAlgo);
+
+            if (Config.SupportsServerVersion(ServerVersion.MifidExecution))
+                m.Write(order.Mifid2ExecutionTrader, order.Mifid2ExecutionAlgo);
+
+            if (Config.SupportsServerVersion(ServerVersion.AutoPriceForHedge))
+                m.Write(order.DontUseAutoPriceForHedge);
+
+            if (Config.SupportsServerVersion(ServerVersion.OrderContainer))
+                m.Write(order.IsOmsContainer);
+
+            if (Config.SupportsServerVersion(ServerVersion.DPegOrders))
+                m.Write(order.DiscretionaryUpToLimitPrice);
+
             m.Send();
         }
 
@@ -228,13 +239,14 @@ namespace InterReact.Core
         /// Updates for all accounts are returned when accountCode is null.
         /// This information is updated every three minutes.
         /// </summary>
-        public void RequestAccountUpdates(bool start, string? accountCode = null) =>
+        public void RequestAccountData(bool start, string? accountCode = null) =>
             CreateMessage().Write(RequestCode.RequestAccountData, "2", start, accountCode).Send();
 
         /// <summary>
         /// When this method is called, execution reports from the last 24 hours that meet the filter criteria are retrieved.
         /// To view executions beyond the past 24 hours, open the trade log in TWS and, while the Trade Log is displayed, select the days to be returned.
         /// When ExecutionFilter is null, all executions are returned.
+        /// Note that the valid format for time is "yyyymmdd-hh:mm:ss"
         /// </summary>
         public void RequestExecutions(int requestId, ExecutionFilter? filter = null) =>
             CreateMessage().Write(RequestCode.RequestExecutions, "3", requestId,
@@ -250,13 +262,13 @@ namespace InterReact.Core
         public void RequestNextOrderId() => CreateMessage().Write(RequestCode.RequestIds, "1", "1").Send();
 
         /// <summary>
-        /// Call this method to retrieve one or more ContractDetails objects for the specified selector contract.
+        /// Call this method to retrieve one or more ContractData objects for the specified selector contract.
         /// </summary>
-        public void RequestContractDetails(int requestId, Contract contract)
+        public void RequestContractData(int requestId, Contract contract)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
-            CreateMessage().Write(RequestCode.RequestContractDetails, "8", requestId,
+            CreateMessage().Write(RequestCode.RequestContractData, "8", requestId,
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
                 contract.Strike, contract.Right, contract.Multiplier,
                 contract.Exchange, contract.PrimaryExchange,
@@ -267,18 +279,32 @@ namespace InterReact.Core
         /// <summary>
         /// Call this method to request market depth for the specified contract. 
         /// </summary>
-        public void RequestMarketDepth(int requestId, Contract contract, int numRows = 3, params Tag[] options)
+        public void RequestMarketDepth(int requestId, Contract contract, int numRows=3, bool isSmartDepth=false, IList<Tag>? options = null)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
-            CreateMessage().Write(RequestCode.RequestMarketDepth, "5", requestId,
+            var smart = Config.SupportsServerVersion(ServerVersion.SmartDepth);
+            if (isSmartDepth && !smart)
+                throw new Exception("RequestMarketDepth: server does not support Smart Depth.");
+            var m = CreateMessage().Write(RequestCode.RequestMarketDepth, "5", requestId,
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
                 contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
-                contract.Currency, contract.LocalSymbol, contract.TradingClass, numRows)
-                .WriteTagsAsOneString(options).Send();
+                contract.Currency, contract.LocalSymbol, contract.TradingClass, numRows);
+            if (smart)
+                m.Write(isSmartDepth);
+            m.Write(Tag.Combine(options)).Send();
         }
 
-        public void CancelMarketDepth(int requestId) => CreateMessage().Write(RequestCode.CancelMarketDepth, "1", requestId).Send();
+        public void CancelMarketDepth(int requestId, bool isSmartDepth = false)
+        {
+            var smart = Config.SupportsServerVersion(ServerVersion.SmartDepth);
+            if (isSmartDepth && !smart)
+                throw new Exception("CancelMarketDepth: server does not support Smart Depth.");
+            var m = CreateMessage().Write(RequestCode.CancelMarketDepth, "1", requestId);
+            if (smart)
+                m.Write(isSmartDepth);
+            m.Send();
+        }
 
         /// <summary>
         /// Call this method to start receiving news bulletins, such as information about exchange status.
@@ -287,8 +313,8 @@ namespace InterReact.Core
 
         public void CancelNewsBulletins() => CreateMessage().Write(RequestCode.CancelNewsBulletins, "1").Send();
 
-        public void SetServerLogLevel(LogEntryLevel logLevel)
-            => CreateMessage().Write(RequestCode.SetServerLogLevel, "1", logLevel).Send();
+        public void ChangeServerLogLevel(LogEntryLevel logLevel) =>
+            CreateMessage().Write(RequestCode.ChangeServerLogLevel, "1", logLevel).Send();
 
         public void RequestAutoOpenOrders(bool autoBind) => CreateMessage().Write(RequestCode.RequestAutoOpenOrders, "1", autoBind).Send();
 
@@ -312,22 +338,24 @@ namespace InterReact.Core
         /// </summary>
         public void RequestHistoricalData(int requestId,
             Contract contract,
-            Instant  endDate = default,
+            Instant endDate = default,
             HistoricalDuration? duration = null,
             HistoricalBarSize?  barSize = null,
             HistoricalDataType? dataType = null,
             bool regularTradingHoursOnly = false,
-            params Tag[] options)
+            bool keepUpToDate = false,
+            IList<Tag>? options = null)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
             if (endDate == default)
                 endDate = Config.Clock.GetCurrentInstant();
 
-            var m = CreateMessage();
+            var m = CreateMessage().Write(RequestCode.RequestHistoricalData);
+            if (Config.ServerVersionCurrent < ServerVersion.SyntRealtimeBats)
+                m.Write("6");
 
-            m.Write(RequestCode.RequestHistoricalData, "6", requestId,
-                contract.ContractId, contract.Symbol, contract.SecurityType,
+            m.Write(requestId, contract.ContractId, contract.Symbol, contract.SecurityType,
                 contract.LastTradeDateOrContractMonth, contract.Strike, contract.Right,
                 contract.Multiplier, contract.Exchange, contract.PrimaryExchange,
                 contract.Currency, contract.LocalSymbol, contract.TradingClass, contract.IncludeExpired,
@@ -343,9 +371,9 @@ namespace InterReact.Core
                 foreach (var leg in contract.ComboLegs)
                     m.Write(leg.ContractId, leg.Ratio, leg.TradeAction, leg.Exchange);
             }
-            m.WriteTagsAsOneString(options);
-
-            m.Send();
+            if (Config.SupportsServerVersion(ServerVersion.SyntRealtimeBats))
+                m.Write(keepUpToDate);
+            m.Write(Tag.Combine(options)).Send();
         }
 
         public void ExerciseOptions(int requestId, Contract contract, OptionExerciseAction exerciseAction, int exerciseQuantity,
@@ -360,15 +388,21 @@ namespace InterReact.Core
                 exerciseAction, exerciseQuantity, account, overrideOrder).Send();
         }
 
+
         /// <summary>
         /// Call this method to start receiving market scanner results.
         /// </summary>
-        public void RequestScannerSubscription(int requestId, ScannerSubscription subscription, params Tag[] options)
+        public void RequestScannerSubscription(int requestId, ScannerSubscription subscription, IList<Tag>? subscriptionOptions = null, IList<Tag>? filterOptions = null)
         {
             if (subscription == null)
                 throw new ArgumentNullException(nameof(subscription));
-            CreateMessage().Write(RequestCode.RequestScannerSubscription, "4", requestId,
-                subscription.NumberOfRows, subscription.Instrument,
+
+            var m = CreateMessage().Write(RequestCode.RequestScannerSubscription);
+
+            if (Config.ServerVersionCurrent < ServerVersion.ScannerGenericOpts)
+                m.Write("4");
+
+            m.Write(requestId, subscription.NumberOfRows, subscription.Instrument,
                 subscription.LocationCode, subscription.ScanCode,
                 subscription.AbovePrice, subscription.BelowPrice, subscription.AboveVolume,
                 subscription.MarketCapAbove, subscription.MarketCapBelow,
@@ -377,8 +411,11 @@ namespace InterReact.Core
                 subscription.MaturityDateAbove, subscription.MaturityDateBelow,
                 subscription.CouponRateAbove, subscription.CouponRateBelow,
                 subscription.ExcludeConvertible, subscription.AverageOptionVolumeAbove,
-                subscription.ScannerSettingPairs, subscription.StockType)
-                .WriteTagsAsOneString(options).Send();
+                subscription.ScannerSettingPairs, subscription.StockType);
+
+            if (Config.SupportsServerVersion(ServerVersion.ScannerGenericOpts))
+                m.Write(Tag.Combine(filterOptions));
+            m.Write(Tag.Combine(subscriptionOptions)).Send();
         }
 
         public void CancelScannerSubscription(int requestId) =>
@@ -402,7 +439,7 @@ namespace InterReact.Core
         /// Call this method to start receiving realtime bar data.
         /// </summary>
         public void RequestRealTimeBars(int requestId, Contract contract, RealtimeBarType? whatToShow = null,
-            bool regularTradingHoursOnly = false, params Tag[] options)
+            bool regularTradingHoursOnly = false, IList<Tag>? options = null)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
@@ -413,8 +450,7 @@ namespace InterReact.Core
                 contract.PrimaryExchange, contract.Currency, contract.LocalSymbol, contract.TradingClass,
                 "5", // only 5 seconds bars are available
                 whatToShow ?? RealtimeBarType.Trades, 
-                regularTradingHoursOnly)
-                .WriteTagsAsOneString(options).Send();
+                regularTradingHoursOnly, Tag.Combine(options)).Send();
         }
 
         public void CancelRealTimeBars(int requestId) => CreateMessage().Write(RequestCode.CancelRealtimeBars, "1", requestId).Send();
@@ -424,7 +460,7 @@ namespace InterReact.Core
         /// There must be a subscription to Reuters Fundamental set up in Account Management before you can receive this data.
         /// IB: The method can handle conid specified in the Contract object, but not tradingClass or multiplier.
         /// </summary>
-        public void RequestFundamentalData(int requestId, Contract contract, FundamentalDataReportType? reportTypeN = null, params Tag[] options)
+        public void RequestFundamentalData(int requestId, Contract contract, FundamentalDataReportType? reportTypeN = null, IList<Tag>? options = null)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
@@ -432,7 +468,7 @@ namespace InterReact.Core
             CreateMessage().Write(RequestCode.RequestFundamentalData, "3", requestId,
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.Exchange,
                 contract.PrimaryExchange, contract.Currency, contract.LocalSymbol,
-                reportType.ToString()).WriteTagsAsOneString(options).Send();
+                reportType.ToString(), Tag.Combine(options)).Send();
         }
 
         public void CancelFundamentalData(int requestId) => CreateMessage().Write(RequestCode.CancelFundamentalData, "1", requestId).Send();
@@ -440,7 +476,7 @@ namespace InterReact.Core
         /// <summary>
         /// Call this function to calculate volatility for a supplied option price and underlying price.
         /// </summary>
-        public void CalculateImpliedVolatility(int requestId, Contract contract, double optionPrice, double underlyingPrice, params Tag[] options)
+        public void CalculateImpliedVolatility(int requestId, Contract contract, double optionPrice, double underlyingPrice, IList<Tag>? options = null)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
@@ -448,13 +484,13 @@ namespace InterReact.Core
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
                 contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
                 contract.PrimaryExchange, contract.Currency, contract.LocalSymbol, contract.TradingClass,
-                optionPrice, underlyingPrice).WriteTagsAsOneString(options).Send();
+                optionPrice, underlyingPrice, Tag.Combine(options)).Send();
         }
 
         /// <summary>
         /// Call this function to calculate option price and greek Values for a supplied volatility and underlying price.
         /// </summary>
-        public void CalculateOptionPrice(int requestId, Contract contract, double volatility, double underlyingPrice, params Tag[] options)
+        public void CalculateOptionPrice(int requestId, Contract contract, double volatility, double underlyingPrice, IList<Tag>? options = null)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
@@ -462,7 +498,7 @@ namespace InterReact.Core
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
                 contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
                 contract.PrimaryExchange, contract.Currency, contract.LocalSymbol, contract.TradingClass,
-                volatility, underlyingPrice).WriteTagsAsOneString(options).Send();
+                volatility, underlyingPrice, Tag.Combine(options)).Send();
         }
 
         public void CancelCalculateImpliedVolatility(int requestId) =>
@@ -486,7 +522,7 @@ namespace InterReact.Core
             => CreateMessage().Write(RequestCode.RequestMarketDataType, "1", marketDataType).Send();
 
         /// <summary>
-        /// Requests real-time position data for all accounts.
+        /// Subscribes to position updates for all accessible accounts. All positions sent initially, and then only updates as positions change. 
         /// </summary>
         public void RequestAccountPositions() => CreateMessage().Write(RequestCode.RequestAccountPositions, "1").Send();
 
@@ -495,10 +531,10 @@ namespace InterReact.Core
         /// Call this method to request the data that appears on the TWS Account Window Summary tab. 
         /// If no tags are specified, data for all tags will be requested.
         /// </summary>
-        public void RequestAccountSummary(int requestId, string group = "All", params AccountSummaryTag[] tags)
+        public void RequestAccountSummary(int requestId, string group = "All", IList<AccountSummaryTag>? tags = null)
         {
             var tagNames = tags?.Select(tag => tag.ToString()).ToList();
-            if (tagNames == null || tagNames.Count == 0)
+            if (tagNames == null || !tagNames.Any())
                 tagNames = Enum.GetNames(typeof(AccountSummaryTag)).ToList();
             CreateMessage().Write(RequestCode.RequestAccountSummary, "1", requestId, group, string.Join(",", tagNames)).Send();
         }
@@ -509,9 +545,11 @@ namespace InterReact.Core
         public void CancelAccountPositions() =>
             CreateMessage().Write(RequestCode.CancelAccountPositions, "1").Send();
 
+        // For IB's internal purpose. Allows to provide means of verification between the TWS and third party programs.
         public void VerifyRequest(string apiName, string apiVersion) =>
             CreateMessage().Write(RequestCode.VerifyRequest, "1", apiName, apiVersion).Send();
 
+        //  For IB's internal purpose.Allows to provide means of verification between the TWS and third party programs.
         public void VerifyMessage(string apiData) =>
             CreateMessage().Write(RequestCode.VerifyMessage, "1", apiData).Send();
 
@@ -527,12 +565,21 @@ namespace InterReact.Core
         public void UnsubscribeFromGroupEvents(int requestId) =>
             CreateMessage().Write(RequestCode.UnsubscribeFromGroupEvents, "1", requestId).Send();
 
+        // For IB's internal purpose. Allows to provide means of verification between the TWS and third party programs.
         public void VerifyAndAuthorizeRequest(string apiName, string apiVersion, string opaqueIsvKey) =>
             CreateMessage().Write(RequestCode.VerifyAndAuthorizeRequest, "1", apiName, apiVersion, opaqueIsvKey).Send();
 
+        // For IB's internal purpose. Allows to provide means of verification between the TWS and third party programs.
         public void VerifyAndAuthorizeMessage(string apiData, string xyzResponse) =>
             CreateMessage().Write(RequestCode.VerifyAndAuthorizeMessage, "1", apiData, xyzResponse).Send();
 
+        /**
+        * @brief Requests position subscription for account and/or model
+        * Initially all positions are returned, and then updates are returned for any position changes in real time.
+        * @param account - If an account Id is provided, only the account's positions belonging to the specified model will be delivered
+        * @param modelCode - The code of the model's positions we are interested in.
+        * @sa cancelPositionsMulti, EWrapper::positionMulti, EWrapper::positionMultiEnd
+        */
         public void RequestPositionsMulti(int requestId, string account, string modelCode)
         {
             Config.RequireServerVersion(ServerVersion.ModelsSupport);
@@ -582,12 +629,14 @@ namespace InterReact.Core
             CreateMessage().Write(RequestCode.RequestMatchingSymbols, requestId, pattern).Send();
         }
 
+        // venues for which market data is returned to updateMktDepthL2(those with market makers)
         public void RequestMarketDepthExchanges()
         {
             Config.RequireServerVersion(ServerVersion.RequestMktDepthExchanges);
             CreateMessage().Write(RequestCode.RequestMktDepthExchanges).Send();
         }
 
+        // Returns the mapping of single letter codes to exchange names given the mapping identifier
         public void RequestSmartComponents(int requestId, string bboExchange)
         {
             Config.RequireServerVersion(ServerVersion.RequestMktDepthExchanges);
@@ -597,7 +646,10 @@ namespace InterReact.Core
         public void RequestNewsArticle(int requestId, string providerCode, string articleId)
         {
             Config.RequireServerVersion(ServerVersion.RequestNewsArticle);
-            CreateMessage().Write(RequestCode.RequestNewsArticle, requestId, providerCode, articleId).Send();
+            var m = CreateMessage().Write(RequestCode.RequestNewsArticle, requestId, providerCode, articleId);
+            if (Config.SupportsServerVersion(ServerVersion.NewsQueryOrigins))
+                m.Write(null);
+            m.Send();
         }
 
         public void RequestNewsProviders()
@@ -609,11 +661,17 @@ namespace InterReact.Core
         public void RequestHistoricalNews(int requestId, int conId, string providerCodes, string startTime, string endTime, int totalResults)
         {
             Config.RequireServerVersion(ServerVersion.RequestHistoricalNews);
-            CreateMessage()
-                .Write(RequestCode.RequestHistoricalNews, requestId, conId, providerCodes, startTime, endTime, totalResults)
-                .Send();
+            var m = CreateMessage();
+            m.Write(RequestCode.RequestHistoricalNews, requestId, conId, providerCodes, startTime, endTime, totalResults);
+            if (Config.SupportsServerVersion(ServerVersion.NewsQueryOrigins))
+                m.Write(null);
+            m.Send();
         }
 
+        // Returns the timestamp of earliest available historical data for a contract and data type
+        //* @param whatToShow - type of data for head timestamp - "BID", "ASK", "TRADES", etc
+        //* @param useRTH - use regular trading hours only, 1 for yes or 0 for no
+        //* @param formatDate - @param formatDate set to 1 to obtain the bars' time as yyyyMMdd HH:mm:ss, set to 2 to obtain it like system time format in seconds
         public void RequestHeadTimestamp(int requestId, Contract contract, string whatToShow, int useRth, int formatDate)
         {
             if (contract == null)
@@ -626,6 +684,7 @@ namespace InterReact.Core
                 .Send();
         }
 
+        // Returns data histogram of specified contract
         public void RequestHistogramData(int requestId, Contract contract, bool useRth, string period)
         {
             if (contract == null)
@@ -642,6 +701,86 @@ namespace InterReact.Core
         {
             Config.RequireServerVersion(ServerVersion.RequestHistogramData);
             CreateMessage().Write(RequestCode.CancelHistogramData, requestId).Send();
+        }
+
+        public void CancelHeadTimestamp(int requestId)
+        {
+            Config.RequireServerVersion(ServerVersion.CancelHeadstamp);
+            CreateMessage().Write(RequestCode.CancelHeadTimestamp, requestId).Send();
+        }
+
+        /// The market rule for an instrument on a particular exchange provides details about how the minimum price increment changes with price
+        /// A list of market rule ids can be obtained by invoking reqContractData on a particular contract.The returned market rule ID list will provide the market rule ID for the instrument in the correspond valid exchange list in contractData.
+        public void RequestMarketRule(int marketRuleId)
+        {
+            Config.RequireServerVersion(ServerVersion.MarketRules);
+            CreateMessage().Write(RequestCode.RequestMarketRule, marketRuleId).Send();
+        }
+
+        public void RequestPnL(int requestId, string account, string modelCode)
+        {
+            Config.RequireServerVersion(ServerVersion.Pnl);
+            CreateMessage().Write(RequestCode.ReqPnL, requestId, account, modelCode).Send();
+        }
+
+        public void CancelPnL(int requestId)
+        {
+            Config.RequireServerVersion(ServerVersion.Pnl);
+            CreateMessage().Write(RequestCode.CancelPnL, requestId).Send();
+        }
+
+        public void RequestPnLSingle(int requestId, string account, string modelCode, int conId)
+        {
+            Config.RequireServerVersion(ServerVersion.Pnl);
+            CreateMessage().Write(RequestCode.ReqPnLSingle, requestId, account, modelCode, conId).Send();
+        }
+
+        public void CancelPnLSingle(int requestId)
+        {
+            Config.RequireServerVersion(ServerVersion.Pnl);
+            CreateMessage().Write(RequestCode.CancelPnLSingle, requestId).Send();
+        }
+
+        /**
+        * @brief Requests historical Time&Sales data for an instrument
+        * @param startDateTime ,i.e. "20170701 12:01:00". Uses TWS timezone specified at login.
+        * @param endDateTime ,i.e. "20170701 13:01:00". In TWS timezone. Exactly one of start time and end time has to be defined.
+        * @param numberOfTicks Number of distinct data points. Max currently 1000 per request.
+        * @param whatToShow (Bid_Ask, Midpoint, Trades) Type of data requested. 
+        * @param useRth Data from regular trading hours (1), or all available hours (0)
+        * @param ignoreSize A filter only used when the source price is Bid_Ask
+        */
+        public void RequestHistoricalTicks(int requestId, Contract contract, string startDateTime,
+            string endDateTime, int numberOfTicks, string whatToShow, int useRth, bool ignoreSize)
+        {
+            Config.RequireServerVersion(ServerVersion.HistoricalTicks);
+            CreateMessage().Write(RequestCode.ReqHistoricalTicks, requestId, contract, startDateTime,
+                endDateTime, numberOfTicks, whatToShow, useRth, ignoreSize, null).Send();
+        }
+
+
+        /**
+         * @brief Requests tick-by-tick data.
+         * @param tickType - tick-by-tick data type: "Last", "AllLast", "BidAsk" or "MidPoint".
+         * @param numberOfTicks - number of ticks.
+         * @param ignoreSize - ignore size flag.
+         */
+        public void RequestTickByTickData(int requestId, Contract contract, string tickType, int numberOfTicks, bool ignoreSize)
+        {
+            Config.RequireServerVersion(ServerVersion.TickByTick);
+            var m = CreateMessage().Write(RequestCode.ReqTickByTickData, requestId,
+            contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
+            contract.Strike, contract.Right, contract.Multiplier, contract.Exchange, contract.PrimaryExchange,
+            contract.Currency, contract.LocalSymbol, contract.TradingClass, tickType);
+            if (Config.SupportsServerVersion(ServerVersion.TickByTickIgnoreSize))
+                m.Write(numberOfTicks, ignoreSize);
+            m.Send();
+        }
+
+        public void CancelTickByTickData(int requestId)
+        {
+            Config.RequireServerVersion(ServerVersion.TickByTick);
+            CreateMessage().Write(RequestCode.CancelTickByTickData, requestId).Send();
         }
     }
 }

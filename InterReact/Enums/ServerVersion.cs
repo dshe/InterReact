@@ -2,13 +2,11 @@
 {
     public enum ServerVersion
     {
-        UseV100Plus = 100,
-        FractionalPositions = 101,
         PeggedToBenchmark = 102,
         ModelsSupport = 103,
         SecurityDefinitionOptionalParametersRequest = 104,
         ExtOperator = 105,
-        SoftDollarTier = 106,
+        SoftDollarTier = 106, // max version of stable client 9.72.18
         RequestFamilyCodes = 107,
         RequestMatchingSymbols = 108,
         PastLimit = 109,
@@ -23,6 +21,33 @@
         RequestHeadTimestamp = 118,
         RequestHistogramData = 119,
         ServiceDataType = 120,
-        AggGroup = 121
+        AggGroup = 121,
+        UnderlyingInfo = 122,
+        CancelHeadstamp = 123,
+        SyntRealtimeBats = 124,
+        CfdReroute = 125,
+        MarketRules = 126,
+        Pnl = 127,
+        NewsQueryOrigins = 128,
+        UnrealizedPnl = 129,
+        HistoricalTicks = 130,
+        MarketCapPrice = 131,
+        PreOpenBidAsk = 132,
+        RealExpirationDate = 134,
+        RealizedPnl = 135,
+        LastLiqidity = 136,
+        TickByTick = 137,
+        DecisionMaker = 138,
+        MifidExecution = 139,
+        TickByTickIgnoreSize = 140,
+        AutoPriceForHedge = 141,
+        WhatIfExtFields = 142,
+        ScannerGenericOpts = 143,
+        ApiBindOrder = 144,
+        OrderContainer = 145,
+        SmartDepth = 146,
+        RemoveNullAllCasting = 147,
+        DPegOrders = 148,
+        MktDepthPrimExchange = 149
     }
 }

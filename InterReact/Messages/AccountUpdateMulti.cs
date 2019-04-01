@@ -11,10 +11,10 @@ namespace InterReact.Messages
         public string Key { get; }
         public string Value { get; }
         public string Currency { get; }
-        internal AccountUpdateMulti(ResponseReader c)
+        internal AccountUpdateMulti(ResponseComposer c)
         {
             c.IgnoreVersion();
-            RequestId = c.Read<int>();
+            RequestId = c.ReadInt();
             Account = c.ReadString();
             ModelCode = c.ReadString();
             Key = c.ReadString();
@@ -26,10 +26,10 @@ namespace InterReact.Messages
     public sealed class AccountUpdateMultiEnd : IHasRequestId
     {
         public int RequestId { get; internal set; }
-        internal AccountUpdateMultiEnd(ResponseReader c)
+        internal AccountUpdateMultiEnd(ResponseComposer c)
         {
             c.IgnoreVersion();
-            RequestId = c.Read<int>();
+            RequestId = c.ReadInt();
         }
     }
 }

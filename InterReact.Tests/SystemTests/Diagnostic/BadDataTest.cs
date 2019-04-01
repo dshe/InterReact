@@ -8,6 +8,7 @@ using Stringification;
 using InterReact.Tests.Utility;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace InterReact.Tests.SystemTests.Diagnostic
 {
@@ -46,7 +47,7 @@ namespace InterReact.Tests.SystemTests.Diagnostic
             Client.Request.RequestMarketData(requestId, Stock1);
 
             var exception = await task;
-            Write(exception.Stringify());
+            Logger.LogDebug(exception.Stringify());
             Assert.IsType<InvalidDataException>(exception);
         }
 

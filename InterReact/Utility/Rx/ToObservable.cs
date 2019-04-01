@@ -77,7 +77,7 @@ namespace InterReact.Utility.Rx
 
         // For requests that use RequestId.
         // Single result (end=null): HistoricalData, FundamentalData, ScannerData
-        // Multiple results (end=false=>true): TickSnapshot, ContractDetails, AccountSummary, Executions
+        // Multiple results (end=false=>true): TickSnapshot, ContractData, AccountSummary, Executions
         // Continuous results (end=false): MarketDepth, Tick, RealtimeBar
         // End type: not type T
         internal static IObservable<T> ToObservable<T>(
@@ -106,8 +106,9 @@ namespace InterReact.Utility.Rx
                         {
                             if (m is Alert alert)
                             {
-                                cancelable = false;
-                                observer.OnError(alert.ToAlertException());
+                                //cancelable = false;
+                                //observer.OnError(alert.ToAlertException());
+                                //observer.OnNext(alert);
                             }
                             else if (end != null && end(m))
                             {

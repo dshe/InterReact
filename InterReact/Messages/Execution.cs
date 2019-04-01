@@ -7,7 +7,6 @@ using System.Collections.Generic;
 
 namespace InterReact.Messages
 {
-
     public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
     {
         // Store executions by executionId so that they can be associated with CommissionReport (above).
@@ -82,26 +81,31 @@ namespace InterReact.Messages
         /// </summary>
         public double EconomicValueMultiplier { get; }
 
+        public string ModelCode { get; } = "";
+
+        public Liquidity LastLiquidity { get; }
+
         public Contract Contract { get; }
 
-        internal Execution(ResponseReader c)
+        internal Execution(ResponseComposer c)
         {
-            var version = c.RequireVersion(10);
-            var requestId = c.Read<int>();
-            var orderId = c.Read<int>();
+            if (!c.Config.SupportsServerVersion(ServerVersion.LastLiqidity))
+                c.RequireVersion(10);
+            var requestId = c.ReadInt();
+            var orderId = c.ReadInt();
             Contract = new Contract
             {
-                ContractId = c.Read<int>(),
+                ContractId = c.ReadInt(),
                 Symbol = c.ReadString(),
                 SecurityType = c.ReadStringEnum<SecurityType>(),
                 LastTradeDateOrContractMonth = c.ReadString(),
-                Strike = c.Read<double>(),
+                Strike = c.ReadDouble(),
                 Right = c.ReadStringEnum<RightType>(),
                 Multiplier = c.ReadString(),
                 Exchange = c.ReadString(),
                 Currency = c.ReadString(),
                 LocalSymbol = c.ReadString(),
-                TradingClass = version >= 10 ? c.ReadString() : string.Empty
+                TradingClass = c.ReadString()
             };
             RequestId = requestId;
             OrderId = orderId;
@@ -110,17 +114,20 @@ namespace InterReact.Messages
             Account = c.ReadString();
             Exchange = c.ReadString();
             Side = c.ReadStringEnum<ExecutionSide>();
-            Shares = c.Read<double>();
-            Price = c.Read<double>();
-            PermanentId = c.Read<int>();
-            ClientId = c.Read<int>();
-            Liquidation = c.Read<int>();
-            CumulativeQuantity = c.Read<double>();
-            AveragePrice = c.Read<double>();
+            Shares = c.ReadDouble();
+            Price = c.ReadDouble();
+            PermanentId = c.ReadInt();
+            ClientId = c.ReadInt();
+            Liquidation = c.ReadInt();
+            CumulativeQuantity = c.ReadDouble();
+            AveragePrice = c.ReadDouble();
             OrderReference = c.ReadString();
             EconomicValueRule = c.ReadString();
-            EconomicValueMultiplier = c.Read<double>();
-
+            EconomicValueMultiplier = c.ReadDouble();
+            if (c.Config.SupportsServerVersion(ServerVersion.ModelsSupport))
+                ModelCode = c.ReadString();
+            if (c.Config.SupportsServerVersion(ServerVersion.LastLiqidity))
+                LastLiquidity = c.ReadEnum<Liquidity>();
             Executions[ExecutionId] = this;
         }
     }
@@ -128,10 +135,10 @@ namespace InterReact.Messages
     public sealed class ExecutionEnd : IHasRequestId
     {
         public int RequestId { get; }
-        internal ExecutionEnd(ResponseReader c)
+        internal ExecutionEnd(ResponseComposer c)
         {
             c.IgnoreVersion();
-            RequestId = c.Read<int>();
+            RequestId = c.ReadInt();
         }
     }
 }

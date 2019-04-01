@@ -5,10 +5,10 @@ namespace InterReact.Messages
     public sealed class NextId
     {
         public int Id { get; }
-        internal NextId(ResponseReader c)
+        internal NextId(ResponseComposer c)
         {
             c.IgnoreVersion();
-            Id = c.Read<int>();
+            Id = c.ReadInt();
         }
     }
 }

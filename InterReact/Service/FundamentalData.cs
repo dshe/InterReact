@@ -26,7 +26,7 @@ namespace InterReact.Service
                     Request.NextId,
                     requestId => Request.RequestFundamentalData(requestId, contract, reportType),
                     Request.CancelFundamentalData)
-                .Select(m => m.XmlData)
+                .Select(m => m.Data)
                 .ToShareSource();
         }
 

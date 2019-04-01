@@ -57,21 +57,31 @@ namespace InterReact.Messages
         /// This field is used to identify an order held when TWS is trying to locate shares for a short sell.
         /// The value used to indicate this is 'locate'.
         /// </summary>
-        public string WhyHeld { get; }
+        public string WhyHeld { get; } = "";
 
-        internal OrderStatusReport(ResponseReader c)
+        public double? MktCapPrice { get; }
+
+        internal OrderStatusReport(ResponseComposer c)
         {
-            var version = c.RequireVersion(5);
-            OrderId = c.Read<int>();
+            var serverVersion = c.Config.ServerVersionCurrent;
+            var version = serverVersion >= ServerVersion.MarketCapPrice ? int.MaxValue : c.ReadInt();
+            OrderId = c.ReadInt();
             Status = c.ReadStringEnum<OrderStatus>();
-            Filled = c.Read<double>(); // int -> double
-            Remaining = c.Read<double>();
-            AverageFillPrice = c.Read<double>();
-            PermanentId = c.Read<int>();
-            ParentId = c.Read<int>();
-            LastFillPrice = c.Read<double>();
-            ClientId = c.Read<int>();
-            WhyHeld = version >= 6 ? c.ReadString() : string.Empty;
+            Filled = c.ReadDouble();
+            Remaining = c.ReadDouble();
+            AverageFillPrice = c.ReadDouble();
+            if (version >= 2)
+                PermanentId = c.ReadInt();
+            if (version >= 3)
+                ParentId = c.ReadInt();
+            if (version >= 4)
+                LastFillPrice = c.ReadDouble();
+            if (version >= 5)
+                ClientId = c.ReadInt();
+            if (version >= 6)
+                WhyHeld = c.ReadString();
+            if (serverVersion >= ServerVersion.MarketCapPrice)
+                MktCapPrice = c.ReadDouble();
         }
     }
 }

@@ -34,13 +34,13 @@ Contract contract = new Contract
 };
 
 // Make a request to IB for the contract details using the contract object.
-IList<ContractDetails> contractDetailsList = await client.Services.ContractDetailsObservable(contract);
+IList<ContractData> contractDataList = await client.Services.ContractDataObservable(contract);
 
 // Get the one contract from the list.
-ContractDetails contractDetails = contractDetailsList.Single();
+ContractData contractData = contractDataList.Single();
 
 // Print the LongName of the contract to the console.
-Console.WriteLine($"Long Name: {contractDetails.LongName}.");
+Console.WriteLine($"Long Name: {contractData.LongName}.");
 
 // Disconnect from IB.
 await client.DisconnectAsync();

@@ -15,21 +15,19 @@ namespace InterReact.Messages
     public sealed class SmartComponents : IHasRequestId
     {
         public int RequestId { get; }
-        public IReadOnlyDictionary<int, KeyValuePair<string, char>> Map { get; }
+        public IDictionary<int, KeyValuePair<string, char>> Map { get; } = new Dictionary<int, KeyValuePair<string, char>>();
 
-        internal SmartComponents(ResponseReader c)
+        internal SmartComponents(ResponseComposer c)
         {
-            RequestId = c.Read<int>();
-            var n = c.Read<int>();
-            var map = new Dictionary<int, KeyValuePair<string, char>>(n);
+            RequestId = c.ReadInt();
+            var n = c.ReadInt();
             for (var i = 0; i < n; i++)
             {
-                var bitNumber = c.Read<int>();
+                var bitNumber = c.ReadInt();
                 var exchange = c.ReadString();
-                var exchangeLetter = c.Read<char>();
-                map.Add(bitNumber, new KeyValuePair<string, char>(exchange, exchangeLetter));
+                var exchangeLetter = c.ReadChar();
+                Map.Add(bitNumber, new KeyValuePair<string, char>(exchange, exchangeLetter));
             }
-            Map = new ReadOnlyDictionary<int, KeyValuePair<string, char>>(map);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Divergic.Logging.Xunit;
+using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using InterReact;
@@ -9,6 +10,7 @@ using Xunit.Abstractions;
 using InterReact.Interfaces;
 using System.Collections.Generic;
 using System.Reactive.Linq;
+using Microsoft.Extensions.Logging;
 
 namespace InterReact.Tests.Utility
 {
@@ -35,7 +37,7 @@ namespace InterReact.Tests.Utility
         public async Task InitializeAsync()
         {
             Debug.WriteLine("init start");
-            Client = await InterReactClient.Builder.BuildAsync().ConfigureAwait(false);
+            Client = await new InterReactClientBuilder().BuildAsync().ConfigureAwait(false);
             Debug.WriteLine("init end");
         }
 
@@ -51,7 +53,7 @@ namespace InterReact.Tests.Utility
     public abstract class BaseSystemTest : IDisposable
     {
         protected readonly IInterReactClient Client;
-        protected readonly Action<string> Write;
+        protected readonly ILogger Logger;
         protected int Id;
         private readonly IDisposable subscription;
         protected readonly List<object> Responses = new List<object>();
@@ -60,11 +62,11 @@ namespace InterReact.Tests.Utility
         {
             if (fixture.Client == null)
                 throw new NullReferenceException(nameof(fixture.Client));
+            Logger = output.BuildLoggerFor<BaseSystemTest>(); // Divergic.Logging.Xunit
             Client = fixture.Client;
-            Write = output.WriteLine;
             Id = Client.Request.NextId();
-            Write($"BaseSystemTest: Id = {Id}.");
-            subscription = Client.Response.Spy(Write).Subscribe(Responses.Add);
+            Logger.LogDebug($"BaseSystemTest: Id = {Id}.");
+            subscription = Client.Response.Spy(Logger).Subscribe(Responses.Add);
         }
 
         public void Dispose() => subscription.Dispose();

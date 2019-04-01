@@ -20,7 +20,7 @@ namespace InterReact.Tests.UnitTests.Utility
             }
             var time = (Stopwatch.GetTimestamp() - start) / (double)Stopwatch.Frequency;
             var freq = count / time;
-            //Write($"{count} / {time} => {freq} ({rate})");
+            //Logger.LogDebug($"{count} / {time} => {freq} ({rate})");
             return freq;
         }
 

@@ -15,11 +15,11 @@ using Xunit.Abstractions;
 /*
 namespace InterReact.Tests.UnitTests.Utility
 {
-    public class ContractDetailsTimeTests : BaseUnitTest
+    public class ContractDataTimeTests : BaseUnitTest
     {
-        public ContractDetailsTimeTests(ITestOutputHelper output) : base(output) { }
+        public ContractDataTimeTests(ITestOutputHelper output) : base(output) { }
 
-        public ContractDetails ContractDetails = new ContractDetails
+        public ContractData ContractData = new ContractData
         {
             TimeZoneId   = "America/New_York",
             TradingHours = "20180101:0900-1215,1315-1700;20180102:0900-1215,1315-1700",
@@ -29,8 +29,8 @@ namespace InterReact.Tests.UnitTests.Utility
         [Fact]
         public void T00_TimeZoneTest()
         {
-            var cdt = new ContractDetailsTime(ContractDetails);
-            var tz = DateTimeZoneProviders.Tzdb.GetZoneOrNull(ContractDetails.TimeZoneId);
+            var cdt = new ContractDataTime(ContractData);
+            var tz = DateTimeZoneProviders.Tzdb.GetZoneOrNull(ContractData.TimeZoneId);
             Assert.Equal(tz, cdt.TimeZone);
             Assert.Equal(16, cdt.Events.Count);
         }
@@ -38,7 +38,7 @@ namespace InterReact.Tests.UnitTests.Utility
         [Fact]
         public void T01_EventsTest()
         {
-            var cdt = new ContractDetailsTime(ContractDetails);
+            var cdt = new ContractDataTime(ContractData);
 
             var status = cdt.Get(Instant.MinValue);
             Assert.Equal(null, status.Previous);
@@ -62,12 +62,12 @@ namespace InterReact.Tests.UnitTests.Utility
         [Fact]
         public async Task T02_ObservableTest()
         {
-            var tz = DateTimeZoneProviders.Tzdb.GetZoneOrNull(ContractDetails.TimeZoneId);
+            var tz = DateTimeZoneProviders.Tzdb.GetZoneOrNull(ContractData.TimeZoneId);
 
             var dto = new LocalDateTime(2018, 1, 1, 10, 0, 00).InZoneStrictly(tz).ToInstant().ToDateTimeOffset();
             var scheduler = new HistoricalScheduler(dto); // TestScheduler();
 
-            var cdt = new ContractDetailsTime(ContractDetails, scheduler);
+            var cdt = new ContractDataTime(ContractData, scheduler);
 
             var status = await cdt.ContractTimeObservable.FirstAsync();
 
@@ -82,9 +82,9 @@ namespace InterReact.Tests.UnitTests.Utility
         [Fact]
         public async Task T03_ObservableAll()
         {
-            var tz = DateTimeZoneProviders.Tzdb.GetZoneOrNull(ContractDetails.TimeZoneId);
+            var tz = DateTimeZoneProviders.Tzdb.GetZoneOrNull(ContractData.TimeZoneId);
             var scheduler = new HistoricalScheduler();
-            var cdt = new ContractDetailsTime(ContractDetails, scheduler);
+            var cdt = new ContractDataTime(ContractData, scheduler);
             var task = cdt.ContractTimeObservable.ToList().ToTask();
             scheduler.Start(); // play all
             var list = await task;

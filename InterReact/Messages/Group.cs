@@ -7,10 +7,10 @@ namespace InterReact.Messages
     {
         public int RequestId { get; }
         public string ContractInfo { get; }
-        internal DisplayGroupUpdate(ResponseReader c)
+        internal DisplayGroupUpdate(ResponseComposer c)
         {
             c.IgnoreVersion();
-            RequestId = c.Read<int>();
+            RequestId = c.ReadInt();
             ContractInfo = c.ReadString();
         }
     }
@@ -19,10 +19,10 @@ namespace InterReact.Messages
     {
         public int RequestId { get; }
         public string Groups { get; }
-        internal DisplayGroups(ResponseReader c)
+        internal DisplayGroups(ResponseComposer c)
         {
             c.IgnoreVersion();
-            RequestId = c.Read<int>();
+            RequestId = c.ReadInt();
             Groups = c.ReadString();
         }
     }

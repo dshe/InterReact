@@ -1,7 +1,10 @@
-﻿using System;
+﻿using NodaTime;
+using StringEnums;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Reflection;
 
@@ -10,6 +13,8 @@ using System.Reflection;
 //   has a confusing API
 //   cannot create observables
 //   would add another dependency to this solution
+
+#nullable enable
 
 namespace InterReact.Tests.Utility.AutoData
 {
@@ -51,17 +56,20 @@ namespace InterReact.Tests.Utility.AutoData
             if (utype != null)
                 type = utype;
 
+            if (type == typeof(bool))
+                return true;
             if (type == typeof(int))
                 return Rand.Next(1, 100);
             if (type == typeof(long))
                 return (long) Rand.Next(1, 100);
-
             if (type == typeof(double))
                 return Rand.NextDouble() * 10;
-            if (type == typeof(bool))
-                return true;
             if (type == typeof(DateTime))
                 return DateTime.UtcNow.AddMinutes(Rand.Next(0, int.MaxValue));
+            if (type == typeof(LocalDateTime))
+                return SystemClock.Instance.GetCurrentInstant().InZone(DateTimeZoneProviders.Tzdb.GetSystemDefault()).LocalDateTime;
+            if (type == typeof(ZonedDateTime))
+                return SystemClock.Instance.GetCurrentInstant().InZone(DateTimeZoneProviders.Tzdb.GetSystemDefault());
 
             var typeInfo = type.GetTypeInfo();
             if (typeInfo.IsEnum)
@@ -76,14 +84,14 @@ namespace InterReact.Tests.Utility.AutoData
             {
                 var genericTypes = typeInfo.GenericTypeArguments;
                 var listType = typeof(List<>).MakeGenericType(genericTypes);
-                var list = Activator.CreateInstance(listType);
+                var list = CreateInstance(listType);
                 AddItemsToList(list);
                 return list;
             }
 
             if (typeInfo.IsClass)
             {
-                var classInstance = Activator.CreateInstance(type);
+                var classInstance = CreateInstance(type);
                 SetClassProperties(classInstance);
                 return classInstance;
             }
@@ -103,8 +111,18 @@ namespace InterReact.Tests.Utility.AutoData
                 var defaultPropertyValue = DefaultValueOfType(propertyType);
 
                 if (Equals(propertyValue, defaultPropertyValue))
-                    property.SetValue(classInstance, Create(propertyType));
-                else if (propertyValue is IEnumerable enumerable)
+                {
+                    try
+                    {
+                        property.SetValue(classInstance, Create(propertyType), BindingFlags.CreateInstance | BindingFlags.NonPublic, null, null, CultureInfo.InvariantCulture);
+                        //property.SetValue(classInstance, Create(propertyType));
+                    }
+                    catch
+                    {
+                        Debug.WriteLine($"Could not set property on: {type.Name}.{property.Name}");
+                    }
+                }
+                else if (propertyValue is IEnumerable enumerable && !(propertyValue is string))
                 {
                     if (!enumerable.GetEnumerator().MoveNext())
                         AddItemsToList(enumerable);
@@ -133,9 +151,18 @@ namespace InterReact.Tests.Utility.AutoData
 
         private static object? DefaultValueOfType(Type type)
         {
-            if (type != typeof(string) && type.GetTypeInfo().IsValueType)
-                return Activator.CreateInstance(type);
+            if (type == null)
+                throw new ArgumentNullException(nameof(type));
+            if (type == typeof(string))
+                return "";
+            if (type.GetTypeInfo().IsValueType)
+                return CreateInstance(type);
             return null;
+        }
+
+        private static object CreateInstance(Type type)
+        {
+            return Activator.CreateInstance(type, true);   // ctor can be public or internal
         }
     }
 }

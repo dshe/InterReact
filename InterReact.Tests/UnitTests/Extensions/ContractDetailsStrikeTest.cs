@@ -10,57 +10,57 @@ using Xunit.Abstractions;
 /*
 namespace InterReact.Tests.UnitTests.Extensions
 {
-    public class ContractDetailsStrikeTest : BaseUnitTest
+    public class ContractDataStrikeTest : BaseUnitTest
     {
-        public ContractDetailsStrikeTest(ITestOutputHelper output) : base(output) {}
+        public ContractDataStrikeTest(ITestOutputHelper output) : base(output) {}
 
         [Fact]
         public void Test_Empty_Strike()
         {
-            var input = new List<ContractDetails> { new ContractDetails() };
+            var input = new List<ContractData> { new ContractData() };
 
-            Assert.Throws<InvalidDataException>(() => ContractDetailsStrikeEx.SelectStrike(input, 3, 0))
+            Assert.Throws<InvalidDataException>(() => ContractDataStrikeEx.SelectStrike(input, 3, 0))
                 .WriteMessageTo(Write);
         }
 
         [Fact]
         public void Test_Strike_Single()
         {
-            var input = new List<ContractDetails> { new ContractDetails { Contract = { Strike = 100 } } };
+            var input = new List<ContractData> { new ContractData { Contract = { Strike = 100 } } };
 
-            var output = ContractDetailsStrikeEx.SelectStrike(input, 0, 0);
+            var output = ContractDataStrikeEx.SelectStrike(input, 0, 0);
             Assert.Equal(input.Single(), output.Single());
 
-            output = ContractDetailsStrikeEx.SelectStrike(input, 0, 100);
+            output = ContractDataStrikeEx.SelectStrike(input, 0, 100);
             Assert.Equal(input.Single(), output.Single());
 
-            output = ContractDetailsStrikeEx.SelectStrike(input, 1, 100);
+            output = ContractDataStrikeEx.SelectStrike(input, 1, 100);
             Assert.True(!output.Any());
         }
 
         [Fact]
         public void Test_Strike_Multiple()
         {
-            var input = new List<ContractDetails>
+            var input = new List<ContractData>
             {
-                new ContractDetails { Contract = { Strike = 100 } },
-                new ContractDetails { Contract = { Strike = 110 } },
-                new ContractDetails { Contract = { Strike = 100 } },
-                new ContractDetails { Contract = { Strike = 80 } },
-                new ContractDetails { Contract = { Strike = 220 } },
-                new ContractDetails { Contract = { Strike = 50 } }
+                new ContractData { Contract = { Strike = 100 } },
+                new ContractData { Contract = { Strike = 110 } },
+                new ContractData { Contract = { Strike = 100 } },
+                new ContractData { Contract = { Strike = 80 } },
+                new ContractData { Contract = { Strike = 220 } },
+                new ContractData { Contract = { Strike = 50 } }
             };
 
-            var output = ContractDetailsStrikeEx.SelectStrike(input, 0, 10);
+            var output = ContractDataStrikeEx.SelectStrike(input, 0, 10);
             Assert.Equal(50, output.Single().Contract.Strike);
 
-            output = ContractDetailsStrikeEx.SelectStrike(input, 1, 75);
+            output = ContractDataStrikeEx.SelectStrike(input, 1, 75);
             Assert.Equal(2, output.Count);
 
-            output = ContractDetailsStrikeEx.SelectStrike(input, 0, 221);
+            output = ContractDataStrikeEx.SelectStrike(input, 0, 221);
             Assert.True(!output.Any());
 
-            output = ContractDetailsStrikeEx.SelectStrike(input, 5, 0);
+            output = ContractDataStrikeEx.SelectStrike(input, 5, 0);
             Assert.True(!output.Any());
         }
 

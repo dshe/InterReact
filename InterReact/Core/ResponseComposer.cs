@@ -5,6 +5,9 @@ using InterReact.Messages;
 using System.IO;
 using System.Reactive.Linq;
 using InterReact.Extensions;
+using StringEnums;
+using NodaTime;
+using NodaTime.Text;
 
 namespace InterReact.Core
 {
@@ -31,23 +34,15 @@ namespace InterReact.Core
 
     public sealed class ResponseComposer
     {
-        private readonly Action<object> Output;
-        private readonly ResponseReader Reader;
+        internal readonly Config Config;
+        internal readonly Action<object> Output;
+        internal readonly ResponseParser Parser;
         private IEnumerator<string>? enumerator;
-
         internal ResponseComposer(Config config, Action<object> output)
         {
+            Config = config;
             Output = output ?? throw new ArgumentNullException(nameof(output));
-            Reader = new ResponseReader(config, ReadString, output);
-        }
-
-        internal string ReadString()
-        {
-            if (enumerator == null)
-                throw new Exception("Null enumerator");
-            if (enumerator.MoveNext())
-                return enumerator.Current;
-            throw new IndexOutOfRangeException($"Message shorter than expected.");
+            Parser = new ResponseParser(Output);
         }
 
         internal void Compose(string[] inputStrings)
@@ -55,13 +50,11 @@ namespace InterReact.Core
             try
             {
                 enumerator = inputStrings.AsEnumerable().GetEnumerator();
-
-                var code = ReadString();
+                var code = ReadString(); // read the first string
                 if (code == "1")
-                    TickPrice.Send(Reader);
+                    TickPrice.Send(this); // compose the message with the remaining strings
                 else
-                    Output(Compose(code));
-
+                    Output(Compose(code)); // compose the message with the remaining strings
                 if (enumerator.MoveNext())
                     Output(new ResponseWarning($"Message longer than expected: [{inputStrings.JoinStrings(", ")}]."));
             }
@@ -75,75 +68,125 @@ namespace InterReact.Core
         {
             return code switch
             {
-                "2" => new TickSize(Reader) as object,
-                "3" => new OrderStatusReport(Reader),
-                "4" => Alert.Create(Reader),
-                "5" => new OpenOrder(Reader),
-                "6" => new AccountValue(Reader),
-                "7" => new PortfolioValue(Reader),
-                "8" => new AccountUpdateTime(Reader),
-                "9" => new NextId(Reader),
-                "10" => new ContractDetails(Reader, ContractDetailsType.ContractDetails),
-                "11" => new Execution(Reader),
-                "12" => new MarketDepth(Reader, false),
-                "13" => new MarketDepth(Reader, true),
-                "14" => new NewsBulletin(Reader),
-                "15" => new ManagedAccounts(Reader),
-                "16" => new FinancialAdvisor(Reader),
-                "17" => new HistoricalBars(Reader),
-                "18" => new ContractDetails(Reader, ContractDetailsType.BondContractDetails),
-                "19" => new ScannerParameters(Reader),
-                "20" => new ScannerData(Reader),
-                "21" => new TickOptionComputation(Reader),
+                "2" => new TickSize(this) as object,
+                "3" => new OrderStatusReport(this),
+                "4" => Alert.Create(this),
+                "5" => new OpenOrder(this),
+                "6" => new AccountValue(this),
+                "7" => new PortfolioValue(this),
+                "8" => new AccountUpdateTime(this),
+                "9" => new NextId(this),
+                "10" => new ContractData(this, ContractDataType.ContractData),
+                "11" => new Execution(this),
+                "12" => new MarketDepth(this, false),
+                "13" => new MarketDepth(this, true),
+                "14" => new NewsBulletin(this),
+                "15" => new ManagedAccounts(this),
+                "16" => new FinancialAdvisor(this),
+                "17" => new HistoricalBars(this),
+                "18" => new ContractData(this, ContractDataType.BondContractData),
+                "19" => new ScannerParameters(this),
+                "20" => new ScannerData(this),
+                "21" => new TickOptionComputation(this),
 
-                "45" => TickGeneric.Create(Reader),
-                "46" => TickString.Create(Reader),
-                "47" => new TickExchangeForPhysical(Reader),
+                "45" => TickGeneric.Create(this),
+                "46" => TickString.Create(this),
+                "47" => new TickExchangeForPhysical(this),
 
-                "49" => new CurrentTime(Reader),
-                "50" => new RealtimeBar(Reader),
-                "51" => new FundamentalData(Reader),
-                "52" => new ContractDetailsEnd(Reader),
-                "53" => new OpenOrderEnd(Reader),
-                "54" => new AccountUpdateEnd(Reader),
-                "55" => new ExecutionEnd(Reader),
-                "56" => new UnderComp(Reader, false),
-                "57" => new TickSnapshotEnd(Reader),
-                "58" => new TickMarketDataType(Reader),
-                "59" => new CommissionReport(Reader),
+                "49" => new CurrentTime(this),
+                "50" => new RealtimeBar(this),
+                "51" => new FundamentalData(this),
+                "52" => new ContractDataEnd(this),
+                "53" => new OpenOrderEnd(this),
+                "54" => new AccountUpdateEnd(this),
+                "55" => new ExecutionEnd(this),
+                "56" => new DeltaNeutralContract(this, true),
+                "57" => new TickSnapshotEnd(this),
+                "58" => new TickMarketDataType(this),
+                "59" => new CommissionReport(this),
 
-                "61" => new AccountPosition(Reader),
-                "62" => new AccountPositionEnd(Reader),
-                "63" => new AccountSummary(Reader),
-                "64" => new AccountSummaryEnd(Reader),
-                "65" => new VerifyMessageApi(Reader),
-                "66" => new VerifyCompleted(Reader),
-                "67" => new DisplayGroups(Reader),
-                "68" => new DisplayGroupUpdate(Reader),
-                "69" => new VerifyAndAuthorizeMessageApi(Reader),
-                "70" => new VerifyAndAuthorizeCompleted(Reader),
-                "71" => new PositionMulti(Reader),
-                "72" => new PositionMultiEnd(Reader),
-                "73" => new AccountUpdateMulti(Reader),
-                "74" => new AccountUpdateMultiEnd(Reader),
-                "75" => new SecurityDefinitionOptionParameter(Reader),
-                "76" => new SecurityDefinitionOptionParameterEnd(Reader),
-                "77" => new SoftDollarTiers(Reader),
-                "78" => FamilyCode.GetAll(Reader),
-                "79" => new ContractDescriptions(Reader),
-                "80" => DepthMktDataDescription.GetAll(Reader),
-                "81" => new TickReqParams(Reader),
-                "82" => new SmartComponents(Reader),
-                "83" => new NewsArticle(Reader),
-                "84" => new TickNews(Reader),
-                "85" => NewsProvider.GetAll(Reader),
-                "86" => new HistoricalNews(Reader),
-                "87" => new HistoricalNewsEnd(Reader),
-                "88" => new HeadTimestamp(Reader),
-                "89" => new HistogramData(Reader),
+                "61" => new AccountPosition(this),
+                "62" => new AccountPositionEnd(this),
+                "63" => new AccountSummary(this),
+                "64" => new AccountSummaryEnd(this),
+                "65" => new VerifyMessageApi(this),
+                "66" => new VerifyCompleted(this),
+                "67" => new DisplayGroups(this),
+                "68" => new DisplayGroupUpdate(this),
+                "69" => new VerifyAndAuthorizeMessageApi(this),
+                "70" => new VerifyAndAuthorizeCompleted(this),
+                "71" => new AccountPositionMulti(this),
+                "72" => new AccountPositionMultiEnd(this),
+                "73" => new AccountUpdateMulti(this),
+                "74" => new AccountUpdateMultiEnd(this),
+                "75" => new SecurityDefinitionOptionParameter(this),
+                "76" => new SecurityDefinitionOptionParameterEnd(this),
+                "77" => new SoftDollarTiers(this),
+                "78" => new FamilyCodes(this),
+                "79" => new SymbolSamples(this),
+                "80" => new MktDepthExchanges(this),
+                "81" => new TickReqParams(this),
+                "82" => new SmartComponents(this),
+                "83" => new NewsArticle(this),
+                "84" => new TickNews(this),
+                "85" => new NewsProviders(this),
+                "86" => new HistoricalNews(this),
+                "87" => new HistoricalNewsEnd(this),
+                "88" => new HeadTimestamp(this),
+                "89" => new HistogramItems(this),
+                "90" => new HistoricalData(this),
+                "91" => new RerouteMktData(this),
+                "92" => new RerouteMktDepth(this),
+                "93" => new MarketRule(this),
+                "94" => new PnL(this),
+                "95" => new PnLSingle(this),
+                "96" => new HistoricalTicks(this),
+                "97" => new HistoricalBidAskTicks(this),
+                "98" => new HistoricalLastTicks(this),
+                "99" => TickByTick.Create(this),
+                "100" => new OrderBound(this),
                 _ => throw new InvalidDataException($"Undefined code '{code}'.")
             };
         }
-    }
 
+        internal string ReadString()
+        {
+            if (enumerator == null)
+                throw new Exception("Null enumerator");
+            if (enumerator.MoveNext())
+                return enumerator.Current;
+            throw new IndexOutOfRangeException($"Message is shorter than expected.");
+        }
+        internal char ReadChar() => Parser.ParseChar(ReadString());
+        internal bool ReadBool() => Parser.ParseBool(ReadString());
+        internal int ReadInt() => Parser.ParseInt(ReadString());
+        internal long ReadLong() => Parser.ParseLong(ReadString());
+        internal double ReadDouble() => Parser.ParseDouble(ReadString());
+        internal int? ReadIntNullable() => Parser.ParseIntNullable(ReadString());
+        internal double? ReadDoubleNullable() => Parser.ParseDoubleNullable(ReadString());
+        internal LocalTime ReadLocalTime(LocalTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
+        internal LocalDateTime ReadLocalDateTime(LocalDateTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
+        internal T ReadEnum<T>() where T:Enum => Parser.ParseEnum<T>(ReadString());
+        internal T ReadStringEnum<T>() where T:StringEnum<T>, new() => Parser.ParseStringEnum<T>(ReadString());
+
+        internal void IgnoreVersion() => ReadString();
+        internal int GetVersion() => ReadInt();
+        internal int RequireVersion(int minimumVersion)
+        {
+            var v = GetVersion();
+            return (v >= minimumVersion) ? v : throw new InvalidDataException($"Invalid response version: {v} < {minimumVersion}.");
+        }
+        internal void AddStringsToList(IList<string> list)
+        {
+            var n = ReadInt();
+            for (int i = 0; i < n; i++)
+                list.Add(ReadString());
+        }
+        internal void AddTagsToList(IList<Tag> list)
+        {
+            var n = ReadInt();
+            for (int i = 0; i < n; i++)
+                list.Add(new Tag(this));
+        }
+    }
 }

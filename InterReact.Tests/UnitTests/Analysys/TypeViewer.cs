@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using InterReact;
@@ -22,35 +23,35 @@ namespace InterReact.Tests.UnitTests.Analysis
         public void View_Interfaces()
         {
             foreach (var type in Types.Where(t => t.IsInterface).OrderBy(x => x.FullName))
-                Write(type.FullName);
+                Logger.LogDebug(type.FullName);
         }
 
         [Fact]
         public void View_Abstract()
         {
             foreach (var type in Types.Where(t => t.IsAbstract && !t.IsSealed && !t.IsInterface).OrderBy(x => x.FullName))
-                Write(type.FullName);
+                Logger.LogDebug(type.FullName);
         }
 
         [Fact]
         public void View_Static_Types()
         {
             foreach (var type in Types.Where(t => t.IsAbstract && t.IsSealed).OrderBy(x => x.FullName))
-                Write(type.FullName);
+                Logger.LogDebug(type.FullName);
         }
 
         [Fact]
         public void View_NonSealed_Types()
         {
             foreach (var type in Types.Where(t => !t.IsSealed && !t.IsInterface && !t.IsAbstract).OrderBy(x => x.FullName))
-                Write(type.FullName);
+                Logger.LogDebug(type.FullName);
         }
 
         [Fact]
         public void View_Exported_Types()
         {
             foreach (var type in Assembly.ExportedTypes.OrderBy(x => x.FullName))
-                Write(type.FullName);
+                Logger.LogDebug(type.FullName);
         }
 
         [Fact]
@@ -68,7 +69,7 @@ namespace InterReact.Tests.UnitTests.Analysis
                     .Distinct()
                     .OrderBy(s => s)
                     .ToList()
-                    .ForEach(Write);
+                    .ForEach(x => Logger.LogDebug(x));
             }
         }
 

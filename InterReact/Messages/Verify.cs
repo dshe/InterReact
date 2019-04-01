@@ -5,7 +5,7 @@ namespace InterReact.Messages
     public sealed class VerifyMessageApi
     {
         public string Data { get; }
-        internal VerifyMessageApi(ResponseReader c)
+        internal VerifyMessageApi(ResponseComposer c)
         {
             c.IgnoreVersion();
             Data = c.ReadString();
@@ -16,10 +16,10 @@ namespace InterReact.Messages
     {
         public bool IsSuccessful { get; }
         public string ErrorText { get;}
-        internal VerifyCompleted(ResponseReader c)
+        internal VerifyCompleted(ResponseComposer c)
         {
             c.IgnoreVersion();
-            IsSuccessful = c.Read<bool>();
+            IsSuccessful = c.ReadBool();
             ErrorText = c.ReadString();
         }
     }
@@ -28,7 +28,7 @@ namespace InterReact.Messages
     {
         public string ApiData { get; }
         public string XyzChallenge { get; }
-        internal VerifyAndAuthorizeMessageApi(ResponseReader c)
+        internal VerifyAndAuthorizeMessageApi(ResponseComposer c)
         {
             c.IgnoreVersion();
             ApiData = c.ReadString();
@@ -40,10 +40,10 @@ namespace InterReact.Messages
     {
         public bool IsSuccessful { get; }
         public string ErrorText { get; }
-        internal VerifyAndAuthorizeCompleted(ResponseReader c)
+        internal VerifyAndAuthorizeCompleted(ResponseComposer c)
         {
             c.IgnoreVersion();
-            IsSuccessful = c.Read<bool>();
+            IsSuccessful = c.ReadBool();
             ErrorText = c.ReadString();
         }
     }

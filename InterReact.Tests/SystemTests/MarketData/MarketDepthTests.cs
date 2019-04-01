@@ -25,7 +25,7 @@ namespace InterReact.Tests.SystemTests.MarketData
         [Fact]
         public async Task T01_MarketDepth()
         {
-            if (Client.Config.IsDemoAccount)
+            if (Client.Config.IsDemoAccount())
                 return;
 
             var contract = new Contract { SecurityType = SecurityType.Cash, Symbol = "USD", Currency = "JPY", Exchange = "IDEALPRO" };
@@ -38,7 +38,7 @@ namespace InterReact.Tests.SystemTests.MarketData
         [Fact]
         public async Task T02_MarketDepthCollections()
         {
-            if (Client.Config.IsDemoAccount)
+            if (Client.Config.IsDemoAccount())
                 return;
 
             var contract = new Contract { SecurityType = SecurityType.Cash, Symbol = "EUR", Currency = "JPY", Exchange = "IDEALPRO" };

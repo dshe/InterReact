@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -40,7 +41,7 @@ namespace InterReact.Tests.Utility.AutoData
 
             var observable2 = AutoObservable.Create<string>(count:0);
             var ex2 = await Assert.ThrowsAsync<InvalidOperationException>(async () => await observable2);
-            Write(ex1.Message);
+            Logger.LogDebug(ex1.Message);
             Assert.Equal(ex1.Message, ex2.Message);
         }
 
@@ -88,7 +89,7 @@ namespace InterReact.Tests.Utility.AutoData
                 if (list.Count != count)
                 {
                     allOk = false;
-                    Write("FAILURE " + list.Count);
+                    Logger.LogDebug("FAILURE " + list.Count);
                 }
             }
             Assert.True(allOk);
@@ -124,9 +125,9 @@ namespace InterReact.Tests.Utility.AutoData
             var connection = connectableObservable.Connect();
 
             var subscription = connectableObservable.Subscribe(
-                onNext: message => Write("OnNext: " + message.Stringify()),
-                onError: ex => Write("OnError: " + ex.Message),
-                onCompleted: () => Write("OnCompleted!"));
+                onNext: message => Logger.LogDebug("OnNext: " + message.Stringify()),
+                onError: ex => Logger.LogDebug("OnError: " + ex.Message),
+                onCompleted: () => Logger.LogDebug("OnCompleted!"));
             
             await Task.Delay(100);
             //subscription.Dispose();

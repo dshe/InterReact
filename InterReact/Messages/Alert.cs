@@ -49,10 +49,10 @@ namespace InterReact.Messages
         internal Exception ToAlertException() =>
             new AlertException(this);
 
-        internal static Alert Create(ResponseReader c)
+        internal static Alert Create(ResponseComposer c)
         {
             c.RequireVersion(2);
-            return new Alert(c.Read<int>(), c.Read<int>(), c.ReadString());
+            return new Alert(c.ReadInt(), c.ReadInt(), c.ReadString());
         }
     }
 

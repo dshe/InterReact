@@ -11,6 +11,7 @@ using Microsoft.Reactive.Testing;
 using Xunit;
 using Xunit.Abstractions;
 using NodaTime;
+using Microsoft.Extensions.Logging;
 
 namespace InterReact.Tests.UnitTests.Rx
 {
@@ -56,7 +57,7 @@ namespace InterReact.Tests.UnitTests.Rx
             Assert.Equal(expected.ToList(), observer2.Messages);
 
             Assert.Equal(1, observable.Subscriptions.Count);
-            Write(observable.Subscriptions.Stringify());
+            Logger.LogDebug(observable.Subscriptions.Stringify());
         }
 
         [Fact]
@@ -98,7 +99,7 @@ namespace InterReact.Tests.UnitTests.Rx
             Assert.Equal(expected.ToList(), observer2.Messages);
 
             Assert.Equal(1, observable.Subscriptions.Count);
-            Write(observable.Subscriptions.Stringify());
+            Logger.LogDebug(observable.Subscriptions.Stringify());
         }
 
         [Fact]
@@ -127,7 +128,7 @@ namespace InterReact.Tests.UnitTests.Rx
             Assert.Equal(expected.ToList(), observer1.Messages);
             Assert.Equal(expected.ToList(), observer2.Messages);
             Assert.Equal(1, observable.Subscriptions.Count);
-            Write(observable.Subscriptions.Stringify());
+            Logger.LogDebug(observable.Subscriptions.Stringify());
         }
 
 

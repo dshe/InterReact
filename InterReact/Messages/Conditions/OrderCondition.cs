@@ -33,9 +33,9 @@ namespace InterReact.Messages.Conditions
             message.Write(IsConjunctionConnection ? "a" : "o");
         }
 
-        internal virtual void Deserialize(ResponseReader reader)
+        internal virtual void Deserialize(ResponseComposer c)
         {
-            IsConjunctionConnection = reader.ReadString() == "a";
+            IsConjunctionConnection = c.ReadString() == "a";
         }
 
         virtual protected bool TryParse(string cond)

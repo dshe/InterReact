@@ -14,10 +14,10 @@ namespace InterReact.Messages
         public string ArticleId { get; }
         public string Headline { get; }
         public string ExtraData { get;}
-        internal TickNews(ResponseReader c)
+        internal TickNews(ResponseComposer c)
         {
-            RequestId = c.Read<int>();
-            TimeStamp = c.Read<long>();
+            RequestId = c.ReadInt();
+            TimeStamp = c.ReadLong();
             ProviderCode = c.ReadString();
             ArticleId = c.ReadString();
             Headline = c.ReadString();

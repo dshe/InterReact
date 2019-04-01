@@ -7,7 +7,7 @@ namespace InterReact.Messages
     public sealed class ScannerParameters
     {
         public string Parameters { get; }
-        internal ScannerParameters(ResponseReader c)
+        internal ScannerParameters(ResponseComposer c)
         {
             c.IgnoreVersion();
             Parameters = c.ReadString();

@@ -1,14 +1,19 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace InterReact.Tests.Utility
 {
     [Trait("Category", "UnitTest")]
-    public class BaseUnitTest
+    public abstract class BaseUnitTest
     {
-        protected readonly Action<string> Write;
-        public BaseUnitTest(ITestOutputHelper output) => Write = output.WriteLine;
+        protected readonly ILogger Logger;
+
+        public BaseUnitTest(ITestOutputHelper output)
+        {
+            Logger = output.BuildLoggerFor<IInterReactClient>(); // Divergic.Logging.Xunit
+        }
     }
 
 }

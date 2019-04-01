@@ -14,7 +14,7 @@ namespace InterReact.Tests.SystemTests.Orders
         [Fact]
         public async Task TestPlaceOrder()
         {
-            if (!Client.Config.IsDemoAccount)
+            if (!Client.Config.IsDemoAccount())
                 return;
 
             //var order = new Order { TradeAction = TradeAction.Buy, TotalQuantity = 200, OrderType = OrderTypes.Limit, LimitPrice = 100 };

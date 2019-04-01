@@ -12,13 +12,13 @@ using InterReact.Utility;
 
 namespace InterReact.Extensions
 {
-    public static class ContractDetailsSingleEx
+    public static class ContractDataSingleEx
     {
         /// <summary>
         /// Completes successfully if the sequence contains exactly one contract details object.
         /// Otherwise, OnError is called containing an exception with a message indicating which properties are different. 
         /// </summary>
-        public static IObservable<ContractDetails> ContractDetailsSingle(this IObservable<IReadOnlyList<ContractDetails>> source)
+        public static IObservable<ContractData> ContractDataSingle(this IObservable<IReadOnlyList<ContractData>> source)
         {
             
             return ThrowIf.ThrowIfEmpty(source).Select(cds =>
@@ -29,7 +29,7 @@ namespace InterReact.Extensions
             });
         }
 
-        private static string ErrorMessage(IReadOnlyList<ContractDetails> cds)
+        private static string ErrorMessage(IReadOnlyList<ContractData> cds)
         {
             var c = new Contract();
             var sb = new StringBuilder();

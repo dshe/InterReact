@@ -11,10 +11,10 @@ namespace InterReact.Messages
         public string Currency { get; }
         public string Value { get; }
 
-        internal AccountSummary(ResponseReader c)
+        internal AccountSummary(ResponseComposer c)
         {
             c.IgnoreVersion();
-            RequestId = c.Read<int>();
+            RequestId = c.ReadInt();
             Account = c.ReadString();
             Tag = c.ReadString();
             Value = c.ReadString();
@@ -25,10 +25,10 @@ namespace InterReact.Messages
     public sealed class AccountSummaryEnd : IHasRequestId
     {
         public int RequestId { get; }
-        internal AccountSummaryEnd(ResponseReader c)
+        internal AccountSummaryEnd(ResponseComposer c)
         {
             c.IgnoreVersion();
-            RequestId = c.Read<int>();
+            RequestId = c.ReadInt();
         }
     }
 }

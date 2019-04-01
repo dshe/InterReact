@@ -11,9 +11,9 @@ namespace InterReact.Messages
         public int RequestId { get; }
         public string HeadTimeStamp { get;}
 
-        internal HeadTimestamp(ResponseReader c)
+        internal HeadTimestamp(ResponseComposer c)
         {
-            RequestId = c.Read<int>();
+            RequestId = c.ReadInt();
             HeadTimeStamp = c.ReadString();
         }
     }

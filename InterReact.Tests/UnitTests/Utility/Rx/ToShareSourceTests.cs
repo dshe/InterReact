@@ -7,6 +7,7 @@ using Xunit;
 using Xunit.Abstractions;
 using InterReact;
 using InterReact.Utility.Rx;
+using Microsoft.Extensions.Logging;
 
 namespace InterReact.Tests.UnitTests.Rx
 {
@@ -49,7 +50,7 @@ namespace InterReact.Tests.UnitTests.Rx
             Assert.Equal(expected.ToList(), observer2.Messages);
 
             Assert.Equal(2, observable.Subscriptions.Count);
-            Write(observable.Subscriptions.Stringify());
+            Logger.LogDebug(observable.Subscriptions.Stringify());
         }
 
         [Fact]

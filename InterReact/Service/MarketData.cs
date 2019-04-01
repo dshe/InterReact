@@ -27,7 +27,7 @@ namespace InterReact.Service
         /// Call Dispose() the value returned from Connect() to disconnect from the source, release all subscriptions and clear the cache.
         /// </summary>
         public IConnectableObservable<ITick> TickConnectableObservable(Contract contract,
-            IEnumerable<GenericTickType>? genericTickTypes = null, bool marketDataOff = false, params Tag[] options)
+            IList<GenericTickType>? genericTickTypes = null, bool marketDataOff = false, IList<Tag>? options = null)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
@@ -50,7 +50,7 @@ namespace InterReact.Service
 
             return Response.ToObservable<ITick>(
                     Request.NextId,
-                    requestId => Request.RequestMarketData(requestId, contract, genericTickTypes:null, isSnapshot: true),
+                    requestId => Request.RequestMarketData(requestId, contract, genericTickTypes:null, isSnapshot:true),
                     null, m => m is TickSnapshotEnd)
                 .ToShareSource();
         }
@@ -60,7 +60,7 @@ namespace InterReact.Service
         /// Can be transformed into observable collections using ToObservableCollections().
         /// Don't forget to Connect().
         /// </summary>
-        public IConnectableObservable<MarketDepth> MarketDepthObservable(Contract contract, int rows = 3, params Tag[] options)
+        public IConnectableObservable<MarketDepth> MarketDepthObservable(Contract contract, int rows = 3, bool smartDepth = false, IList<Tag>? options = null)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
@@ -69,7 +69,7 @@ namespace InterReact.Service
 
             return Response.ToObservable<MarketDepth>(
                     Request.NextId,
-                    requestId => Request.RequestMarketDepth(requestId, contract, rows, options),
+                    requestId => Request.RequestMarketDepth(requestId, contract, rows, smartDepth, options),
                     requestId => Request.CancelMarketDepth(requestId),
                     m => false)
                .Publish();
@@ -80,12 +80,12 @@ namespace InterReact.Service
         /// This observable starts with the first subscription and completes when the last observer unsubscribes.
         /// </summary>
         public IObservable<RealtimeBar> RealtimeBarObservable(Contract contract,
-            RealtimeBarType? whatToShow = null, bool regularTradingHours = true, params Tag[] options)
+            RealtimeBarType? whatToShow = null, bool regularTradingHours = true, IList<Tag>? options = null)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
 
-            whatToShow = whatToShow ?? RealtimeBarType.Trades;
+            whatToShow ??= RealtimeBarType.Trades;
 
             return Response.ToObservable<RealtimeBar>(
                     Request.NextId,

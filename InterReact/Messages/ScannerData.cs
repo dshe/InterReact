@@ -9,28 +9,29 @@ namespace InterReact.Messages
     public sealed class ScannerData : IHasRequestId
     {
         public int RequestId { get; }
-        public IReadOnlyList<ScannerDataItem> Items { get; } = new List<ScannerDataItem>();
-        internal ScannerData(ResponseReader c)
+        public IList<ScannerDataItem> Items { get; } = new List<ScannerDataItem>();
+        internal ScannerData(ResponseComposer c)
         {
             c.RequireVersion(3);
-            RequestId = c.Read<int>();
-            var n = c.Read<int>();
-            Items = Enumerable.Repeat(new ScannerDataItem(c), n).ToList();
+            RequestId = c.ReadInt();
+            var n = c.ReadInt();
+            for (int i = 0; i < n; i++)
+                Items.Add(new ScannerDataItem(c));
         }
     }
 
     public sealed class ScannerDataItem
     {
         public int Rank { get;}
-        public ContractDetails ContractDetails { get; }
+        public ContractData ContractData { get; }
         public string Distance { get;}
         public string Benchmark { get;}
         public string Projection { get;}
         public string ComboLegs { get;}
-        internal ScannerDataItem(ResponseReader c)
+        internal ScannerDataItem(ResponseComposer c)
         {
-            Rank = c.Read<int>();
-            ContractDetails = new ContractDetails(c, ContractDetailsType.ScannerContractDetails);
+            Rank = c.ReadInt();
+            ContractData = new ContractData(c, ContractDataType.ScannerContractData);
             Distance = c.ReadString();
             Benchmark = c.ReadString();
             Projection = c.ReadString();

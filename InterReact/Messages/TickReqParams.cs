@@ -9,12 +9,12 @@ namespace InterReact.Messages
         public double MinTick { get;}
         public string BboExchange { get;}
         public int SnapshotPermissions { get;}
-        internal TickReqParams(ResponseReader c)
+        internal TickReqParams(ResponseComposer c)
         {
-            RequestId = c.Read<int>();
-            MinTick = c.Read<double>();
+            RequestId = c.ReadInt();
+            MinTick = c.ReadDouble();
             BboExchange = c.ReadString();
-            SnapshotPermissions = c.Read<int>();
+            SnapshotPermissions = c.ReadInt();
         }
     };
 }

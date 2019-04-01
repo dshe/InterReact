@@ -9,22 +9,24 @@ using InterReact.StringEnums;
 using InterReact.Extensions;
 using System.Windows.Data;
 
+#nullable enable
+
 namespace WpfDepth
 {
     public sealed class MainViewModel : NotifyPropertyChangedBase, IDisposable
     {
         private readonly object Gate = new object();
         public string Title { get; private set; } = "InterReact";
-        public ReadOnlyObservableCollection<MarketDepthItem> Bids { get; private set; }
-        public ReadOnlyObservableCollection<MarketDepthItem> Asks { get; private set; }
+        public ReadOnlyObservableCollection<MarketDepthItem>? Bids { get; private set; }
+        public ReadOnlyObservableCollection<MarketDepthItem>? Asks { get; private set; }
 
-        private IInterReactClient client;
+        private IInterReactClient? client;
 
         public async Task Initialize()
         {
             try
             {
-                client = await InterReactClient.Builder.BuildAsync();
+                client = await new InterReactClientBuilder().BuildAsync();
             }
             catch (Exception exception)
             {

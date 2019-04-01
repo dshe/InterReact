@@ -1,0 +1,57 @@
+﻿<Page
+    x:Class="RealtimeVolume.MainPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:RealtimeVolume"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:utility="using:RealtimeVolume.Utility"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <utility:DoubleToColorConverter x:Key="DoubleToColorConverter"/>
+        <Style TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Bottom" />
+        </Style>
+    </Page.Resources>
+
+    <Grid Margin="0,0,30,30">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Button Width="200" Height="100" Background="Aqua"></Button>
+        <TextBox TextChanged="{x:Bind Path=Vm.Symbol.TextChanged, Mode=OneWay}" IsEnabled="{x:Bind Vm.Symbol.IsEnabled, Mode=OneWay}"
+                     PlaceholderText="symbol" Width="100" Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Center" VerticalAlignment="Bottom" />
+        <TextBlock Text="{x:Bind Vm.Date.Text, Mode=OneWay}" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Right" />
+        <TextBlock Text="{x:Bind Vm.Title.Text, Mode=OneWay}" FontWeight="Medium" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" HorizontalAlignment="Center" />
+        <TextBlock Text="Bid" FontWeight="Medium" Grid.Row="2" Grid.Column="0" />
+        <TextBlock Text="Ask" FontWeight="Medium" Grid.Row="2" Grid.Column="1" />
+        <TextBlock Text="Last" FontWeight="Medium" Grid.Row="2" Grid.Column="2" />
+        <TextBlock Text="Change" FontWeight="Medium" Grid.Row="2" Grid.Column="3" />
+        <TextBlock Text="{x:Bind Vm.BidPrice.Text, Mode=OneWay}" Foreground="{x:Bind Vm.BidPriceChange.Value, Mode=OneWay, Converter={StaticResource DoubleToColorConverter}}" Grid.Row="3" Grid.Column="0" />
+        <TextBlock Text="{x:Bind Vm.AskPrice.Text, Mode=OneWay}" Foreground="{x:Bind Vm.AskPriceChange.Value, Mode=OneWay, Converter={StaticResource DoubleToColorConverter}}" Grid.Row="3" Grid.Column="1" />
+        <TextBlock Text="{x:Bind Vm.LastPrice.Text, Mode=OneWay}" Foreground="{x:Bind Vm.LastPriceChange.Value, Mode=OneWay, Converter={StaticResource DoubleToColorConverter}}" Grid.Row="3" Grid.Column="2" />
+        <TextBlock Text="{x:Bind Vm.LastPriceChange.Text, Mode=OneWay}" Foreground="{x:Bind Vm.LastPriceChange.Value, Mode=OneWay, Converter={StaticResource DoubleToColorConverter}}" Grid.Row="3" Grid.Column="3" />
+        <TextBlock Text="{x:Bind Vm.BidSize.Text, Mode=OneWay}" Grid.Row="4" Grid.Column="0" />
+        <TextBlock Text="{x:Bind Vm.AskSize.Text, Mode=OneWay}" Grid.Row="4" Grid.Column="1" />
+        <TextBlock Text="{x:Bind Vm.LastSize.Text, Mode=OneWay}" Grid.Row="4" Grid.Column="2" />
+        <TextBlock Text="{x:Bind Vm.Volume.Text, Mode=OneWay}" Grid.Row="4" Grid.Column="3" />
+        <TextBlock Text="{x:Bind Vm.Spread.Text, Mode=OneWay}" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" />
+        <TextBlock Text="{x:Bind Vm.LastInstant, Mode=OneWay}" Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" />
+        <TextBlock Text="{x:Bind Vm.ContractTimeStatus.Text, Mode=OneWay}" Grid.Row="6" Grid.Column="0" Grid.ColumnSpan="4" />
+    </Grid>
+
+</Page>

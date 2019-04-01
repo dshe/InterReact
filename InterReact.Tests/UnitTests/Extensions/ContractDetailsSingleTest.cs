@@ -9,47 +9,51 @@ using InterReact.Tests.Utility;
 using InterReact.Tests.Utility.AutoData;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace InterReact.Tests.UnitTests.Extensions
 {
-    public class ContractDetailsSingleTest : BaseUnitTest
+    public class ContractDataSingleTest : BaseUnitTest
     {
-        public ContractDetailsSingleTest(ITestOutputHelper output) : base(output) { }
+        public ContractDataSingleTest(ITestOutputHelper output) : base(output) { }
 
+        /*
         [Fact]
         public async Task Test_Null()
         {
-            IObservable<IReadOnlyList<ContractDetails>> nullvalue = null;
+            IObservable<IReadOnlyList<ContractData>> nullvalue;
             var ex = await Assert.ThrowsAsync<ArgumentNullException>
-                    (async () => await nullvalue.ContractDetailsSingle());
+                    (async () => await nullvalue.ContractDataSingle());
             ex.WriteMessageTo(Write);
         }
+        */
 
         [Fact]
         public async Task Test_Empty()
         {
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () =>
-                        await Observable.Empty<List<ContractDetails>>().ContractDetailsSingle());
-            ex.WriteMessageTo(Write);
+                        await Observable.Empty<List<ContractData>>().ContractDataSingle());
+            ex.WriteMessageTo(Logger);
+            Logger.LogInformation("test");
         }
 
         [Fact]
         public async Task Test_One_Item()
         {
-            var list = AutoData.Create<ContractDetails>(1);
-            var listOfList = new List<List<ContractDetails>> {list};
-            var cd = await listOfList.ToObservable().ContractDetailsSingle();
-            Write(cd.Stringify());
+            var list = new List<ContractData> { new ContractData() };
+            var listOfList = new List<List<ContractData>> {list};
+            var cd = await listOfList.ToObservable().ContractDataSingle();
+            Logger.LogDebug(cd.Stringify());
         }
 
         [Fact]
         public async Task Test_Multiple()
         {
-            var list = AutoData.Create<ContractDetails>(2);
-            var listOfList = new List<List<ContractDetails>> {list};
-            var cd = listOfList.ToObservable().ContractDetailsSingle();
-            var ex = await Assert.ThrowsAsync<InvalidDataException>(async () => await cd);
-            ex.WriteMessageTo(Write);
+            var list = new List<ContractData> { new ContractData(), new ContractData() };
+            var listOfList = new List<List<ContractData>> {list};
+            var cd = listOfList.ToObservable().ContractDataSingle();
+            (await Assert.ThrowsAsync<InvalidDataException>(async () => await cd))
+                .WriteMessageTo(Logger);
         }
 
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using InterReact.Tests.Utility;
+using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -20,14 +21,14 @@ namespace InterReact.Tests.UnitTests.Analysis
         public void T01_Show_All()
         {
             foreach (var type in EnumTypes)
-                Write($"{type.Name}");
+                Logger.LogDebug($"{type.Name}");
         }
 
         [Fact]
         public void T02_Show_All_With_Values()
         {
             foreach (var type in EnumTypes)
-                Write($"{type.Name}: {string.Join(", ", type.GetEnumNames())}\n");
+                Logger.LogDebug($"{type.Name}: {string.Join(", ", type.GetEnumNames())}\n");
         }
 
         [Fact]
@@ -44,7 +45,7 @@ namespace InterReact.Tests.UnitTests.Analysis
                     dict.Add(v, val);
                 }
                 if (dict.ContainsKey(0))
-                    Write($"{type.Name}: {dict[0]}");
+                    Logger.LogDebug($"{type.Name}: {dict[0]}");
             }
         }
 
@@ -54,7 +55,7 @@ namespace InterReact.Tests.UnitTests.Analysis
             foreach (var type in EnumTypes)
             {
                 if (type.GetEnumValues().Cast<object>().Select(x => (int) x).All(x => x != 0))
-                    Write($"{type.Name} does not contain an enum of value 0");
+                    Logger.LogDebug($"{type.Name} does not contain an enum of value 0");
             }
         }
     }

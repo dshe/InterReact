@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using InterReact.Extensions;
 using InterReact.Messages;
 using InterReact.StringEnums;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace InterReact.Tests.SystemTests
@@ -11,7 +12,7 @@ namespace InterReact.Tests.SystemTests
     public partial class SystemTest
     {
         [Fact]
-        public async Task TestContractDetailsGetNextFuture()
+        public async Task TestContractDataGetNextFuture()
         {
             var contract = new Contract
             {
@@ -22,13 +23,13 @@ namespace InterReact.Tests.SystemTests
             };
             var cd = await Client
                 .Services
-                .ContractDetailsObservable(contract)
-                .ContractDetailsExpirySelect();
-            Write(cd.Single().Contract.Stringify());
+                .ContractDataObservable(contract)
+                .ContractDataExpirySelect();
+            Logger.LogDebug(cd.Single().Contract.Stringify());
         }
 
         [Fact]
-        public async Task TestContractDetailsOptionFind()
+        public async Task TestContractDataOptionFind()
         {
             var contract = new Contract
             {
@@ -40,9 +41,9 @@ namespace InterReact.Tests.SystemTests
                 Multiplier = "100",
                 Strike = 200
             };
-            var cds = await Client.Services.ContractDetailsObservable(contract);
+            var cds = await Client.Services.ContractDataObservable(contract);
             foreach (var cd in cds.OrderBy(x => x.Contract.LastTradeDateOrContractMonth))
-                Write(cd.Contract.LastTradeDateOrContractMonth);
+                Logger.LogDebug(cd.Contract.LastTradeDateOrContractMonth);
             Assert.True(cds.All(cd => cd.Contract.Strike == 200));
         }
     }

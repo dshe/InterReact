@@ -17,27 +17,26 @@ namespace InterReact.Messages
         public int UnderlyingContractId { get; }
         public string TradingClass { get; }
         public string Multiplier { get; }
-        public IReadOnlyList<string> Expirations { get; }
-        public IReadOnlyList<string> Strikes { get; }
-        internal SecurityDefinitionOptionParameter(ResponseReader c)
+        public IList<string> Expirations { get; } = new List<string>();
+        public IList<string> Strikes { get; } = new List<string>();
+        internal SecurityDefinitionOptionParameter(ResponseComposer c)
         {
-            RequestId = c.Read<int>();
+            RequestId = c.ReadInt();
             Exchange = c.ReadString();
-            UnderlyingContractId = c.Read<int>();
+            UnderlyingContractId = c.ReadInt();
             TradingClass = c.ReadString();
             Multiplier = c.ReadString();
-            Expirations = GetStrings(c.Read<int>());
-            Strikes = GetStrings(c.Read<int>());
-            List<string> GetStrings(int n) => Enumerable.Repeat(c.ReadString(), n).ToList();
+            c.AddStringsToList(Expirations);
+            c.AddStringsToList(Strikes);
         }
     }
 
     public sealed class SecurityDefinitionOptionParameterEnd : IHasRequestId
     {
         public int RequestId { get; }
-        internal SecurityDefinitionOptionParameterEnd(ResponseReader c)
+        internal SecurityDefinitionOptionParameterEnd(ResponseComposer c)
         {
-            RequestId = c.Read<int>();
+            RequestId = c.ReadInt();
         }
     }
 }

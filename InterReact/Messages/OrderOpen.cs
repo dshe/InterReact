@@ -13,23 +13,30 @@ namespace InterReact.Messages
 
         public Contract Contract { get; }
 
+
         public OrderStatus Status { get; }
 
         /// <summary>
         /// Initial margin requirement for the order.
         /// </summary>
-        public string InitialMargin { get; }
+        public string InitialMarginBefore { get; } = "";
 
         /// <summary>
         /// Maintenance margin requirement for the order.
         /// Shows the impact the order would have on your initial margin.
         /// </summary>
-        public string MaintenanceMargin { get; }
+        public string MaintenanceMarginBefore { get; } = "";
 
         /// <summary>
         /// Shows the impact the order would have on your equity with loan value.
         /// </summary>
-        public string EquityWithLoan { get; }
+        public string EquityWithLoanBefore { get; }
+        public string InitMarginChange { get; } = "";
+        public string MaintMarginChange { get; } = "";
+        public string EquityWithLoanChange { get; } = "";
+        public string InitMarginAfter { get; }
+        public string MaintMarginAfter { get; }
+        public string EquityWithLoanAfter { get; } = "";
 
         public double? Commission { get; }
         /// <summary>
@@ -45,44 +52,45 @@ namespace InterReact.Messages
 
         public string WarningText { get; }
 
-        internal OpenOrder(ResponseReader c) // the monster
+        internal OpenOrder(ResponseComposer c) // the monster
         {
-            var version = c.RequireVersion(17);
-            var orderId = c.Read<int>();
+            var serverVersion = c.Config.ServerVersionCurrent;
+            var messageVersion = serverVersion < ServerVersion.OrderContainer ? c.RequireVersion(17) : (int)serverVersion;
+            var orderId = c.ReadInt();
 
             Contract = new Contract
             {
-                ContractId = c.Read<int>(),
+                ContractId = c.ReadInt(),
                 Symbol = c.ReadString(),
                 SecurityType = c.ReadStringEnum<SecurityType>(),
                 LastTradeDateOrContractMonth = c.ReadString(),
-                Strike = c.Read<double>(),
+                Strike = c.ReadDouble(),
                 Right = c.ReadStringEnum<RightType>(),
-                Multiplier = version >= 32 ? c.ReadString() : string.Empty,
+                Multiplier = messageVersion >= 32 ? c.ReadString() : string.Empty,
                 Exchange = c.ReadString(),
                 Currency = c.ReadString(),
                 LocalSymbol = c.ReadString(),
-                TradingClass = version >= 32 ? c.ReadString() : string.Empty
+                TradingClass = messageVersion >= 32 ? c.ReadString() : string.Empty
             };
             Order = new Order
             {
                 OrderId = orderId,
                 TradeAction = c.ReadStringEnum<TradeAction>(),
-                TotalQuantity = c.Read<double>(),
+                TotalQuantity = c.ReadDouble(),
                 OrderType = c.ReadStringEnum<OrderType>(),
-                LimitPrice = c.Read<double?>(),
-                AuxPrice = c.Read<double?>(),
+                LimitPrice = messageVersion < 29 ? c.ReadDouble() : c.ReadDoubleNullable(),
+                AuxPrice = messageVersion < 30 ? c.ReadDouble() : c.ReadDoubleNullable(),
                 TimeInForce = c.ReadStringEnum<TimeInForce>(),
                 OcaGroup = c.ReadString(),
                 Account = c.ReadString(),
                 OpenClose = c.ReadStringEnum<OrderOpenClose>(),
-                Origin = c.Read<OrderOrigin>(),
+                Origin = c.ReadEnum<OrderOrigin>(),
                 OrderRef = c.ReadString(),
-                ClientId = c.Read<int>(),
-                PermanentId = c.Read<int>(),
-                OutsideRegularTradingHours = c.Read<bool>(),
-                Hidden = c.Read<bool>(),
-                DiscretionaryAmount = c.Read<double>(),
+                ClientId = c.ReadInt(),
+                PermanentId = c.ReadInt(),
+                OutsideRegularTradingHours = c.ReadBool(),
+                Hidden = c.ReadBool(),
+                DiscretionaryAmount = c.ReadDouble(),
                 GoodAfterTime = c.ReadString()
             };
 
@@ -97,212 +105,221 @@ namespace InterReact.Messages
                 Order.ModelCode = c.ReadString();
 
             Order.GoodUntilDate = c.ReadString();
-
-
             Order.Rule80A = c.ReadStringEnum<AgentDescription>();
-            Order.PercentOffset = c.Read<double?>();
+            Order.PercentOffset = c.ReadDoubleNullable();
             Order.SettlingFirm = c.ReadString();
-            Order.ShortSaleSlot = c.Read<ShortSaleSlot>();
+            Order.ShortSaleSlot = c.ReadEnum<ShortSaleSlot>();
             Order.DesignatedLocation = c.ReadString();
-            Order.ExemptCode = c.Read<int>();
-            Order.AuctionStrategy = c.Read<AuctionStrategy>();
-            Order.StartingPrice = c.Read<double?>();
-            Order.StockReferencePrice = c.Read<double?>();
-            Order.Delta = c.Read<double?>();
-            Order.StockRangeLower = c.Read<double?>();
-            Order.StockRangeUpper = c.Read<double?>();
-            Order.DisplaySize = c.Read<int>();
+            Order.ExemptCode = c.ReadInt();
+            Order.AuctionStrategy = c.ReadEnum<AuctionStrategy>();
+            Order.StartingPrice = c.ReadDoubleNullable();
+            Order.StockReferencePrice = c.ReadDoubleNullable();
+            Order.Delta = c.ReadDoubleNullable();
+            Order.StockRangeLower = c.ReadDoubleNullable();
+            Order.StockRangeUpper = c.ReadDoubleNullable();
+            Order.DisplaySize = c.ReadInt();
 
-            Order.BlockOrder = c.Read<bool>();
-            Order.SweepToFill = c.Read<bool>();
-            Order.AllOrNone = c.Read<bool>();
-            Order.MinimumQuantity = c.Read<int?>();
-            Order.OcaType = c.Read<OcaType>();
-            Order.ElectronicTradeOnly = c.Read<bool>();
-            Order.FirmQuoteOnly = c.Read<bool>();
-            Order.NbboPriceCap = c.Read<double?>();
+            Order.BlockOrder = c.ReadBool();
+            Order.SweepToFill = c.ReadBool();
+            Order.AllOrNone = c.ReadBool();
+            Order.MinimumQuantity = c.ReadIntNullable();
+            Order.OcaType = c.ReadEnum<OcaType>();
+            Order.ElectronicTradeOnly = c.ReadBool();
+            Order.FirmQuoteOnly = c.ReadBool();
+            Order.NbboPriceCap = c.ReadDoubleNullable();
 
-            Order.ParentId = c.Read<int>();
-            Order.TriggerMethod = c.Read<TriggerMethod>();
+            Order.ParentId = c.ReadInt();
+            Order.TriggerMethod = c.ReadEnum<TriggerMethod>();
 
-            Order.Volatility = c.Read<double?>();
-            Order.VolatilityType = c.Read<VolatilityType>();
+            Order.Volatility = c.ReadDoubleNullable();
+            Order.VolatilityType = c.ReadEnum<VolatilityType>();
 
             Order.DeltaNeutralOrderType = c.ReadString();
-            Order.DeltaNeutralAuxPrice = c.Read<double?>();
+            Order.DeltaNeutralAuxPrice = c.ReadDoubleNullable();
 
             if (!string.IsNullOrEmpty(Order.DeltaNeutralOrderType))
             {
-                if (version >= 27)
+                if (messageVersion >= 27)
                 {
-                    Order.DeltaNeutralContractId = c.Read<int>();
+                    Order.DeltaNeutralContractId = c.ReadInt();
                     Order.DeltaNeutralSettlingFirm = c.ReadString();
                     Order.DeltaNeutralClearingAccount = c.ReadString();
                     Order.DeltaNeutralClearingIntent = c.ReadString();
                 }
-                if (version >= 31)
+                if (messageVersion >= 31)
                 {
                     Order.DeltaNeutralOpenClose = c.ReadString();
-                    Order.DeltaNeutralShortSale = c.Read<bool>();
-                    Order.DeltaNeutralShortSaleSlot = c.Read<int>();
+                    Order.DeltaNeutralShortSale = c.ReadBool();
+                    Order.DeltaNeutralShortSaleSlot = c.ReadInt();
                     Order.DeltaNeutralDesignatedLocation = c.ReadString();
                 }
             }
 
-            Order.ContinuousUpdate = c.Read<int>();
-            Order.ReferencePriceType = c.Read<ReferencePriceType>();
+            Order.ContinuousUpdate = c.ReadInt();
+            Order.ReferencePriceType = c.ReadEnum<ReferencePriceType>();
 
-            Order.TrailingStopPrice = c.Read<double?>();
-            if (version >= 30)
-                Order.TrailingStopPercent = c.Read<double?>();
+            Order.TrailingStopPrice = c.ReadDoubleNullable();
+            if (messageVersion >= 30)
+                Order.TrailingStopPercent = c.ReadDoubleNullable();
 
-            Order.BasisPoints = c.Read<double?>();
-            Order.BasisPointsType = c.Read<int?>();
+            Order.BasisPoints = c.ReadDoubleNullable();
+            Order.BasisPointsType = c.ReadIntNullable();
             Contract.ComboLegsDescription = c.ReadString();
 
-            if (version >= 29)
+            if (messageVersion >= 29)
             {
-                var n = c.Read<int>();
+                var n = c.ReadInt();
                 for (var i = 0; i < n; i++)
                     Contract.ComboLegs.Add(new ContractComboLeg(c));
 
-                n = c.Read<int>();
+                n = c.ReadInt();
                 for (var i = 0; i < n; i++)
-                    Order.ComboLegs.Add(new OrderComboLeg(c.Read<double?>()));
+                    Order.ComboLegs.Add(new OrderComboLeg(c.ReadDoubleNullable()));
             }
 
-            if (version >= 26)
-            {
-                var n = c.Read<int>();
-                for (var i = 0; i < n; i++)
-                    Order.SmartComboRoutingParams.Add(new Tag(c));
-            }
+            if (messageVersion >= 26)
+                c.AddTagsToList(Order.SmartComboRoutingParams);
 
-            if (version >= 15)
+            if (messageVersion >= 15)
             {
-                if (version >= 20)
+                if (messageVersion >= 20)
                 {
-                    Order.ScaleInitLevelSize = c.Read<int?>();
-                    Order.ScaleSubsLevelSize = c.Read<int?>();
+                    Order.ScaleInitLevelSize = c.ReadIntNullable();
+                    Order.ScaleSubsLevelSize = c.ReadIntNullable();
                 }
                 else
                 {
                     c.ReadString();
-                    Order.ScaleInitLevelSize = c.Read<int?>();
+                    Order.ScaleInitLevelSize = c.ReadIntNullable();
                 }
-                Order.ScalePriceIncrement = c.Read<double?>();
+                Order.ScalePriceIncrement = c.ReadDoubleNullable();
             }
 
-            if (version >= 28 && Order.ScalePriceIncrement > 0)
+            if (messageVersion >= 28 && Order.ScalePriceIncrement > 0)
             {
-                Order.ScalePriceAdjustValue = c.Read<double?>();
-                Order.ScalePriceAdjustInterval = c.Read<int?>();
-                Order.ScaleProfitOffset = c.Read<double?>();
-                Order.ScaleAutoReset = c.Read<bool>();
-                Order.ScaleInitPosition = c.Read<int?>();
-                Order.ScaleInitFillQty = c.Read<int?>();
-                Order.ScaleRandomPercent = c.Read<bool>();
+                Order.ScalePriceAdjustValue = c.ReadDoubleNullable();
+                Order.ScalePriceAdjustInterval = c.ReadIntNullable();
+                Order.ScaleProfitOffset = c.ReadDoubleNullable();
+                Order.ScaleAutoReset = c.ReadBool();
+                Order.ScaleInitPosition = c.ReadIntNullable();
+                Order.ScaleInitFillQty = c.ReadIntNullable();
+                Order.ScaleRandomPercent = c.ReadBool();
             }
 
-            if (version >= 24)
+            if (messageVersion >= 24)
             {
                 Order.HedgeType = c.ReadStringEnum<HedgeType>();
                 if (Order.HedgeType != HedgeType.Undefined)
                     Order.HedgeParam = c.ReadString();
             }
 
-            if (version >= 25)
-                Order.OptOutSmartRouting = c.Read<bool>();
+            if (messageVersion >= 25)
+                Order.OptOutSmartRouting = c.ReadBool();
 
-            if (version >= 19)
+            if (messageVersion >= 19)
             {
                 Order.ClearingAccount = c.ReadString();
                 Order.ClearingIntent = c.ReadStringEnum<ClearingIntent>();
             }
 
-            if (version >= 19)
-                Order.NotHeld = c.Read<bool>();
+            if (messageVersion >= 22)
+                Order.NotHeld = c.ReadBool();
 
-            if (version >= 20 && c.Read<bool>())
-                Contract.Undercomp = new UnderComp(c, true);
+            if (messageVersion >= 20 && c.ReadBool())
+                Contract.DeltaNeutralContract = new DeltaNeutralContract(c, false);
 
-            if (version >= 21)
+            if (messageVersion >= 21)
             {
                 Order.AlgoStrategy = c.ReadString();
                 if (!string.IsNullOrEmpty(Order.AlgoStrategy))
-                {
-                    var n = c.Read<int>();
-                    for (var i = 0; i < n; i++)
-                        Order.AlgoParams.Add(new Tag(c));
-                }
+                    c.AddTagsToList(Order.AlgoParams);
             }
 
-            if (version >= 33)
-                Order.Solicited = c.Read<bool>();
+            if (messageVersion >= 33)
+                Order.Solicited = c.ReadBool();
 
-            Order.WhatIf = c.Read<bool>();
+            Order.WhatIf = c.ReadBool();
             Status = c.ReadStringEnum<OrderStatus>();
-            InitialMargin = c.ReadString();
-            MaintenanceMargin = c.ReadString();
-            EquityWithLoan = c.ReadString();
-            Commission = c.Read<double?>();
-            MinimumCommission = c.Read<double?>();
-            MaximumCommission = c.Read<double?>();
+
+            if (serverVersion >= ServerVersion.WhatIfExtFields)
+            {
+                InitialMarginBefore = c.ReadString();
+                MaintenanceMarginBefore = c.ReadString();
+                EquityWithLoanBefore = c.ReadString();
+                InitMarginChange = c.ReadString();
+                MaintMarginChange = c.ReadString();
+                EquityWithLoanChange = c.ReadString();
+            }
+            InitMarginAfter = c.ReadString();
+            MaintMarginAfter = c.ReadString();
+            EquityWithLoanBefore = c.ReadString();
+            Commission = c.ReadDoubleNullable();
+            MinimumCommission = c.ReadDoubleNullable();
+            MaximumCommission = c.ReadDoubleNullable();
             CommissionCurrency = c.ReadString();
             WarningText = c.ReadString();
 
-            if (version >= 34)
+            if (messageVersion >= 34)
             {
-                Order.RandomizeSize = c.Read<bool>();
-                Order.RandomizePrice = c.Read<bool>();
+                Order.RandomizeSize = c.ReadBool();
+                Order.RandomizePrice = c.ReadBool();
             }
 
             if (c.Config.SupportsServerVersion(ServerVersion.PeggedToBenchmark))
             {
                 if (Order.OrderType == OrderType.PeggedToBenchmark)
                 {
-                    Order.ReferenceContractId = c.Read<int>();
-                    Order.IsPeggedChangeAmountDecrease = c.Read<bool>();
-                    Order.PeggedChangeAmount = c.Read<double?>();
-                    Order.ReferenceChangeAmount = c.Read<double?>();
+                    Order.ReferenceContractId = c.ReadInt();
+                    Order.IsPeggedChangeAmountDecrease = c.ReadBool();
+                    Order.PeggedChangeAmount = c.ReadDoubleNullable();
+                    Order.ReferenceChangeAmount = c.ReadDoubleNullable();
                     Order.ReferenceExchange = c.ReadString();
                 }
 
-                var n = c.Read<int>();
+                var n = c.ReadInt();
                 if (n > 0)
                 {
                     for (var i = 0; i < n; i++)
                     {
-                        var orderConditionType = c.Read<OrderConditionType>();
+                        var orderConditionType = c.ReadEnum<OrderConditionType>();
                         var condition = OrderCondition.Create(orderConditionType);
                         condition.Deserialize(c);
                         Order.Conditions.Add(condition);
                     }
-                    Order.ConditionsIgnoreRegularTradingHours = c.Read<bool>();
-                    Order.ConditionsCancelOrder = c.Read<bool>();
+                    Order.ConditionsIgnoreRegularTradingHours = c.ReadBool();
+                    Order.ConditionsCancelOrder = c.ReadBool();
                 }
 
                 Order.AdjustedOrderType = c.ReadString();
-                Order.TriggerPrice = c.Read<double?>();
-                Order.TrailingStopPrice = c.Read<double?>();
-                Order.LmtPriceOffset = c.Read<double?>();
-                Order.AdjustedStopPrice = c.Read<double?>();
-                Order.AdjustedStopLimitPrice = c.Read<double?>();
-                Order.AdjustedTrailingAmount = c.Read<double?>();
-                Order.AdjustableTrailingUnit = c.Read<int>();
+                Order.TriggerPrice = c.ReadDoubleNullable();
+                Order.TrailingStopPrice = c.ReadDoubleNullable();
+                Order.LmtPriceOffset = c.ReadDoubleNullable();
+                Order.AdjustedStopPrice = c.ReadDoubleNullable();
+                Order.AdjustedStopLimitPrice = c.ReadDoubleNullable();
+                Order.AdjustedTrailingAmount = c.ReadDoubleNullable();
+                Order.AdjustableTrailingUnit = c.ReadInt();
             }
 
             if (c.Config.SupportsServerVersion(ServerVersion.SoftDollarTier))
                 Order.SoftDollarTier = new SoftDollarTier(c);
 
             if (c.Config.SupportsServerVersion(ServerVersion.CashQty))
-                Order.CashQty = c.Read<double?>();
+                Order.CashQty = c.ReadDoubleNullable();
+
+            if (c.Config.SupportsServerVersion(ServerVersion.AutoPriceForHedge))
+                Order.DontUseAutoPriceForHedge = c.ReadBool();
+
+            if (c.Config.SupportsServerVersion(ServerVersion.OrderContainer))
+                Order.IsOmsContainer = c.ReadBool();
+
+            if (c.Config.SupportsServerVersion(ServerVersion.DPegOrders))
+                Order.DiscretionaryUpToLimitPrice = c.ReadBool();
         }
     }
 
     public sealed class OpenOrderEnd
     {
-        internal OpenOrderEnd(ResponseReader c) => c.IgnoreVersion();
+        internal OpenOrderEnd(ResponseComposer c) => c.IgnoreVersion();
     }
 
 }

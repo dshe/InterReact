@@ -6,10 +6,8 @@ using System.Net.Sockets;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using MinimalContainer;
 using RxSockets;
 using InterReact.Core;
 using InterReact.Enums;
@@ -18,12 +16,30 @@ using InterReact.Extensions;
 using InterReact.Service;
 using NodaTime;
 using InterReact.Utility;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace InterReact
 {
     public sealed class InterReactClientBuilder : EditorBrowsableNever
     {
+        private readonly ILogger Logger;
+        private readonly CancellationToken Ct;
+        private readonly ServiceCollection InjectedServices = new ServiceCollection();
         private readonly Config Config = new Config();
+
+        // ctor, with optional external services
+        public InterReactClientBuilder(ILoggerFactory? loggerFactory = null, CancellationToken ct = default)
+        {
+            Ct = ct;
+            loggerFactory ??= NullLoggerFactory.Instance;
+            InjectedServices.AddSingleton(loggerFactory);
+            Logger = loggerFactory.CreateLogger(GetType());
+            Logger.LogDebug($"Constructing {GetType()}.");
+            var name = GetType().GetTypeInfo().Assembly.GetName();
+            Logger.LogInformation($"{name.Name} version {name.Version}.");
+        }
 
         /// <summary>
         /// Specify an IPAddress to connect to TWS/Gateway.
@@ -77,64 +93,72 @@ namespace InterReact
 
         /////////////////////////////////////////////////////////////
 
-        public async Task<IInterReactClient> BuildAsync(int timeout = 1000, CancellationToken ct = default)
+        public async Task<IInterReactClient> BuildAsync(int timeout = 1000)
         {
-            var rxSocket = await ConnectAsync(timeout, ct).ConfigureAwait(false);
+            IRxSocketClient? rxSocket = null;
 
             try
             {
-                await Login(rxSocket, timeout, ct).ConfigureAwait(false);
+                rxSocket = await ConnectAsync(timeout).ConfigureAwait(false);
+                Logger.LogInformation($"Connected to server at {Config.IPEndPoint}.");
+
+                await Login(rxSocket, timeout).ConfigureAwait(false);
+                Logger.LogInformation($"Logged into Tws/Gateway with ClientId: {Config.ClientId}, ServerVersion: {Config.ServerVersionCurrent}.");
 
                 var response = rxSocket
                     .ReceiveObservable
                     .ToByteArrayOfLengthPrefix()
                     .ToStringArray()
                     .ToMessages(Config)
-                    .StartWith(GetPreamble())
                     .Publish()
                     .RefCount();
 
-                return new Container()
-                    .RegisterInstance(Config)
-                    .RegisterInstance(rxSocket)
-                    .RegisterInstance(response)
-                    .RegisterSingleton<Request>()
-                    .RegisterTransient<RequestMessage>()
-                    .RegisterInstance(new Limiter(Config.MaxRequestsPerSecond))
-                    .RegisterSingleton<Services>()
-                    .RegisterSingleton<InterReactClient>()
-                    .Resolve<InterReactClient>();
+                return InjectedServices
+                    .AddSingleton(typeof(CancellationToken), Ct)
+                    .AddSingleton(Config) // Config has no dependencies
+                    .AddSingleton(rxSocket) // rxSocket is an instance of RxSocketClient
+                    .AddSingleton<IObservable<object>>(response) // response is IPbservable<object>
+                    .AddSingleton(new Limiter(Config.MaxRequestsPerSecond)) // configured instance
+                    .AddTransient<RequestMessage>() // transient
+                    .AddSingleton<Func<RequestMessage>>(x => () => x.GetService<RequestMessage>()) // factory
+                    .AddSingleton<Request>()
+                    .AddSingleton<Services>()
+                    .AddSingleton<IInterReactClient, InterReactClient>()
+                    .BuildServiceProvider()
+                    .GetService<IInterReactClient>();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                rxSocket.Dispose();
+                Logger.LogCritical(ex, "InterReactClientBuilder.BuildAsync");
+                rxSocket?.Dispose();
                 throw;
             }
         }
 
-        private async Task<IRxSocketClient> ConnectAsync(int timeout, CancellationToken ct)
+        private async Task<IRxSocketClient> ConnectAsync(int timeout)
         {
             (SocketError error, IRxSocketClient? socket) result = default;
             foreach (var port in Config.Ports)
             {
                 Config.IPEndPoint.Port = port;
-                result = await TryConnectAsync(timeout, ct).ConfigureAwait(false);
+                result = await TryConnectAsync(timeout).ConfigureAwait(false);
                 if (result.error == SocketError.Success)
                     return result.socket ?? throw new ArgumentNullException();
             }
             // SocketException is not thrown here because it does not have a message property.
             var ports = Config.Ports.Select(p => p.ToString()).JoinStrings(", ");
             var message = $"{result.error.ToString()}.{Environment.NewLine}Could not connect to TWS/Gateway at [{Config.IPEndPoint.Address}]:{ports}.";
+            Logger.LogCritical(message);
             if (result.error == SocketError.TimedOut)
                 throw new TimeoutException(message);
             throw new IOException(message, new SocketException((int)result.error));
         }
 
-        private async Task<(SocketError error, IRxSocketClient? rxsocket)> TryConnectAsync(int timeout, CancellationToken ct)
+        private async Task<(SocketError error, IRxSocketClient? rxsocket)> TryConnectAsync(int timeout)
         {
             try
             {
-                var rxsocket = await RxSocketClient.ConnectAsync(Config.IPEndPoint, timeout, ct).ConfigureAwait(false);
+                var rxsocket = await RxSocketClient.ConnectAsync(Config.IPEndPoint, timeout).ConfigureAwait(false);
                 return (SocketError.Success, rxsocket);
             }
             catch (SocketException se) when (se.ErrorCode == (int)SocketError.ConnectionRefused)
@@ -147,7 +171,7 @@ namespace InterReact
             }
         }
 
-        private async Task Login(IRxSocketClient rxsocket, int timeout, CancellationToken ct)
+        private async Task Login(IRxSocketClient rxsocket, int timeout)
         {
             var ts = timeout >= 0 ? TimeSpan.FromMilliseconds(timeout) : TimeSpan.MaxValue;
 
@@ -156,8 +180,13 @@ namespace InterReact
 
             // Start sending and receiving messages with an int32 message length prefix (UseV100Plus).
             // Report a range of supported API versions to TWS.
-            new[] { $"v{Config.ServerVersionMin}..{Config.ServerVersionMax}" }.ToByteArrayWithLengthPrefix().SendTo(rxsocket);
-            new[] { ((int)RequestCode.StartApi).ToString(), "2", Config.ClientId.ToString(), Config.OptionalCapabilities }.ToByteArrayWithLengthPrefix().SendTo(rxsocket);
+            new[] { $"v{Config.ServerVersionMin}..{Config.ServerVersionMax}" }
+            .ToByteArrayWithLengthPrefix()
+            .SendTo(rxsocket);
+
+            new[] { ((int)RequestCode.StartApi).ToString(), "2", Config.ClientId.ToString(), Config.OptionalCapabilities }
+            .ToByteArrayWithLengthPrefix()
+            .SendTo(rxsocket);
 
             var messages = await rxsocket
                 .ReceiveObservable
@@ -166,29 +195,17 @@ namespace InterReact
                 .Take(3)
                 .Timeout(ts, Observable.Throw<string[]>(new TimeoutException("No response received from server.")))
                 .ToList()
-                .ToTask(ct);
+                .ToTask(Ct);
 
             // ServerVersion is the highest supported API version in the range specified.
             if (!Enum.TryParse(messages[0][0], out ServerVersion version))
                 throw new InvalidDataException($"Could not parse server version '{messages[0][0]}'.");
             Config.ServerVersionCurrent = version;
             Config.Date = messages[0][1];
+            Logger.LogInformation($"Date: {Config.Date}.");
             Config.ManagedAccounts = messages[1][2];
+            Logger.LogInformation($"Managed Accounts: {Config.ManagedAccounts}.");
             Config.NextIdValue = int.Parse(messages[2][2]) - 1;
-        }
-
-        // Get login messages to send to the first observer.
-        private string GetPreamble()
-        {
-            var name = GetType().GetTypeInfo().Assembly.GetName();
-
-            return new StringBuilder()
-                .AppendLine($"{name.Name} version {name.Version}.")
-                .AppendLine($"Connected to server at {Config.IPEndPoint}.")
-                .AppendLine($"Logged into Tws/Gateway with ClientId: {Config.ClientId}, ServerVersion: {Config.ServerVersionCurrent}.")
-                .AppendLine($"Date: {Config.Date}.")
-                .AppendLine($"Managed Accounts: {Config.ManagedAccounts}.")
-                .ToString();
         }
     }
 }

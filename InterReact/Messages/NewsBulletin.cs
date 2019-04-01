@@ -15,11 +15,11 @@ namespace InterReact.Messages
         /// The exchange from which this message originated.
         /// </summary>
         public string Origin { get; }
-        internal NewsBulletin(ResponseReader c)
+        internal NewsBulletin(ResponseComposer c)
         {
             c.IgnoreVersion();
-            MessageId = c.Read<int>();
-            Type = c.Read<NewsBulletinType>();
+            MessageId = c.ReadInt();
+            Type = c.ReadEnum<NewsBulletinType>();
             Message = c.ReadString();
             Origin = c.ReadString();
         }

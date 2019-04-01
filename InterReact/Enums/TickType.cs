@@ -1,5 +1,3 @@
-using System;
-
 namespace InterReact.Enums
 {
     public enum TickType
@@ -7,7 +5,7 @@ namespace InterReact.Enums
         /// <summary> 
         /// This value is used as the default to distinguish it from BidSize = 0
         /// </summary>
-        Undefined = -2, 
+        Undefined = -2,
 
         /// <summary> 
         /// from TickMarketDataType. This value is used internally.
@@ -304,7 +302,8 @@ namespace InterReact.Enums
         /// </summary>
         LastRegularTradingHoursTrade = 57,
         RealtimeHistoricalVolatility = 58,
-
+        IbDividends = 59,
+        BondFactorMultiplier = 60,
         RegulatoryImbalance = 61,
         NewsTick = 62,
         ShortTermVolume3Min = 63,
@@ -329,6 +328,20 @@ namespace InterReact.Enums
         DelayedLastOption = 82,
         DelayedModelOption = 83,
         LastExchange = 84,
-        LastRegTime = 85
+        LastRegTime = 85,
+        FuturesOpenInterest = 86,
+        AvgOptVolume = 87,
+        DelayedLastTimeStamp = 88,
+        ShortableShares = 89
     }
+
+    public enum TickByTickType
+    {
+        None = 0,
+        Last = 1,
+        AllLast = 2,
+        BidAsk = 3,
+        MidPoint = 4
+    }
+
 }

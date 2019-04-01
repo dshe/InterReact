@@ -65,7 +65,7 @@ namespace InterReact.Tests.UnitTests.Core
         [Fact]
         public void T03_Undefined_Code()
         {
-            var e = Assert.Throws<InvalidDataException>(() => EmitMessage(new string[] { null }));
+            var e = Assert.Throws<InvalidDataException>(() => EmitMessage(new string[] { "" }));
             Assert.Equal("Undefined code ''.", e.InnerException.Message);
 
             e = Assert.Throws<InvalidDataException>(() => EmitMessage(new string[] { "notInSwitch" }));
@@ -76,8 +76,8 @@ namespace InterReact.Tests.UnitTests.Core
         public void T04_ParseError()
         {
             var e = Assert.Throws<InvalidDataException>(() => EmitMessage(new[] { "1", "version", "cannotParseInt" }));
-            Assert.IsType<InvalidDataException>(e.InnerException);
-            Assert.StartsWith("Parse<", e.InnerException.Message);
+            Assert.IsType<ArgumentException>(e.InnerException);
+            Assert.StartsWith("Parse", e.InnerException.Message);
         }
 
         [Fact]

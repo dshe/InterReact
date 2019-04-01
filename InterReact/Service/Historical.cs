@@ -28,7 +28,8 @@ namespace InterReact.Service
             Instant end = default,
             HistoricalDataType? dataType = null,
             bool regularTradingHoursOnly = true,
-            params Tag[] options)
+            bool keepUpToDate = false,
+            IList<Tag>? options = null)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
@@ -36,7 +37,7 @@ namespace InterReact.Service
             return Response
                 .ToObservable<HistoricalBars>(
                     Request.NextId,
-                    requestId => Request.RequestHistoricalData(requestId, contract, end, duration, barSize, dataType, regularTradingHoursOnly, options),
+                    requestId => Request.RequestHistoricalData(requestId, contract, end, duration, barSize, dataType, regularTradingHoursOnly, keepUpToDate, options),
                     Request.CancelHistoricalData)
                 .ToShareSource();
         }

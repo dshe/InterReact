@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.Windows;
 
+#nullable enable
+
 namespace WpfDepth
 {
     public abstract class NotifyPropertyChangedBase : INotifyPropertyChanged
@@ -9,8 +11,9 @@ namespace WpfDepth
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void NotifyPropertiesChanged()
-            => NotifyPropertyChanged(null);
+            => NotifyPropertyChanged("");
 
+        // An Empty value or null for the propertyName parameter indicates that all of the properties have changed.
         protected virtual void NotifyPropertyChanged(string name)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }

@@ -7,10 +7,10 @@ namespace InterReact.Messages
     {
         public FinancialAdvisorDataType DataType { get; }
         public string XmlData { get; }
-        internal FinancialAdvisor(ResponseReader c)
+        internal FinancialAdvisor(ResponseComposer c)
         {
             c.IgnoreVersion();
-            DataType = c.Read<FinancialAdvisorDataType>();
+            DataType = c.ReadEnum<FinancialAdvisorDataType>();
             XmlData = c.ReadString();
         }
     }

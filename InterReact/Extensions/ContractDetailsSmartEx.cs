@@ -7,17 +7,17 @@ using InterReact.Utility;
 
 namespace InterReact.Extensions
 {
-    public static class ContractDetailsSmartEx
+    public static class ContractDataSmartEx
     {
         /// <summary>
         /// For each particular contractId, if SMART is one of the exchanges, this filter removes the contracts with other exchanges.
         /// </summary>
-        public static IObservable<IReadOnlyList<ContractDetails>> ContractDetailsSmartFilter(this IObservable<IReadOnlyList<ContractDetails>> source)
-            => ThrowIf.ThrowIfEmpty(source).Select(ContractDetailsSmartFilter);
+        public static IObservable<IReadOnlyList<ContractData>> ContractDataSmartFilter(this IObservable<IReadOnlyList<ContractData>> source)
+            => ThrowIf.ThrowIfEmpty(source).Select(ContractDataSmartFilter);
 
-        internal static List<ContractDetails> ContractDetailsSmartFilter(IEnumerable<ContractDetails> cds)
+        internal static List<ContractData> ContractDataSmartFilter(IEnumerable<ContractData> cds)
         {
-            var list = new List<ContractDetails>();
+            var list = new List<ContractData>();
             foreach (var group in cds.GroupBy(cd => cd.Contract.ContractId))
             {
                 var smart = group.Where(cd => cd.Contract.Exchange == "SMART").ToList();

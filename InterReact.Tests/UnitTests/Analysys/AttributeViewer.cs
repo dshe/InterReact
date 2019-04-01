@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Security;
 using InterReact;
 using InterReact.Tests.Utility;
+using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -33,9 +34,9 @@ namespace InterReact.Tests.UnitTests.Analysis
                     !(x.a is ExtensionAttribute))
                 .GroupBy(x => x.a))
             {
-                Write(group.Key.ToString());
+                Logger.LogDebug(group.Key.ToString());
                 foreach (var a in group.OrderBy(x => x.ti?.FullName))
-                    Write($"    {a.ti?.FullName}");
+                    Logger.LogDebug($"    {a.ti?.FullName}");
             }
         }
 
@@ -57,10 +58,10 @@ namespace InterReact.Tests.UnitTests.Analysis
                         x.attr is DebuggerStepThroughAttribute))
                 .GroupBy(x => x.attr))
             {
-                Write(group.Key.ToString());
+                Logger.LogDebug(group.Key.ToString());
                 foreach (var a in group.OrderBy(x=> x.type?.FullName + x.method?.Name))
 
-                    Write($"     {a.type?.FullName}  {a.method?.Name}");
+                    Logger.LogDebug($"     {a.type?.FullName}  {a.method?.Name}");
             }
         }
 

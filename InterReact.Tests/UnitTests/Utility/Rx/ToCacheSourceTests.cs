@@ -12,6 +12,7 @@ using InterReact.Tests.Utility.AutoData;
 using Microsoft.Reactive.Testing;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.Extensions.Logging;
 
 namespace InterReact.Tests.UnitTests.Rx
 {
@@ -136,7 +137,7 @@ namespace InterReact.Tests.UnitTests.Rx
                 var result = await task.ConfigureAwait(false);
                 if (result.Count != numberOfValues)
                     ok = false;
-                Write($"{(result.Count == numberOfValues ? "Ok" : "FAILURE")} {result.Count}");
+                Logger.LogDebug($"{(result.Count == numberOfValues ? "Ok" : "FAILURE")} {result.Count}");
             }
             Assert.True(ok);
         }

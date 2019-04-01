@@ -13,6 +13,7 @@ using System.Threading;
 using InterReact.Extensions;
 using InterReact.Utility;
 using InterReact.StringEnums;
+using Microsoft.Extensions.Logging;
 
 namespace InterReact.Tests.SystemTests.MarketData
 {
@@ -27,9 +28,9 @@ namespace InterReact.Tests.SystemTests.MarketData
                 HistoricalBarSize.OneHour,
                 HistoricalDuration.OneDay);
 
-            Write($"\n\nStart {data.Start}, End: {data.End}\n");
+            Logger.LogDebug($"\n\nStart {data.Start}, End: {data.End}\n");
             foreach (var item in data.Bars)
-                Write(item.Stringify());
+                Logger.LogDebug(item.Stringify());
         }
 
     }

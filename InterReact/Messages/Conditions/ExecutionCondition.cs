@@ -58,13 +58,13 @@ namespace InterReact.Messages.Conditions
             return true;
         }
 
-        internal override void Deserialize(ResponseReader reader)
+        internal override void Deserialize(ResponseComposer c)
         {
-            base.Deserialize(reader);
+            base.Deserialize(c);
 
-            SecType = reader.ReadString();
-            Exchange = reader.ReadString();
-            Symbol = reader.ReadString();
+            SecType = c.ReadString();
+            Exchange = c.ReadString();
+            Symbol = c.ReadString();
         }
 
         internal override void Serialize(RequestMessage message)

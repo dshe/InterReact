@@ -17,6 +17,11 @@ namespace InterReact.Tests.UnitTests.Extensions
     {
         public string Key1 { get; set; }
         public string Data1 { get; set; }
+        public Item(string key1, string data1 = "")
+        {
+            Key1 = key1;
+            Data1 = data1;
+        }
     }
 
     public class ToObservableCollectionEx : BaseUnitTest
@@ -30,7 +35,7 @@ namespace InterReact.Tests.UnitTests.Extensions
         [InlineData("z", "", "b", "zzz", "b", "")]
         public void T01_Empty(params string[] data)
         {
-            var list1 = data.Select(x => new Item { Key1 = x }).ToList();
+            var list1 = data.Select(x => new Item(x)).ToList();
 
             var oc = list1.ToTestObservable(complete:false).ToObservableCollection(x => x.Key1);
             var list2 = new List<Item>(oc);
@@ -49,19 +54,15 @@ namespace InterReact.Tests.UnitTests.Extensions
         [Fact]
         public void T00_Empty_Strike()
         {
-            var list = new[] { new Item { Key1 = "b" }, new Item { Key1 = "a" }, new Item { Key1 = "b", Data1 = "x" } };
+            var list = new[] { new Item("b"), new Item("a"), new Item("b", "x") };
 
             var oc = list.ToTestObservable(complete:false).ToObservableCollection(x => x.Key1);
 
             Assert.Equal(2, oc.Count);
             Assert.Equal("a", oc[0].Key1);
-            Assert.Null(oc[0].Data1);
+            Assert.Equal("", oc[0].Data1);
             Assert.Equal("b", oc[1].Key1);
             Assert.Equal("x", oc[1].Data1);
-
-            //var list2 = new List<Item>(oc);
-            ;
-
         }
 
     }

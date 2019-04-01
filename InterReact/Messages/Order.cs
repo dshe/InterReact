@@ -307,14 +307,15 @@ namespace InterReact.Messages
         /// For GTC orders.
         /// </summary>
         public string ActiveStopTime { get; set; } = "";
-
         public string ScaleTable { get; set; } = "";
-
         public string ModelCode { get; set; } = "";
-
         public string ExtOperator { get; set; } = "";
-
         public double? CashQty { get; set; }
+        public string Mifid2DecisionMaker { get; set; } = "";
+        public string Mifid2DecisionAlgo { get; set; } = "";
+        public string Mifid2ExecutionTrader { get; set; } = "";
+        public string Mifid2ExecutionAlgo { get; set; } = "";
+        public bool DontUseAutoPriceForHedge { get; set; }
 
         public bool RandomizeSize { get; set; }
         public bool RandomizePrice { get; set; }
@@ -334,5 +335,7 @@ namespace InterReact.Messages
         public bool ConditionsIgnoreRegularTradingHours { get; set; }
         public bool ConditionsCancelOrder { get; set; }
         public SoftDollarTier? SoftDollarTier { get; set; }
+        public bool IsOmsContainer { get; set; }
+        public bool DiscretionaryUpToLimitPrice { get; set; }
     }
 }

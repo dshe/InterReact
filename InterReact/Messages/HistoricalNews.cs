@@ -10,9 +10,9 @@ namespace InterReact.Messages
         public string ProviderCode { get;}
         public string ArticleId { get;}
         public string Headline { get;}
-        internal HistoricalNews(ResponseReader c)
+        internal HistoricalNews(ResponseComposer c)
         {
-            RequestId = c.Read<int>();
+            RequestId = c.ReadInt();
             Time = c.ReadString();
             ProviderCode = c.ReadString();
             ArticleId = c.ReadString();
@@ -24,10 +24,10 @@ namespace InterReact.Messages
     {
         public int RequestId { get;}
         public bool HasMore { get;}
-        internal HistoricalNewsEnd(ResponseReader c)
+        internal HistoricalNewsEnd(ResponseComposer c)
         {
-            RequestId = c.Read<int>();
-            HasMore = c.Read<bool>();
+            RequestId = c.ReadInt();
+            HasMore = c.ReadBool();
         }
     }
 

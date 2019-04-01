@@ -9,31 +9,31 @@ namespace InterReact.Messages
     public sealed class ContractDescription // output
     {
         public Contract Contract { get; }
-        public IReadOnlyList<string> DerivativeSecTypes { get; }
-        internal ContractDescription(ResponseReader c)
+        public IList<string> DerivativeSecTypes { get; } = new List<string>();
+        internal ContractDescription(ResponseComposer c)
         {
             Contract = new Contract
             {
-                ContractId = c.Read<int>(),
+                ContractId = c.ReadInt(),
                 Symbol = c.ReadString(),
-                SecurityType = c.Read<SecurityType>(),
+                SecurityType = c.ReadStringEnum<SecurityType>(),
                 PrimaryExchange = c.ReadString(),
                 Currency = c.ReadString()
             };
-            var n = c.Read<int>();
-            DerivativeSecTypes = Enumerable.Repeat(c.ReadString(), n).ToList();
+            c.AddStringsToList(DerivativeSecTypes);
         }
     }
 
-    public sealed class ContractDescriptions : IHasRequestId // output
+    public sealed class SymbolSamples : IHasRequestId // output
     {
         public int RequestId { get; }
-        public IReadOnlyList<ContractDescription> Descriptions { get; }
-        internal ContractDescriptions(ResponseReader c)
+        public IList<ContractDescription> Descriptions { get; } = new List<ContractDescription>();
+        internal SymbolSamples(ResponseComposer c)
         {
-            RequestId = c.Read<int>();
-            var n = c.Read<int>();
-            Descriptions = Enumerable.Repeat(new ContractDescription(c), n).ToList();
+            RequestId = c.ReadInt();
+            var n = c.ReadInt();
+            for (int i = 0; i < n; i++)
+                Descriptions.Add(new ContractDescription(c));
         }
     }
 }

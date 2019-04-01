@@ -24,7 +24,7 @@ namespace InterReact.Tests.SystemTests.Account
         {
             var list = await Client.Services.AccountPositionsObservable.ToList();
             // The demo account may or may not have positions.
-            if (!Client.Config.IsDemoAccount)
+            if (!Client.Config.IsDemoAccount())
                 Assert.NotEmpty(list);
         }
 

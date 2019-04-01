@@ -59,11 +59,11 @@ namespace InterReact.Messages.Conditions
             return true;
         }
 
-        internal override void Deserialize(ResponseReader reader)
+        internal override void Deserialize(ResponseComposer c)
         {
-            base.Deserialize(reader);
-            IsMore = reader.Read<bool>();
-            Value = reader.ReadString();
+            base.Deserialize(c);
+            IsMore = c.ReadBool();
+            Value = c.ReadString();
         }
 
         internal override void Serialize(RequestMessage message)
