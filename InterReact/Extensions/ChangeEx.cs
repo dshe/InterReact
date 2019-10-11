@@ -4,6 +4,8 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 
+#nullable enable
+
 namespace InterReact.Extensions
 {
     public static class ChangeEx

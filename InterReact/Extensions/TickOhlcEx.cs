@@ -35,7 +35,7 @@ namespace InterReact.Extensions
 
     public static class TickOpenHighLowCloseEx
     {
-        public static IObservable<TickOhlc> TickOpenHighLowClose(this IObservable<ITick> source, TimeSpan barSize)
+        public static IObservable<TickOhlc> TickOpenHighLowClose(this IObservable<Tick> source, TimeSpan barSize)
             => ThrowIf.ThrowIfNull(source)
                 .OfType<TickPrice>()
                 .Where(x => x.TickType == TickType.LastPrice)

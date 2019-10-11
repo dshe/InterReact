@@ -7,7 +7,7 @@ using System.Text;
 
 namespace InterReact.Messages
 {
-    public class PnL : IHasRequestId
+    public sealed class PnL : IHasRequestId
     {
         public int RequestId { get; }
         public double DailyPnL { get; }
@@ -24,7 +24,7 @@ namespace InterReact.Messages
         }
     }
 
-    public class PnLSingle : IHasRequestId
+    public sealed class PnLSingle : IHasRequestId
     {
         public int RequestId { get; }
         public int Pos { get; }

@@ -16,6 +16,8 @@ using InterReact.Messages;
 using InterReact.StringEnums;
 using InterReact.Utility.Rx;
 
+#nullable enable
+
 namespace InterReact.Service
 {
     public sealed partial class Services
@@ -26,13 +28,13 @@ namespace InterReact.Service
         /// Call Connect() to start receiving updates.
         /// Call Dispose() the value returned from Connect() to disconnect from the source, release all subscriptions and clear the cache.
         /// </summary>
-        public IConnectableObservable<ITick> TickConnectableObservable(Contract contract,
+        public IConnectableObservable<Tick> TickConnectableObservable(Contract contract,
             IList<GenericTickType>? genericTickTypes = null, bool marketDataOff = false, IList<Tag>? options = null)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
 
-            return Response.ToObservable<ITick>(
+            return Response.ToObservable<Tick>(
                     Request.NextId,
                     requestId => Request.RequestMarketData(requestId, contract, genericTickTypes, marketDataOff, false, options),
                     requestId => Request.CancelMarketData(requestId),
@@ -43,12 +45,12 @@ namespace InterReact.Service
         /// <summary>
         /// Creates an observable which emits a snapshot of market ticks, then completes.
         /// </summary>
-        public IObservable<ITick> TickSnapshotObservable(Contract contract)
+        public IObservable<Tick> TickSnapshotObservable(Contract contract)
         {
             if (contract == null)
                 throw new ArgumentNullException(nameof(contract));
 
-            return Response.ToObservable<ITick>(
+            return Response.ToObservable<Tick>(
                     Request.NextId,
                     requestId => Request.RequestMarketData(requestId, contract, genericTickTypes:null, isSnapshot:true),
                     null, m => m is TickSnapshotEnd)

@@ -8,21 +8,28 @@ using InterReact.Extensions;
 using StringEnums;
 using NodaTime;
 using NodaTime.Text;
+using Microsoft.Extensions.Logging;
+
+#nullable enable
 
 namespace InterReact.Core
 {
     internal static class ToMessagesEx
     {
-        internal static IObservable<object> ToMessages(this IObservable<string[]> source, Config config)
+        internal static IObservable<object> ToMessages(this IObservable<string[]> source, Config config, ILoggerFactory loggerfactory)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
             if (config == null)
                 throw new ArgumentNullException(nameof(config));
+            if (loggerfactory == null)
+                throw new ArgumentNullException(nameof(loggerfactory));
+
+            var parser = new ResponseParser(loggerfactory.CreateLogger("ResponseParser"));
 
             return Observable.Create<object>(observer =>
             {
-                var responseComposer = new ResponseComposer(config, observer.OnNext);
+                var responseComposer = new ResponseComposer(config, parser, observer.OnNext, loggerfactory.CreateLogger("ResponseComposer"));
 
                 return source.Subscribe(
                     onNext:      responseComposer.Compose,
@@ -35,14 +42,17 @@ namespace InterReact.Core
     public sealed class ResponseComposer
     {
         internal readonly Config Config;
-        internal readonly Action<object> Output;
         internal readonly ResponseParser Parser;
+        internal readonly Action<object> Output;
+        internal readonly ILogger Logger;
+
         private IEnumerator<string>? enumerator;
-        internal ResponseComposer(Config config, Action<object> output)
+        internal ResponseComposer(Config config, ResponseParser parser, Action<object> output, ILogger logger)
         {
-            Config = config;
+            Config = config ?? throw new ArgumentNullException(nameof(config));
+            Parser = parser ?? throw new ArgumentNullException(nameof(parser));
             Output = output ?? throw new ArgumentNullException(nameof(output));
-            Parser = new ResponseParser(Output);
+            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         internal void Compose(string[] inputStrings)
@@ -50,23 +60,34 @@ namespace InterReact.Core
             try
             {
                 enumerator = inputStrings.AsEnumerable().GetEnumerator();
-                var code = ReadString(); // read the first string
-                if (code == "1")
-                    TickPrice.Send(this); // compose the message with the remaining strings
-                else
-                    Output(Compose(code)); // compose the message with the remaining strings
+                Emit();
                 if (enumerator.MoveNext())
-                    Output(new ResponseWarning($"Message longer than expected: [{inputStrings.JoinStrings(", ")}]."));
+                {
+                    var m = $"Message longer than expected: [{inputStrings.JoinStrings(", ")}].";
+                    Logger.LogError(m);
+                    throw new InvalidDataException(m);
+                }
             }
             catch (Exception e)
             {
-                throw new InvalidDataException($"ComposeMessageError: [{inputStrings.JoinStrings(", ")}].", e);
+                var m = $"Compose message error: [{inputStrings.JoinStrings(", ")}].";
+                throw new InvalidDataException(m, e);
             }
         }
 
-        private object Compose(string code)
+        private void Emit()
         {
-            return code switch
+            var code = ReadString(); // read the first string
+            if (code == null)
+                throw new InvalidDataException($"Undefined code 'null'.");
+
+            if (code == "1")
+            {
+                TickPrice.Send(this);
+                return;
+            }
+
+            var result = code switch
             {
                 "2" => new TickSize(this) as object,
                 "3" => new OrderStatusReport(this),
@@ -147,6 +168,9 @@ namespace InterReact.Core
                 "100" => new OrderBound(this),
                 _ => throw new InvalidDataException($"Undefined code '{code}'.")
             };
+
+            if (result != null)
+                Output(result);
         }
 
         internal string ReadString()

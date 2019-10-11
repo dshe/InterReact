@@ -10,6 +10,8 @@ using InterReact.Extensions;
 using NodaTime;
 using NodaTime.Text;
 
+#nullable enable
+
 namespace InterReact.Core
 {
     /// <summary>

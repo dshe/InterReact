@@ -2,7 +2,6 @@
 using InterReact.Enums;
 using InterReact.Interfaces;
 using InterReact.StringEnums;
-using Stringification;
 using System.Collections.Generic;
 
 namespace InterReact.Messages
@@ -11,7 +10,7 @@ namespace InterReact.Messages
     {
         // Store executions by executionId so that they can be associated with CommissionReport (above).
         // This assumes that CommissionReport always follows Execution.
-        internal static readonly Dictionary<string, Execution> Executions = new Dictionary<string, Execution>();
+        internal static Dictionary<string, Execution> Executions = new Dictionary<string, Execution>();
 
         /// <summary>
         /// RequestId will be -1 if this object sent due to an execution rather than a request for executions.

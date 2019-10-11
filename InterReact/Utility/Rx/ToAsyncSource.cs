@@ -8,6 +8,8 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 
+#nullable enable
+
 namespace InterReact.Utility.Rx
 {
     internal static class AsyncSourceEx

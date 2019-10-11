@@ -16,7 +16,7 @@ namespace InterReact.Tests.SystemTests.Other
         public async Task TestFinancialAdvisorConfiguration()
         {
             var observable = Client.Services.FinancialAdvisorConfigurationObservable(FinancialAdvisorDataType.Profiles);
-            await Assert.ThrowsAsync<AlertException>(async () => await observable);
+            await Assert.ThrowsAsync<Alert>(async () => await observable);
             // Throws: Not a financial advisor account.
         }
 

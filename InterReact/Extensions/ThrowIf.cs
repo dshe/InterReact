@@ -4,9 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Stringification;
 
-namespace InterReact.Utility
+namespace InterReact.Extensions
 {
     public static class ThrowIf
     {

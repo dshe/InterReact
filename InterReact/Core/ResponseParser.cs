@@ -3,15 +3,19 @@ using System;
 using System.Globalization;
 using StringEnums;
 using System.Linq;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+
+#nullable enable
 
 namespace InterReact.Core
 {
     internal sealed class ResponseParser
     {
         private readonly Dictionary<Type, Dictionary<string, object>> enumCache = new Dictionary<Type, Dictionary<string, object>>();
-        private readonly Action<object> Output;
+        private readonly ILogger Logger;
 
-        internal ResponseParser(Action<object> output) => Output = output ?? throw new ArgumentNullException(nameof(output));
+        internal ResponseParser(ILogger logger) => Logger = logger;
 
         internal char ParseChar(string s)
         {
@@ -105,7 +109,7 @@ namespace InterReact.Core
                     throw new ArgumentException($"ParseEnum<{type.Name}>('{numberString}') is not an integer.");
                 e = Enum.ToObject(type, number);
                 enumValues.Add(numberString, e);
-                Output(new ResponseWarning($"ParseEnum<{type.Name}>('{numberString}') new value."));
+                Logger.LogDebug($"ParseEnum<{type.Name}>('{numberString}') new value.");
             }
             return (T)e;
         }
@@ -118,7 +122,9 @@ namespace InterReact.Core
             if (e == null)
             {
                 e = StringEnum<T>.Add(s);
-                Output(new ResponseWarning($"ReadStringEnum<{typeof(T).Name}>('{e}') added new value."));
+                if (e == null)
+                    throw new Exception($"Could not add new value {s} to StringEnum.");
+                Logger.LogDebug($"ParseStringEnum<{typeof(T).Name}>('{e}') added new value.");
             }
             return e;
         }

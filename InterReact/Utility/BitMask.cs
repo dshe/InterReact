@@ -4,13 +4,13 @@ namespace InterReact.Utility
 {
     internal sealed class BitMask
     {
-        public int Mask { get; private set; }
+        internal int Mask { get; private set; }
 
-        public BitMask(int i) => Mask = i;
+        internal BitMask(int i) => Mask = i;
 
-        public void Clear() => Mask = 0;
+        internal void Clear() => Mask = 0;
 
-        public bool this[int index]
+        internal bool this[int index]
         {
             get
             {

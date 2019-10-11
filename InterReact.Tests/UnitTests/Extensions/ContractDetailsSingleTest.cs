@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using InterReact.Extensions;
 using InterReact.Messages;
 using InterReact.Tests.Utility;
-using InterReact.Tests.Utility.AutoData;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.Extensions.Logging;

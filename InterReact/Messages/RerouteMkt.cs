@@ -6,7 +6,7 @@ using System.Text;
 
 namespace InterReact.Messages
 {
-    public class RerouteMktData : IHasRequestId
+    public sealed class RerouteMktData : IHasRequestId
     {
         public int RequestId { get; }
         public int ContractId { get; }
@@ -17,7 +17,7 @@ namespace InterReact.Messages
         }
     }
 
-    public class RerouteMktDepth : IHasRequestId
+    public sealed class RerouteMktDepth : IHasRequestId
     {
         public int RequestId { get; }
         public int ContractId { get; }

@@ -8,11 +8,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using InterReact.Utility.Rx;
 using InterReact.Tests.Utility;
-using InterReact.Tests.Utility.AutoData;
 using Microsoft.Reactive.Testing;
 using Xunit;
 using Xunit.Abstractions;
 using Microsoft.Extensions.Logging;
+using Stringification;
 
 namespace InterReact.Tests.UnitTests.Rx
 {

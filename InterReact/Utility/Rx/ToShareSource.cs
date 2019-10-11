@@ -10,6 +10,8 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Concurrency;
 
+#nullable enable
+
 namespace InterReact.Utility.Rx
 {
     internal static class ShareSourceEx

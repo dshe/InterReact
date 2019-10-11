@@ -11,6 +11,8 @@ using InterReact.Interfaces;
 using InterReact.Messages;
 using System.Diagnostics;
 
+#nullable enable
+
 namespace InterReact.Utility.Rx
 {
     internal static class ObservableFactoryEx
@@ -106,8 +108,8 @@ namespace InterReact.Utility.Rx
                         {
                             if (m is Alert alert)
                             {
-                                //cancelable = false;
-                                //observer.OnError(alert.ToAlertException());
+                                cancelable = false;
+                                observer.OnError(alert); // ???
                                 //observer.OnNext(alert);
                             }
                             else if (end != null && end(m))

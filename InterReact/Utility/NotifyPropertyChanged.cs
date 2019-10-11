@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel;
 
+#nullable enable
+
 namespace InterReact.Utility
 {
     public abstract class NotifyPropertyChanged : INotifyPropertyChanged

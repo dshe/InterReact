@@ -58,7 +58,7 @@ namespace InterReact.Extensions
 
     public static class TickBidAskPriceEx
     {
-        public static IObservable<TickBidAskPrice> ToBidAskTicks(this IObservable<ITick> source)
+        public static IObservable<TickBidAskPrice> ToBidAskTicks(this IObservable<Tick> source)
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));

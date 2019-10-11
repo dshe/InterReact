@@ -1,5 +1,9 @@
-﻿using System;
+﻿using RxSockets;
+using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+
+#nullable enable
 
 namespace CoreClientServer
 {
@@ -18,7 +22,7 @@ namespace CoreClientServer
             var libraryLoggerFactory = new MyLoggerFactory("ClientLibrary: ", ConsoleColor.DarkCyan);
 
             var serverTask = new Client(Port, clientLoggerFactory.CreateLogger(), libraryLoggerFactory).Run();
-            var clientTask = new Server(Port, serverLoggerFactory.CreateLogger()).Run();
+            var clientTask = new Server(Port, serverLoggerFactory.CreateLogger<RxSocketServer>()).Run();
 
             await Task.WhenAll(clientTask, serverTask);
             await Task.Delay(1000);

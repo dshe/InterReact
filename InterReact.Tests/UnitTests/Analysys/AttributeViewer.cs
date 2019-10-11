@@ -5,10 +5,12 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security;
 using InterReact;
+using Stringification;
 using InterReact.Tests.Utility;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using Xunit.Abstractions;
+using System;
 
 namespace InterReact.Tests.UnitTests.Analysis
 {
@@ -60,8 +62,29 @@ namespace InterReact.Tests.UnitTests.Analysis
             {
                 Logger.LogDebug(group.Key.ToString());
                 foreach (var a in group.OrderBy(x=> x.type?.FullName + x.method?.Name))
-
                     Logger.LogDebug($"     {a.type?.FullName}  {a.method?.Name}");
+            }
+        }
+
+        [Fact]
+        public void AutoTypeAndStringify()
+        {
+            foreach (var type in types.Where(t =>
+                t.IsClass && t.IsSealed &&
+                t.Namespace != null && t.Namespace.Contains(".Messages")).ToList())
+            {
+                try
+                {
+                    var instance = AutoData.Create(type);
+                    Assert.NotNull(instance);
+                    var str = instance!.Stringify();
+                    Logger.LogDebug(str + "\n");
+                }
+                catch (Exception e)
+                {
+                    Logger.LogError(e, $"Type: {type.Name}");
+                    throw;
+                }
             }
         }
 

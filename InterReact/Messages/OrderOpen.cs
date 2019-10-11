@@ -9,10 +9,9 @@ namespace InterReact.Messages
     public sealed class OpenOrder : IHasOrderId
     {
         public Order Order { get; }
-        public int OrderId => Order.OrderId;
+        public int OrderId { get; }
 
         public Contract Contract { get; }
-
 
         public OrderStatus Status { get; }
 
@@ -93,6 +92,8 @@ namespace InterReact.Messages
                 DiscretionaryAmount = c.ReadDouble(),
                 GoodAfterTime = c.ReadString()
             };
+
+            OrderId = Order.OrderId;
 
             c.ReadString(); // skip deprecated sharesAllocation field
 

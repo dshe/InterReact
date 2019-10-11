@@ -5,7 +5,7 @@ namespace InterReact.Messages
 {
     // Orderid is a long here, rather than an int like the other OrderId????
     // MODIFIED!
-    public class OrderBound : IHasOrderId
+    public sealed class OrderBound : IHasOrderId
     {
         public long OrderBoundId { get; } // was OrderId
         public int ClientId { get; } // was ApiClientId

@@ -20,7 +20,7 @@ namespace InterReact.Tests.SystemTests.FundamentalData
 
             var observable = Client.Services.FundamentalDataObservable(contract, FundamentalDataReportType.CompanyOverview);
 
-            await Assert.ThrowsAsync<AlertException>(async () => await observable);
+            await Assert.ThrowsAsync<Alert>(async () => await observable);
         }
     }
 }

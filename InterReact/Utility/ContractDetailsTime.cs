@@ -15,19 +15,26 @@ using System.Reactive.Disposables;
 
 namespace InterReact.Utility
 {
-    // use class/reference type to allow use of null to indicate no data
     public sealed class ContractDataTimeEvent 
     {
-        public ZonedDateTime      Time   { get; internal set; }
-        public ContractTimeStatus Status { get; internal set; }
+        public ZonedDateTime      Time   { get; }
+        public ContractTimeStatus Status { get; }
+        internal ContractDataTimeEvent(ZonedDateTime time, ContractTimeStatus status)
+        {
+            Time = time;
+            Status = status;
+        }
     }
 
     public sealed class ContractDataTimePeriod
     {
-        public ContractDataTimeEvent? Previous { get; internal set; }
-        public ContractDataTimeEvent? Next     { get; internal set; }
-        public ContractDataTimePeriod(ContractDataTimeEvent? previous, ContractDataTimeEvent? next)
-            => (Previous, Next) = (previous, next);
+        public ContractDataTimeEvent? Previous { get; }
+        public ContractDataTimeEvent? Next     { get; }
+        internal ContractDataTimePeriod(ContractDataTimeEvent? previous, ContractDataTimeEvent? next)
+        {
+            Previous = previous;
+            Next = next;
+        }
     }
 
     public sealed class ContractDataTime
@@ -69,7 +76,7 @@ namespace InterReact.Utility
                 list.Add(start, ContractTimeStatus.Liquid);
                 list.Add(end, previous.Value == ContractTimeStatus.Trading ? ContractTimeStatus.Trading: ContractTimeStatus.Closed);
             }
-            return list.Select(x => new ContractDataTimeEvent { Time = x.Key.InZoneLeniently(TimeZone), Status = x.Value }).ToList();
+            return list.Select(x => new ContractDataTimeEvent(x.Key.InZoneLeniently(TimeZone), x.Value)).ToList();
         }
 
         private static List<(LocalDateTime start, LocalDateTime end)> GetSessions(string s)
@@ -101,7 +108,7 @@ namespace InterReact.Utility
             return list;
 
             // local
-            (LocalTime start, LocalTime end) GetSessionTime(string session)
+            static (LocalTime start, LocalTime end) GetSessionTime(string session)
             {
                 var times = session.Split('-').Select(t => TimePattern.Parse(t).Value).ToList();
                 Debug.Assert(times.Count == 2);
@@ -138,7 +145,7 @@ namespace InterReact.Utility
                     return Disposable.Empty;
                 }
 
-                Action<Action<DateTimeOffset>> work = (self) =>
+                void work(Action<DateTimeOffset> self)
                 {
                     try
                     {
@@ -154,7 +161,7 @@ namespace InterReact.Utility
                     {
                         observer.OnError(e);
                     }
-                };
+                }
 
                 return Sched.Schedule(initialResult.Next.Time.ToDateTimeOffset(), work);
             });

@@ -9,8 +9,8 @@ using InterReact.Interfaces;
 using InterReact.Messages;
 using InterReact.StringEnums;
 using InterReact.Utility.Rx;
-using Stringification;
 using NodaTime;
+using Stringification;
 
 namespace InterReact.Service
 {

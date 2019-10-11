@@ -55,7 +55,7 @@ namespace HelloWorld
 
             Console.WriteLine($"Long Name: {contractData.LongName}.");
 
-            await client.DisconnectAsync();
+            client.Dispose();
 
             Console.WriteLine(Environment.NewLine + "press a key to exit...");
             Console.ReadKey();

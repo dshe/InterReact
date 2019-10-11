@@ -6,7 +6,7 @@ using System.Text;
 
 namespace InterReact.Messages
 {
-    public class HistoricalData : IHasRequestId
+    public sealed class HistoricalData : IHasRequestId
     {
         public int RequestId { get; }
         public int BarCount { get; }

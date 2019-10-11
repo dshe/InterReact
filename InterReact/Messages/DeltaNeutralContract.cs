@@ -1,6 +1,8 @@
 ﻿using InterReact.Core;
 using InterReact.Interfaces;
 
+#nullable enable
+
 namespace InterReact.Messages
 {
     /// <summary>
@@ -8,20 +10,19 @@ namespace InterReact.Messages
     /// </summary>
     public sealed class DeltaNeutralContract : IHasRequestId // output
     {
-        public int RequestId { get; private set; }
+        public int RequestId { get; }
 
-        public int ContractId { get; internal set; }
+        public int ContractId { get; }
 
         /// <summary>
         /// The underlying stock or future delta.
         /// </summary>
-        public double Delta { get; internal set; }
+        public double Delta { get; }
 
         /// <summary>
         /// The price of the underlying.
         /// </summary>
-        public double Price { get; internal set; }
-        internal DeltaNeutralContract() { } // testing
+        public double Price { get; }
         internal DeltaNeutralContract(ResponseComposer c, bool independent)
         {
             if (independent)

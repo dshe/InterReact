@@ -92,12 +92,12 @@ namespace WinFormsTicks
             // Create the object containing the observable which will emit realtime updates.
             var ticks = client.Services.TickConnectableObservable(contract);
 
-            SubscribeToTicks(ticks.Select(tick => TickUtility.Undelay(tick)).ObserveOn(synchronizationContext));
+            SubscribeToTicks(ticks.Undelay().ObserveOn(synchronizationContext));
 
             connection = ticks.Connect();
         }
 
-        private void SubscribeToTicks(IObservable<ITick> synchronizedTicks)
+        private void SubscribeToTicks(IObservable<Tick> synchronizedTicks)
         {
             // Observe any errors.
             synchronizedTicks.Subscribe(m => { }, ex => ShowMessage(ex.Message));

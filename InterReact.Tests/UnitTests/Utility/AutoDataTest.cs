@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 using InterReact.Messages;
 using InterReact.Enums;
 using InterReact.StringEnums;
@@ -8,42 +7,36 @@ using Xunit;
 using Xunit.Abstractions;
 using InterReact.Core;
 using InterReact.Interfaces;
+using InterReact.Tests.Utility;
+using Microsoft.Extensions.Logging;
+using System;
 
-namespace InterReact.Tests.Utility.AutoData
+#nullable enable
+
+namespace InterReact.Tests.UnitTests
 {
-    public class TestClass
-    {
-        public int First { get; set; }
-        public IList<ContractComboLeg> ComboLegs { get; } = new List<ContractComboLeg>();
-        public TestClass() { }
-        public IReadOnlyList<Tag> SecurityIds { get; } = new List<Tag>(); // output
-    }
-
     public class AutoDataTests : BaseUnitTest
     {
-        public AutoDataTests(ITestOutputHelper output) : base(output) {}
+        public AutoDataTests(ITestOutputHelper output) : base(output) { }
 
         private void TestCreate<T>()
         {
             var value = AutoData.Create<T>();
+            if (value == null)
+                throw new Exception("null");
             Logger.LogDebug(value.Stringify());
         }
 
         [Fact]
         public void Test_0()
         {
-            TestCreate<string>();
-            TestCreate<int>();
-            TestCreate<long>();
-            TestCreate<bool>();
+            TestCreate<Tag>();
             TestCreate<AlertType>();
             TestCreate<SecurityType>();
             TestCreate<ContractComboLeg>();
             TestCreate<Contract>();
-            TestCreate<ContractData>();
             TestCreate<List<Contract>>();
-            TestCreate<List<int>>();
-            TestCreate<TestClass>();
+            TestCreate<ContractData>();
         }
 
         [Fact]
@@ -58,5 +51,13 @@ namespace InterReact.Tests.Utility.AutoData
 
             Assert.NotEqual(c1.Stringify(), c2.Stringify());
         }
+
+        [Fact]
+        public void Test_2()
+        {
+            //Assert.NotEqual(c1.Stringify(), c2.Stringify());
+        }
+
+
     }
 }

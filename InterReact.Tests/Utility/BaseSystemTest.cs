@@ -1,5 +1,4 @@
-﻿using Divergic.Logging.Xunit;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using InterReact;
@@ -11,6 +10,9 @@ using InterReact.Interfaces;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
+using MXLogger;
+
+#nullable enable
 
 namespace InterReact.Tests.Utility
 {
@@ -40,12 +42,15 @@ namespace InterReact.Tests.Utility
             Client = await new InterReactClientBuilder().BuildAsync().ConfigureAwait(false);
             Debug.WriteLine("init end");
         }
-
-        public Task DisposeAsync()
+        public void Dispose()
         {
             Debug.WriteLine("dtor");
-            Client?.Dispose();
-            return Task.CompletedTask;
+            Client!.Dispose();
+        }
+
+        public async Task DisposeAsync()
+        {
+            await Task.Delay(0);
         }
     }
 
@@ -53,6 +58,7 @@ namespace InterReact.Tests.Utility
     public abstract class BaseSystemTest : IDisposable
     {
         protected readonly IInterReactClient Client;
+        protected readonly ILoggerFactory LoggerFactory;
         protected readonly ILogger Logger;
         protected int Id;
         private readonly IDisposable subscription;
@@ -62,7 +68,11 @@ namespace InterReact.Tests.Utility
         {
             if (fixture.Client == null)
                 throw new NullReferenceException(nameof(fixture.Client));
-            Logger = output.BuildLoggerFor<BaseSystemTest>(); // Divergic.Logging.Xunit
+
+            var provider = new MXLoggerProvider(output.WriteLine);
+            LoggerFactory = new LoggerFactory(new[] { provider });
+            Logger = LoggerFactory.CreateLogger("SystemTest");
+
             Client = fixture.Client;
             Id = Client.Request.NextId();
             Logger.LogDebug($"BaseSystemTest: Id = {Id}.");

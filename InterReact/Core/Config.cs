@@ -4,6 +4,8 @@ using System;
 using InterReact.Enums;
 using NodaTime;
 
+#nullable enable
+
 namespace InterReact.Core
 {
     public sealed class Config : EditorBrowsableNever
@@ -23,7 +25,7 @@ namespace InterReact.Core
         public int ClientId { get; internal set; } = Random.Next(1000, 1000000);
 
         public int MaxRequestsPerSecond { get; internal set; } = 50;
-        public string? OptionalCapabilities { get; internal set; }
+        public string OptionalCapabilities { get; internal set; } = "";
 
         /// <summary>
         /// The maximum version of the API supported by this client.

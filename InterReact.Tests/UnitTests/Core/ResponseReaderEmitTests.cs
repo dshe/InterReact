@@ -7,6 +7,7 @@ using InterReact.Tests.Utility;
 using Xunit;
 using Xunit.Abstractions;
 using System.Collections.Generic;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace InterReact.Tests.UnitTests.Core
 {
@@ -18,7 +19,8 @@ namespace InterReact.Tests.UnitTests.Core
 
         private object EmitMessage(string[] strings)
         {
-            new ResponseComposer(new Config(), messages.Add).Compose(strings);
+            var parser = new ResponseParser(NullLogger.Instance);
+            new ResponseComposer(new Config(), parser, output: messages.Add, NullLogger.Instance).Compose(strings);
             return messages.LastOrDefault();
         }
 
@@ -45,21 +47,19 @@ namespace InterReact.Tests.UnitTests.Core
         public void T02_Long_Message()
         {
             var longMessage = new[] {
-                "1",  // code = price
+                "1",  // code = TickPrice
                 "99", // version
-                "2",  // requestId
+                "21",  // requestId
                 "5",  // tickType = LastSize
                 "9.9", // price
                 "100", // size
-                "0", // AutoExec, true
-                "7" // extra
+                "1", // AutoExec, true
+                "33", // extra, to make it tool long
             };
 
-            EmitMessage(longMessage);
-            Assert.Equal(2, messages.Count);
+            Assert.Throws<InvalidDataException>(() => EmitMessage(longMessage));
             Assert.IsType<TickPrice>(messages[0]);
-            var e = Assert.IsType<ResponseWarning>(messages[1]);
-            Assert.StartsWith("Message longer", e.Message);
+            // there is an error message written to the log
         }
 
         [Fact]

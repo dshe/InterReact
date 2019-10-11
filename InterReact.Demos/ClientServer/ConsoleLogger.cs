@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Reactive.Disposables;
 using Microsoft.Extensions.Logging;
+using RxSockets;
+
+#nullable enable
 
 namespace CoreClientServer
 {
@@ -18,7 +21,7 @@ namespace CoreClientServer
         {
             var color = Color;
             if (logLevel <= LogLevel.Debug)
-                return; //color = ConsoleColor.DarkGray;
+                return;
             var oldColor = Console.ForegroundColor;
             Console.ForegroundColor = color;
             Console.WriteLine(CategoryName + formatter(state, exception));
@@ -45,5 +48,4 @@ namespace CoreClientServer
 
         public void Dispose() { }
     }
-
 }

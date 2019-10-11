@@ -19,7 +19,7 @@ namespace InterReact.Messages
         }
     }
 
-    public class HistogramItem
+    public sealed class HistogramItem
     {
         public double Price { get; }
         public long Size { get; }

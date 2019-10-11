@@ -47,8 +47,8 @@ namespace InterReact.Tests.SystemTests
         public async Task TestContractDataRequestNotFound()
         {
             var contract = new Contract { ContractId = 99999 };
-            var ex = await Assert.ThrowsAsync<AlertException>(async () => await Client.Services.ContractDataObservable(contract));
-            Assert.Equal(200, ex.Alert.Code);
+            var alert = await Assert.ThrowsAsync<Alert>(async () => await Client.Services.ContractDataObservable(contract));
+            Assert.Equal(200, alert.Code);
         }
 
         [Fact]

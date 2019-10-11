@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace InterReact.Messages
 {
-    class HistoricalTicks : IHasRequestId
+    public sealed class HistoricalTicks : IHasRequestId
     {
         public int RequestId { get; }
         public IList<HistoricalTick> Ticks { get; } = new List<HistoricalTick>();
@@ -22,7 +22,7 @@ namespace InterReact.Messages
 
     }
 
-    public class HistoricalTick
+    public sealed class HistoricalTick
     {
         public long Time { get; }
         public double Price { get; }
@@ -36,7 +36,7 @@ namespace InterReact.Messages
         }
     }
 
-    class HistoricalLastTicks : IHasRequestId
+    public sealed class HistoricalLastTicks : IHasRequestId
     {
         public int RequestId { get; }
         public IList<HistoricalLastTick> Ticks { get; } = new List<HistoricalLastTick>();
@@ -52,7 +52,7 @@ namespace InterReact.Messages
 
     }
 
-    public class HistoricalLastTick
+    public sealed class HistoricalLastTick
     {
         public long Time { get; }
         public TickAttribLast TickAttribLast { get;  }
@@ -71,7 +71,7 @@ namespace InterReact.Messages
         }
     }
 
-    class HistoricalBidAskTicks : IHasRequestId
+    public sealed class HistoricalBidAskTicks : IHasRequestId
     {
         public int RequestId { get; }
         public IList<HistoricalTick> Ticks { get; } = new List<HistoricalTick>();
@@ -87,7 +87,7 @@ namespace InterReact.Messages
 
     }
 
-    public class HistoricalBidAskTick
+    public sealed class HistoricalBidAskTick
     {
         public long Time { get; }
         public TickAttribBidAsk TickAttribBidAsk { get; }

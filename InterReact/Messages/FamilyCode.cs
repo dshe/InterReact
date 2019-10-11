@@ -6,7 +6,7 @@ namespace InterReact.Messages
 {
     public sealed class FamilyCodes // output
     {
-        public IList<FamilyCode> Codes = new List<FamilyCode>();
+        public IList<FamilyCode> Codes { get; } = new List<FamilyCode>();
         internal FamilyCodes(ResponseComposer c)
         {
             var n = c.ReadInt();

@@ -4,6 +4,8 @@ using InterReact.StringEnums;
 using System.Collections.Generic;
 using System.Linq;
 
+#nullable enable
+
 namespace InterReact.Messages
 {
     public sealed class ContractDescription // output

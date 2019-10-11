@@ -8,6 +8,8 @@ using InterReact.Enums;
 using InterReact.Messages;
 using InterReact.Utility;
 
+#nullable enable
+
 namespace InterReact.Extensions
 {
     /// <summary>

@@ -10,6 +10,8 @@ using InterReact.Messages;
 using InterReact.Utility.Rx;
 using NodaTime;
 
+#nullable enable
+
 namespace InterReact.Service
 {
     public sealed partial class Services

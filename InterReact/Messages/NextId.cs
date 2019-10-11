@@ -1,5 +1,7 @@
 ﻿using InterReact.Core;
 
+#nullable enable
+
 namespace InterReact.Messages
 {
     public sealed class NextId

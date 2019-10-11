@@ -3,10 +3,10 @@ using System.Linq;
 using InterReact.Core;
 using InterReact.Enums;
 
+#nullable enable
 
 namespace InterReact.Messages.Conditions
 {
-
     public abstract class OrderCondition
     {
         public OrderConditionType Type { get; private set; }
@@ -55,7 +55,7 @@ namespace InterReact.Messages.Conditions
             var other = obj as OrderCondition;
             if (other == null)
                 return false;
-            return this.IsConjunctionConnection == other.IsConjunctionConnection && this.Type == other.Type;
+            return IsConjunctionConnection == other.IsConjunctionConnection && this.Type == other.Type;
         }
 
         public override int GetHashCode()

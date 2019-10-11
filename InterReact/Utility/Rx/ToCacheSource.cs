@@ -6,6 +6,8 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
+#nullable enable
+
 namespace InterReact.Utility.Rx
 {
     internal static class CacheSourceEx

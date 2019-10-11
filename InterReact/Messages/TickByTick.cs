@@ -3,6 +3,8 @@ using InterReact.Enums;
 using InterReact.Interfaces;
 using System;
 
+#nullable enable
+
 namespace InterReact.Messages
 {
     public abstract class TickByTick : IHasRequestId
@@ -25,17 +27,17 @@ namespace InterReact.Messages
             var time = c.ReadLong();
             return tickType switch
             {
-                TickByTickType.None => null as TickByTick,
-                TickByTickType.Last => new TickByTickAllLast(requestId, tickType, time, c),
-                TickByTickType.AllLast => new TickByTickAllLast(requestId, tickType, time, c),
-                TickByTickType.BidAsk => new TickByTickBidAsk(requestId, tickType, time, c),
+                TickByTickType.None =>     null as TickByTick,
+                TickByTickType.Last =>     new TickByTickAllLast(requestId, tickType, time, c),
+                TickByTickType.AllLast =>  new TickByTickAllLast(requestId, tickType, time, c),
+                TickByTickType.BidAsk =>   new TickByTickBidAsk(requestId, tickType, time, c),
                 TickByTickType.MidPoint => new TickByTickMidpoint(requestId, tickType, time, c),
                 _ => throw new Exception("Invalid TickByTick type.")
             };
         }
     }
 
-    public class TickByTickAllLast : TickByTick
+    public sealed class TickByTickAllLast : TickByTick
     {
         public double Price { get; }
         public int Size { get; }
@@ -52,7 +54,7 @@ namespace InterReact.Messages
         }
     }
 
-    public class TickByTickBidAsk : TickByTick
+    public sealed class TickByTickBidAsk : TickByTick
     {
         public double BidPrice { get; }
         public double AskPrice { get; }
@@ -69,7 +71,7 @@ namespace InterReact.Messages
         }
     }
 
-    public class TickByTickMidpoint : TickByTick
+    public sealed class TickByTickMidpoint : TickByTick
     {
         public double Midpoint { get; }
         public TickByTickMidpoint(int requestId, TickByTickType tickType, long time, ResponseComposer c) : base(requestId, tickType, time)

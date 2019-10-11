@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace InterReact.Messages
 {
-    class MarketRule
+    public sealed class MarketRule
     {
         public int MarketRuleId { get; }
         public IList<PriceIncrement> PriceIncrements { get; } = new List<PriceIncrement>();
@@ -18,7 +18,7 @@ namespace InterReact.Messages
         }
     }
 
-    public class PriceIncrement
+    public sealed class PriceIncrement
     {
         public double LowEdge { get; }
         public double Increment { get; }

@@ -9,6 +9,8 @@ using InterReact.Extensions;
 using RxSockets;
 using InterReact.Utility;
 
+#nullable enable
+
 namespace InterReact.Core
 {
     public sealed class RequestMessage

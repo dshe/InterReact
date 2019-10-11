@@ -140,7 +140,7 @@ namespace RealtimeVolume
             ticksSubscription = ticks.Connect();
         }
 
-        private void SubscribeToTicks(IObservable<ITick> ticks)
+        private void SubscribeToTicks(IObservable<Tick> ticks)
         {
             // Display error messages, if any.
             ticks.Subscribe(m => { }, async exception => await SyncMessageBox.Show(exception.Message));

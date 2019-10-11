@@ -8,6 +8,8 @@ using Xunit;
 using Xunit.Abstractions;
 using InterReact.Utility;
 
+#nullable enable
+
 namespace InterReact.Tests.UnitTests.Core
 {
     public class RequestMessageTests : BaseUnitTest

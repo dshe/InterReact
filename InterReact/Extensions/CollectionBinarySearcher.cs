@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Text;
 
-namespace InterReact.Utility
+namespace InterReact.Extensions
 {
     internal static class CollectionBinarySearcherEx
     {

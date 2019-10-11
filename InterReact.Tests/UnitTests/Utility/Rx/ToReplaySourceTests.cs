@@ -15,11 +15,11 @@ using Microsoft.Extensions.Logging;
 
 namespace InterReact.Tests.UnitTests.Rx
 {
-    public class ToReplaySourceTests : BaseReactiveTest
+    public class ToAsyncSourceTests : BaseReactiveTest
     {
         private readonly TestScheduler testScheduler = new TestScheduler();
 
-        public  ToReplaySourceTests(ITestOutputHelper output) : base(output) {}
+        public  ToAsyncSourceTests(ITestOutputHelper output) : base(output) {}
 
         [Fact]
         public void T01_Consecutive()

@@ -98,8 +98,8 @@ namespace InterReact.Tests.UnitTests.Rx
                     Assert.Equal(Id, requestId);
                     Interlocked.Increment(ref unsubscribeCalls);
                 });
-            var e = await Assert.ThrowsAsync<AlertException>(async () => await observable);
-            Assert.Equal(Id, e.Alert.RequestId);
+            var alert = await Assert.ThrowsAsync<Alert>(async () => await observable);
+            Assert.Equal(Id, alert.RequestId);
             Assert.Equal(1, subscribeCalls);
             Assert.Equal(0, unsubscribeCalls);
         }
@@ -120,8 +120,8 @@ namespace InterReact.Tests.UnitTests.Rx
                     Interlocked.Increment(ref unsubscribeCalls);
                 },
                 m => m is SomeClassEnd);
-            var e = await Assert.ThrowsAsync<AlertException>(async () => await observable);
-            Assert.Equal(Id, e.Alert.RequestId);
+            var alert = await Assert.ThrowsAsync<Alert>(async () => await observable);
+            Assert.Equal(Id, alert.RequestId);
             Assert.Equal(1, subscribeCalls);
             Assert.Equal(0, unsubscribeCalls);
         }

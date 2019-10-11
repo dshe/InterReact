@@ -8,13 +8,13 @@ using Xunit.Abstractions;
 
 namespace InterReact.Tests.UnitTests.Analysis
 {
-    public class ObjectChecker : BaseUnitTest
+    public class InterfaceChecker : BaseUnitTest
     {
         private static readonly IEnumerable<TypeInfo> Types =
             typeof(InterReactClient).GetTypeInfo().Assembly
             .DefinedTypes.Where(t => t.IsClass);
 
-        public ObjectChecker(ITestOutputHelper output) : base(output) {}
+        public InterfaceChecker(ITestOutputHelper output) : base(output) {}
 
         [Fact]
         public void Find_Classes_With_RequestId_But_Not_Interface()
@@ -32,5 +32,12 @@ namespace InterReact.Tests.UnitTests.Analysis
                     t.GetInterface("IHasOrderId") == null));
         }
 
+        [Fact]
+        public void Find_Classes_With_ExecutioinId_But_Not_Interface()
+        {
+            Assert.Empty(Types.Where(t =>
+                    t.GetProperty("ExecutionId") != null &&
+                    t.GetInterface("IHasExecutionId") == null));
+        }
     }
 }

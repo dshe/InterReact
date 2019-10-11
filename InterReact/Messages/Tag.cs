@@ -3,13 +3,14 @@ using InterReact.Extensions;
 using System.Collections.Generic;
 using System.Linq;
 
+#nullable enable
+
 namespace InterReact.Messages
 {
     public sealed class Tag // input + output
     {
-        public string Name { get; private set; }
-        public string Value { get; private set; }
-        internal Tag() : this("","") { } // testing
+        public string Name { get; }
+        public string Value { get; }
         public Tag(string name, string value)
         {
             Name = name;

@@ -7,6 +7,8 @@ using InterReact;
 using InterReact.Messages;
 using Microsoft.Extensions.Logging;
 
+#nullable enable
+
 namespace CoreClientServer
 {
     internal class Client
@@ -24,8 +26,9 @@ namespace CoreClientServer
 
         internal async Task Run()
         {
-            var client = await new InterReactClientBuilder(LoggerFactory).SetPort(Port).BuildAsync();
-
+            // hangs on next line
+            var client = await new InterReactClientBuilder(LoggerFactory).SetPort(Port).BuildAsync().ConfigureAwait(false);
+            
             Logger.LogInformation("Connected to server.");
             client.Response.OfType<string>().Subscribe(x => Logger.LogDebug(x));
 
@@ -37,7 +40,6 @@ namespace CoreClientServer
 
             // wait to get the first tickSize message, indicating test start
             await client.Response.OfType<TickSize>().FirstAsync();
-
 
             Logger.LogInformation("Receiving...");
 
@@ -51,7 +53,7 @@ namespace CoreClientServer
             Logger.LogInformation($"Received {frequency:N0} messages/second.");
 
             Logger.LogInformation("Disconnecting.");
-            await client.DisconnectAsync();
+            client.Dispose();
             Logger.LogInformation("Disconnected.");
         }
     }

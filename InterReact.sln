@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfDepth", "InterReact.Demo
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E5FEAEC0-0590-472A-8183-50B953E73916}"
 	ProjectSection(SolutionItems) = preProject
-		Nuget.Config = Nuget.Config
+		appveyor.yml = appveyor.yml
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -117,7 +117,7 @@ Global
 		{D4B26383-BD67-4E5A-9C94-B4C1E27BB5FC}.Release|x64.Build.0 = Release|Any CPU
 		{D4B26383-BD67-4E5A-9C94-B4C1E27BB5FC}.Release|x86.ActiveCfg = Release|Any CPU
 		{D4B26383-BD67-4E5A-9C94-B4C1E27BB5FC}.Release|x86.Build.0 = Release|Any CPU
-		{96F4FF48-2978-4B28-8DE9-602438175A85}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{96F4FF48-2978-4B28-8DE9-602438175A85}.Debug|Any CPU.ActiveCfg = Debug|x64
 		{96F4FF48-2978-4B28-8DE9-602438175A85}.Debug|ARM.ActiveCfg = Debug|ARM
 		{96F4FF48-2978-4B28-8DE9-602438175A85}.Debug|ARM.Build.0 = Debug|ARM
 		{96F4FF48-2978-4B28-8DE9-602438175A85}.Debug|ARM.Deploy.0 = Debug|ARM

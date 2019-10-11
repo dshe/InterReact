@@ -34,7 +34,7 @@ namespace InterReact.Service
                             observer.OnCompleted();
                         }
                         else if (m is Alert alert && alert.Code == 321)
-                            observer.OnError(alert.ToAlertException());
+                            observer.OnError(alert);
 
                     }, observer.OnError, observer.OnCompleted);
 

@@ -2,6 +2,8 @@
 using InterReact.Enums;
 using InterReact.Utility;
 
+#nullable enable
+
 namespace InterReact.Messages
 {
     public sealed class TickAttrib
@@ -54,7 +56,7 @@ namespace InterReact.Messages
         }
     }
 
-    public class TickAttribBidAsk
+    public sealed class TickAttribBidAsk
     {
         /**
          * @brief Used with real time tick-by-tick. Indicates if bid is lower than day's lowest low. 
@@ -74,7 +76,7 @@ namespace InterReact.Messages
         }
     }
 
-    public class TickAttribLast
+    public sealed class TickAttribLast
     {
         /**
          * @brief Not currently used with trade data; only applies to bid/ask data. 

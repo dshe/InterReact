@@ -4,7 +4,6 @@ using System.Linq;
 using InterReact.Extensions;
 using InterReact.Messages;
 using InterReact.Tests.Utility;
-using Moq;
 using Xunit;
 using Xunit.Abstractions;
 

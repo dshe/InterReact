@@ -4,6 +4,8 @@ using InterReact.Interfaces;
 using InterReact.Messages.Conditions;
 using InterReact.StringEnums;
 
+#nullable enable
+
 namespace InterReact.Messages
 {
     public sealed class Order : IHasOrderId  // input + output

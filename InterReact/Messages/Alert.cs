@@ -9,57 +9,53 @@ namespace InterReact.Messages
     /// Alert can represent an error, warning or informative message.
     /// The Id, when >= 0, indicates that the message is associated with a particular request(requestId) or order(orderId).
     /// For messages which are not associated with a particular request or order, the Id is -1.
-    /// Alert is used to report BOTH error and status messages.
-    /// When an error is received from IB which contains an id which is 0 or greater, the id could be either a requestId or an orderId.
-    /// Errors which are not associated with a particular request or order have Id = -1 (requestId = orderId = -1).
     /// In order to be compatible with the IHasRequestId and IHasOrderId interfaces, both requestId and orderId properties are included in Alert.
     /// They are always set to the same value.
     /// </summary>
-    public sealed class Alert : IHasRequestId, IHasOrderId
+    public sealed class Alert : Exception, IHasRequestId, IHasOrderId
     {
         public int Code { get; }
         public int RequestId { get; }
         public int OrderId { get; } 
         public AlertType AlertType { get; }
-        public string Message { get; }
 
-        internal Alert(int id, int code, string message)
+        internal Alert(int id, int code, string message) : base(message)
         {
-            Code = code;
             RequestId = OrderId = id; // id refers to either a requestId or an orderId.
-            if (id >= 0)
-                AlertType = AlertType.HasId;
-            else if (code == 1100 || code == 2110)
-                AlertType = AlertType.ConnectionLost;
-            else if (code == 1101 || code == 1102)
-                AlertType = AlertType.ConnectionRestored;
-            else if (code >= 2103 && code <= 2108)
-                AlertType = AlertType.DataFarm;
+            Code = code;
             if (string.IsNullOrWhiteSpace(message))
                 throw new ArgumentException(nameof(message));
-            Message = message;
-            if (!Message.EndsWith("."))
-                Message += ".";
-            if (code != -1)
-                Message += " Code=" + code + ".";
-            if (RequestId != -1)
-                Message += $" Id={RequestId}.";
+            AlertType = GetAlertTypeFromCode(code, id);
         }
-
-        internal Exception ToAlertException() =>
-            new AlertException(this);
-
         internal static Alert Create(ResponseComposer c)
         {
             c.RequireVersion(2);
             return new Alert(c.ReadInt(), c.ReadInt(), c.ReadString());
         }
-    }
 
-    public sealed class AlertException : Exception
-    {
-        public Alert Alert { get; }
+        public override string ToString()
+        {
+            var m = Message;
+            if (!m.EndsWith("."))
+                m += ".";
+            if (Code >= 0)
+                m += " Code=" + Code + ".";
+            if (RequestId >= 0)
+                m += $" Id={RequestId}.";
+            return m;
+        }
 
-        internal AlertException(Alert alert) : base(alert.Message) => Alert = alert;
+        private static AlertType GetAlertTypeFromCode(int code, int id)
+        {
+            if (code == 1100 || code == 2110)
+                return AlertType.ConnectionLost;
+            if (code == 1101 || code == 1102)
+                return AlertType.ConnectionRestored;
+            if (code >= 2103 && code <= 2108)
+                return AlertType.DataFarm;
+            if (id >= 0)
+                return AlertType.HasId;
+            return AlertType.Undefined;
+        }
     }
 }

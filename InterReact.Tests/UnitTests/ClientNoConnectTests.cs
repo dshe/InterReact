@@ -19,43 +19,25 @@ namespace InterReact.Tests.UnitTests
         public async Task T01_Cancel()
         {
             var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
-                await new InterReactClientBuilder(ct: new CancellationToken(true)).BuildAsync(timeout: -1));
+                await new InterReactClientBuilder(LoggerFactory).BuildAsync(ct: new CancellationToken(true)));
             Logger.LogDebug(ex.Message);
         }
 
         [Fact]
         public async Task T02_Timeout()
         {
-            var ex = await Assert.ThrowsAsync<TimeoutException>(async () => await new InterReactClientBuilder().BuildAsync(timeout: 0));
+            var cts = new CancellationTokenSource(0);
+            var ex = await Assert.ThrowsAsync<Exception>(async () => await new InterReactClientBuilder(LoggerFactory).BuildAsync(1));
             Logger.LogDebug(ex.Message);
         }
 
         [Fact]
         public async Task T03_ConnectionRefused()
         {
-            var task = new InterReactClientBuilder()
-                .SetPort(NetworkHelper.GetRandomAvailablePort())
-                .BuildAsync(timeout: -1);
-            var ex = await Assert.ThrowsAsync<IOException>(async () => await task);
-            Assert.StartsWith("ConnectionRefused", ex.Message);
-            Logger.LogDebug(ex.Message);
-            Logger.LogDebug(ex.InnerException.Message);
-        }
-
-        [Fact]
-        public async Task T04_NoResponse()
-        {
-            var serverSocket = NetworkHelper.CreateSocket();
-            var endPoint = NetworkHelper.GetEndPointOnLoopbackRandomPort();
-            serverSocket.Bind(endPoint);
-            serverSocket.Listen(10);
-
-            var task = new InterReactClientBuilder()
-                .SetPort(endPoint.Port)
-                .BuildAsync(timeout: 1000);
-            var ex = await Assert.ThrowsAsync<TimeoutException>(async () => await task);
-            Assert.StartsWith("No response", ex.Message);
+            var task = new InterReactClientBuilder(LoggerFactory).SetPort(999).BuildAsync();
+            var ex = await Assert.ThrowsAsync<Exception> (async () => await task);
             Logger.LogDebug(ex.Message);
         }
+
     }
 }

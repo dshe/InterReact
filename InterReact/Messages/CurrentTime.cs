@@ -2,6 +2,8 @@
 using NodaTime;
 using System.Globalization;
 
+#nullable enable
+
 namespace InterReact.Messages
 {
     public sealed class CurrentTime

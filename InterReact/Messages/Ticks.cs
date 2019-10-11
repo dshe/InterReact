@@ -7,14 +7,37 @@ using InterReact.Interfaces;
 using InterReact.Utility;
 using NodaTime;
 
+#nullable enable
+
 namespace InterReact.Messages
 {
-    // This abstract class just avoids repeating the two properties in derived classes.
-    // [interfaces can only specify public properties and functions]
-    public abstract class Tick : ITick
+    public abstract class Tick : IHasRequestId
     {
         public int RequestId { get; protected set; }
-        public TickType TickType { get; set; } // internal set is not possible 
+        public TickType TickType { get; protected set; }
+        internal void Undelay()
+        {
+            TickType = TickType switch
+            {
+                TickType.DelayedBidPrice => TickType.BidSize,
+                TickType.DelayedAskPrice => TickType.AskPrice,
+                TickType.DelayedLastPrice => TickType.LastPrice,
+                TickType.DelayedBidSize => TickType.BidSize,
+                TickType.DelayedAskSize => TickType.AskSize,
+                TickType.DelayedLastSize => TickType.LastSize,
+                TickType.DelayedHigh => TickType.HighPrice,
+                TickType.DelayedLow => TickType.LowPrice,
+                TickType.DelayedVolume => TickType.Volume,
+                TickType.DelayedClose => TickType.ClosePrice,
+                TickType.DelayedOpen => TickType.OpenPrice,
+                TickType.DelayedBidOption => TickType.BidOptionComputation,
+                TickType.DelayedAskOption => TickType.AskOptionComputation,
+                TickType.DelayedLastOption => TickType.LastOptionComputation,
+                TickType.DelayedModelOption => TickType.ModelOptionComputation,
+                TickType.DelayedLastTimeStamp => TickType.LastTimeStamp,
+                _ => TickType
+            };
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -79,11 +102,22 @@ namespace InterReact.Messages
 
             if (version >= 2)
             {
-                TickType tickTypeSize = TickUtility.GetTickTypeSize(priceTickType);
+                TickType tickTypeSize = GetTickTypeSize(priceTickType);
                 if (tickTypeSize != TickType.Undefined)
                     p.Output(new TickSize(requestId, tickTypeSize, size));
             }
         }
+
+        private static TickType GetTickTypeSize(TickType tickType) => tickType switch
+        {
+            TickType.BidPrice => TickType.BidSize,
+            TickType.AskPrice => TickType.AskSize,
+            TickType.LastPrice => TickType.LastSize,
+            TickType.DelayedBidPrice => TickType.DelayedBidSize,
+            TickType.DelayedAskPrice => TickType.DelayedAskSize,
+            TickType.DelayedLastPrice => TickType.DelayedLastSize,
+            _ => TickType.Undefined
+        };
     }
 
     public sealed class TickString : Tick

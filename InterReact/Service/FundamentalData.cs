@@ -9,6 +9,8 @@ using InterReact.Interfaces;
 using InterReact.Messages;
 using InterReact.Utility.Rx;
 
+#nullable enable
+
 namespace InterReact.Service
 {
     public sealed partial class Services
