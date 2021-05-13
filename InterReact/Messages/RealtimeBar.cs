@@ -1,10 +1,7 @@
-﻿using System;
-using System.Globalization;
-using InterReact.Core;
-using InterReact.Interfaces;
+﻿using System.Globalization;
 using NodaTime;
 
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class RealtimeBar : IHasRequestId
     {
@@ -17,7 +14,7 @@ namespace InterReact.Messages
         public long Volume { get; }
         public double Wap { get; }
         public int Count { get; }
-        internal RealtimeBar(ResponseComposer c)
+        internal RealtimeBar(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();

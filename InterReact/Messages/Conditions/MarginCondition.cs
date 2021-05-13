@@ -1,4 +1,4 @@
-﻿namespace InterReact.Messages.Conditions
+﻿namespace InterReact
 {
     /**
     * @class MarginCondition
@@ -11,33 +11,19 @@
 
         protected override string Value
         {
-            get
-            {
-                return Percent.ToString();
-            }
-            set
-            {
-                Percent = int.Parse(value);
-            }
+            get => Percent.ToString();
+            set => Percent = int.Parse(value);
         }
 
-        public override string ToString()
-        {
-            return header + base.ToString();
-        }
+        public override string ToString() => header + base.ToString();
 
-        /**
-        * @brief Margin percent to trigger condition.
-        */
         public int Percent { get; set; }
 
         protected override bool TryParse(string cond)
         {
             if (!cond.StartsWith(header))
                 return false;
-
             cond = cond.Replace(header, "");
-
             return base.TryParse(cond);
         }
     }

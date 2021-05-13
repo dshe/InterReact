@@ -1,22 +1,17 @@
 ﻿using System;
 using System.Threading.Tasks;
-using InterReact.Core;
-using InterReact.Interfaces;
-using InterReact.Service;
-using RxSockets;
-using System.Threading;
 using Microsoft.Extensions.Logging;
-
-#nullable enable
+using RxSockets;
 
 namespace InterReact
 {
-    public interface IInterReactClient : IEditorBrowsableNever, IDisposable
+    public interface IInterReactClient : IEditorBrowsableNever
     {
         Request Request { get; }
         IObservable<object> Response { get; }
         Services Services { get; }
         Config Config { get; }
+        Task DisposeAsync();
     }
 
     public sealed class InterReactClient : IInterReactClient
@@ -26,19 +21,18 @@ namespace InterReact
         public Request Request { get; }
         public IObservable<object> Response { get; }
         public Services Services { get; }
-        public void Dispose() => RxSocket.Dispose();
+        public Task DisposeAsync() => RxSocket.DisposeAsync();
 
-        // constructed by container, so must be public
+        // must be public because it is constructed by the container
         public InterReactClient(IRxSocketClient rxsocket, Config config, Request request, IObservable<object> response,
-            Services services, ILoggerFactory loggerFactory)
+            Services services, ILogger logger)
         {
             RxSocket = rxsocket;
             Config = config;
             Request = request;
             Response = response;
             Services = services;
-            var logger = loggerFactory.CreateLogger(GetType());
-            logger.LogDebug($"Constructed {GetType().Name}.");
+            logger.LogInformation($"Constructed {GetType().Name}.");
         }
     }
 }

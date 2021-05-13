@@ -1,15 +1,12 @@
-﻿using InterReact.Core;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
-#nullable enable
-
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class ManagedAccounts
     {
-        public IList<string> Accounts { get; }
-        internal ManagedAccounts(ResponseComposer c)
+        public List<string> Accounts { get; }
+        internal ManagedAccounts(ResponseReader c)
         {
             c.IgnoreVersion();
             Accounts = c.ReadString().Split(',').OrderBy(name => name).ToList();

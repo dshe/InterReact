@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using InterReact.Core;
-using InterReact.Interfaces;
-using InterReact.Messages;
 using NodaTime;
 
-namespace InterReact.Service.Utility
+namespace InterReact.Utility
 {
     /// <summary>
     /// This object is returned from Services.PlaceOrder(...).
@@ -29,15 +26,13 @@ namespace InterReact.Service.Utility
         //internal OrderMonitor(Request request, Response response, Order order, Contract contract, int orderId)
         internal OrderMonitor(Request request, IObservable<object> response, Order order, Contract contract, int orderId, IClock clock)
         {
-            this.request = request ?? throw new ArgumentNullException(nameof(request));
-            if (response == null)
-                throw new ArgumentNullException(nameof(response));
+            this.request = request;
             response.OfType<IHasOrderId>().Where(m => m.OrderId == orderId).Subscribe(subject);
-            Contract = contract ?? throw new ArgumentNullException(nameof(contract));
-            Order = order ?? throw new ArgumentNullException(nameof(order));
+            Order = order;
+            Contract = contract;
             if (orderId < 0)
                 throw new ArgumentException(nameof(orderId));
-            OrderId = orderId == 0 ? request.NextId() : orderId;
+            OrderId = orderId == 0 ? request.GetNextId() : orderId;
             request.PlaceOrder(OrderId, Order, Contract);
             SubmissionTime = clock.GetCurrentInstant();
         }
@@ -45,5 +40,12 @@ namespace InterReact.Service.Utility
         public void Cancel() => request.CancelOrder(OrderId); // allow Cancel even if the order has executed or an error has been received.
         public void Dispose() => subject.Dispose();
     }
+
+    /// <summary>
+    /// Places an order and returns a object use to monitor the order.
+    /// </summary>
+    //public OrderMonitor PlaceOrder(Order order, Contract contract, int orderId = 0) =>
+    //   new OrderMonitor(Request, Response, order, contract, orderId, Config.Clock);
+
 
 }

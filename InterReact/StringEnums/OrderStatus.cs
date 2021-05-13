@@ -1,6 +1,6 @@
 using StringEnums;
 
-namespace InterReact.StringEnums
+namespace InterReact
 {
     public sealed class OrderStatus : StringEnum<OrderStatus>
     {
@@ -49,7 +49,7 @@ namespace InterReact.StringEnums
         public static readonly OrderStatus PartiallyFilled = Create("PartiallyFilled");
 
         public static readonly OrderStatus ApiPending = Create("ApiPending");
-        
+
         /// <summary>
         /// Api Cancelled.
         /// </summary>

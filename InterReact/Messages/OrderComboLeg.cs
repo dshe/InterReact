@@ -1,4 +1,4 @@
-﻿namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class OrderComboLeg // input + output
     {

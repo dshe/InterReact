@@ -1,8 +1,4 @@
-﻿using InterReact.Core;
-using InterReact.Enums;
-using InterReact.StringEnums;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class ContractComboLeg // input + output
     {
@@ -44,7 +40,7 @@ namespace InterReact.Messages
 
         public ContractComboLeg() { }
 
-        internal ContractComboLeg(ResponseComposer c)
+        internal ContractComboLeg(ResponseReader c)
         {
             ContractId = c.ReadInt();
             Ratio = c.ReadInt();

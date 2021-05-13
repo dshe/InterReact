@@ -1,43 +1,31 @@
 ﻿using System;
-using InterReact.Core;
 
-namespace InterReact.Messages.Conditions
+namespace InterReact
 {
-	public abstract class ContractCondition : OperatorCondition
+    public abstract class ContractCondition : OperatorCondition
     {
+        private const string Delimiter = " of ";
         public int ConId { get; set; }
         public string Exchange { get; set; } = "";
 
-        private const string Delimiter = " of ";
-
         public Func<int, string, string> ContractResolver { get; set; }
 
-        public ContractCondition()
-        {
+        public ContractCondition() =>
             ContractResolver = (conid, exch) => conid + "(" + exch + ")";
-        }
 
         public override string ToString()
-        {
-            return Type + Delimiter + ContractResolver(ConId, Exchange) + base.ToString();
-        }
+            => Type + Delimiter + ContractResolver(ConId, Exchange) + base.ToString();
 
         public override bool Equals(object obj)
         {
-            var other = obj as ContractCondition;
-
-            if (other == null)
-                return false;
-
-            return base.Equals(obj)
+            return (obj is ContractCondition other)
+                && base.Equals(other)
                 && ConId == other.ConId
                 && Exchange.Equals(other.Exchange);
         }
 
         public override int GetHashCode()
-        {
-            return base.GetHashCode() + ConId.GetHashCode() + Exchange.GetHashCode();
-        }
+            => base.GetHashCode() + ConId.GetHashCode() + Exchange.GetHashCode();
 
         protected override bool TryParse(string cond)
         {
@@ -55,7 +43,6 @@ namespace InterReact.Messages.Conditions
                 cond = cond.Substring(cond.IndexOf("(") + 1);
                 Exchange = cond.Substring(0, cond.IndexOf(")"));
                 cond = cond.Substring(cond.IndexOf(")") + 1);
-
                 return base.TryParse(cond);
             }
             catch
@@ -64,10 +51,9 @@ namespace InterReact.Messages.Conditions
             }
         }
 
-        internal override void Deserialize(ResponseComposer c)
+        internal override void Deserialize(ResponseReader c)
         {
             base.Deserialize(c);
-
             ConId = c.ReadInt();
             Exchange = c.ReadString();
         }

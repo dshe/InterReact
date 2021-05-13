@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using InterReact.Core;
-using InterReact.Interfaces;
+﻿using System.Collections.Generic;
 
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class SoftDollarTiers : IHasRequestId
     {
         public int RequestId { get; }
-        public IList<SoftDollarTier> Tiers { get; } = new List<SoftDollarTier>();
-        internal SoftDollarTiers(ResponseComposer c)
+        public List<SoftDollarTier> Tiers { get; } = new List<SoftDollarTier>();
+        internal SoftDollarTiers(ResponseReader c)
         {
             RequestId = c.ReadInt();
             var n = c.ReadInt();
@@ -26,7 +20,7 @@ namespace InterReact.Messages
         public string Name { get; }
         public string Value { get; }
         public string DisplayName { get; }
-        internal SoftDollarTier(ResponseComposer c)
+        internal SoftDollarTier(ResponseReader c)
         {
             Name = c.ReadString();
             Value = c.ReadString();

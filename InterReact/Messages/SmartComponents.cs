@@ -1,10 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Text;
-using InterReact.Core;
-using InterReact.Interfaces;
 
-namespace InterReact.Messages
+namespace InterReact
 {
     // output
     /// <summary>
@@ -15,9 +11,9 @@ namespace InterReact.Messages
     public sealed class SmartComponents : IHasRequestId
     {
         public int RequestId { get; }
-        public IDictionary<int, KeyValuePair<string, char>> Map { get; } = new Dictionary<int, KeyValuePair<string, char>>();
+        public Dictionary<int, KeyValuePair<string, char>> Map { get; } = new Dictionary<int, KeyValuePair<string, char>>();
 
-        internal SmartComponents(ResponseComposer c)
+        internal SmartComponents(ResponseReader c)
         {
             RequestId = c.ReadInt();
             var n = c.ReadInt();

@@ -1,10 +1,4 @@
-﻿using InterReact.Core;
-using InterReact.Enums;
-using InterReact.Interfaces;
-using InterReact.Messages.Conditions;
-using InterReact.StringEnums;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class OpenOrder : IHasOrderId
     {
@@ -51,10 +45,9 @@ namespace InterReact.Messages
 
         public string WarningText { get; }
 
-        internal OpenOrder(ResponseComposer c) // the monster
+        internal OpenOrder(ResponseReader c) // the monster
         {
-            var serverVersion = c.Config.ServerVersionCurrent;
-            var messageVersion = serverVersion < ServerVersion.OrderContainer ? c.RequireVersion(17) : (int)serverVersion;
+            var messageVersion = c.RequireVersion(17);
             var orderId = c.ReadInt();
 
             Contract = new Contract
@@ -64,7 +57,7 @@ namespace InterReact.Messages
                 SecurityType = c.ReadStringEnum<SecurityType>(),
                 LastTradeDateOrContractMonth = c.ReadString(),
                 Strike = c.ReadDouble(),
-                Right = c.ReadStringEnum<RightType>(),
+                Right = c.ReadStringEnum<OptionRightType>(),
                 Multiplier = messageVersion >= 32 ? c.ReadString() : string.Empty,
                 Exchange = c.ReadString(),
                 Currency = c.ReadString(),
@@ -75,7 +68,7 @@ namespace InterReact.Messages
             {
                 OrderId = orderId,
                 TradeAction = c.ReadStringEnum<TradeAction>(),
-                TotalQuantity = c.ReadDouble(),
+                TotalQuantity = c.Config.SupportsServerVersion(ServerVersion.FractionalPositions) ? c.ReadDouble() : c.ReadInt(),
                 OrderType = c.ReadStringEnum<OrderType>(),
                 LimitPrice = messageVersion < 29 ? c.ReadDouble() : c.ReadDoubleNullable(),
                 AuxPrice = messageVersion < 30 ? c.ReadDouble() : c.ReadDoubleNullable(),
@@ -242,15 +235,6 @@ namespace InterReact.Messages
             Order.WhatIf = c.ReadBool();
             Status = c.ReadStringEnum<OrderStatus>();
 
-            if (serverVersion >= ServerVersion.WhatIfExtFields)
-            {
-                InitialMarginBefore = c.ReadString();
-                MaintenanceMarginBefore = c.ReadString();
-                EquityWithLoanBefore = c.ReadString();
-                InitMarginChange = c.ReadString();
-                MaintMarginChange = c.ReadString();
-                EquityWithLoanChange = c.ReadString();
-            }
             InitMarginAfter = c.ReadString();
             MaintMarginAfter = c.ReadString();
             EquityWithLoanBefore = c.ReadString();
@@ -306,21 +290,12 @@ namespace InterReact.Messages
 
             if (c.Config.SupportsServerVersion(ServerVersion.CashQty))
                 Order.CashQty = c.ReadDoubleNullable();
-
-            if (c.Config.SupportsServerVersion(ServerVersion.AutoPriceForHedge))
-                Order.DontUseAutoPriceForHedge = c.ReadBool();
-
-            if (c.Config.SupportsServerVersion(ServerVersion.OrderContainer))
-                Order.IsOmsContainer = c.ReadBool();
-
-            if (c.Config.SupportsServerVersion(ServerVersion.DPegOrders))
-                Order.DiscretionaryUpToLimitPrice = c.ReadBool();
         }
     }
 
     public sealed class OpenOrderEnd
     {
-        internal OpenOrderEnd(ResponseComposer c) => c.IgnoreVersion();
+        internal OpenOrderEnd(ResponseReader c) => c.IgnoreVersion();
     }
 
 }

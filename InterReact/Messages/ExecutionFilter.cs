@@ -1,9 +1,7 @@
-﻿using System;
-using InterReact.Enums;
-using InterReact.StringEnums;
+﻿
 using NodaTime;
 
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class ExecutionFilter // input
     {

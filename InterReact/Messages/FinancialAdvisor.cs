@@ -1,13 +1,10 @@
-﻿using InterReact.Core;
-using InterReact.Enums;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class FinancialAdvisor // output
     {
         public FinancialAdvisorDataType DataType { get; }
         public string XmlData { get; }
-        internal FinancialAdvisor(ResponseComposer c)
+        internal FinancialAdvisor(ResponseReader c)
         {
             c.IgnoreVersion();
             DataType = c.ReadEnum<FinancialAdvisorDataType>();

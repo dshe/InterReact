@@ -1,4 +1,4 @@
-﻿namespace InterReact.Interfaces
+﻿namespace InterReact
 {
     public interface IHasRequestId
     {

@@ -1,12 +1,6 @@
 ﻿using System.Collections.Generic;
-using InterReact.Enums;
-using InterReact.Interfaces;
-using InterReact.Messages.Conditions;
-using InterReact.StringEnums;
 
-#nullable enable
-
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class Order : IHasOrderId  // input + output
     {
@@ -296,9 +290,9 @@ namespace InterReact.Messages
 
         public bool NotHeld { get; set; }
 
-        public IList<Tag> SmartComboRoutingParams { get; } = new List<Tag>(); // input + output
-        public IList<OrderComboLeg> ComboLegs { get; } = new List<OrderComboLeg>(); // input + output
-        public IList<Tag> MiscOptions { get; } = new List<Tag>(); // input
+        public List<Tag> SmartComboRoutingParams { get; } = new List<Tag>(); // input + output
+        public List<OrderComboLeg> ComboLegs { get; } = new List<OrderComboLeg>(); // input + output
+        public List<Tag> MiscOptions { get; } = new List<Tag>(); // input
 
         /// <summary>
         /// For GTC(good-till cancelled) orders.
@@ -333,7 +327,7 @@ namespace InterReact.Messages
         public double? AdjustedStopLimitPrice { get; set; }
         public double? AdjustedTrailingAmount { get; set; }
         public int AdjustableTrailingUnit { get; set; }
-        public IList<OrderCondition> Conditions { get; } = new List<OrderCondition>();
+        public List<OrderCondition> Conditions { get; } = new List<OrderCondition>();
         public bool ConditionsIgnoreRegularTradingHours { get; set; }
         public bool ConditionsCancelOrder { get; set; }
         public SoftDollarTier? SoftDollarTier { get; set; }

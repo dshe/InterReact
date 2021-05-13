@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using InterReact.Core;
-using InterReact.Interfaces;
+﻿using System.Collections.Generic;
 
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class HistogramItems : IHasRequestId // output
     {
         public int RequestId { get; }
-        public IList<HistogramItem> Items { get; } = new List<HistogramItem>();
-        internal HistogramItems(ResponseComposer c)
+        public List<HistogramItem> Items { get; } = new List<HistogramItem>();
+        internal HistogramItems(ResponseReader c)
         {
             RequestId = c.ReadInt();
             var n = c.ReadInt();
@@ -24,7 +20,7 @@ namespace InterReact.Messages
         public double Price { get; }
         public long Size { get; }
 
-        internal HistogramItem(ResponseComposer c)
+        internal HistogramItem(ResponseReader c)
         {
             Price = c.ReadDouble();
             Size = c.ReadLong();

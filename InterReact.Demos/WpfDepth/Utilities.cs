@@ -2,13 +2,13 @@
 using System.ComponentModel;
 using System.Windows;
 
-#nullable enable
+
 
 namespace WpfDepth
 {
     public abstract class NotifyPropertyChangedBase : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         protected virtual void NotifyPropertiesChanged()
             => NotifyPropertyChanged("");

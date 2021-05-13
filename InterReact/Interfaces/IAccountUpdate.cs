@@ -1,4 +1,4 @@
-﻿namespace InterReact.Interfaces
+﻿namespace InterReact
 {
     /// <summary>
     /// Marker interface indicating messages returned from RequestAccountUpdates().

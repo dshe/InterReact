@@ -1,10 +1,6 @@
-﻿using InterReact.Core;
-using InterReact.Enums;
-using InterReact.Interfaces;
-using InterReact.StringEnums;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
     {
@@ -40,7 +36,7 @@ namespace InterReact.Messages
         /// </summary>
         public string Account { get; }
 
-        public string Exchange { get;  }
+        public string Exchange { get; }
         public ExecutionSide Side { get; }
 
         /// <summary>
@@ -86,10 +82,9 @@ namespace InterReact.Messages
 
         public Contract Contract { get; }
 
-        internal Execution(ResponseComposer c)
+        internal Execution(ResponseReader c)
         {
-            if (!c.Config.SupportsServerVersion(ServerVersion.LastLiqidity))
-                c.RequireVersion(10);
+            c.RequireVersion(10);
             var requestId = c.ReadInt();
             var orderId = c.ReadInt();
             Contract = new Contract
@@ -99,7 +94,7 @@ namespace InterReact.Messages
                 SecurityType = c.ReadStringEnum<SecurityType>(),
                 LastTradeDateOrContractMonth = c.ReadString(),
                 Strike = c.ReadDouble(),
-                Right = c.ReadStringEnum<RightType>(),
+                Right = c.ReadStringEnum<OptionRightType>(),
                 Multiplier = c.ReadString(),
                 Exchange = c.ReadString(),
                 Currency = c.ReadString(),
@@ -113,7 +108,10 @@ namespace InterReact.Messages
             Account = c.ReadString();
             Exchange = c.ReadString();
             Side = c.ReadStringEnum<ExecutionSide>();
-            Shares = c.ReadDouble();
+            if (c.Config.SupportsServerVersion(ServerVersion.FractionalPositions))
+                Shares = c.ReadDouble();
+            else
+                Shares = c.ReadInt();
             Price = c.ReadDouble();
             PermanentId = c.ReadInt();
             ClientId = c.ReadInt();
@@ -125,8 +123,6 @@ namespace InterReact.Messages
             EconomicValueMultiplier = c.ReadDouble();
             if (c.Config.SupportsServerVersion(ServerVersion.ModelsSupport))
                 ModelCode = c.ReadString();
-            if (c.Config.SupportsServerVersion(ServerVersion.LastLiqidity))
-                LastLiquidity = c.ReadEnum<Liquidity>();
             Executions[ExecutionId] = this;
         }
     }
@@ -134,7 +130,7 @@ namespace InterReact.Messages
     public sealed class ExecutionEnd : IHasRequestId
     {
         public int RequestId { get; }
-        internal ExecutionEnd(ResponseComposer c)
+        internal ExecutionEnd(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();

@@ -1,4 +1,4 @@
-namespace InterReact.Enums
+namespace InterReact
 {
     public enum TickType
     {
@@ -332,7 +332,17 @@ namespace InterReact.Enums
         FuturesOpenInterest = 86,
         AvgOptVolume = 87,
         DelayedLastTimeStamp = 88,
-        ShortableShares = 89
+        ShortableShares = 89,
+        DdelayedHalted = 90,
+        Reuters2MutualFunds = 91,
+        EtfNavClose = 92,
+        EtfNavPriorClose = 93,
+        EtfNavBid = 94,
+        EtfNavAsk = 95,
+        EtfNavLast = 96,
+        EtfFrozenNavLast = 97,
+        EtfNavHigh = 98,
+        EtfNavLow = 99
     }
 
     public enum TickByTickType

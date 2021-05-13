@@ -1,16 +1,10 @@
-﻿using InterReact.Core;
-using InterReact.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class RerouteMktData : IHasRequestId
     {
         public int RequestId { get; }
         public int ContractId { get; }
-        internal RerouteMktData(ResponseComposer c)
+        internal RerouteMktData(ResponseReader c)
         {
             RequestId = c.ReadInt();
             ContractId = c.ReadInt();
@@ -22,7 +16,7 @@ namespace InterReact.Messages
         public int RequestId { get; }
         public int ContractId { get; }
         public string Exchange { get; }
-        internal RerouteMktDepth(ResponseComposer c)
+        internal RerouteMktDepth(ResponseReader c)
         {
             RequestId = c.ReadInt();
             ContractId = c.ReadInt();

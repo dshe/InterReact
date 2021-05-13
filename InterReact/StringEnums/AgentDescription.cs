@@ -1,6 +1,6 @@
 using StringEnums;
 
-namespace InterReact.StringEnums
+namespace InterReact
 {
     /// <summary>
     /// Used for Rule 80A. Describes the type of trader.

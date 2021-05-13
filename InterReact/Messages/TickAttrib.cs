@@ -1,10 +1,6 @@
-﻿using InterReact.Core;
-using InterReact.Enums;
-using InterReact.Utility;
+﻿using InterReact.Utility;
 
-#nullable enable
-
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class TickAttrib
     {
@@ -38,19 +34,18 @@ namespace InterReact.Messages
          */
         public bool AskPastHigh { get; }
 
-        internal TickAttrib(ResponseComposer? c)
+        internal TickAttrib(ResponseReader? r)
         {
-            if (c == null)
+            if (r == null)
                 return;
-
-            var value = c.ReadInt();
+            var value = r.ReadInt();
             CanAutoExecute = value == 1;
-            if (c.Config.SupportsServerVersion(ServerVersion.PastLimit))
+            if (r.Config.SupportsServerVersion(ServerVersion.PastLimit))
             {
                 var mask = new BitMask(value);
                 CanAutoExecute = mask[0];
                 PastLimit = mask[1];
-                if (c.Config.SupportsServerVersion(ServerVersion.PreOpenBidAsk))
+                if (r.Config.SupportsServerVersion(ServerVersion.PreOpenBidAsk))
                     PreOpen = mask[2];
             }
         }

@@ -1,6 +1,6 @@
 ﻿using StringEnums;
 
-namespace InterReact.StringEnums
+namespace InterReact
 {
     public sealed class OrderOpenClose : StringEnum<OrderOpenClose>
     {

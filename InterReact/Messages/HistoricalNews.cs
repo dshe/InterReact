@@ -1,16 +1,13 @@
-﻿using InterReact.Core;
-using InterReact.Interfaces;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class HistoricalNews : IHasRequestId
     {
         public int RequestId { get; }
-        public string Time { get;}
-        public string ProviderCode { get;}
-        public string ArticleId { get;}
-        public string Headline { get;}
-        internal HistoricalNews(ResponseComposer c)
+        public string Time { get; }
+        public string ProviderCode { get; }
+        public string ArticleId { get; }
+        public string Headline { get; }
+        internal HistoricalNews(ResponseReader c)
         {
             RequestId = c.ReadInt();
             Time = c.ReadString();
@@ -22,9 +19,9 @@ namespace InterReact.Messages
 
     public sealed class HistoricalNewsEnd : IHasRequestId
     {
-        public int RequestId { get;}
-        public bool HasMore { get;}
-        internal HistoricalNewsEnd(ResponseComposer c)
+        public int RequestId { get; }
+        public bool HasMore { get; }
+        internal HistoricalNewsEnd(ResponseReader c)
         {
             RequestId = c.ReadInt();
             HasMore = c.ReadBool();

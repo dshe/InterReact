@@ -3,72 +3,64 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using InterReact.Core;
-using InterReact.Enums;
+using InterReact;
 using InterReact.Utility;
 using RxSockets;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
-using System.Net;
-using System.Reactive.Threading.Tasks;
-
-#nullable enable
 
 namespace CoreClientServer
 {
     internal class Server
     {
-        private readonly IPEndPoint EndPoint;
-        private readonly ILogger<RxSocketServer> Logger;
+        public IRxSocketServer SocketServer { get; }
+        private readonly ILogger Logger;
         private readonly Limiter Limiter = new Limiter();
 
-        internal Server(int port, ILogger<RxSocketServer> logger)
+        internal Server(ILogger logger, ILogger libLogger)
         {
-            EndPoint = new IPEndPoint(IPAddress.IPv6Any, port);
             Logger = logger;
+            SocketServer = RxSocketServer.Create(libLogger);
         }
 
         internal async Task Run()
         {
-            //var server = EndPoint.CreateRxSocketServer(Logger);
-            var server = EndPoint.CreateRxSocketServer();
-
             Logger.LogInformation("Waiting for client.");
-            var accept = await server.AcceptObservable.FirstAsync();
+            var accept = await SocketServer.AcceptObservable.FirstAsync();
             Logger.LogInformation("Client connection accepted.");
 
-            var firstString = await accept.ReceiveObservable.ToStrings().FirstAsync();
+            var firstString = await accept.ReadAsync().ToStringAsync();
+
             if (firstString != "API")
                 throw new InvalidDataException("'API' not received.");
             Logger.LogInformation("Received 'API'.");
 
             // Start receiving with length prefix.
-            // hangs on next line
-            var messages1 = await accept.ReceiveObservable.ToByteArrayOfLengthPrefix().ToStringArray().FirstAsync();
+            var messages1 = await accept.ReadAsync().ToStringsFromBufferWithLengthPrefixAsync();
             var versions = messages1.Single();
 
             if (!versions.StartsWith("v"))
                 throw new InvalidDataException("Versions not received.");
             Logger.LogInformation($"Received supported server versions: '{versions}'.");
 
-            var messages2 = await accept.ReceiveObservable.ToByteArrayOfLengthPrefix().ToStringArray().FirstAsync();
+            var messages2 = await accept.ReadAsync().ToStringsFromBufferWithLengthPrefixAsync();
 
             if (messages2[0] != "71") // receive StartApi message
                 throw new InvalidDataException("StartApi message not received.");
             Logger.LogInformation("Received StartApi message.");
 
-            new RequestMessage(accept, Limiter)
+            new RequestMessage(accept.Send, Limiter)
                 .Write(149) // server version
                 .Write(DateTime.Now.ToString("yyyyMMdd HH:mm:ss XXX"))
                 .Send();
 
-            new RequestMessage(accept, Limiter)
+            new RequestMessage(accept.Send, Limiter)
                 .Write("15")
                 .Write("1")
                 .Write("123,456,789")
                 .Send();
 
-            new RequestMessage(accept, Limiter)
+            new RequestMessage(accept.Send, Limiter)
                 .Write("9")
                 .Write("1")
                 .Write("10")
@@ -78,7 +70,10 @@ namespace CoreClientServer
 
             ////////////////////////////////////////////////////
 
-            var obs = accept.ReceiveObservable.ToByteArrayOfLengthPrefix().ToStringArray().Publish().RefCount();
+            var obs = accept.ReceiveObservable
+                .RemoveLengthPrefix()
+                .ToStrings()
+                .Publish().RefCount();
 
             // receive test start signal
             await obs.FirstAsync();
@@ -108,7 +103,7 @@ namespace CoreClientServer
             await obs.LastOrDefaultAsync();
 
             Logger.LogInformation("Disconnecting.");
-            server.Dispose();
+            await SocketServer.DisposeAsync();
             Logger.LogInformation("Disconnected.");
         }
     }

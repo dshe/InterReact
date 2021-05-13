@@ -1,18 +1,12 @@
-﻿using InterReact.Core;
-using InterReact.Interfaces;
-using InterReact.StringEnums;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
-#nullable enable
-
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class ContractDescription // output
     {
         public Contract Contract { get; }
-        public IList<string> DerivativeSecTypes { get; } = new List<string>();
-        internal ContractDescription(ResponseComposer c)
+        public List<string> DerivativeSecTypes { get; } = new List<string>();
+        internal ContractDescription(ResponseReader c)
         {
             Contract = new Contract
             {
@@ -29,8 +23,8 @@ namespace InterReact.Messages
     public sealed class SymbolSamples : IHasRequestId // output
     {
         public int RequestId { get; }
-        public IList<ContractDescription> Descriptions { get; } = new List<ContractDescription>();
-        internal SymbolSamples(ResponseComposer c)
+        public List<ContractDescription> Descriptions { get; } = new List<ContractDescription>();
+        internal SymbolSamples(ResponseReader c)
         {
             RequestId = c.ReadInt();
             var n = c.ReadInt();

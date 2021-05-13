@@ -1,13 +1,10 @@
-﻿using InterReact.Core;
-using InterReact.Interfaces;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class DisplayGroupUpdate : IHasRequestId
     {
         public int RequestId { get; }
         public string ContractInfo { get; }
-        internal DisplayGroupUpdate(ResponseComposer c)
+        internal DisplayGroupUpdate(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();
@@ -19,7 +16,7 @@ namespace InterReact.Messages
     {
         public int RequestId { get; }
         public string Groups { get; }
-        internal DisplayGroups(ResponseComposer c)
+        internal DisplayGroups(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();

@@ -1,6 +1,4 @@
-﻿using InterReact.Core;
-
-namespace InterReact.Messages.Conditions
+﻿namespace InterReact
 {
     /**
     * @class ExecutionCondition
@@ -9,19 +7,8 @@ namespace InterReact.Messages.Conditions
     */
     public class ExecutionCondition : OrderCondition
     {
-        /**
-        * @brief Exchange where the symbol needs to be traded.
-        */
         public string Exchange { get; set; } = "";
-
-        /**
-        * @brief Kind of instrument being monitored.
-        */
         public string SecType { get; set; } = "";
-
-        /**
-        * @brief Instrument's symbol
-        */
         public string Symbol { get; set; } = "";
 
         private const string header = "trade occurs for ",
@@ -29,16 +16,13 @@ namespace InterReact.Messages.Conditions
                      exchangeSuffix = " exchange for ",
                      secTypeSuffix = " security type";
 
-        public override string ToString()
-        {
-            return header + Symbol + symbolSuffix + Exchange + exchangeSuffix + SecType + secTypeSuffix;
-        }
+        public override string ToString() =>
+            header + Symbol + symbolSuffix + Exchange + exchangeSuffix + SecType + secTypeSuffix;
 
         protected override bool TryParse(string cond)
         {
             if (!cond.StartsWith(header))
                 return false;
-
             try
             {
                 var parser = new StringSuffixParser(cond.Replace(header, ""));
@@ -54,14 +38,12 @@ namespace InterReact.Messages.Conditions
             {
                 return false;
             }
-
             return true;
         }
 
-        internal override void Deserialize(ResponseComposer c)
+        internal override void Deserialize(ResponseReader c)
         {
             base.Deserialize(c);
-
             SecType = c.ReadString();
             Exchange = c.ReadString();
             Symbol = c.ReadString();
@@ -75,20 +57,14 @@ namespace InterReact.Messages.Conditions
 
         public override bool Equals(object obj)
         {
-            var other = obj as ExecutionCondition;
-
-            if (other == null)
-                return false;
-
-            return base.Equals(obj) 
+            return (obj is ExecutionCondition other)
+                && base.Equals(obj)
                 && Exchange.Equals(other.Exchange)
                 && SecType.Equals(other.SecType)
                 && Symbol.Equals(other.Symbol);
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode() + Exchange.GetHashCode() + SecType.GetHashCode() + Symbol.GetHashCode();
-        }
+        public override int GetHashCode() =>
+            base.GetHashCode() + Exchange.GetHashCode() + SecType.GetHashCode() + Symbol.GetHashCode();
     }
 }

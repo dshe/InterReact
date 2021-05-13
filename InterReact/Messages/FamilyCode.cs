@@ -1,13 +1,11 @@
-﻿using InterReact.Core;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class FamilyCodes // output
     {
-        public IList<FamilyCode> Codes { get; } = new List<FamilyCode>();
-        internal FamilyCodes(ResponseComposer c)
+        public List<FamilyCode> Codes { get; } = new List<FamilyCode>();
+        internal FamilyCodes(ResponseReader c)
         {
             var n = c.ReadInt();
             for (int i = 0; i < n; i++)
@@ -19,7 +17,7 @@ namespace InterReact.Messages
     {
         public string AccountId { get; }
         public string FamilyCodeStr { get; }
-        internal FamilyCode(ResponseComposer c)
+        internal FamilyCode(ResponseReader c)
         {
             AccountId = c.ReadString();
             FamilyCodeStr = c.ReadString();

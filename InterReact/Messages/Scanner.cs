@@ -1,13 +1,9 @@
-﻿using InterReact.Core;
-using InterReact.Enums;
-using InterReact.StringEnums;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class ScannerParameters
     {
         public string Parameters { get; }
-        internal ScannerParameters(ResponseComposer c)
+        internal ScannerParameters(ResponseReader c)
         {
             c.IgnoreVersion();
             Parameters = c.ReadString();

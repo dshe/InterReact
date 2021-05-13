@@ -1,7 +1,4 @@
-﻿using InterReact.Core;
-using InterReact.StringEnums;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class AccountPosition
     {
@@ -9,7 +6,7 @@ namespace InterReact.Messages
         public Contract Contract { get; }
         public double Position { get; }
         public double AverageCost { get; }
-        internal AccountPosition(ResponseComposer c)
+        internal AccountPosition(ResponseReader c)
         {
             c.RequireVersion(3);
             Account = c.ReadString();
@@ -20,20 +17,20 @@ namespace InterReact.Messages
                 SecurityType = c.ReadStringEnum<SecurityType>(),
                 LastTradeDateOrContractMonth = c.ReadString(),
                 Strike = c.ReadDouble(),
-                Right = c.ReadStringEnum<RightType>(),
+                Right = c.ReadStringEnum<OptionRightType>(),
                 Multiplier = c.ReadString(),
                 Exchange = c.ReadString(),
                 Currency = c.ReadString(),
                 LocalSymbol = c.ReadString(),
                 TradingClass = c.ReadString()
             };
-            Position = c.ReadDouble(); // may be an int
+            Position = c.Config.SupportsServerVersion(ServerVersion.FractionalPositions) ? c.ReadDouble() : c.ReadInt();
             AverageCost = c.ReadDouble();
-       }
+        }
     }
 
     public sealed class AccountPositionEnd
     {
-        internal AccountPositionEnd(ResponseComposer c) => c.IgnoreVersion();
+        internal AccountPositionEnd(ResponseReader c) => c.IgnoreVersion();
     }
 }

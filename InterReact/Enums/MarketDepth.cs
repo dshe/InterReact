@@ -1,4 +1,4 @@
-namespace InterReact.Enums
+namespace InterReact
 {
     public enum MarketDepthOperation
     {

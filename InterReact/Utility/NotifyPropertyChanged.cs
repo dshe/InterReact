@@ -1,15 +1,15 @@
 ﻿using System.ComponentModel;
-
-#nullable enable
+using System.Runtime.CompilerServices;
 
 namespace InterReact.Utility
 {
     public abstract class NotifyPropertyChanged : INotifyPropertyChanged
     {
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
 
-        internal void PropertyChange(string? propertyName = null) =>
+        internal void PropertyChange([CallerMemberName] string? propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
+
 
 }

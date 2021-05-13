@@ -1,22 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
-using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
-using InterReact.Enums;
-using InterReact.Messages;
 using InterReact.Utility;
 using System.Threading;
-using InterReact.Interfaces;
+using Stringification;
 
 //https://github.com/dotnet/corefx/issues/970
 
 namespace InterReact.Extensions
 {
-    public static class ToObservableCollectionEx
+    public static class ToObservableCollectionExtensions
     {
         /// <summary>
         /// Create observable collections from AccountValue updates.
@@ -29,7 +23,7 @@ namespace InterReact.Extensions
         public static (ReadOnlyObservableList<AccountValue> accountValue, ReadOnlyObservableList<PortfolioValue> portfolioValue)
             ToObservableCollections(this IObservable<IAccountUpdate> source, CancellationToken ct = default)
         {
-            var av = source.OfType<AccountValue>  ().ToObservableCollection(v => $"{v.Account}+{v.Key}+{v.Currency}", ct);
+            var av = source.OfType<AccountValue>().ToObservableCollection(v => $"{v.Account}+{v.Key}+{v.Currency}", ct);
             var pv = source.OfType<PortfolioValue>().ToObservableCollection(v => $"{v.Account}+{v.Contract?.Stringify()}", ct);
 
             return (av, pv);
@@ -37,13 +31,8 @@ namespace InterReact.Extensions
 
         internal static ReadOnlyObservableList<TValue> ToObservableCollection<TKey, TValue>
             (this IObservable<TValue> source, Func<TValue, TKey> getKey, CancellationToken ct = default)
-                where TValue: NotifyPropertyChanged
+                where TValue : NotifyPropertyChanged
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-            if (getKey == null)
-                throw new ArgumentNullException(nameof(getKey));
-
             // compare keys using the default comparer for the key type
             var comparer = Comparer<TValue>.Create((a, b) => Comparer<TKey>.Default.Compare(getKey(a), getKey(b)));
             var collection = new ObservableCollection<TValue>();

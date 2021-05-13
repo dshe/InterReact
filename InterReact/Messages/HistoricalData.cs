@@ -1,10 +1,4 @@
-﻿using InterReact.Core;
-using InterReact.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class HistoricalData : IHasRequestId
     {
@@ -17,7 +11,7 @@ namespace InterReact.Messages
         public double Low { get; }
         public double WAP { get; }
         public long Volume { get; }
-        internal HistoricalData(ResponseComposer c)
+        internal HistoricalData(ResponseReader c)
         {
             RequestId = c.ReadInt();
             BarCount = c.ReadInt();

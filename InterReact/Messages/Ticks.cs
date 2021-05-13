@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Globalization;
-using InterReact.Core;
-using InterReact.Enums;
-using InterReact.Interfaces;
-using InterReact.Utility;
 using NodaTime;
 
-#nullable enable
-
-namespace InterReact.Messages
+namespace InterReact
 {
     public abstract class Tick : IHasRequestId
     {
@@ -38,6 +31,40 @@ namespace InterReact.Messages
                 _ => TickType
             };
         }
+
+        internal static (TickPrice, TickSize?) CreatePriceAndSizeTicks(ResponseReader p)
+        {
+            var version = p.GetVersion();
+            var requestId = p.ReadInt();
+            if (requestId == int.MaxValue)
+                p.ReadDouble(); // IMPORTANT: trigger parse exception for testing
+            var priceTickType = p.ReadEnum<TickType>();
+            var price = p.ReadDouble();
+            var size = version >= 2 ? p.ReadInt() : 0;
+
+            var tickPrice = new TickPrice(requestId, priceTickType, price, new TickAttrib(version >= 3 ? p : null));
+            TickSize? tickSize = null;
+            if (version >= 2)
+            {
+                TickType tickTypeSize = GetTickTypeSize(priceTickType);
+                if (tickTypeSize != TickType.Undefined)
+                    tickSize = new TickSize(requestId, tickTypeSize, size);
+            }
+            return (tickPrice, tickSize);
+        }
+
+        private static TickType GetTickTypeSize(TickType tickType) => tickType switch
+        {
+            TickType.BidPrice => TickType.BidSize,
+            TickType.AskPrice => TickType.AskSize,
+            TickType.LastPrice => TickType.LastSize,
+            TickType.DelayedBidPrice => TickType.DelayedBidSize,
+            TickType.DelayedAskPrice => TickType.DelayedAskSize,
+            TickType.DelayedLastPrice => TickType.DelayedLastSize,
+            _ => TickType.Undefined
+        };
+
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -58,19 +85,19 @@ namespace InterReact.Messages
             TickType = tickType;
             Size = size;
         }
-        internal TickSize(ResponseComposer c)
+        internal TickSize(ResponseReader r)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
-            TickType = c.ReadEnum<TickType>();
-            Size = c.ReadInt();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
+            TickType = r.ReadEnum<TickType>();
+            Size = r.ReadInt();
         }
     }
 
     /// <summary>
     /// Combined Price AND Size tick. IB's own API client sends separate messages.
     /// A trade/bid/ask at a price which is different from the previous trade/bid/ask price.
-    /// An TickPrice is followed by a corresponding TickSize tick. 
+    /// A TickPrice is followed by a corresponding TickSize tick. 
     /// You can either choose to ignore the size property in TickPrice,
     /// or else filter out the redundant TickSize messages using TickRedundentSizeFilter.
     /// </summary>
@@ -78,46 +105,13 @@ namespace InterReact.Messages
     {
         public double Price { get; }
         public TickAttrib TickAttrib { get; }
-        private TickPrice(int requestId, TickType tickType, double price, TickAttrib attrib)
+        internal TickPrice(int requestId, TickType tickType, double price, TickAttrib attrib)
         {
             RequestId = requestId;
             TickType = tickType;
             Price = price;
             TickAttrib = attrib;
         }
-
-        // This is the only method that can send more than 1 message. Output(message) used instead of return(message).
-        internal static void Send(ResponseComposer p)
-        {
-            var version = p.GetVersion();
-            var requestId = p.ReadInt();
-            if (requestId == int.MaxValue)
-                p.ReadDouble(); // trigger parse exception for testing
-            var priceTickType = p.ReadEnum<TickType>();
-            var price = p.ReadDouble();
-            var size = version >= 2 ? p.ReadInt() : 0;
-
-            var priceTick = new TickPrice(requestId, priceTickType, price, new TickAttrib(version >= 3? p: null));
-            p.Output(priceTick);
-
-            if (version >= 2)
-            {
-                TickType tickTypeSize = GetTickTypeSize(priceTickType);
-                if (tickTypeSize != TickType.Undefined)
-                    p.Output(new TickSize(requestId, tickTypeSize, size));
-            }
-        }
-
-        private static TickType GetTickTypeSize(TickType tickType) => tickType switch
-        {
-            TickType.BidPrice => TickType.BidSize,
-            TickType.AskPrice => TickType.AskSize,
-            TickType.LastPrice => TickType.LastSize,
-            TickType.DelayedBidPrice => TickType.DelayedBidSize,
-            TickType.DelayedAskPrice => TickType.DelayedAskSize,
-            TickType.DelayedLastPrice => TickType.DelayedLastSize,
-            _ => TickType.Undefined
-        };
     }
 
     public sealed class TickString : Tick
@@ -130,7 +124,7 @@ namespace InterReact.Messages
             Value = value;
         }
 
-        internal static Tick Create(ResponseComposer c)
+        internal static Tick Create(ResponseReader c)
         {
             c.IgnoreVersion();
             var requestId = c.ReadInt();
@@ -201,7 +195,7 @@ namespace InterReact.Messages
             TickType = tickType;
             Value = value;
         }
-        internal static Tick Create(ResponseComposer c)
+        internal static Tick Create(ResponseReader c)
         {
             c.IgnoreVersion();
             var requestId = c.ReadInt();
@@ -222,7 +216,7 @@ namespace InterReact.Messages
         public string FutureExpiry { get; }
         public double DividendImpact { get; }
         public double DividendsToLastTradeDate { get; }
-        internal TickExchangeForPhysical(ResponseComposer c)
+        internal TickExchangeForPhysical(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();
@@ -246,12 +240,12 @@ namespace InterReact.Messages
         public double? ImpliedVolatility { get; }
         public double? Delta { get; }
         public double? OptPrice { get; }
-        public double? PvDividend { get;}
-        public double? Gamma { get;}
-        public double? Vega { get;}
-        public double? Theta { get;}
-        public double? UndPrice { get;}
-        internal TickOptionComputation(ResponseComposer c)
+        public double? PvDividend { get; }
+        public double? Gamma { get; }
+        public double? Vega { get; }
+        public double? Theta { get; }
+        public double? UndPrice { get; }
+        internal TickOptionComputation(ResponseReader c)
         {
             var version = c.GetVersion();
             RequestId = c.ReadInt();
@@ -313,7 +307,7 @@ namespace InterReact.Messages
     public sealed class TickMarketDataType : Tick
     {
         public MarketDataType MarketDataType { get; }
-        internal TickMarketDataType(ResponseComposer c)
+        internal TickMarketDataType(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();
@@ -325,7 +319,7 @@ namespace InterReact.Messages
     public sealed class TickSnapshotEnd : IHasRequestId
     {
         public int RequestId { get; }
-        public TickSnapshotEnd(ResponseComposer c)
+        public TickSnapshotEnd(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();

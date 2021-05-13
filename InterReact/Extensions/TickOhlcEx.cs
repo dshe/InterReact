@@ -1,10 +1,5 @@
 ﻿using System;
 using System.Reactive.Linq;
-using InterReact.Enums;
-using InterReact.Interfaces;
-using InterReact.Messages;
-using InterReact.StringEnums;
-using InterReact.Utility;
 
 namespace InterReact.Extensions
 {
@@ -16,9 +11,6 @@ namespace InterReact.Extensions
         public double? Close { get; private set; }
         internal static TickOhlc Calc(TickOhlc instance, double value)
         {
-            if (instance == null)
-                throw new ArgumentNullException(nameof(instance));
-
             if (!instance.Open.HasValue)
                 instance.Open = instance.High = instance.Low = value;
             else
@@ -33,10 +25,10 @@ namespace InterReact.Extensions
         }
     }
 
-    public static class TickOpenHighLowCloseEx
+    public static class TickOpenHighLowCloseExtensions
     {
         public static IObservable<TickOhlc> TickOpenHighLowClose(this IObservable<Tick> source, TimeSpan barSize)
-            => ThrowIf.ThrowIfNull(source)
+            => source
                 .OfType<TickPrice>()
                 .Where(x => x.TickType == TickType.LastPrice)
                 .Select(x => x.Price)

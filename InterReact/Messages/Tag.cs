@@ -1,11 +1,8 @@
-﻿using InterReact.Core;
-using InterReact.Extensions;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Stringification;
 
-#nullable enable
-
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class Tag // input + output
     {
@@ -16,7 +13,7 @@ namespace InterReact.Messages
             Name = name;
             Value = value;
         }
-        public Tag(ResponseComposer c) : this(c.ReadString(), c.ReadString()) { }
+        public Tag(ResponseReader c) : this(c.ReadString(), c.ReadString()) { }
 
         internal static string Combine(IList<Tag>? tags)
         {

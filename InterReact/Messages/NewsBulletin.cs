@@ -1,7 +1,4 @@
-﻿using InterReact.Core;
-using InterReact.Enums;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class NewsBulletin
     {
@@ -15,7 +12,7 @@ namespace InterReact.Messages
         /// The exchange from which this message originated.
         /// </summary>
         public string Origin { get; }
-        internal NewsBulletin(ResponseComposer c)
+        internal NewsBulletin(ResponseReader c)
         {
             c.IgnoreVersion();
             MessageId = c.ReadInt();

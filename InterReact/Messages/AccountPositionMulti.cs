@@ -1,8 +1,4 @@
-﻿using InterReact.Core;
-using InterReact.Interfaces;
-using InterReact.StringEnums;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class AccountPositionMulti : IHasRequestId
     {
@@ -12,7 +8,7 @@ namespace InterReact.Messages
         public double Pos { get; }
         public double AvgCost { get; }
         public string ModelCode { get; }
-        internal AccountPositionMulti(ResponseComposer c)
+        internal AccountPositionMulti(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();
@@ -24,7 +20,7 @@ namespace InterReact.Messages
                 SecurityType = c.ReadStringEnum<SecurityType>(),
                 LastTradeDateOrContractMonth = c.ReadString(),
                 Strike = c.ReadDouble(),
-                Right = c.ReadStringEnum<RightType>(),
+                Right = c.ReadStringEnum<OptionRightType>(),
                 Multiplier = c.ReadString(),
                 Exchange = c.ReadString(),
                 Currency = c.ReadString(),
@@ -40,7 +36,7 @@ namespace InterReact.Messages
     public sealed class AccountPositionMultiEnd : IHasRequestId
     {
         public int RequestId { get; }
-        internal AccountPositionMultiEnd(ResponseComposer c)
+        internal AccountPositionMultiEnd(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();

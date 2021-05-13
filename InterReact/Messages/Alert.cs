@@ -1,9 +1,6 @@
 ﻿using System;
-using InterReact.Core;
-using InterReact.Enums;
-using InterReact.Interfaces;
 
-namespace InterReact.Messages
+namespace InterReact
 {
     /// <summary>
     /// Alert can represent an error, warning or informative message.
@@ -16,7 +13,7 @@ namespace InterReact.Messages
     {
         public int Code { get; }
         public int RequestId { get; }
-        public int OrderId { get; } 
+        public int OrderId { get; }
         public AlertType AlertType { get; }
 
         internal Alert(int id, int code, string message) : base(message)
@@ -27,7 +24,7 @@ namespace InterReact.Messages
                 throw new ArgumentException(nameof(message));
             AlertType = GetAlertTypeFromCode(code, id);
         }
-        internal static Alert Create(ResponseComposer c)
+        internal static Alert Create(ResponseReader c)
         {
             c.RequireVersion(2);
             return new Alert(c.ReadInt(), c.ReadInt(), c.ReadString());

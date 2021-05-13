@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using InterReact.Core;
-using InterReact.Interfaces;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class TickNews : IHasRequestId
     {
@@ -13,8 +7,8 @@ namespace InterReact.Messages
         public string ProviderCode { get; }
         public string ArticleId { get; }
         public string Headline { get; }
-        public string ExtraData { get;}
-        internal TickNews(ResponseComposer c)
+        public string ExtraData { get; }
+        internal TickNews(ResponseReader c)
         {
             RequestId = c.ReadInt();
             TimeStamp = c.ReadLong();

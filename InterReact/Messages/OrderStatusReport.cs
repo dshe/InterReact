@@ -1,9 +1,4 @@
-﻿using InterReact.Core;
-using InterReact.Enums;
-using InterReact.Interfaces;
-using InterReact.StringEnums;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class OrderStatusReport : IHasOrderId
     {
@@ -61,14 +56,22 @@ namespace InterReact.Messages
 
         public double? MktCapPrice { get; }
 
-        internal OrderStatusReport(ResponseComposer c)
+        internal OrderStatusReport(ResponseReader c)
         {
-            var serverVersion = c.Config.ServerVersionCurrent;
-            var version = serverVersion >= ServerVersion.MarketCapPrice ? int.MaxValue : c.ReadInt();
+            var version = c.ReadInt();
             OrderId = c.ReadInt();
             Status = c.ReadStringEnum<OrderStatus>();
-            Filled = c.ReadDouble();
-            Remaining = c.ReadDouble();
+
+            if (c.Config.SupportsServerVersion(ServerVersion.FractionalPositions))
+            {
+                Filled = c.ReadDouble();
+                Remaining = c.ReadDouble();
+            }
+            else
+            {
+                Filled = c.ReadInt();
+                Remaining = c.ReadInt();
+            }
             AverageFillPrice = c.ReadDouble();
             if (version >= 2)
                 PermanentId = c.ReadInt();
@@ -80,8 +83,6 @@ namespace InterReact.Messages
                 ClientId = c.ReadInt();
             if (version >= 6)
                 WhyHeld = c.ReadString();
-            if (serverVersion >= ServerVersion.MarketCapPrice)
-                MktCapPrice = c.ReadDouble();
         }
     }
 }

@@ -1,15 +1,13 @@
 ﻿using System.Net;
-using InterReact.Interfaces;
 using System;
-using InterReact.Enums;
 using NodaTime;
 
-#nullable enable
-
-namespace InterReact.Core
+namespace InterReact
 {
     public sealed class Config : EditorBrowsableNever
     {
+        public Config() { }
+
         internal static readonly Random Random = new Random();
 
         public IClock Clock { get; internal set; } = SystemClock.Instance;
@@ -18,9 +16,9 @@ namespace InterReact.Core
 
         public IPEndPoint IPEndPoint { get; internal set; } = new IPEndPoint(IPAddress.IPv6Loopback, 0);
 
-        internal int[] Ports = { 4001, 4002, 7496, 7497 };
+        internal int[] Ports = { (int)DefaultPort.TwsRegularAccount, (int)DefaultPort.TwsDemoAccount, (int)DefaultPort.GatewayRegularAccount, (int)DefaultPort.GatewayDemoAccount };
 
-        public bool IsDemoAccount() => IPEndPoint.Port == 4002 || IPEndPoint.Port == 7497;
+        public bool IsDemoAccount => IPEndPoint.Port == (int)DefaultPort.TwsDemoAccount || IPEndPoint.Port == (int)DefaultPort.GatewayDemoAccount;
 
         public int ClientId { get; internal set; } = Random.Next(1000, 1000000);
 
@@ -28,32 +26,22 @@ namespace InterReact.Core
         public string OptionalCapabilities { get; internal set; } = "";
 
         /// <summary>
-        /// The maximum version of the API supported by this client.
-        /// </summary>
-        public const string ClientApiVersion = "9.75.01";
-
-        /// <summary>
         /// The version of the currently connected server.
         /// </summary>
         public ServerVersion ServerVersionCurrent { get; internal set; }
-
-        public const ServerVersion ServerVersionMin = ServerVersion.PeggedToBenchmark;
-        public const ServerVersion ServerVersionMax = ServerVersion.AggGroup;
+        public const ServerVersion ServerVersionMin = ServerVersion.VT100; // always 100
+        public const ServerVersion ServerVersionMax = ServerVersion.UnderlyingInfo;
 
         public string? ManagedAccounts { get; internal set; }
-        public string? Date            { get; internal set; }
+        public string? Date { get; internal set; }
 
-        internal int  NextIdValue; // set during login
+        internal int NextIdValue; // set during login
 
         internal bool SupportsServerVersion(ServerVersion version) => version <= ServerVersionCurrent;
-
         internal void RequireServerVersion(ServerVersion version)
         {
             if (!SupportsServerVersion(version))
                 throw new ArgumentException($"The server does not support version: '{version}'.");
         }
-
-        internal Config() {}
     }
-
 }

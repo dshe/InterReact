@@ -1,13 +1,9 @@
-﻿using InterReact.Core;
-
-#nullable enable
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class NextId
     {
         public int Id { get; }
-        internal NextId(ResponseComposer c)
+        internal NextId(ResponseReader c)
         {
             c.IgnoreVersion();
             Id = c.ReadInt();

@@ -1,18 +1,14 @@
 ﻿using System;
+using System.Data;
 using System.Drawing;
+using System.Linq;
+using System.Windows.Forms;
 using System.Reactive.Linq;
 using System.Threading;
-using System.Windows.Forms;
 using InterReact;
 using InterReact.Extensions;
-using InterReact.Interfaces;
-using InterReact.Messages;
-using InterReact.Enums;
-using InterReact.StringEnums;
 using System.Diagnostics;
-using InterReact.Utility;
-
-#nullable enable
+using Stringification;
 
 namespace WinFormsTicks
 {
@@ -25,14 +21,14 @@ namespace WinFormsTicks
         public Form1()
         {
             InitializeComponent();
-            synchronizationContext = SynchronizationContext.Current;
+            synchronizationContext = SynchronizationContext.Current ?? throw new NullReferenceException("SynchronizationContext");
         }
 
         private async void Form1_Load(object sender, EventArgs e)
         {
             try
             {
-                client = await new InterReactClientBuilder().BuildAsync();
+                client = await new InterReactClientBuilder().BuildAsync().ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -42,13 +38,15 @@ namespace WinFormsTicks
 
             // Write all incoming messages to the debug window to see what's happening.
             // Also observe any exceptions.
-            client.Response.Stringify().Subscribe(Console.WriteLine, exception => ShowMessage(exception.Message));
+            client.Response.StringifyItems().Subscribe(Console.WriteLine, exception => ShowMessage(exception.Message));
 
+
+            //crash
             SymbolLabel.Visible = Symbol.Visible = true;
 
             // Listen for textbox TextChanged messages to determine the symbol.
             Observable.FromEventPattern(Symbol, "TextChanged")
-                .Select(ea => ((TextBox)ea.Sender).Text)
+                .Select(ea => ((TextBox)ea.Sender!).Text)
                 .Throttle(TimeSpan.FromSeconds(1))
                 .DistinctUntilChanged()
                 .ObserveOn(synchronizationContext)
@@ -77,7 +75,7 @@ namespace WinFormsTicks
             try
             {
                 // Create the observable and capture the single contract details object to determine the full name of the contract.
-                var contractData = await client!.Services.ContractDataObservable(contract).ContractDataSingle();
+                var contractData = await client!.Services.CreateContractDataObservable(contract).ContractDataSingle();
                 // Display the stock name in the title bar.
                 Text = $"{contractData.LongName} ({symbol})";
             }
@@ -90,7 +88,7 @@ namespace WinFormsTicks
             client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
             // Create the object containing the observable which will emit realtime updates.
-            var ticks = client.Services.TickConnectableObservable(contract);
+            var ticks = client.Services.CreateTickConnectableObservable(contract);
 
             SubscribeToTicks(ticks.Undelay().ObserveOn(synchronizationContext));
 
@@ -118,7 +116,7 @@ namespace WinFormsTicks
 
             bidPrices.Change().ToColor().Subscribe(c => BidPrice.ForeColor = c);
             askPrices.Change().ToColor().Subscribe(c => AskPrice.ForeColor = c);
-            lastPrices.Change().ToColor().Subscribe(c => {Change.ForeColor = LastPrice.ForeColor = c;});
+            lastPrices.Change().ToColor().Subscribe(c => { Change.ForeColor = LastPrice.ForeColor = c; });
             lastPrices.Change().WhereHasValue().Select(chg => chg.ToString(priceFormat)).Subscribe(s => Change.Text = s);
 
             var sizeTicks = synchronizedTicks.OfType<TickSize>();
@@ -148,7 +146,11 @@ namespace WinFormsTicks
                 synchronizationContext.Post(x => action(), null);
         }
 
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e) => client?.Dispose();
+        private async void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (client != null)
+                await client.DisposeAsync();
+        }
     }
 
     internal static class UtilityEx

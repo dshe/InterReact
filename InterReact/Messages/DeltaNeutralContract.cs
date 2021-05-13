@@ -1,9 +1,4 @@
-﻿using InterReact.Core;
-using InterReact.Interfaces;
-
-#nullable enable
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     /// <summary>
     /// Delta-Neutral Underlying Component.
@@ -23,7 +18,7 @@ namespace InterReact.Messages
         /// The price of the underlying.
         /// </summary>
         public double Price { get; }
-        internal DeltaNeutralContract(ResponseComposer c, bool independent)
+        internal DeltaNeutralContract(ResponseReader c, bool independent)
         {
             if (independent)
             {

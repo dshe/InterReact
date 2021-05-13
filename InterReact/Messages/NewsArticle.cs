@@ -1,14 +1,11 @@
-﻿using InterReact.Core;
-using InterReact.Interfaces;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class NewsArticle : IHasRequestId // output
     {
         public int RequestId { get; }
-        public int ArticleType { get;}
-        public string ArticleText { get;}
-        internal NewsArticle(ResponseComposer c)
+        public int ArticleType { get; }
+        public string ArticleText { get; }
+        internal NewsArticle(ResponseReader c)
         {
             RequestId = c.ReadInt();
             ArticleType = c.ReadInt();

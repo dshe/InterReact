@@ -1,7 +1,4 @@
-﻿using InterReact.Core;
-using InterReact.Interfaces;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class FundamentalData : IHasRequestId
     {
@@ -9,7 +6,7 @@ namespace InterReact.Messages
 
         public string Data { get; }
 
-        internal FundamentalData(ResponseComposer c)
+        internal FundamentalData(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();

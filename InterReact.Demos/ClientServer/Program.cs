@@ -1,28 +1,28 @@
-﻿using RxSockets;
-using System;
+﻿using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-
-#nullable enable
 
 namespace CoreClientServer
 {
     public static class Program
     {
-        const int Port = 7777; // use an arbitrary port
-
         public static async Task Main()
         {
             Console.Title = "InterReact";
+#pragma warning disable CA1416 // Validate platform compatibility
             Console.SetWindowSize(100, 30);
             Console.SetBufferSize(100, 100);
+#pragma warning restore CA1416 // Validate platform compatibility
 
-            var serverLoggerFactory = new MyLoggerFactory("Server: ", ConsoleColor.DarkMagenta);
-            var clientLoggerFactory = new MyLoggerFactory("Client: ", ConsoleColor.DarkYellow);
-            var libraryLoggerFactory = new MyLoggerFactory("ClientLibrary: ", ConsoleColor.DarkCyan);
+            var clientLogger = new ConsoleLogger("Client:    ", ConsoleColor.DarkYellow);
+            var clientLibLogger = new ConsoleLogger("ClientLib: ", ConsoleColor.DarkGreen);
+            var serverLogger = new ConsoleLogger("Server:    ", ConsoleColor.DarkMagenta);
+            var serverLibLogger = new ConsoleLogger("ServerLib: ", ConsoleColor.DarkCyan);
 
-            var serverTask = new Client(Port, clientLoggerFactory.CreateLogger(), libraryLoggerFactory).Run();
-            var clientTask = new Server(Port, serverLoggerFactory.CreateLogger<RxSocketServer>()).Run();
+            var server = new Server(serverLogger, serverLibLogger);
+            var port = server.SocketServer.IPEndPoint.Port;
+            var serverTask = server.Run();
+
+            var clientTask = Client.Run(port, clientLogger, clientLibLogger);
 
             await Task.WhenAll(clientTask, serverTask);
             await Task.Delay(1000);

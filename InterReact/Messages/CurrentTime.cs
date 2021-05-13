@@ -1,15 +1,12 @@
-﻿using InterReact.Core;
-using NodaTime;
+﻿using NodaTime;
 using System.Globalization;
 
-#nullable enable
-
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class CurrentTime
     {
         public Instant Time { get; }
-        internal CurrentTime(ResponseComposer c)
+        internal CurrentTime(ResponseReader c)
         {
             c.IgnoreVersion();
             Time = Instant.FromUnixTimeSeconds(long.Parse(c.ReadString(), NumberFormatInfo.InvariantInfo));

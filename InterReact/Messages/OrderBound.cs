@@ -1,7 +1,4 @@
-﻿using InterReact.Core;
-using InterReact.Interfaces;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     // Orderid is a long here, rather than an int like the other OrderId????
     // MODIFIED!
@@ -10,7 +7,7 @@ namespace InterReact.Messages
         public long OrderBoundId { get; } // was OrderId
         public int ClientId { get; } // was ApiClientId
         public int OrderId { get; } // was ApiIOrderId
-        internal OrderBound(ResponseComposer c)
+        internal OrderBound(ResponseReader c)
         {
             OrderBoundId = c.ReadLong();
             ClientId = c.ReadInt();

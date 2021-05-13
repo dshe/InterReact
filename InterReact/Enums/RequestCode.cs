@@ -1,4 +1,4 @@
-﻿namespace InterReact.Enums
+﻿namespace InterReact
 {
     internal enum RequestCode
     {
@@ -77,6 +77,7 @@
         CancelPnLSingle = 95,
         ReqHistoricalTicks = 96,
         ReqTickByTickData = 97,
-        CancelTickByTickData = 98
+        CancelTickByTickData = 98,
+        ReqCompletedOrders = 99
     }
 }

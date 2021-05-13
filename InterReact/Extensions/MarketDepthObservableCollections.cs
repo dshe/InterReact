@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
-using InterReact.Enums;
-using InterReact.Messages;
-using InterReact.Utility;
 
-#nullable enable
+using InterReact.Utility;
 
 namespace InterReact.Extensions
 {
@@ -19,7 +15,7 @@ namespace InterReact.Extensions
     ///    .ObserveOn(synchronizationContext); // SynchronizationContext.Current or ObserveOnDispatcher()
     ///    .ToMarketDepthObservableCollections();
     /// </summary>
-    public static class MarketDepthObservableCollectionsEx
+    public static class MarketDepthObservableCollectionsExtensions
     {
         public static (ReadOnlyObservableList<MarketDepthItem> bids, ReadOnlyObservableList<MarketDepthItem> asks)
             ToMarketDepthObservableCollections(this IObservable<MarketDepth> source, CancellationToken ct = default)
@@ -33,9 +29,6 @@ namespace InterReact.Extensions
         private static ReadOnlyObservableList<MarketDepthItem>
             ToMarketDepthObservableCollection(this IObservable<MarketDepth> source, CancellationToken ct)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
             var list = new ObservableCollection<MarketDepthItem>();
 
             source.Subscribe(
@@ -105,9 +98,6 @@ namespace InterReact.Extensions
         private static ReadOnlyObservableList<MarketDepthItem>
             ToMarketDepthObservableCollectionx(this IObservable<NotifyCollectionChangedEventArgs> source, CancellationToken ct = default)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
             var list = new ObservableCollection<MarketDepthItem>();
 
             source.Subscribe(
@@ -151,7 +141,7 @@ namespace InterReact.Extensions
                     }
                     */
                 },
-                //onError: e => { },     // ???
+                //onError: e => { },     // ?
                 onCompleted: list.Clear, // Note that the list is cleared when the observable completes.
                 ct);                     // It is possible to unsubscribe by cancelling the token source.
             return new ReadOnlyObservableList<MarketDepthItem>(list);
@@ -171,8 +161,8 @@ namespace InterReact.Extensions
 
     public sealed class MarketDepthItem : NotifyPropertyChanged
     {
-        public double Price       { get; internal set; }
-        public int    Size        { get; internal set; }
+        public double Price { get; internal set; }
+        public int Size { get; internal set; }
         public string MarketMaker { get; internal set; }
         public MarketDepthItem(double price, int size, string marketMaker) =>
             (Price, Size, MarketMaker) = (price, size, marketMaker);

@@ -1,7 +1,4 @@
-﻿using InterReact.Core;
-using InterReact.Interfaces;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class AccountUpdateMulti : IHasRequestId
     {
@@ -11,7 +8,7 @@ namespace InterReact.Messages
         public string Key { get; }
         public string Value { get; }
         public string Currency { get; }
-        internal AccountUpdateMulti(ResponseComposer c)
+        internal AccountUpdateMulti(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();
@@ -26,7 +23,7 @@ namespace InterReact.Messages
     public sealed class AccountUpdateMultiEnd : IHasRequestId
     {
         public int RequestId { get; internal set; }
-        internal AccountUpdateMultiEnd(ResponseComposer c)
+        internal AccountUpdateMultiEnd(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();

@@ -1,21 +1,17 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using InterReact;
-using InterReact.Messages;
-using InterReact.StringEnums;
-using InterReact.Extensions;
-using System.Windows.Data;
 
-#nullable enable
+
+using InterReact.Extensions;
 
 namespace WpfDepth
 {
-    public sealed class MainViewModel : NotifyPropertyChangedBase, IDisposable
+    public sealed class MainViewModel : NotifyPropertyChangedBase, IAsyncDisposable
     {
-        private readonly object Gate = new object();
+        //private readonly object Gate = new object();
         public string Title { get; private set; } = "InterReact";
         public ReadOnlyObservableCollection<MarketDepthItem>? Bids { get; private set; }
         public ReadOnlyObservableCollection<MarketDepthItem>? Asks { get; private set; }
@@ -46,7 +42,7 @@ namespace WpfDepth
             Title = contract.Currency + "/" + contract.Symbol;
 
             var depthObservable = client.Services
-                 .MarketDepthObservable(contract, rows: 5);
+                 .CreateMarketDepthObservable(contract, rows: 5);
 
             var (Bids, Asks) = depthObservable.ToMarketDepthObservableCollections();
             //.ObserveOn(SynchronizationContext.Current)
@@ -61,6 +57,10 @@ namespace WpfDepth
             depthObservable.Connect();
         }
 
-        public void Dispose() => client?.Dispose();
+        public async ValueTask DisposeAsync()
+        {
+            if (client != null)
+                await client.DisposeAsync();
+        }
     }
 }

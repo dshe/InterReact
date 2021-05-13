@@ -13,11 +13,11 @@ namespace WpfDepth
             InitializeComponent();
         }
 
-        private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e) 
+        private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
             => await mainViewModel.Initialize();
 
-        private void MainWindow_OnClosing(object sender, CancelEventArgs e)
-            => mainViewModel.Dispose();
+        private async void MainWindow_OnClosing(object sender, CancelEventArgs e)
+            => await mainViewModel.DisposeAsync();
 
     }
 }

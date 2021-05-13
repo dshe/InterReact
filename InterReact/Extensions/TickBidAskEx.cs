@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Reactive;
 using System.Reactive.Linq;
-using InterReact.Enums;
-using InterReact.Interfaces;
-using InterReact.Messages;
 
 namespace InterReact.Extensions
 {
@@ -31,14 +28,14 @@ namespace InterReact.Extensions
         {
             if (!IsValid)
                 return null;
-            return Math.Log(AskPrice/BidPrice) * 10000;
+            return Math.Log(AskPrice / BidPrice) * 10000;
         }
 
         public double? Mid()
         {
             if (!IsValid)
                 return null;
-            return Math.Sqrt(AskPrice*BidPrice);
+            return Math.Sqrt(AskPrice * BidPrice);
         }
 
         public double? Min()
@@ -56,13 +53,10 @@ namespace InterReact.Extensions
         }
     }
 
-    public static class TickBidAskPriceEx
+    public static class TickBidAskPriceExtensions
     {
         public static IObservable<TickBidAskPrice> ToBidAskTicks(this IObservable<Tick> source)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
             var bal = new TickBidAskPrice();
 
             return Observable.Create<TickBidAskPrice>(observer =>

@@ -2,22 +2,19 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using InterReact.Enums;
-using InterReact.Messages;
-using NodaTime;
 using System.Diagnostics;
-using NodaTime.Text;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Reactive.Disposables;
-
-#nullable enable
+using Microsoft.Extensions.Logging;
+using NodaTime;
+using NodaTime.Text;
 
 namespace InterReact.Utility
 {
-    public sealed class ContractDataTimeEvent 
+    public sealed class ContractDataTimeEvent
     {
-        public ZonedDateTime      Time   { get; }
+        public ZonedDateTime Time { get; }
         public ContractTimeStatus Status { get; }
         internal ContractDataTimeEvent(ZonedDateTime time, ContractTimeStatus status)
         {
@@ -29,7 +26,7 @@ namespace InterReact.Utility
     public sealed class ContractDataTimePeriod
     {
         public ContractDataTimeEvent? Previous { get; }
-        public ContractDataTimeEvent? Next     { get; }
+        public ContractDataTimeEvent? Next { get; }
         internal ContractDataTimePeriod(ContractDataTimeEvent? previous, ContractDataTimeEvent? next)
         {
             Previous = previous;
@@ -41,21 +38,22 @@ namespace InterReact.Utility
     {
         private static readonly LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HHmm");
         private static readonly LocalDatePattern DatePattern = LocalDatePattern.CreateWithInvariantCulture("yyyyMMdd");
-        private readonly ContractData ContractData;
+        private readonly ContractDetails ContractData;
         private readonly IScheduler Sched;
-        public DateTimeZone? TimeZone { get; } // null if not available
+        public DateTimeZone TimeZone { get; } // null if not available
         public IReadOnlyList<ContractDataTimeEvent> Events { get; } = new List<ContractDataTimeEvent>();
         // empty if no hours or timeZone
         public IObservable<ContractDataTimePeriod> ContractTimeObservable { get; } // completes immediately if no timeZone or hours
 
-        public ContractDataTime(ContractData contractData, IScheduler? scheduler = null)
+        public ContractDataTime(ContractDetails contractData, ILogger logger, IScheduler? scheduler = null)
         {
-            ContractData = contractData ?? throw new ArgumentNullException(nameof(contractData));
+            ContractData = contractData;
             Sched = scheduler ?? Scheduler.CurrentThread;
             ContractTimeObservable = CreateContractTimeObservable();
+
             var tzi = contractData.TimeZoneId;
             if (string.IsNullOrEmpty(tzi)) // for expired Future Options there is no TimeZoneId(?)
-                return;
+                tzi = "Etc/GMT";
             TimeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull(tzi) ?? throw new ArgumentException($"TimeZoneId '{tzi}' not found.");
             Events = GetList();
         }
@@ -68,13 +66,13 @@ namespace InterReact.Utility
             foreach (var (start, end) in GetSessions(ContractData.TradingHours))
             {
                 list.Add(start, ContractTimeStatus.Trading);
-                list.Add(end,   ContractTimeStatus.Closed);
+                list.Add(end, ContractTimeStatus.Closed);
             }
             foreach (var (start, end) in GetSessions(ContractData.LiquidHours))
             {
                 var previous = list.Where(x => x.Key < end).LastOrDefault();
                 list.Add(start, ContractTimeStatus.Liquid);
-                list.Add(end, previous.Value == ContractTimeStatus.Trading ? ContractTimeStatus.Trading: ContractTimeStatus.Closed);
+                list.Add(end, previous.Value == ContractTimeStatus.Trading ? ContractTimeStatus.Trading : ContractTimeStatus.Closed);
             }
             return list.Select(x => new ContractDataTimeEvent(x.Key.InZoneLeniently(TimeZone), x.Value)).ToList();
         }
@@ -90,6 +88,7 @@ namespace InterReact.Utility
             foreach (var day in days)
             {
                 var parts = day.Split(':');
+
                 Debug.Assert(parts.Count() == 2);
                 var date = DatePattern.Parse(parts[0]).Value;
                 var sessions = parts[1].Split(',').Distinct(); // the sessions may be repeated(?)
@@ -97,7 +96,7 @@ namespace InterReact.Utility
                 {
                     var times = GetSessionTime(session);
                     var start = date.At(times.start);
-                    var end   = date.At(times.end);
+                    var end = date.At(times.end);
                     if (end < start)
                         start = start.PlusDays(-1); //end = end.PlusDays(1); ??
                     if (list.Any() && (start <= list.Last().end || end <= start)) // ensure consecutive, non-overlapping periods
@@ -126,7 +125,7 @@ namespace InterReact.Utility
 
             return new ContractDataTimePeriod(
                 Events.Where(x => x.Time.ToInstant() <= dt).LastOrDefault(),
-                Events.Where(x => x.Time.ToInstant() >  dt).FirstOrDefault());
+                Events.Where(x => x.Time.ToInstant() > dt).FirstOrDefault());
         }
 
         /// <summary>

@@ -3,15 +3,13 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using InterReact;
-using InterReact.Messages;
-using InterReact.StringEnums;
-using InterReact.Extensions;
+
+
+using Stringification;
 /*
 * Be sure that Trader Workstation (TWS) is running on your machine and that the following is set:
 * File / GlobalConfiguration / API / Settings/ "Enable ActiveX and Socket Clients".
 */
-#nullable enable
-
 namespace HelloWorld
 {
     internal static class Program
@@ -35,32 +33,33 @@ namespace HelloWorld
                 return;
             }
 
-            // Print all messages as strings to the console and also observe any errors.
-            client.Response.Stringify().Subscribe(
+            // Print all messages as strings to the console.
+            client.Response.StringifyItems().Subscribe(
                 onNext: Console.WriteLine,
-                onError: Console.WriteLine,
+                //onError: Console.WriteLine,
                 onCompleted: () => Console.WriteLine("Completed."));
 
             var contract = new Contract
             {
                 SecurityType = SecurityType.Stock,
-                Symbol = "SPY",
+                Symbol = "C",
                 Currency = "USD",
-                Exchange = "SMART"
+                Exchange = "NYSE"
             };
 
-            var contractDataList = await client.Services.ContractDataObservable(contract);
+            var contractDataList = await client.Services.CreateContractDataObservable(contract);
 
             var contractData = contractDataList.Single();
 
             Console.WriteLine($"Long Name: {contractData.LongName}.");
 
-            client.Dispose();
+            // allow some time to display data
+            await Task.Delay(3000);
+            await client.DisposeAsync();
 
             Console.WriteLine(Environment.NewLine + "press a key to exit...");
             Console.ReadKey();
         }
-
     }
 }
 

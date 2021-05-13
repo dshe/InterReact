@@ -4,8 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
-#nullable enable
-
 namespace InterReact.Utility
 {
     public sealed class Limiter
@@ -24,9 +22,6 @@ namespace InterReact.Utility
 
         internal void Limit(Action action)
         {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-
             lock (Ring)
             {
                 if (Rate > 0)

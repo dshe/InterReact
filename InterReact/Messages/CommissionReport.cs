@@ -1,10 +1,4 @@
-﻿using System;
-using InterReact.Core;
-using InterReact.Interfaces;
-
-#nullable enable
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     /// <summary>
     /// Sent after trades and after calling RequestExecutions.
@@ -25,7 +19,7 @@ namespace InterReact.Messages
         // Yet another date format: YYYYMMDD as integer.
         public int YieldRedemptionDate { get; }
 
-        internal CommissionReport(ResponseComposer c)
+        internal CommissionReport(ResponseReader c)
         {
             c.IgnoreVersion();
             ExecutionId = c.ReadString();

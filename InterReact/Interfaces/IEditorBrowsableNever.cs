@@ -9,7 +9,7 @@ Environment | IntelliSense | Completion Appearance and check “Filter members b
 using System;
 using System.ComponentModel;
 
-namespace InterReact.Interfaces
+namespace InterReact
 {
     [EditorBrowsable(EditorBrowsableState.Never)]
     public interface IEditorBrowsableNever

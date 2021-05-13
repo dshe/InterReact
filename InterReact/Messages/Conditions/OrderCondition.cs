@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Linq;
-using InterReact.Core;
-using InterReact.Enums;
 
-#nullable enable
-
-namespace InterReact.Messages.Conditions
+namespace InterReact
 {
     public abstract class OrderCondition
     {
@@ -28,15 +24,11 @@ namespace InterReact.Messages.Conditions
             return result;
         }
 
-        internal virtual void Serialize(RequestMessage message)
-        {
+        internal virtual void Serialize(RequestMessage message) =>
             message.Write(IsConjunctionConnection ? "a" : "o");
-        }
 
-        internal virtual void Deserialize(ResponseComposer c)
-        {
+        internal virtual void Deserialize(ResponseReader c) =>
             IsConjunctionConnection = c.ReadString() == "a";
-        }
 
         virtual protected bool TryParse(string cond)
         {
@@ -58,34 +50,25 @@ namespace InterReact.Messages.Conditions
             return IsConjunctionConnection == other.IsConjunctionConnection && this.Type == other.Type;
         }
 
-        public override int GetHashCode()
-        {
-            return IsConjunctionConnection.GetHashCode() + Type.GetHashCode();
-        }
+        public override int GetHashCode() => IsConjunctionConnection.GetHashCode() + Type.GetHashCode();
+
     }
 
     class StringSuffixParser
     {
-        string str;
+        private string Str;
+        public StringSuffixParser(string str) => Str = str;
 
-        public StringSuffixParser(string str)
+        string SkipSuffix(string prefix) =>
+            Str.Substring(Str.IndexOf(prefix) + prefix.Length);
+
+        public string GetNextSuffixedValue(string prefix)
         {
-            this.str = str;
-        }
-
-        string SkipSuffix(string perfix)
-        {
-            return str.Substring(str.IndexOf(perfix) + perfix.Length);
-        }
-
-        public string GetNextSuffixedValue(string perfix)
-        {
-            var rval = str.Substring(0, str.IndexOf(perfix));
-            str = SkipSuffix(perfix);
-
+            var rval = Str.Substring(0, Str.IndexOf(prefix));
+            Str = SkipSuffix(prefix);
             return rval;
         }
 
-        public string Rest => str;
+        public string Rest => Str;
     }
 }

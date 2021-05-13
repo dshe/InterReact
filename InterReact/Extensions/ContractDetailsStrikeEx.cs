@@ -3,12 +3,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using InterReact.Messages;
-using InterReact.Utility;
 
 namespace InterReact.Extensions
 {
-    public static class ContractDataStrikeEx
+    public static class ContractDataStrikeExtensions
     {
         /// <summary>
         /// Selects contract(s) from a list of contracts with varying expiry dates.
@@ -17,11 +15,11 @@ namespace InterReact.Extensions
         /// An offset of +1 returns contract(s) with the next greater strike.
         /// Negative Values select contract(s) with strikes below the reference price.
         /// </summary>
-        public static IObservable<IReadOnlyList<ContractData>> ContractDataStrikeSelect(
-                this IObservable<IReadOnlyList<ContractData>> source, int offset, double referencePrice)
-            => ThrowIf.ThrowIfEmpty(source).Select(cds => SelectStrike(cds, offset, referencePrice));
+        public static IObservable<IReadOnlyList<ContractDetails>> ContractDataStrikeSelect(
+                this IObservable<IReadOnlyList<ContractDetails>> source, int offset, double referencePrice)
+            => source.ThrowIfAnyEmpty().Select(cds => SelectStrike(cds, offset, referencePrice));
 
-        internal static List<ContractData> SelectStrike(IEnumerable<ContractData> cds, int offset, double reference)
+        internal static List<ContractDetails> SelectStrike(IEnumerable<ContractDetails> cds, int offset, double reference)
         {
             var groups = cds
                 .GroupBy(cd => cd.Contract.Strike)
@@ -40,7 +38,7 @@ namespace InterReact.Extensions
             var index = offset + pos;
 
             if (index < 0 || index > groups.Count - 1) // invalid index
-                return new List<ContractData>();
+                return new List<ContractDetails>();
 
             return groups[index].ToList();
         }

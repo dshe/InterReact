@@ -1,7 +1,4 @@
-﻿using InterReact.Core;
-using InterReact.Interfaces;
-
-namespace InterReact.Messages
+﻿namespace InterReact
 {
     public sealed class AccountSummary : IHasRequestId
     {
@@ -11,7 +8,7 @@ namespace InterReact.Messages
         public string Currency { get; }
         public string Value { get; }
 
-        internal AccountSummary(ResponseComposer c)
+        internal AccountSummary(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();
@@ -25,7 +22,7 @@ namespace InterReact.Messages
     public sealed class AccountSummaryEnd : IHasRequestId
     {
         public int RequestId { get; }
-        internal AccountSummaryEnd(ResponseComposer c)
+        internal AccountSummaryEnd(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();

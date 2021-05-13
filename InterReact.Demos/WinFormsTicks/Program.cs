@@ -1,15 +1,19 @@
-﻿using System;
+using System;
+using System.Windows.Forms;
 
 namespace WinFormsTicks
 {
-    internal static class Program
+    static class Program
     {
+        /// <summary>
+        ///  The main entry point for the application.
+        /// </summary>
         [STAThread]
-        private static void Main()
+        static void Main()
         {
-            System.Windows.Forms.Application.EnableVisualStyles();
-            System.Windows.Forms.Application.SetCompatibleTextRenderingDefault(false);
-
+            Application.SetHighDpiMode(HighDpiMode.SystemAware);
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
             /*
             AppDomain.CurrentDomain.UnhandledException += (source, ex) =>
                 ObserveError("AppDomain.CurrentDomain.UnhandledException:\n\n" + ex.ExceptionObject.ToString());
@@ -24,14 +28,14 @@ namespace WinFormsTicks
 
             try
             {
-                System.Windows.Forms.Application.Run(new Form1());
+                Application.Run(new Form1());
             }
             catch (Exception exception)
             {
                 ObserveError("Application.Run Exception:\n\n" + exception);
             }
         }
-
-        private static void ObserveError(string str) => System.Windows.Forms.MessageBox.Show(str);
+        private static void ObserveError(string str) => MessageBox.Show(str);
     }
 }
+

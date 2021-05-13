@@ -1,4 +1,4 @@
-﻿namespace InterReact.Enums
+﻿namespace InterReact
 {
     public enum ContractTimeStatus
     {
@@ -25,7 +25,7 @@
         /// <summary>
         /// Time when there is no trading.
         /// </summary>
-        Closed   
+        Closed
     }
 
 }

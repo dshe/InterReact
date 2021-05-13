@@ -1,17 +1,14 @@
-﻿using InterReact.Core;
-using InterReact.Interfaces;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class HistoricalTicks : IHasRequestId
     {
         public int RequestId { get; }
-        public IList<HistoricalTick> Ticks { get; } = new List<HistoricalTick>();
+        public List<HistoricalTick> Ticks { get; } = new List<HistoricalTick>();
         public bool Done { get; }
-        public HistoricalTicks(ResponseComposer c)
+        public HistoricalTicks(ResponseReader c)
         {
             RequestId = c.ReadInt();
             var n = c.ReadInt();
@@ -27,7 +24,7 @@ namespace InterReact.Messages
         public long Time { get; }
         public double Price { get; }
         public long Size { get; }
-        internal HistoricalTick(ResponseComposer c)
+        internal HistoricalTick(ResponseReader c)
         {
             Time = c.ReadLong();
             c.ReadInt(); // ?
@@ -39,14 +36,14 @@ namespace InterReact.Messages
     public sealed class HistoricalLastTicks : IHasRequestId
     {
         public int RequestId { get; }
-        public IList<HistoricalLastTick> Ticks { get; } = new List<HistoricalLastTick>();
+        public List<HistoricalLastTick> Ticks { get; } = new List<HistoricalLastTick>();
         public bool Done { get; }
-        public HistoricalLastTicks(ResponseComposer c)
+        public HistoricalLastTicks(ResponseReader c)
         {
             RequestId = c.ReadInt();
             var n = c.ReadInt();
 
-            Ticks = Enumerable.Repeat(new HistoricalLastTick(c), n).ToList().AsReadOnly();
+            Ticks = Enumerable.Repeat(new HistoricalLastTick(c), n).ToList();
             Done = c.ReadBool();
         }
 
@@ -55,12 +52,12 @@ namespace InterReact.Messages
     public sealed class HistoricalLastTick
     {
         public long Time { get; }
-        public TickAttribLast TickAttribLast { get;  }
+        public TickAttribLast TickAttribLast { get; }
         public double Price { get; }
         public long Size { get; }
         public string Exchange { get; }
         public string SpecialConditions { get; }
-        internal HistoricalLastTick(ResponseComposer c)
+        internal HistoricalLastTick(ResponseReader c)
         {
             Time = c.ReadLong();
             TickAttribLast = new TickAttribLast(c.ReadInt());
@@ -74,9 +71,9 @@ namespace InterReact.Messages
     public sealed class HistoricalBidAskTicks : IHasRequestId
     {
         public int RequestId { get; }
-        public IList<HistoricalTick> Ticks { get; } = new List<HistoricalTick>();
+        public List<HistoricalTick> Ticks { get; } = new List<HistoricalTick>();
         public bool Done { get; }
-        public HistoricalBidAskTicks(ResponseComposer c)
+        public HistoricalBidAskTicks(ResponseReader c)
         {
             RequestId = c.ReadInt();
             var n = c.ReadInt();
@@ -95,7 +92,7 @@ namespace InterReact.Messages
         public double PriceAsk { get; }
         public long SizeBid { get; }
         public long SizeAsk { get; }
-        internal HistoricalBidAskTick(ResponseComposer c)
+        internal HistoricalBidAskTick(ResponseReader c)
         {
             Time = c.ReadLong();
             TickAttribBidAsk = new TickAttribBidAsk(c.ReadInt());

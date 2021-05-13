@@ -3,27 +3,25 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using InterReact.Messages;
-using InterReact.Utility;
 
 namespace InterReact.Extensions
 {
-    public static class ContractDataExpiryEx
+    public static class ContractDataExpiryExtensions
     {
         /// <summary>
         /// Emits contract details with the n'th expiry.
         /// The default is 0, the next expiry.
         /// </summary>
-        public static IObservable<IReadOnlyList<ContractData>> ContractDataExpirySelect(
-            this IObservable<IReadOnlyList<ContractData>> source, int offset = 0)
+        public static IObservable<IReadOnlyList<ContractDetails>> ContractDataExpirySelect(
+            this IObservable<IReadOnlyList<ContractDetails>> source, int offset)
         {
             if (offset < 0)
                 throw new ArgumentException("Offset must be >= 0.");
 
-            return ThrowIf.ThrowIfEmpty(source).Select(cds => ContractDataExpiryFilter(cds, offset));
+            return source.ThrowIfAnyEmpty().Select(cds => ContractDataExpiryFilter(cds, offset));
         }
 
-        internal static List<ContractData> ContractDataExpiryFilter(IEnumerable<ContractData> cds, int offset)
+        public static List<ContractDetails> ContractDataExpiryFilter(this IEnumerable<ContractDetails> cds, int offset)
         {
             var groups = cds
                 .GroupBy(cd => cd.Contract.LastTradeDateOrContractMonth)
@@ -37,7 +35,7 @@ namespace InterReact.Extensions
                 return groups.Last().ToList();
 
             if (offset >= groups.Count) // invalid expiry offset
-                return new List<ContractData>(); // empty
+                return new List<ContractDetails>(); // empty
 
             return groups[offset].ToList();
         }

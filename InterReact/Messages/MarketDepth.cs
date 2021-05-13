@@ -1,10 +1,6 @@
-﻿using InterReact.Core;
-using InterReact.Enums;
-using InterReact.Interfaces;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
 
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class MarketDepth : IHasRequestId
     {
@@ -24,7 +20,7 @@ namespace InterReact.Messages
 
         public bool IsSmartDepth { get; }
 
-        internal MarketDepth(ResponseComposer c, bool isLevel2)
+        internal MarketDepth(ResponseReader c, bool isLevel2)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();
@@ -34,16 +30,14 @@ namespace InterReact.Messages
             Side = c.ReadEnum<MarketDepthSide>();
             Price = c.ReadDouble();
             Size = c.ReadInt();
-            if (isLevel2 && c.Config.SupportsServerVersion(ServerVersion.SmartDepth))
-                IsSmartDepth = c.ReadBool();
         }
     }
 
     public sealed class MktDepthExchanges
     {
-        public IList<MktDepthExchange> Exchanges { get; } = new List<MktDepthExchange>();
+        public List<MktDepthExchange> Exchanges { get; } = new List<MktDepthExchange>();
 
-        internal MktDepthExchanges(ResponseComposer c)
+        internal MktDepthExchanges(ResponseReader c)
         {
             var n = c.ReadInt();
             for (int i = 0; i < n; i++)
@@ -58,7 +52,7 @@ namespace InterReact.Messages
         public string ListingExch { get; }
         public string ServiceDataTyp { get; }
         public int? AggGroup { get; } // The aggregated group
-        internal MktDepthExchange(ResponseComposer c)
+        internal MktDepthExchange(ResponseReader c)
         {
             Exchange = c.ReadString();
             SecType = c.ReadString();

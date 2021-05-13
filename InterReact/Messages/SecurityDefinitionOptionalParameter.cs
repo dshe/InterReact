@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using InterReact.Core;
-using InterReact.Interfaces;
+﻿using System.Collections.Generic;
 
-namespace InterReact.Messages
+namespace InterReact
 {
     // output
     public sealed class SecurityDefinitionOptionParameter : IHasRequestId
@@ -17,9 +10,9 @@ namespace InterReact.Messages
         public int UnderlyingContractId { get; }
         public string TradingClass { get; }
         public string Multiplier { get; }
-        public IList<string> Expirations { get; } = new List<string>();
-        public IList<string> Strikes { get; } = new List<string>();
-        internal SecurityDefinitionOptionParameter(ResponseComposer c)
+        public List<string> Expirations { get; } = new List<string>();
+        public List<string> Strikes { get; } = new List<string>();
+        internal SecurityDefinitionOptionParameter(ResponseReader c)
         {
             RequestId = c.ReadInt();
             Exchange = c.ReadString();
@@ -34,7 +27,7 @@ namespace InterReact.Messages
     public sealed class SecurityDefinitionOptionParameterEnd : IHasRequestId
     {
         public int RequestId { get; }
-        internal SecurityDefinitionOptionParameterEnd(ResponseComposer c)
+        internal SecurityDefinitionOptionParameterEnd(ResponseReader c)
         {
             RequestId = c.ReadInt();
         }

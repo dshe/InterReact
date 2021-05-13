@@ -1,6 +1,6 @@
 ﻿using StringEnums;
 
-namespace InterReact.StringEnums
+namespace InterReact
 {
     public sealed class HistoricalDataType : StringEnum<HistoricalDataType>
     {
@@ -18,6 +18,6 @@ namespace InterReact.StringEnums
         public static readonly HistoricalDataType FeeRate = Create("FEE_RATE");
         public static readonly HistoricalDataType RebateRate = Create("REBATE_RATE");
     }
-    
+
 }
 

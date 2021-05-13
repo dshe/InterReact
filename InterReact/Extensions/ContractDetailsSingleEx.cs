@@ -5,23 +5,20 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Text;
-using InterReact.Messages;
-using StringEnums;
-using InterReact.Extensions;
-using InterReact.Utility;
+
+using Stringification;
 
 namespace InterReact.Extensions
 {
-    public static class ContractDataSingleEx
+    public static class ContractDataSingleExtensions
     {
         /// <summary>
         /// Completes successfully if the sequence contains exactly one contract details object.
         /// Otherwise, OnError is called containing an exception with a message indicating which properties are different. 
         /// </summary>
-        public static IObservable<ContractData> ContractDataSingle(this IObservable<IReadOnlyList<ContractData>> source)
+        public static IObservable<ContractDetails> ContractDataSingle(this IObservable<IReadOnlyList<ContractDetails>> source)
         {
-            
-            return ThrowIf.ThrowIfEmpty(source).Select(cds =>
+            return source.ThrowIfAnyEmpty().Select(cds =>
             {
                 if (cds.Count == 1)
                     return cds.Single();
@@ -29,7 +26,7 @@ namespace InterReact.Extensions
             });
         }
 
-        private static string ErrorMessage(IReadOnlyList<ContractData> cds)
+        private static string ErrorMessage(IReadOnlyList<ContractDetails> cds)
         {
             var c = new Contract();
             var sb = new StringBuilder();
@@ -46,7 +43,7 @@ namespace InterReact.Extensions
                     .OrderBy(value => value, StringComparer.Ordinal);
 
                 if (values.Count() > 1)
-                    sb.AppendFormat($"{property.Name}: {values.JoinStrings(", ")}"+ Environment.NewLine+Environment.NewLine);
+                    sb.AppendFormat($"{property.Name}: {values.JoinStrings(", ")}" + Environment.NewLine + Environment.NewLine);
             }
 
             if (sb.Length == 0)

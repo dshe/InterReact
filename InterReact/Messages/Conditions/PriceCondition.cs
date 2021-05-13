@@ -1,51 +1,36 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
-using InterReact.Core;
-using InterReact.Enums;
 
-namespace InterReact.Messages.Conditions
+namespace InterReact
 {
-/** 
- *  @brief Used with conditional orders to cancel or submit order based on price of an instrument. 
- */
+    /** 
+     *  @brief Used with conditional orders to cancel or submit order based on price of an instrument. 
+     */
     public class PriceCondition : ContractCondition
     {
         protected override string Value
         {
-            get
-            {
-                return Price.ToString();
-            }
-            set
-            {
-                Price = double.Parse(value, NumberFormatInfo.InvariantInfo);
-            }
+            get => Price.ToString();
+            set => Price = double.Parse(value, NumberFormatInfo.InvariantInfo);
         }
-
         public override string ToString()
         {
             var name = Enum.GetName(typeof(TriggerMethod), TriggerMethod);
             return name + " " + base.ToString();
         }
-
         public override bool Equals(object obj)
         {
-            var other = obj as PriceCondition;
-            if (other == null)
-                return false;
-            return base.Equals(obj) && this.TriggerMethod == other.TriggerMethod;
+            return (obj is PriceCondition other)
+                && base.Equals(obj)
+                && TriggerMethod == other.TriggerMethod;
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode() + TriggerMethod.GetHashCode();
-        }
-
+        public override int GetHashCode() => base.GetHashCode() + TriggerMethod.GetHashCode();
         public double Price { get; set; }
         public TriggerMethod TriggerMethod { get; set; }
 
-        internal override void Deserialize(ResponseComposer c)
+        internal override void Deserialize(ResponseReader c)
         {
             base.Deserialize(c);
             TriggerMethod = c.ReadEnum<TriggerMethod>();
@@ -67,7 +52,7 @@ namespace InterReact.Messages.Conditions
 
             try
             {
-                TriggerMethod  = (TriggerMethod) Enum.Parse(typeof(TriggerMethod), fName);
+                TriggerMethod = (TriggerMethod)Enum.Parse(typeof(TriggerMethod), fName);
                 cond = cond.Substring(cond.IndexOf(fName) + fName.Length + 1);
                 return base.TryParse(cond);
             }

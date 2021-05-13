@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using InterReact.StringEnums;
 
-#nullable enable
 
-namespace InterReact.Messages
+namespace InterReact
 {
     public sealed class Contract // input + output
     {
@@ -27,7 +25,7 @@ namespace InterReact.Messages
         public string LastTradeDateOrContractMonth { get; set; } = "";  // Expiry: YYYYMM or YYYYMMDD
 
         public double Strike { get; set; }
-        public RightType Right { get; set; } = RightType.Undefined;
+        public OptionRightType Right { get; set; } = OptionRightType.Undefined;
         public string Multiplier { get; set; } = ""; // options and futures
 
         /// <summary>
@@ -74,7 +72,7 @@ namespace InterReact.Messages
         /// <summary>
         /// The legs of a combined contract definition.
         /// </summary>
-        public IList<ContractComboLeg> ComboLegs { get; } = new List<ContractComboLeg>(); // input + output
+        public List<ContractComboLeg> ComboLegs { get; } = new List<ContractComboLeg>(); // input + output
 
         /// <summary>
         /// Delta and underlying price for Delta-Neutral combo orders.

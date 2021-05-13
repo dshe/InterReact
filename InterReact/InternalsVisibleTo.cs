@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("InterReact.Tests")]
+[assembly: InternalsVisibleTo("InterReact.UnitTests")]
+[assembly: InternalsVisibleTo("InterReact.SystemTests")]
 [assembly: InternalsVisibleTo("ClientServer")]
