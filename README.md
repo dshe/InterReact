@@ -6,11 +6,11 @@
 - dependencies: RxSockets, StringEnums, Stringification, NodaTime, Reactive Extensions.
 - demo applications: Console, NET Core, UWP, WPF, Windows Forms.
 
-**Notes**
+### Notes ###
 
 TWS or Gateway must be running with API access enabled. In TWS, navigate to Edit / Global Configuration / API / Settings and make sure the "Enable ActiveX and Socket Clients" option is checked.
 
-**Example**
+### Example ###
 
 ```csharp
 // Create the InterReact client by connecting to TWS/Gateway using the default port and a random clientId.
