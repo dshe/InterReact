@@ -5,11 +5,11 @@ namespace InterReact
 {
     public sealed class ManagedAccounts
     {
-        public List<string> Accounts { get; }
+        public string Accounts { get; }
         internal ManagedAccounts(ResponseReader c)
         {
             c.IgnoreVersion();
-            Accounts = c.ReadString().Split(',').OrderBy(name => name).ToList();
+            Accounts = c.ReadString();
         }
     }
 }

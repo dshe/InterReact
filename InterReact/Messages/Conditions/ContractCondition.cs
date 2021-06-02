@@ -16,7 +16,7 @@ namespace InterReact
         public override string ToString()
             => Type + Delimiter + ContractResolver(ConId, Exchange) + base.ToString();
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return (obj is ContractCondition other)
                 && base.Equals(other)

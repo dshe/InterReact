@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using InterReact;
 
@@ -17,8 +18,11 @@ namespace HelloWorld
         public static async Task Main()
         {
             Console.Title = "InterReact";
-            Console.SetWindowSize(140, 30);
-            Console.SetBufferSize(140, 60);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Console.SetWindowSize(140, 30);
+                Console.SetBufferSize(140, 60);
+            }
 
             // Create the InterReact client by connecting to TWS/Gateway on your local machine.
             IInterReactClient client;

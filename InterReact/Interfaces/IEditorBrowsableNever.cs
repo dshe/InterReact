@@ -21,7 +21,7 @@ namespace InterReact
         int GetHashCode();
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        string ToString();
+        string? ToString();
 
         [EditorBrowsable(EditorBrowsableState.Never)]
         bool Equals(object obj);
@@ -37,10 +37,10 @@ namespace InterReact
         public override int GetHashCode() => base.GetHashCode();
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override string ToString() => base.ToString();
+        public override string? ToString() => base.ToString();
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override bool Equals(object obj) => ReferenceEquals(this, obj);
+        public override bool Equals(object? obj) => ReferenceEquals(this, obj);
     }
 
 }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
+﻿using System.Globalization;
 using NodaTime;
 
 namespace InterReact
@@ -8,31 +7,9 @@ namespace InterReact
     {
         public int RequestId { get; protected set; }
         public TickType TickType { get; protected set; }
-        internal void Undelay()
-        {
-            TickType = TickType switch
-            {
-                TickType.DelayedBidPrice => TickType.BidSize,
-                TickType.DelayedAskPrice => TickType.AskPrice,
-                TickType.DelayedLastPrice => TickType.LastPrice,
-                TickType.DelayedBidSize => TickType.BidSize,
-                TickType.DelayedAskSize => TickType.AskSize,
-                TickType.DelayedLastSize => TickType.LastSize,
-                TickType.DelayedHigh => TickType.HighPrice,
-                TickType.DelayedLow => TickType.LowPrice,
-                TickType.DelayedVolume => TickType.Volume,
-                TickType.DelayedClose => TickType.ClosePrice,
-                TickType.DelayedOpen => TickType.OpenPrice,
-                TickType.DelayedBidOption => TickType.BidOptionComputation,
-                TickType.DelayedAskOption => TickType.AskOptionComputation,
-                TickType.DelayedLastOption => TickType.LastOptionComputation,
-                TickType.DelayedModelOption => TickType.ModelOptionComputation,
-                TickType.DelayedLastTimeStamp => TickType.LastTimeStamp,
-                _ => TickType
-            };
-        }
+        internal void Undelay() => TickType = GetTickTypeUndelayed(TickType);
 
-        internal static (TickPrice, TickSize?) CreatePriceAndSizeTicks(ResponseReader p)
+        internal static object[] CreatePriceAndSizeTicks(ResponseReader p)
         {
             var version = p.GetVersion();
             var requestId = p.ReadInt();
@@ -43,14 +20,16 @@ namespace InterReact
             var size = version >= 2 ? p.ReadInt() : 0;
 
             var tickPrice = new TickPrice(requestId, priceTickType, price, new TickAttrib(version >= 3 ? p : null));
-            TickSize? tickSize = null;
             if (version >= 2)
             {
-                TickType tickTypeSize = GetTickTypeSize(priceTickType);
+                var tickTypeSize = GetTickTypeSize(priceTickType);
                 if (tickTypeSize != TickType.Undefined)
-                    tickSize = new TickSize(requestId, tickTypeSize, size);
+                {
+                    var tickSize = new TickSize(requestId, tickTypeSize, size);
+                    return new object[] { tickPrice, tickSize };
+                }
             }
-            return (tickPrice, tickSize);
+            return new object[] { tickPrice };
         }
 
         private static TickType GetTickTypeSize(TickType tickType) => tickType switch
@@ -64,7 +43,26 @@ namespace InterReact
             _ => TickType.Undefined
         };
 
-
+        private static TickType GetTickTypeUndelayed(TickType tickType) => tickType switch
+        {
+            TickType.DelayedBidPrice => TickType.BidSize,
+            TickType.DelayedAskPrice => TickType.AskPrice,
+            TickType.DelayedLastPrice => TickType.LastPrice,
+            TickType.DelayedBidSize => TickType.BidSize,
+            TickType.DelayedAskSize => TickType.AskSize,
+            TickType.DelayedLastSize => TickType.LastSize,
+            TickType.DelayedHigh => TickType.HighPrice,
+            TickType.DelayedLow => TickType.LowPrice,
+            TickType.DelayedVolume => TickType.Volume,
+            TickType.DelayedClose => TickType.ClosePrice,
+            TickType.DelayedOpen => TickType.OpenPrice,
+            TickType.DelayedBidOption => TickType.BidOptionComputation,
+            TickType.DelayedAskOption => TickType.AskOptionComputation,
+            TickType.DelayedLastOption => TickType.LastOptionComputation,
+            TickType.DelayedModelOption => TickType.ModelOptionComputation,
+            TickType.DelayedLastTimeStamp => TickType.LastTimeStamp,
+            _ => tickType
+        };
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,12 +175,12 @@ namespace InterReact
             RequestId = requestId;
             TickType = TickType.RealtimeVolume;
             var parts = str.Split(';');
-            Price = c.ParseDouble(parts[0]);
-            Size = c.ParseInt(parts[1]);
+            Price = ResponseParser.ParseDouble(parts[0]);
+            Size = ResponseParser.ParseInt(parts[1]);
             Instant = Instant.FromUnixTimeMilliseconds(long.Parse(parts[2], NumberFormatInfo.InvariantInfo));
-            Volume = c.ParseInt(parts[3]);
-            Vwap = c.ParseDouble(parts[4]);
-            SingleTrade = c.ParseBool(parts[5]);
+            Volume = ResponseParser.ParseInt(parts[3]);
+            Vwap = ResponseParser.ParseDouble(parts[4]);
+            SingleTrade = ResponseParser.ParseBool(parts[5]);
         }
     };
 
@@ -325,5 +323,5 @@ namespace InterReact
             RequestId = c.ReadInt();
         }
     };
-
 }
+

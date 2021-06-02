@@ -8,7 +8,7 @@ namespace InterReact
 {
     public sealed partial class Services
     {
-        public IObservable<IList<string>> CreateManagedAccountsObservable() =>
+        public IObservable<string> CreateManagedAccountsObservable() =>
             Response
             .ToObservable<ManagedAccounts>(Request.RequestManagedAccounts)
             .Select(m => m.Accounts)

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -12,32 +13,16 @@ namespace InterReact
     {
         internal static IObservable<object> ToMessages(this IObservable<string[]> source, Config config, ILogger logger)
         {
-            return Observable.Create<object>(observer =>
-            {
-                var responseComposer = new ResponseComposer(config, logger);
-
-                return source.Subscribe(strings =>
-                {
-                    try
-                    {
-                        responseComposer.Compose(strings, observer.OnNext);
-                    }
-                    catch (Exception e)
-                    {
-                        observer.OnError(e);
-                    }
-                },
-                onError: observer.OnError,
-                onCompleted: observer.OnCompleted);
-            });
+            var responseComposer = new ResponseComposer(config, logger);
+            return source.Select(strings => responseComposer.Compose(strings)).SelectMany(x => x);
         }
     }
 
     public sealed class ResponseComposer
     {
-        internal readonly ILogger Logger;
-        internal readonly Config Config;
-        internal readonly ResponseParser Parser;
+        private readonly ILogger Logger;
+        private readonly Config Config;
+        private readonly ResponseParser Parser;
 
         internal ResponseComposer(Config config, ILogger logger)
         {
@@ -46,24 +31,21 @@ namespace InterReact
             Parser = new ResponseParser(logger);
         }
 
-        internal void Compose(string[] strings, Action<object> onNext)
+        internal object[] Compose(string[] strings)
         {
             try
             {
-                var reader = new ResponseReader(Config, Parser, strings);
-                string code = reader.ReadString(); // read the first string
+                ResponseReader reader = new(Config, Parser, strings);
+                string code = reader.ReadString(); // read the code (first string)
                 if (code == "1")
                 {
-                    var (tickPrice, tickSize) = TickPrice.CreatePriceAndSizeTicks(reader);
+                    var tickMessages = Tick.CreatePriceAndSizeTicks(reader);
                     reader.VerifyMessageEnd();
-                    onNext(tickPrice);
-                    if (tickSize != null)
-                        onNext(tickSize);
-                    return;
+                    return tickMessages;
                 }
-                var message = GetMessage(code, reader);
+                object message = GetMessage(code, reader);
                 reader.VerifyMessageEnd();
-                onNext(message);
+                return new object[] { message };
             }
             catch (Exception e)
             {
@@ -73,7 +55,7 @@ namespace InterReact
             }
         }
 
-        private object GetMessage(string code, ResponseReader reader) => code switch
+        private static object GetMessage(string code, ResponseReader reader) => code switch
         {
             "2" => new TickSize(reader),
             "3" => new OrderStatusReport(reader),

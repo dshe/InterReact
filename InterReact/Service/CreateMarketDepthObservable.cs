@@ -17,7 +17,7 @@ namespace InterReact
         public IConnectableObservable<MarketDepth> CreateMarketDepthObservable(Contract contract, int rows = 3, IList<Tag>? options = null)
         {
             if (rows < 1)
-                throw new ArgumentException(nameof(rows));
+                throw new ArgumentException("rows < 1", nameof(rows));
 
             return Response.ToObservableWithIdContinuous<MarketDepth>(
                     Request.GetNextId,

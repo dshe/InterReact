@@ -29,7 +29,7 @@
             Yield = c.ReadDouble();
             YieldRedemptionDate = c.ReadInt();
 
-            if (Execution.Executions.TryGetValue(ExecutionId, out Execution execution))
+            if (Execution.Executions.TryGetValue(ExecutionId, out Execution? execution))
             {
                 Execution = execution;
                 OrderId = execution.OrderId;

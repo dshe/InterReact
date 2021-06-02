@@ -11,8 +11,8 @@ namespace InterReact
     public class ResponseReader
     {
         private readonly IEnumerator<string> Enumerator;
-        internal readonly Config Config;
-        internal readonly ResponseParser Parser;
+        internal Config Config { get; }
+        internal ResponseParser Parser { get; }
 
         internal ResponseReader(Config config, ResponseParser responseParser, string[] strings)
         {
@@ -34,13 +34,13 @@ namespace InterReact
             throw new IndexOutOfRangeException("Message is shorter than expected.");
         }
 
-        internal char ReadChar() => Parser.ParseChar(ReadString());
-        internal bool ReadBool() => Parser.ParseBool(ReadString());
-        internal int ReadInt() => Parser.ParseInt(ReadString());
-        internal long ReadLong() => Parser.ParseLong(ReadString());
-        internal double ReadDouble() => Parser.ParseDouble(ReadString());
-        internal int? ReadIntNullable() => Parser.ParseIntNullable(ReadString());
-        internal double? ReadDoubleNullable() => Parser.ParseDoubleNullable(ReadString());
+        internal char ReadChar() => ResponseParser.ParseChar(ReadString());
+        internal bool ReadBool() => ResponseParser.ParseBool(ReadString());
+        internal int ReadInt() => ResponseParser.ParseInt(ReadString());
+        internal long ReadLong() => ResponseParser.ParseLong(ReadString());
+        internal double ReadDouble() => ResponseParser.ParseDouble(ReadString());
+        internal int? ReadIntNullable() => ResponseParser.ParseIntNullable(ReadString());
+        internal double? ReadDoubleNullable() => ResponseParser.ParseDoubleNullable(ReadString());
         internal LocalTime ReadLocalTime(LocalTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
         internal LocalDateTime ReadLocalDateTime(LocalDateTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
         internal T ReadEnum<T>() where T : Enum => Parser.ParseEnum<T>(ReadString());

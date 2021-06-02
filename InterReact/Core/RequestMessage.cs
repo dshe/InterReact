@@ -10,22 +10,19 @@ namespace InterReact
 {
     public sealed class RequestMessage
     {
-        private readonly List<string> Strings = new List<string>();
-        private readonly Action<byte[], int, int> sendAction;
-        private readonly Limiter limiter;
+        private readonly List<string> Strings = new();
+        private readonly IRxSocketClient RxSocket;
+        private readonly Limiter Limiter;
 
-        internal RequestMessage(Action<byte[], int, int> sendAction, Limiter limiter)
+        internal RequestMessage(IRxSocketClient rxSocket, Limiter limiter)
         {
-            this.sendAction = sendAction;
-            this.limiter = limiter;
+            RxSocket = rxSocket;
+            Limiter = limiter;
         }
 
         // V100Plus format: 4 byte message length prefix plus payload of null-terminated strings.
-        internal void Send()
-        {
-            var bytes = Strings.ToBufferWithLengthPrefix();
-            limiter.Limit(() => sendAction(bytes, 0, bytes.Length));
-        }
+        internal byte[] Get() => Strings.ToByteArray().ToByteArrayWithLengthPrefix();
+        internal void Send() => Limiter.Limit(() => RxSocket.Send(Get()));
 
         /////////////////////////////////////////////////////
 
@@ -34,13 +31,13 @@ namespace InterReact
             if (objs == null)
                 Strings.Add(string.Empty);
             else if (objs.Length == 0)
-                throw new ArgumentException(nameof(objs));
+                throw new ArgumentException("invalid length", nameof(objs));
             else foreach (var o in objs)
                     Strings.Add(GetString(o));
             return this;
         }
 
-        private string GetString(object? o)
+        private static string GetString(object? o)
         {
             if (o == null)
                 return "";
@@ -53,13 +50,13 @@ namespace InterReact
                     return bo ? "1" : "0";
                 case Enum e:
                     var ut = Enum.GetUnderlyingType(e.GetType());
-                    return Convert.ChangeType(e, ut).ToString();
+                    return Convert.ChangeType(e, ut).ToString() ?? "";
             }
 
             var type = o.GetType();
 
             if (type.IsStringEnum())
-                return o.ToString();
+                return o.ToString() ?? "";
 
             var utype = Nullable.GetUnderlyingType(type);
             if (utype != null)

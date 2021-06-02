@@ -18,15 +18,14 @@ namespace InterReact.Extensions
         /// Used by AccountUpdates, MarketData (Ticks).
         /// </summary>
         internal static CacheSource<T, TKey> ToCacheSource<T, TKey>(
-            this IObservable<T> source,
-            Func<T, TKey> keySelector, bool sort = false) =>
-                new CacheSource<T, TKey>(source, keySelector, sort);
+            this IObservable<T> source, Func<T, TKey> keySelector, bool sort = false) where TKey : notnull =>
+                new(source, keySelector, sort);
     }
 
-    internal sealed class CacheSource<T, TKey> : ObservableBase<T>, IConnectableObservable<T>
+    internal sealed class CacheSource<T, TKey> : ObservableBase<T>, IConnectableObservable<T> where TKey:notnull
     {
-        private readonly Dictionary<TKey, T> cache = new Dictionary<TKey, T>();
-        private Subject<T> subject = new Subject<T>();
+        private readonly Dictionary<TKey, T> cache = new();
+        private Subject<T> subject = new();
         private readonly IObservable<T> source;
         private IDisposable? connection;
         private readonly Func<T, TKey> keySelector;

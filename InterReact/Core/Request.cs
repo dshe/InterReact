@@ -14,20 +14,20 @@ namespace InterReact
     /// Methods which send request messages to TWS/Gateway.
     /// Request methods are serialized, thread-safe and limited to a specified number of messages per second.
     /// </summary>
-    public sealed class Request : IEditorBrowsableNever
+    public sealed class Request //: IEditorBrowsableNever
     {
         private readonly Config Config;
-        private readonly Action<byte[], int, int> SendAction;
+        private readonly IRxSocketClient RxSocket;
         private readonly Limiter Limiter;
 
         public Request(Config config, IRxSocketClient rxSocket, Limiter limiter)
         {
             Config = config;
-            SendAction = rxSocket.Send;
+            RxSocket = rxSocket;
             Limiter = limiter;
         }
 
-        private RequestMessage CreateMessage() => new RequestMessage(SendAction, Limiter);
+        private RequestMessage CreateMessage() => new(RxSocket, Limiter);
 
         /// <summary>
         /// Returns successive unique ids which are used to uniquely identify requests and orders.

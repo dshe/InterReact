@@ -55,7 +55,7 @@
             message.Write(SecType, Exchange, Symbol);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return (obj is ExecutionCondition other)
                 && base.Equals(obj)

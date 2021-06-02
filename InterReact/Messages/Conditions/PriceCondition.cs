@@ -19,7 +19,7 @@ namespace InterReact
             var name = Enum.GetName(typeof(TriggerMethod), TriggerMethod);
             return name + " " + base.ToString();
         }
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return (obj is PriceCondition other)
                 && base.Equals(obj)

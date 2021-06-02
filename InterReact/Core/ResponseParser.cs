@@ -9,12 +9,12 @@ namespace InterReact
 {
     internal sealed class ResponseParser
     {
-        private readonly Dictionary<Type, Dictionary<string, object>> enumCache = new Dictionary<Type, Dictionary<string, object>>();
+        private readonly Dictionary<Type, Dictionary<string, object>> enumCache = new();
         private readonly ILogger Logger;
 
         internal ResponseParser(ILogger logger) => Logger = logger;
 
-        internal char ParseChar(string s)
+        internal static char ParseChar(string s)
         {
             if (s == "")
                 return '\0';
@@ -23,7 +23,7 @@ namespace InterReact
             throw new ArgumentException($"ParseChar>('{s}') failure.");
         }
 
-        internal bool ParseBool(string s)
+        internal static bool ParseBool(string s)
         {
             if (s == "" || s == "0" || string.Compare(s, "false", StringComparison.OrdinalIgnoreCase) == 0)
                 return false;
@@ -34,7 +34,7 @@ namespace InterReact
             throw new ArgumentException($"ParseBool('{s}') failure.");
         }
 
-        internal int ParseInt(string s)
+        internal static int ParseInt(string s)
         {
             if (s == "" || s == "0")
                 return 0;
@@ -43,7 +43,7 @@ namespace InterReact
             throw new ArgumentException($"ParseInt('{s}') failure.");
         }
 
-        internal long ParseLong(string s)
+        internal static long ParseLong(string s)
         {
             if (s == "" || s == "0")
                 return 0L;
@@ -52,7 +52,7 @@ namespace InterReact
             throw new ArgumentException($"ParseLong('{s}') failure.");
         }
 
-        internal double ParseDouble(string s)
+        internal static double ParseDouble(string s)
         {
             if (s == "" || s == "0")
                 return 0D;
@@ -61,14 +61,14 @@ namespace InterReact
             throw new ArgumentException($"ParseDouble('{s}') failure.");
         }
 
-        internal int? ParseIntNullable(string s)
+        internal static int? ParseIntNullable(string s)
         {
             if (s == "")
                 return null; // !
             return ParseInt(s);
         }
 
-        internal double? ParseDoubleNullable(string s)
+        internal static double? ParseDoubleNullable(string s)
         {
             if (s == "")
                 return null; // !
@@ -83,13 +83,13 @@ namespace InterReact
                 enumValues = Enum.GetValues(type).OfType<object>().ToDictionary(x => ((int)(x)).ToString());
                 enumCache.Add(type, enumValues);
             }
-            if (!enumValues.TryGetValue(numberString, out object e))
+            if (!enumValues.TryGetValue(numberString, out object? e))
             {
                 if (!int.TryParse(numberString, out var number))
                     throw new ArgumentException($"ParseEnum<{type.Name}>('{numberString}') is not an integer.");
                 e = Enum.ToObject(type, number);
                 enumValues.Add(numberString, e);
-                Logger.LogDebug($"ParseEnum<{type.Name}>('{numberString}') new value.");
+                Logger.LogTrace($"ParseEnum<{type.Name}>('{numberString}') new value.");
             }
             return (T)e;
         }
@@ -102,7 +102,7 @@ namespace InterReact
                 e = StringEnum<T>.Add(s);
                 if (e == null)
                     throw new Exception($"Could not add new value {s} to StringEnum.");
-                Logger.LogDebug($"ParseStringEnum<{typeof(T).Name}>('{e}') added new value.");
+                Logger.LogTrace($"ParseStringEnum<{typeof(T).Name}>('{e}') added new value.");
             }
             return e;
         }

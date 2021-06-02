@@ -42,9 +42,9 @@ namespace InterReact
             return conditions.FirstOrDefault(c => c.TryParse(cond));
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            var other = obj as OrderCondition;
+            OrderCondition? other = obj as OrderCondition;
             if (other == null)
                 return false;
             return IsConjunctionConnection == other.IsConjunctionConnection && this.Type == other.Type;

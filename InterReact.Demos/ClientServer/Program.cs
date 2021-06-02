@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
 namespace CoreClientServer
@@ -8,10 +9,12 @@ namespace CoreClientServer
         public static async Task Main()
         {
             Console.Title = "InterReact";
-#pragma warning disable CA1416 // Validate platform compatibility
-            Console.SetWindowSize(100, 30);
-            Console.SetBufferSize(100, 100);
-#pragma warning restore CA1416 // Validate platform compatibility
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Console.SetWindowSize(100, 30);
+                Console.SetBufferSize(100, 100);
+            }
 
             var clientLogger = new ConsoleLogger("Client:    ", ConsoleColor.DarkYellow);
             var clientLibLogger = new ConsoleLogger("ClientLib: ", ConsoleColor.DarkGreen);
@@ -28,6 +31,9 @@ namespace CoreClientServer
             await Task.Delay(1000);
 
             Console.ResetColor();
+
+
+
         }
     }
 }

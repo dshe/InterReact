@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using RxSockets;
 
 namespace InterReact
 {
-    public interface IInterReactClient : IEditorBrowsableNever
+    public interface IInterReactClient: IAsyncDisposable, IEditorBrowsableNever
     {
         Request Request { get; }
         IObservable<object> Response { get; }
         Services Services { get; }
         Config Config { get; }
-        Task DisposeAsync();
     }
 
     public sealed class InterReactClient : IInterReactClient
@@ -21,18 +19,18 @@ namespace InterReact
         public Request Request { get; }
         public IObservable<object> Response { get; }
         public Services Services { get; }
-        public Task DisposeAsync() => RxSocket.DisposeAsync();
 
         // must be public because it is constructed by the container
-        public InterReactClient(IRxSocketClient rxsocket, Config config, Request request, IObservable<object> response,
-            Services services, ILogger logger)
+        public InterReactClient(IRxSocketClient rxsocket, Config config, Request request, 
+            IObservable<object> response, Services services)
         {
             RxSocket = rxsocket;
             Config = config;
             Request = request;
             Response = response;
             Services = services;
-            logger.LogInformation($"Constructed {GetType().Name}.");
         }
+
+        public async ValueTask DisposeAsync() => await RxSocket.DisposeAsync();
     }
 }

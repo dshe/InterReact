@@ -43,7 +43,7 @@ namespace InterReact
                 var key = contract.Stringify();
                 lock (cache)
                 {
-                    if (!cache.TryGetValue(key, out IObservable<IReadOnlyList<ContractDetails>> item))
+                    if (!cache.TryGetValue(key, out IObservable<IReadOnlyList<ContractDetails>>? item))
                     {
                         item = ContractDataObservableImpl(contract).ToAsyncSource(ContractDataExpiry, Config.Clock);
                         cache.Add(key, item);

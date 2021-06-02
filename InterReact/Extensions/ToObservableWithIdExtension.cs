@@ -31,7 +31,7 @@ namespace InterReact.Extensions
                                 observer.OnError(alert);
                                 return;
                             }
-                            if (!(m is T t))
+                            if (m is not T t)
                                 throw new InvalidCastException($"Invalid type: {m.GetType()}.");
                             observer.OnNext(t);
                             cancelable = false;
@@ -76,7 +76,7 @@ namespace InterReact.Extensions
                                 observer.OnError(alert);
                                 return;
                             }
-                            if (!(m is T t))
+                            if (m is not T t)
                                 throw new InvalidCastException($"Invalid type: {m.GetType()}.");
                             observer.OnNext(t);
                         },
@@ -125,7 +125,7 @@ namespace InterReact.Extensions
                                 observer.OnNext(t);
                                 return;
                             }
-                            if (!(m is TEnd t2))
+                            if (m is not TEnd t2)
                                 throw new InvalidCastException($"Invalid type: {m.GetType()}.");
                             cancelable = false;
                             observer.OnCompleted();

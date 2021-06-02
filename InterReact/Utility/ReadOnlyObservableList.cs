@@ -12,7 +12,7 @@ namespace InterReact.Utility
         {
         }
 
-        public new event NotifyCollectionChangedEventHandler CollectionChanged
+        public new event NotifyCollectionChangedEventHandler? CollectionChanged
         {
             add { base.CollectionChanged += value; }
             remove { base.CollectionChanged -= value; }

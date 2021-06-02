@@ -8,7 +8,7 @@ namespace InterReact.Utility
 {
     public sealed class Limiter
     {
-        private readonly List<long> Ring = new List<long>();
+        private readonly List<long> Ring = new();
         private readonly int Rate;
         private int Index;
 

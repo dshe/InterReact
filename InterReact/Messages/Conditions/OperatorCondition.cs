@@ -7,7 +7,7 @@
         const string header = " is ";
         public override string ToString() => header + (IsMore ? ">= " : "<= ") + Value;
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return (obj is OperatorCondition other)
                 && base.Equals(obj)

@@ -7,21 +7,13 @@ namespace InterReact
     public sealed class Config : EditorBrowsableNever
     {
         public Config() { }
-
-        internal static readonly Random Random = new Random();
-
+        internal static Random Random { get; } = new();
         public IClock Clock { get; internal set; } = SystemClock.Instance;
 
-        public DateTimeZone SystemTimeZone { get; internal set; } = DateTimeZoneProviders.Tzdb.GetSystemDefault();
-
-        public IPEndPoint IPEndPoint { get; internal set; } = new IPEndPoint(IPAddress.IPv6Loopback, 0);
-
+        public IPEndPoint IPEndPoint { get; internal set; } = new(IPAddress.IPv6Loopback, 0);
         internal int[] Ports = { (int)DefaultPort.TwsRegularAccount, (int)DefaultPort.TwsDemoAccount, (int)DefaultPort.GatewayRegularAccount, (int)DefaultPort.GatewayDemoAccount };
-
         public bool IsDemoAccount => IPEndPoint.Port == (int)DefaultPort.TwsDemoAccount || IPEndPoint.Port == (int)DefaultPort.GatewayDemoAccount;
-
         public int ClientId { get; internal set; } = Random.Next(1000, 1000000);
-
         public int MaxRequestsPerSecond { get; internal set; } = 50;
         public string OptionalCapabilities { get; internal set; } = "";
 
@@ -32,10 +24,9 @@ namespace InterReact
         public const ServerVersion ServerVersionMin = ServerVersion.VT100; // always 100
         public const ServerVersion ServerVersionMax = ServerVersion.UnderlyingInfo;
 
-        public string? ManagedAccounts { get; internal set; }
-        public string? Date { get; internal set; }
-
-        internal int NextIdValue; // set during login
+        public string ManagedAccounts { get; internal set; } = "";
+        public string Date { get; internal set; } = "";
+        internal int NextIdValue;
 
         internal bool SupportsServerVersion(ServerVersion version) => version <= ServerVersionCurrent;
         internal void RequireServerVersion(ServerVersion version)
