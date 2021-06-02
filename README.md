@@ -4,7 +4,7 @@
 - compatible with Interactive Brokers TWS/Gateway API 9.73
 - supports .NET 5.0
 - dependencies: RxSockets, StringEnums, Stringification, NodaTime, Reactive Extensions.
-- demo applications: Console, NET Core, UWP, WPF, Windows Forms.
+- demo applications: Console, NET Core, WPF, Windows Forms.
 
 ### Notes ###
 
