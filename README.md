@@ -1,4 +1,4 @@
-## InterReact&nbsp;&nbsp;[![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)
+# InterReact&nbsp;&nbsp; [![License](https://img.shields.io/badge/Version-0.1.0-blue)]() [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ***Reactive C# API to Interactive Brokers***
 - compatible with Interactive Brokers TWS/Gateway API 9.73
