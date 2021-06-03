@@ -2,16 +2,20 @@
 
 ***Reactive C# API to Interactive Brokers***
 - compatible with Interactive Brokers TWS/Gateway API 9.73
-- supports .NET 5.0
+- supports **.NET 5.0**
 - dependencies: RxSockets, StringEnums, Stringification, NodaTime, Reactive Extensions.
 - demo applications: Console, NET Core, WPF, Windows Forms.
 
-### Notes ###
-
-TWS or Gateway must be running with API access enabled. In TWS, navigate to Edit / Global Configuration / API / Settings and make sure the "Enable ActiveX and Socket Clients" option is checked.
-
+```csharp
+interface IInterReactClient : IAsyncDisposable
+{
+    Request Request { get; }
+    IObservable<object> Response { get; }
+    Services Services { get; }
+    Config Config { get; }
+}
+```
 ### Example ###
-
 ```csharp
 // Create the InterReact client by connecting to TWS/Gateway using the default port and a random clientId.
 IInterReactClient client = await InterReactClient.Builder.BuildAsync();
@@ -42,5 +46,8 @@ ContractData contractData = contractDataList.Single();
 Console.WriteLine($"Long Name: {contractData.LongName}.");
 
 // Disconnect from IB.
-await client.DisconnectAsync();
+await client.DisposeAsync();
 ```
+### Notes ###
+
+TWS or Gateway must be running with API access enabled. In TWS, navigate to Edit / Global Configuration / API / Settings and make sure the "Enable ActiveX and Socket Clients" option is checked.
