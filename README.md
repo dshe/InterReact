@@ -9,23 +9,16 @@
 ```csharp
 interface IInterReactClient : IAsyncDisposable
 {
+    Config Config { get; }
     Request Request { get; }
     IObservable<object> Response { get; }
     Services Services { get; }
-    Config Config { get; }
 }
 ```
 ### Example ###
 ```csharp
 // Create the InterReact client by connecting to TWS/Gateway using the default port and a random clientId.
 IInterReactClient client = await new InterReactClientBuilder().BuildAsync();
-
-// Convert all messages received from IB to strings and then write them to the console.
-client.Response.Stringify().Subscribe(
-   onNext:            Console.WriteLine, 
-   onError:           Console.WriteLine, 
-   onCompleted: () => Console.WriteLine("Completed.")
-);
 
 // Create a contract object.
 Contract contract = new Contract
@@ -36,14 +29,18 @@ Contract contract = new Contract
    Exchange     = "SMART"
 };
 
-// Make a request to IB for the contract details using the contract object.
-IList<ContractData> contractDataList = await client.Services.ContractDataObservable(contract);
+// Create an observbale which will return ticks for the contract.
+IObservable<Tick> ticks = client.Services.CreateTickConnectableObservable(contract);
 
-// Get the one contract from the list.
-ContractData contractData = contractDataList.Single();
+// Subscribe to the observable to start receiving ticks.
+ticks.OfType<TickPrice>().Subscribe(tickPrice =>
+{
+    Console.WriteLine($"Price = {tickPrice.Price}");
+});
 
-// Print the LongName of the contract to the console.
-Console.WriteLine($"Long Name: {contractData.LongName}.");
+Console.WriteLine(Environment.NewLine + "press a key to exit...");
+Console.ReadKey();
+Console.Clear();
 
 // Disconnect from IB.
 await client.DisposeAsync();
