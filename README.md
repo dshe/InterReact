@@ -17,7 +17,7 @@ interface IInterReactClient : IAsyncDisposable
 ```
 ### Example ###
 ```csharp
-// Create the InterReact client by connecting to TWS/Gateway using the default port and a random clientId.
+// Create the InterReact client by connecting to TWS/Gateway.
 IInterReactClient client = await new InterReactClientBuilder().BuildAsync();
 
 // Create a contract object.
@@ -29,7 +29,7 @@ Contract contract = new Contract
    Exchange     = "SMART"
 };
 
-// Create an observbale which will return ticks for the contract.
+// Create an observable which will receive ticks for the contract.
 IObservable<Tick> ticks = client.Services.CreateTickObservable(contract);
 
 // Subscribe to the observable to start receiving ticks.
