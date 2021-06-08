@@ -33,7 +33,7 @@ Contract contract = new Contract
 IObservable<Tick> ticks = client.Services.CreateTickObservable(contract);
 
 // Subscribe to the observable to start receiving ticks.
-ticks.OfType<TickPrice>().Subscribe(tickPrice =>
+IDisposable subscription = ticks.OfType<TickPrice>().Subscribe(tickPrice =>
 {
     Console.WriteLine($"Price = {tickPrice.Price}");
 });
@@ -41,6 +41,9 @@ ticks.OfType<TickPrice>().Subscribe(tickPrice =>
 Console.WriteLine(Environment.NewLine + "press a key to exit...");
 Console.ReadKey();
 Console.Clear();
+
+// Dispose the subscription to stop receiving ticks.
+subscription.Dispose();
 
 // Disconnect from TWS/Gateway.
 await client.DisposeAsync();
