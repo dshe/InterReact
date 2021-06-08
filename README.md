@@ -4,7 +4,7 @@
 - compatible with Interactive Brokers TWS/Gateway API 9.73
 - supports **.NET 5.0**
 - dependencies: RxSockets, StringEnums, Stringification, NodaTime, Reactive Extensions.
-- demo applications: Console, NET Core, WPF, Windows Forms.
+- demo applications: Console, WPF.
 
 ```csharp
 interface IInterReactClient : IAsyncDisposable
@@ -35,7 +35,8 @@ IObservable<Tick> ticks = client.Services.CreateTickObservable(contract);
 // Subscribe to the observable to start receiving ticks.
 IDisposable subscription = ticks.OfType<TickPrice>().Subscribe(tickPrice =>
 {
-    Console.WriteLine($"Price = {tickPrice.Price}");
+    // Write ticks to the console.
+    Console.WriteLine($"{Enum.GetName(tickPrice.TickType)} = {tickPrice.Price}");
 });
 
 Console.WriteLine(Environment.NewLine + "press a key to exit...");
