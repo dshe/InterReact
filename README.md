@@ -42,7 +42,7 @@ Console.WriteLine(Environment.NewLine + "press a key to exit...");
 Console.ReadKey();
 Console.Clear();
 
-// Disconnect from IB.
+// Disconnect from TWS/Gateway.
 await client.DisposeAsync();
 ```
 ### Notes ###
