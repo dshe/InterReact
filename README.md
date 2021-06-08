@@ -30,7 +30,7 @@ Contract contract = new Contract
 };
 
 // Create an observbale which will return ticks for the contract.
-IObservable<Tick> ticks = client.Services.CreateTickConnectableObservable(contract);
+IObservable<Tick> ticks = client.Services.CreateTickObservable(contract);
 
 // Subscribe to the observable to start receiving ticks.
 ticks.OfType<TickPrice>().Subscribe(tickPrice =>
