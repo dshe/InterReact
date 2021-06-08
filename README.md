@@ -35,7 +35,7 @@ IObservable<Tick> tickObservable = client.Services.CreateTickObservable(contract
 // Subscribe to the observable to start receiving ticks.
 IDisposable subscription = tickObservable
     .OfType<TickPrice>()
-    .Subscribe(tickPrice =>
+    .Subscribe(onNext: tickPrice =>
     {
         // Write ticks to the console.
         Console.WriteLine($"{Enum.GetName(tickPrice.TickType)} = {tickPrice.Price}");
