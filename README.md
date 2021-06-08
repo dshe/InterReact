@@ -18,7 +18,7 @@ interface IInterReactClient : IAsyncDisposable
 ### Example ###
 ```csharp
 // Create the InterReact client by connecting to TWS/Gateway using the default port and a random clientId.
-IInterReactClient client = await InterReactClient.Builder.BuildAsync();
+IInterReactClient client = await new InterReactClientBuilder().BuildAsync();
 
 // Convert all messages received from IB to strings and then write them to the console.
 client.Response.Stringify().Subscribe(
