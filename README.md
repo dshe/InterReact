@@ -30,14 +30,16 @@ Contract contract = new Contract
 };
 
 // Create an observable which will receive ticks for the contract.
-IObservable<Tick> ticks = client.Services.CreateTickObservable(contract);
+IObservable<Tick> tickObservable = client.Services.CreateTickObservable(contract);
 
 // Subscribe to the observable to start receiving ticks.
-IDisposable subscription = ticks.OfType<TickPrice>().Subscribe(tickPrice =>
-{
-    // Write ticks to the console.
-    Console.WriteLine($"{Enum.GetName(tickPrice.TickType)} = {tickPrice.Price}");
-});
+IDisposable subscription = tickObservable
+    .OfType<TickPrice>()
+    .Subscribe(tickPrice =>
+    {
+        // Write ticks to the console.
+        Console.WriteLine($"{Enum.GetName(tickPrice.TickType)} = {tickPrice.Price}");
+    });
 
 Console.WriteLine(Environment.NewLine + "press a key to exit...");
 Console.ReadKey();
