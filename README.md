@@ -43,7 +43,7 @@ IDisposable subscription = tickObservable
     .OfType<TickPrice>()
     .Subscribe(onNext: tickPrice =>
     {
-        // Write ticks to the console.
+        // Write price ticks to the console.
         Console.WriteLine($"{Enum.GetName(tickPrice.TickType)} = {tickPrice.Price}");
     });
 
@@ -55,7 +55,7 @@ Console.Clear();
 subscription.Dispose();
 
 // Disconnect from TWS/Gateway.
-interReact client.DisposeAsync();
+interReact.DisposeAsync();
 ```
 ### Notes ###
 
