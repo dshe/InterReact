@@ -7,7 +7,7 @@
 - demo applications: Console, WPF.
 
 ```csharp
-interface IInterReactClient : IAsyncDisposable
+interface IInterReact : IAsyncDisposable
 {
     Config Config { get; }
     Request Request { get; }
@@ -17,8 +17,8 @@ interface IInterReactClient : IAsyncDisposable
 ```
 ### Example ###
 ```csharp
-// Create the InterReact client by connecting to TWS/Gateway.
-IInterReactClient client = await new InterReactClientBuilder().BuildAsync();
+// Create the InterReact client by first connecting to TWS/Gateway on the local host.
+IInterReact interreact = await new InterReactBuilder().BuildAsync();
 
 // Create a contract object.
 Contract contract = new Contract
@@ -30,7 +30,7 @@ Contract contract = new Contract
 };
 
 // Create an observable which will receive ticks for the contract.
-IObservable<Tick> tickObservable = client.Services.CreateTickObservable(contract);
+IObservable<Tick> tickObservable = interreact.Services.CreateTickObservable(contract);
 
 // Subscribe to the observable to start receiving ticks.
 IDisposable subscription = tickObservable
@@ -49,7 +49,7 @@ Console.Clear();
 subscription.Dispose();
 
 // Disconnect from TWS/Gateway.
-await client.DisposeAsync();
+interreact client.DisposeAsync();
 ```
 ### Notes ###
 
