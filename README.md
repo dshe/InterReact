@@ -18,7 +18,7 @@ interface IInterReact : IAsyncDisposable
 ### Example ###
 ```csharp
 // Create the InterReact client by first connecting to TWS/Gateway on the local host.
-IInterReact interreact = await new InterReactBuilder().BuildAsync();
+IInterReact interReact = await new InterReactBuilder().BuildAsync();
 
 // Create a contract object.
 Contract contract = new Contract
@@ -30,7 +30,7 @@ Contract contract = new Contract
 };
 
 // Create an observable which will receive ticks for the contract.
-IObservable<Tick> tickObservable = interreact.Services.CreateTickObservable(contract);
+IObservable<Tick> tickObservable = interReact.Services.CreateTickObservable(contract);
 
 // Subscribe to the observable to start receiving ticks.
 IDisposable subscription = tickObservable
@@ -49,7 +49,7 @@ Console.Clear();
 subscription.Dispose();
 
 // Disconnect from TWS/Gateway.
-interreact client.DisposeAsync();
+interReact client.DisposeAsync();
 ```
 ### Notes ###
 
