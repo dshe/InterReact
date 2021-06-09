@@ -17,6 +17,12 @@ interface IInterReact : IAsyncDisposable
 ```
 ### Example ###
 ```csharp
+using System;
+using System.Threading.Tasks;
+using System.Reactive.Linq;
+using InterReact;
+```
+```csharp
 // Create the InterReact client by first connecting to TWS/Gateway on the local host.
 IInterReact interReact = await new InterReactBuilder().BuildAsync();
 
