@@ -35,10 +35,10 @@ Contract contract = new Contract
    Exchange     = "SMART"
 };
 
-// Create an observable which will receive ticks for the contract.
+// Create an observable which can observe ticks for the contract.
 IObservable<Tick> tickObservable = interReact.Services.CreateTickObservable(contract);
 
-// Subscribe to the observable to start receiving ticks.
+// Subscribe to the observable to start observing ticks.
 IDisposable subscription = tickObservable
     .OfType<TickPrice>()
     .Subscribe(onNext: tickPrice =>
@@ -51,7 +51,7 @@ Console.WriteLine(Environment.NewLine + "press a key to exit...");
 Console.ReadKey();
 Console.Clear();
 
-// Dispose the subscription to stop receiving ticks.
+// Dispose the subscription to stop observing ticks.
 subscription.Dispose();
 
 // Disconnect from TWS/Gateway.
