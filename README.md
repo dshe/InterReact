@@ -3,7 +3,7 @@
 ***Reactive C# API to Interactive Brokers***
 - compatible with Interactive Brokers TWS/Gateway API 9.73
 - supports **.NET 5.0**
-- dependencies: RxSockets, StringEnums, Stringification, NodaTime, Reactive Extensions.
+- dependencies: RxSockets, StringEnums, Stringification, Reactive Extensions, NodaTime.
 - demo applications: Console, WPF.
 
 ```csharp
