@@ -1,5 +1,4 @@
-﻿using InterReact.Extensions;
-using Stringification;
+﻿using Stringification;
 using System;
 using System.Collections.Generic;
 using System.IO;

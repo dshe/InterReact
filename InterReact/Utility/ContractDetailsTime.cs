@@ -10,28 +10,18 @@ using Microsoft.Extensions.Logging;
 using NodaTime;
 using NodaTime.Text;
 
-namespace InterReact.Utility
+namespace InterReact
 {
-    public sealed class ContractDataTimeEvent
+    public sealed record ContractDataTimeEvent
     {
-        public ZonedDateTime Time { get; }
-        public ContractTimeStatus Status { get; }
-        internal ContractDataTimeEvent(ZonedDateTime time, ContractTimeStatus status)
-        {
-            Time = time;
-            Status = status;
-        }
+        public ZonedDateTime Time { get; init; }
+        public ContractTimeStatus Status { get; init; }
     }
 
-    public sealed class ContractDataTimePeriod
+    public sealed record ContractDataTimePeriod
     {
-        public ContractDataTimeEvent? Previous { get; }
-        public ContractDataTimeEvent? Next { get; }
-        internal ContractDataTimePeriod(ContractDataTimeEvent? previous, ContractDataTimeEvent? next)
-        {
-            Previous = previous;
-            Next = next;
-        }
+        public ContractDataTimeEvent? Previous { get; init; }
+        public ContractDataTimeEvent? Next { get; init; }
     }
 
     public sealed class ContractDataTime
@@ -74,7 +64,7 @@ namespace InterReact.Utility
                 list.Add(start, ContractTimeStatus.Liquid);
                 list.Add(end, previous.Value == ContractTimeStatus.Trading ? ContractTimeStatus.Trading : ContractTimeStatus.Closed);
             }
-            return list.Select(x => new ContractDataTimeEvent(x.Key.InZoneLeniently(TimeZone), x.Value)).ToList();
+            return list.Select(x => new ContractDataTimeEvent { Time = x.Key.InZoneLeniently(TimeZone), Status = x.Value }).ToList();
         }
 
         private static List<(LocalDateTime start, LocalDateTime end)> GetSessions(string s)
@@ -123,9 +113,11 @@ namespace InterReact.Utility
             if (!Events.Any())
                 return null;
 
-            return new ContractDataTimePeriod(
-                Events.Where(x => x.Time.ToInstant() <= dt).LastOrDefault(),
-                Events.Where(x => x.Time.ToInstant() > dt).FirstOrDefault());
+            return new ContractDataTimePeriod
+            {
+                Previous = Events.Where(x => x.Time.ToInstant() <= dt).LastOrDefault(),
+                Next = Events.Where(x => x.Time.ToInstant() > dt).FirstOrDefault()
+            };
         }
 
         /// <summary>

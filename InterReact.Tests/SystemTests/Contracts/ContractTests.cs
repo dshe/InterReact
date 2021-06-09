@@ -1,5 +1,4 @@
 ﻿using InterReact;
-using InterReact.Extensions;
 using InterReact.SystemTests;
 using System;
 using System.Reactive.Linq;

@@ -3,9 +3,9 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
-namespace InterReact.Extensions
+namespace InterReact
 {
-    internal static class ToShareSourceExtension
+    public static partial class Extensions
     {
         /// <summary>
         /// Returns an observable that relays messages from an underlying sequence so that concurrent observers, if any, receive the same sequence.
@@ -14,7 +14,7 @@ namespace InterReact.Extensions
         internal static IObservable<T> ToShareSource<T>(this IObservable<T> source)
         {
             var gate = new object();
-            ReplaySubject<T> subject = new ReplaySubject<T>();
+            ReplaySubject<T> subject = new();
             IDisposable subjectSubscription = Disposable.Empty;
 
             return Observable.Create<T>(observer =>

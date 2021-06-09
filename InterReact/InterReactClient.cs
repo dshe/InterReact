@@ -6,10 +6,10 @@ namespace InterReact
 {
     public interface IInterReactClient: IAsyncDisposable, IEditorBrowsableNever
     {
+        Config Config { get; }
         Request Request { get; }
         IObservable<object> Response { get; }
         Services Services { get; }
-        Config Config { get; }
     }
 
     public sealed class InterReactClient : IInterReactClient

@@ -1,7 +1,5 @@
 ﻿using System;
 
-using InterReact.Extensions;
-
 namespace InterReact
 {
     public sealed partial class Services
@@ -11,9 +9,9 @@ namespace InterReact
         /// </summary>
         public IObservable<AccountSummary> CreateAccountSummaryObservable() =>
             Response
-                .ToObservableWithId<AccountSummary,AccountSummaryEnd>(
+                .ToObservableWithIdMultiple<AccountSummary,AccountSummaryEnd>(
                     Request.GetNextId,
-                    requestId => Request.RequestAccountSummary(requestId),
+                    id => Request.RequestAccountSummary(id),
                     Request.CancelAccountSummary)
                 .ToShareSource();
     }

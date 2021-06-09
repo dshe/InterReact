@@ -6,8 +6,9 @@ namespace InterReact
 {
     public sealed class Config : EditorBrowsableNever
     {
+        private static readonly Random Random = new();
+
         public Config() { }
-        internal static Random Random { get; } = new();
         public IClock Clock { get; internal set; } = SystemClock.Instance;
 
         public IPEndPoint IPEndPoint { get; internal set; } = new(IPAddress.IPv6Loopback, 0);

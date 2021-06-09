@@ -1,5 +1,4 @@
-﻿using InterReact.Extensions;
-using Microsoft.Reactive.Testing;
+﻿using Microsoft.Reactive.Testing;
 using NodaTime;
 using Stringification;
 using System;

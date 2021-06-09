@@ -3,15 +3,15 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Threading;
 
-namespace InterReact.Extensions
+namespace InterReact
 {
-    public static class CancelWhenExtension
+    public static partial class Extensions
     {
         public static IObservable<T> CancelWhen<T>(this IObservable<T> source, CancellationToken ct)
         {
             return Observable.Create<T>(observer =>
             {
-                var subscription = source.Subscribe(observer);
+                var subscription = source.SubscribeSafe(observer);
 
                 CancellationTokenRegistration? regx = null;
                 regx = ct.Register(() =>

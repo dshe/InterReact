@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using InterReact.Utility;
 using NodaTime;
 using NodaTime.Text;
 using RxSockets;
@@ -14,7 +13,7 @@ namespace InterReact
     /// Methods which send request messages to TWS/Gateway.
     /// Request methods are serialized, thread-safe and limited to a specified number of messages per second.
     /// </summary>
-    public sealed class Request //: IEditorBrowsableNever
+    public sealed class Request : IEditorBrowsableNever
     {
         private readonly Config Config;
         private readonly IRxSocketClient RxSocket;
@@ -219,7 +218,7 @@ namespace InterReact
         /// Updates for all accounts are returned when accountCode is null.
         /// This information is updated every three minutes.
         /// </summary>
-        public void RequestAccountData(bool start, string? accountCode = null) =>
+        public void RequestAccountUpdates(bool start, string? accountCode = null) =>
             CreateMessage().Write(RequestCode.RequestAccountData, "2", start, accountCode).Send();
 
         /// <summary>
@@ -511,7 +510,7 @@ namespace InterReact
             CreateMessage().Write(RequestCode.VerifyAndAuthorizeMessage, "1", apiData, xyzResponse).Send();
 
         /**
-        * @brief Requests position subscription for account and/or model
+        * Requests position subscription for account and/or model
         * Initially all positions are returned, and then updates are returned for any position changes in real time.
         * @param account - If an account Id is provided, only the account's positions belonging to the specified model will be delivered
         * @param modelCode - The code of the model's positions we are interested in.

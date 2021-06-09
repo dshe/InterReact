@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using InterReact;
@@ -25,7 +26,7 @@ namespace HelloWorld
             }
 
             // Create the InterReact client by connecting to TWS/Gateway on your local machine.
-            IInterReactClient client;
+            IInterReactClient? client;
             try
             {
                 client = await new InterReactClientBuilder().BuildAsync();
@@ -37,32 +38,29 @@ namespace HelloWorld
                 return;
             }
 
-            // Print all messages as strings to the console.
-            client.Response.StringifyItems().Subscribe(
-                onNext: Console.WriteLine,
-                //onError: Console.WriteLine,
-                onCompleted: () => Console.WriteLine("Completed."));
-
             var contract = new Contract
             {
                 SecurityType = SecurityType.Stock,
-                Symbol = "C",
+                Symbol = "SPY",
                 Currency = "USD",
-                Exchange = "NYSE"
+                Exchange = "SMART"
             };
 
-            var contractDataList = await client.Services.CreateContractDataObservable(contract);
+            IObservable<Tick> tickObservable = client.Services.CreateTickObservable(contract);
 
-            var contractData = contractDataList.Single();
-
-            Console.WriteLine($"Long Name: {contractData.LongName}.");
-
-            // allow some time to display data
-            await Task.Delay(3000);
-            await client.DisposeAsync();
+            IDisposable subscription = tickObservable
+                .OfType<TickPrice>()
+                .Subscribe(onNext: tickPrice =>
+                {
+                    Console.WriteLine($"{Enum.GetName(tickPrice.TickType)} = {tickPrice.Price}");
+                });
 
             Console.WriteLine(Environment.NewLine + "press a key to exit...");
             Console.ReadKey();
+            Console.Clear();
+
+            subscription.Dispose();
+            await client.DisposeAsync();
         }
     }
 }

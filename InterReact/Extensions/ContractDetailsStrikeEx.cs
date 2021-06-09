@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 
-namespace InterReact.Extensions
+namespace InterReact
 {
-    public static class ContractDataStrikeExtensions
+    public static partial class Extensions
     {
         /// <summary>
         /// Selects contract(s) from a list of contracts with varying expiry dates.

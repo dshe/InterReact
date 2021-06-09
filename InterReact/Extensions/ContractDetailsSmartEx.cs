@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 
-namespace InterReact.Extensions
+namespace InterReact
 {
-    public static class ContractDataSmartExtensions
+    public static partial class Extensions
     {
         /// <summary>
         /// For each particular contractId, if SMART is one of the exchanges, this filter removes the contracts with other exchanges.

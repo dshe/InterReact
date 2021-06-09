@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using InterReact.Extensions;
-
 
 namespace InterReact
 {
@@ -15,9 +12,8 @@ namespace InterReact
         /// </summary>
         public IObservable<NewsBulletin> CreateNewsBulletinsObservable() =>
             Response
-                .ToObservable<NewsBulletin>(
-                    () => Request.RequestNewsBulletins(),
-                    Request.CancelNewsBulletins)
+                .ToObservableContinuous<NewsBulletin>(
+                    () => Request.RequestNewsBulletins(), Request.CancelNewsBulletins)
                 .Publish()
                 .RefCount();
     }

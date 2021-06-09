@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-
-using InterReact.Extensions;
 
 namespace InterReact
 {
@@ -13,7 +9,7 @@ namespace InterReact
         /// </summary>
         public IObservable<AccountPosition> CreateAccountPositionsObservable() =>
             Response
-                .ToObservable<AccountPosition, AccountPositionEnd>(
+                .ToObservableMultiple<AccountPosition, AccountPositionEnd>(
                     Request.RequestAccountPositions,
                     Request.CancelAccountPositions)
                 .ToShareSource();

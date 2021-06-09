@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
-using InterReact.Extensions;
 
 namespace InterReact
 {

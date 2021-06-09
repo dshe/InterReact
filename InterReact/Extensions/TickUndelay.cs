@@ -1,12 +1,11 @@
-﻿
-using System;
+﻿using System;
 using System.Reactive.Linq;
 
-namespace InterReact.Extensions
+namespace InterReact
 {
-    public static class TickExtensions
+    public static partial class Extensions
     {
-        public static IObservable<T> Undelay<T>(this IObservable<T> source) where T : Tick =>
-            source.Do(x => x.Undelay());
+        public static IObservable<Tick> Undelay(this IObservable<Tick> source) =>
+            source.Do(tick => tick.Undelay());
     }
 }

@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 
-namespace InterReact.Extensions
+namespace InterReact
 {
-    public static class ContractDataExpiryExtensions
+    public static partial class Extensions
     {
         /// <summary>
         /// Emits contract details with the n'th expiry.

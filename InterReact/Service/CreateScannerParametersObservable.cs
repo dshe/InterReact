@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using InterReact.Extensions;
-
 
 namespace InterReact
 {
@@ -13,7 +10,7 @@ namespace InterReact
         /// </summary>
         public IObservable<string> CreateScannerParametersObservable() =>
             Response
-                .ToObservable<ScannerParameters>(Request.RequestScannerParameters)
+                .ToObservableSingle<ScannerParameters>(Request.RequestScannerParameters)
                 .Select(m => m.Parameters)
                 .ToShareSource();
     }

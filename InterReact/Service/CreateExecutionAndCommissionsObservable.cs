@@ -1,6 +1,4 @@
 ﻿using System;
-using InterReact.Extensions;
-
 
 namespace InterReact
 {
@@ -11,8 +9,8 @@ namespace InterReact
         /// </summary>
         internal IObservable<IHasRequestId> CreateExecutionAndCommissionsObservable() =>
             Response
-            .ToObservableWithId<IHasRequestId,ExecutionEnd>(
-                Request.GetNextId, requestId => Request.RequestExecutions(requestId))
-            .ToShareSource();
+                .ToObservableWithIdMultiple<IHasRequestId,ExecutionEnd>(
+                    Request.GetNextId, id => Request.RequestExecutions(id))
+                .ToShareSource();
     }
 }

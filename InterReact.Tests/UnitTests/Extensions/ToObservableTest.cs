@@ -1,5 +1,4 @@
-﻿using InterReact.Extensions;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -29,7 +28,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Ok()
         {
-            var observable = subject.ToObservable<SomeClass>(
+            var observable = subject.ToObservableSingle<SomeClass>(
                 () =>
                 {
                     Interlocked.Increment(ref subscribeCalls);
@@ -55,7 +54,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Multi_Ok()
         {
-            var observable = subject.ToObservable<SomeClass, SomeClassEnd>(
+            var observable = subject.ToObservableMultiple<SomeClass, SomeClassEnd>(
                 () =>
                 {
                     Interlocked.Increment(ref subscribeCalls);
@@ -74,21 +73,21 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Subscribe_Error()
         {
-            var observable = subject.ToObservable<string>(() => { throw new BarrierPostPhaseException(); });
+            var observable = subject.ToObservableSingle<string>(() => { throw new BarrierPostPhaseException(); });
             await Assert.ThrowsAsync<BarrierPostPhaseException>(async () => await observable);
         }
 
         [Fact]
         public async Task Test_Source_Error()
         {
-            var observable = subject.ToObservable<string>(() => subject.OnError(new BarrierPostPhaseException()));
+            var observable = subject.ToObservableSingle<string>(() => subject.OnError(new BarrierPostPhaseException()));
             await Assert.ThrowsAsync<BarrierPostPhaseException>(async () => await observable);
         }
 
         [Fact]
         public async Task Test_Source_Completed()
         {
-            var observable = subject.ToObservable<string>(() => subject.OnCompleted());
+            var observable = subject.ToObservableSingle<string>(() => subject.OnCompleted());
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => await observable);
             Assert.Equal("Sequence contains no elements.", ex.Message);
         }
@@ -102,7 +101,7 @@ namespace InterReact.UnitTests.Extensions
         public async Task Test_Timeout(int ticks)
         {
             var ts = ticks == -1 ? TimeSpan.Zero : TimeSpan.FromTicks(ticks);
-            var observable = subject.ToObservable<string>(() => Interlocked.Increment(ref subscribeCalls), () => Interlocked.Increment(ref unsubscribeCalls));
+            var observable = subject.ToObservableContinuous<string>(() => Interlocked.Increment(ref subscribeCalls), () => Interlocked.Increment(ref unsubscribeCalls));
             await Assert.ThrowsAsync<TimeoutException>(async () => await observable.Timeout(ts));
             await Task.Delay(1);
             Assert.Equal(1, subscribeCalls);

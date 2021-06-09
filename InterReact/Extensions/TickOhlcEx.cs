@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reactive.Linq;
 
-namespace InterReact.Extensions
+namespace InterReact
 {
     public sealed class TickOhlc
     {
@@ -11,24 +11,24 @@ namespace InterReact.Extensions
         public double? Close { get; private set; }
         internal static TickOhlc Calc(TickOhlc instance, double value)
         {
-            if (!instance.Open.HasValue)
-                instance.Open = instance.High = instance.Low = value;
-            else
+            if (instance.Open == null)
             {
-                if (!instance.High.HasValue || !instance.Low.HasValue)
-                    throw new ArgumentNullException(nameof(instance));
-                instance.High = Math.Max(instance.High.Value, value);
-                instance.Low = Math.Min(instance.Low.Value, value);
+                instance.Open = instance.High = instance.Low = instance.Close = value;
+                return instance;
             }
+            if (instance.High == null || instance.Low == null)
+                throw new ArgumentNullException(nameof(instance));
+            instance.High = Math.Max(instance.High.Value, value);
+            instance.Low = Math.Min(instance.Low.Value, value);
             instance.Close = value;
             return instance;
         }
     }
 
-    public static class TickOpenHighLowCloseExtensions
+    public static partial class Extensions
     {
-        public static IObservable<TickOhlc> TickOpenHighLowClose(this IObservable<Tick> source, TimeSpan barSize)
-            => source
+        public static IObservable<TickOhlc> TickOpenHighLowClose(this IObservable<Tick> source, TimeSpan barSize) =>
+            source
                 .OfType<TickPrice>()
                 .Where(x => x.TickType == TickType.LastPrice)
                 .Select(x => x.Price)

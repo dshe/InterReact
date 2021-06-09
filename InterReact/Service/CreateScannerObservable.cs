@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
-using InterReact.Extensions;
-
 
 namespace InterReact
 {
@@ -12,14 +10,13 @@ namespace InterReact
         /// Creates an observable which, upon subscription, emits scanner results, then completes.
         /// </summary>
         public IObservable<List<ScannerDataItem>> CreateScannerObservable(
-            ScannerSubscription subscription,
-            IList<Tag>? subscriptionOptions = null)
+            ScannerSubscription subscription, IList<Tag>? subscriptionOptions = null)
         {
             if (subscription == null)
                 throw new ArgumentNullException(nameof(subscription));
 
             return Response
-                .ToObservableWithId<ScannerData>(
+                .ToObservableWithIdSingle<ScannerData>(
                     Request.GetNextId,
                     requestId => Request.RequestScannerSubscription(
                         requestId,

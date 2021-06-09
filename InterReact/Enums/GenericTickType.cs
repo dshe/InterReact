@@ -2,6 +2,8 @@ namespace InterReact
 {
     public enum GenericTickType
     {
+        Undefined = 0,
+
         /// <summary>
         /// Option Volume. For stocks options only.
         /// </summary>

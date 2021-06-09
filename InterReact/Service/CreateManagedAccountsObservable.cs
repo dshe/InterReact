@@ -2,7 +2,6 @@
 using System.Reactive.Linq;
 using System.Collections.Generic;
 using System.Reactive.Threading.Tasks;
-using InterReact.Extensions;
 
 namespace InterReact
 {
@@ -10,8 +9,8 @@ namespace InterReact
     {
         public IObservable<string> CreateManagedAccountsObservable() =>
             Response
-            .ToObservable<ManagedAccounts>(Request.RequestManagedAccounts)
-            .Select(m => m.Accounts)
-            .ToShareSource();
+                .ToObservableSingle<ManagedAccounts>(Request.RequestManagedAccounts)
+                .Select(m => m.Accounts)
+                .ToShareSource();
     }
 }

@@ -4,20 +4,17 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using InterReact;
-using InterReact.Utility;
 using RxSockets;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 
 namespace CoreClientServer
 {
-
-
     internal class Server
     {
         public IRxSocketServer SocketServer { get; }
         private readonly ILogger Logger;
-        private readonly Limiter Limiter = new Limiter();
+        private readonly Limiter Limiter = new();
 
         internal Server(ILogger logger, ILogger libLogger)
         {

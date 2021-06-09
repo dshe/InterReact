@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using InterReact.Extensions;
+using System.Threading.Tasks;
 using NodaTime;
 using Stringification;
 
@@ -11,9 +11,7 @@ namespace InterReact
 {
     public sealed partial class Services
     {
-        private readonly Dictionary<string, IObservable<IReadOnlyList<ContractDetails>>> cache
-            = new Dictionary<string, IObservable<IReadOnlyList<ContractDetails>>>();
-
+        private readonly Dictionary<string, IObservable<IReadOnlyList<ContractDetails>>> cache = new();
         public Duration ContractDataExpiry { get; set; } = Duration.FromHours(12);
 
         /// <summary>
@@ -53,10 +51,10 @@ namespace InterReact
             });
         }
 
-        private IObservable<IReadOnlyList<ContractDetails>> ContractDataObservableImpl(Contract contract)
-            => Response.ToObservableWithId<ContractDetails,ContractDataEnd>(Request.GetNextId, requestId
-                    => Request.RequestContractData(requestId, contract))
+        private IObservable<IReadOnlyList<ContractDetails>> ContractDataObservableImpl(Contract contract) =>
+            Response
+                .ToObservableWithIdMultiple<ContractDetails,ContractDataEnd>(Request.GetNextId, 
+                    id => Request.RequestContractData(id, contract))
                 .ToArray();
     }
-
 }

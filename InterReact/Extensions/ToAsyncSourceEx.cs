@@ -4,9 +4,9 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
-namespace InterReact.Extensions
+namespace InterReact
 {
-    internal static class ToAsyncSourceExtension
+    public static partial class Extensions
     {
         /// <summary>
         /// Returns an observable that shares a single subscription to an underlying sequence which produces a single result.

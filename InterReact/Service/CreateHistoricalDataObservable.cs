@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using InterReact.Extensions;
 using NodaTime;
 
 namespace InterReact
@@ -19,9 +18,9 @@ namespace InterReact
             Instant end = default,
             HistoricalDataType? dataType = null,
             bool regularTradingHoursOnly = true,
-            IList<Tag>? options = null)
-        {
-            return Response.ToObservableWithId<HistoricalBars>(
+            IList<Tag>? options = null) =>
+                Response
+                    .ToObservableWithIdSingle<HistoricalBars>(
                         Request.GetNextId,
                         requestId => Request.RequestHistoricalData(
                             requestId,
@@ -34,6 +33,5 @@ namespace InterReact
                             options),
                         Request.CancelHistoricalData)
                     .ToShareSource();
-        }
     }
 }

@@ -1,8 +1,7 @@
-﻿using System.Reactive.Linq;
+﻿using System;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Reactive.Threading.Tasks;
-
-using InterReact.Extensions;
 using Stringification;
 
 namespace InterReact
@@ -17,15 +16,13 @@ namespace InterReact
         /// Call Connect() to start receiving updates.
         /// Call Dispose() the value returned from Connect() to disconnect from the source, release all subscriptions and clear the cache.
         /// </summary>
-        public IConnectableObservable<IAccountUpdate> CreateAccountUpdatesConnectableObservable() =>
-            Response.ToObservable<IAccountUpdate>(
-                () => Request.RequestAccountData(start: true),
-                () => Request.RequestAccountData(start: false))
-            //.ToCacheSource(CacheKeySelector, sort: true);
-            .Publish();
+        public IObservable<IAccountUpdate> CreateAccountUpdatesObservable() =>
+            Response.ToObservableContinuous<IAccountUpdate>(
+                () => Request.RequestAccountUpdates(start: true),
+                () => Request.RequestAccountUpdates(start: false));
 
         // The key identifies unique items to be cached and specifies the order.
-        private static string CacheKeySelector(IAccountUpdate v)
+        public static string AccountUpdatesCacheKey(IAccountUpdate v)
         {
             if (v is AccountUpdateTime)
                 return "!"; // top

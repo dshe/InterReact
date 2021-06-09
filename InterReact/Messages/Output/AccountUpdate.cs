@@ -1,15 +1,15 @@
-﻿using InterReact.Utility;
-using NodaTime;
+﻿using NodaTime;
 using NodaTime.Text;
 
 namespace InterReact
 {
-    public sealed class AccountValue : NotifyPropertyChanged, IAccountUpdate
+    public sealed class AccountValue : IAccountUpdate
     {
-        public string Account { get; }
-        public string Key { get; }
-        public string Currency { get; }
-        public string Value { get; }
+        public string Account { get; init; }
+        public string Key { get; init; }
+        public string Currency { get; init; }
+        public string Value { get; init; }
+        public AccountValue() => Account = Key = Currency = Value = "";
         internal AccountValue(ResponseReader c)
         {
             c.RequireVersion(2);
@@ -20,16 +20,21 @@ namespace InterReact
         }
     }
 
-    public sealed class PortfolioValue : NotifyPropertyChanged, IAccountUpdate
+    public sealed class PortfolioValue : IAccountUpdate
     {
-        public string Account { get; }
-        public Contract Contract { get; }
-        public double Position { get; }
-        public double MarketPrice { get; }
-        public double MarketValue { get; }
-        public double AverageCost { get; }
-        public double UnrealizedPnl { get; }
-        public double RealizedPnl { get; }
+        public string Account { get; init; }
+        public Contract Contract { get; init; }
+        public double Position { get; init; }
+        public double MarketPrice { get; init; }
+        public double MarketValue { get; init; }
+        public double AverageCost { get; init; }
+        public double UnrealizedPnl { get; init; }
+        public double RealizedPnl { get; init; }
+        public PortfolioValue() 
+        {
+            Account = "";
+            Contract = new Contract();
+        }
         internal PortfolioValue(ResponseReader c)
         {
             c.RequireVersion(8);
@@ -60,7 +65,8 @@ namespace InterReact
     public sealed class AccountUpdateTime : IAccountUpdate
     {
         private static readonly LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HH:mm");
-        public LocalTime Time { get; }
+        public LocalTime Time { get; init; }
+        public AccountUpdateTime(LocalTime time) => Time = time;
         internal AccountUpdateTime(ResponseReader c)
         {
             c.IgnoreVersion();
@@ -73,7 +79,8 @@ namespace InterReact
     /// </summary>
     public sealed class AccountUpdateEnd : IAccountUpdate
     {
-        public string Account { get; }
+        public string Account { get; init; }
+        public AccountUpdateEnd(string account = "") => Account = account;
         internal AccountUpdateEnd(ResponseReader c)
         {
             c.IgnoreVersion();

@@ -1,5 +1,4 @@
-﻿using InterReact.Extensions;
-using Microsoft.Reactive.Testing;
+﻿using Microsoft.Reactive.Testing;
 using Stringification;
 using System.Linq;
 using System.Reactive.Linq;

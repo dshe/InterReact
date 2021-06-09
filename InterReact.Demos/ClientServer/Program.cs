@@ -31,9 +31,6 @@ namespace CoreClientServer
             await Task.Delay(1000);
 
             Console.ResetColor();
-
-
-
         }
     }
 }

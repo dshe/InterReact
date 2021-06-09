@@ -12,7 +12,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NodaTime;
 using Stringification;
 using RxSockets;
-using InterReact.Utility;
 
 namespace InterReact
 {
@@ -129,10 +128,8 @@ namespace InterReact
                 {
                     return await config.IPEndPoint.CreateRxSocketClientAsync(logger, ct).ConfigureAwait(false);
                 }
-                catch (SocketException e)
+                catch (SocketException e) when (e.SocketErrorCode == SocketError.ConnectionRefused || e.SocketErrorCode == SocketError.TimedOut)
                 {
-                    if (e.SocketErrorCode != SocketError.ConnectionRefused && e.SocketErrorCode != SocketError.TimedOut)
-                        throw;
                 }
             }
             string ports = config.Ports.Select(p => p.ToString()).JoinStrings(", ");
@@ -175,7 +172,7 @@ namespace InterReact
         }
     }
 
-    internal static class InterReactClientBuilderExtensions
+    public static partial class Extensions
     {
         internal static IObservable<object> DoIntercept(this IObservable<object> source, Config config, ILogger logger)
         {

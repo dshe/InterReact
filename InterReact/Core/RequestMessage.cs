@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using StringEnums;
 using RxSockets;
-using InterReact.Utility;
 
 namespace InterReact
 {

@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Reactive.Disposables;
+using System.Reactive;
 using System.Reactive.Linq;
 
-namespace InterReact.Extensions
+namespace InterReact
 {
-    public static class ChangeExtensions
+    public static partial class Extensions
     {
         /// <summary>
         /// Returns an observable sequence of arrays which contain the current and previous source message,
@@ -12,35 +12,23 @@ namespace InterReact.Extensions
         /// Buffer(2,1) is not used because it does not emit the first value (when there is no previous value).
         /// The first value is useful for, for example, initializing display objects.
         /// </summary>
-        private static IObservable<T[]> PairWithPrevious<T>(this IObservable<T> source) where T : struct
+        private static IObservable<T[]> PairWithPrevious<T>(this IObservable<T> source) where T : notnull
         {
             return Observable.Create<T[]>(observer =>
             {
-                var first = true;
-                var previous = default(T);
+                T? previous = default;
 
-                var subscription = source.Subscribe(
+                return source.SubscribeSafe(Observer.Create<T>(
                     onNext: m =>
                     {
-                        if (first)
-                        {
-                            first = false;
+                        if (previous == null)
                             observer.OnNext(new[] { m });
-                        }
                         else
                             observer.OnNext(new[] { m, previous });
                         previous = m;
-
                     },
                     onError: observer.OnError,
-                    onCompleted: observer.OnCompleted);
-
-                return Disposable.Create(() =>
-                {
-                    subscription.Dispose();
-                    first = true;
-                });
-
+                    onCompleted: observer.OnCompleted));
             });
         }
 
@@ -54,9 +42,5 @@ namespace InterReact.Extensions
                 .PairWithPrevious()
                 .Select(m => m.Length == 2 && m[0] > 0 && m[1] > 0 ? m[0] - m[1] : (double?)null);
         }
-
-        public static IObservable<T> WhereHasValue<T>(this IObservable<T?> source) where T : struct
-            => source.Where(x => x.HasValue).Select(x => x.GetValueOrDefault());
-
     }
 }

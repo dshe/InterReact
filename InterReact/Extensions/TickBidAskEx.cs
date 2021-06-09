@@ -2,7 +2,7 @@
 using System.Reactive;
 using System.Reactive.Linq;
 
-namespace InterReact.Extensions
+namespace InterReact
 {
     /// <summary>
     /// The spread, (ask - bid), is normally positive (bid &lt; ask).
@@ -53,7 +53,7 @@ namespace InterReact.Extensions
         }
     }
 
-    public static class TickBidAskPriceExtensions
+    public static partial class Extensions
     {
         public static IObservable<TickBidAskPrice> ToBidAskTicks(this IObservable<Tick> source)
         {

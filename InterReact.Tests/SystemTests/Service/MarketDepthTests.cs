@@ -1,5 +1,4 @@
 ﻿using InterReact;
-using InterReact.Extensions;
 using InterReact.SystemTests;
 using System;
 using System.Linq;
@@ -38,7 +37,7 @@ namespace InterReact.SystemTests.Service
 
             var depth = Client.Services.CreateMarketDepthObservable(contract);
 
-            var (bidCollection, askCollection) = depth.ToMarketDepthObservableCollections();
+            //var (bidCollection, askCollection) = depth.ToMarketDepthObservableCollections();
 
             var subscription = depth.Subscribe(m => { }, e =>
              {
@@ -49,7 +48,7 @@ namespace InterReact.SystemTests.Service
 
             await depth.FirstAsync();
 
-            Assert.True(bidCollection.Any() || askCollection.Any());
+            //Assert.True(bidCollection.Any() || askCollection.Any());
 
             subscription.Dispose();
         }

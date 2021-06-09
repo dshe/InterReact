@@ -1,25 +1,19 @@
 ﻿using System;
+using System.Linq;
 using System.Collections;
 using System.IO;
 using System.Reactive.Linq;
+using System.Reactive;
 
-namespace InterReact.Extensions
+namespace InterReact
 {
-    public static class ThrowIfExtensions
+    public static class ThrowIfAnyEmptyExtensions
     {
-        public static T ThrowIfNull<T>(this T source)
-        {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
-
-            return source;
-        }
-
         public static IObservable<T> ThrowIfAnyEmpty<T>(this IObservable<T> source) where T : IEnumerable
         {
             return Observable.Create<T>(observer =>
             {
-                return source.Subscribe(
+                return source.SubscribeSafe(Observer.Create<T>(
                     onNext: m =>
                     {
                         if (m.GetEnumerator().MoveNext())
@@ -28,7 +22,7 @@ namespace InterReact.Extensions
                             observer.OnError(new InvalidDataException("Empty collection."));
                     },
                     onError: observer.OnError,
-                    onCompleted: observer.OnCompleted);
+                    onCompleted: observer.OnCompleted));
             });
         }
     }

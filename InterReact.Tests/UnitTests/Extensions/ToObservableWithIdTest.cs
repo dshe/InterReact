@@ -1,5 +1,4 @@
-﻿using InterReact.Extensions;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -32,7 +31,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Ok()
         {
-            var observable = subject.ToObservableWithId<SomeClass>(
+            var observable = subject.ToObservableWithIdSingle<SomeClass>(
                 () => Id,
                 requestId =>
                 {
@@ -64,7 +63,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Multi_Ok()
         {
-            var observable = subject.ToObservableWithId<SomeClass, SomeClassEnd>(
+            var observable = subject.ToObservableWithIdMultiple<SomeClass, SomeClassEnd>(
                 () => Id,
                 requestId =>
                 {
@@ -88,7 +87,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Alert()
         {
-            var observable = subject.ToObservableWithId<SomeClass>(
+            var observable = subject.ToObservableWithIdSingle<SomeClass>(
                 () => Id,
                 requestId =>
                 {
@@ -110,7 +109,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Alert_multi()
         {
-            var observable = subject.ToObservableWithId<SomeClass, SomeClassEnd>(
+            var observable = subject.ToObservableWithIdMultiple<SomeClass, SomeClassEnd>(
                 () => Id,
                 requestId =>
                 {
@@ -132,7 +131,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Subscribe_Error()
         {
-            var observable = subject.ToObservableWithId<SomeClass>(
+            var observable = subject.ToObservableWithIdSingle<SomeClass>(
                 () => Id,
                 requestId => { throw new BarrierPostPhaseException(); },
                 requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -143,7 +142,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Source_Error()
         {
-            var observable = subject.ToObservableWithId<SomeClass>(
+            var observable = subject.ToObservableWithIdSingle<SomeClass>(
                 () => Id,
                 requestId => subject.OnError(new BarrierPostPhaseException()),
                 requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -154,7 +153,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Source_Completed()
         {
-            var observable = subject.ToObservableWithId<SomeClass>(
+            var observable = subject.ToObservableWithIdSingle<SomeClass>(
                 () => Id,
                 requestId => subject.OnCompleted(),
                 requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -172,7 +171,7 @@ namespace InterReact.UnitTests.Extensions
         {
             var ts = ticks == -1 ? TimeSpan.Zero : TimeSpan.FromTicks(ticks);
 
-            var observable = subject.ToObservableWithId<SomeClass>(
+            var observable = subject.ToObservableWithIdSingle<SomeClass>(
                 () => Id,
                 requestId => Interlocked.Increment(ref subscribeCalls),
                 requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -186,7 +185,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public void Test_Unsubscribe_Error()
         {
-            var observable = subject.ToObservableWithId<SomeClass>(
+            var observable = subject.ToObservableWithIdSingle<SomeClass>(
                 () => Id,
                 requestId => Interlocked.Increment(ref subscribeCalls),
                 requestId => { throw new BarrierPostPhaseException(); });

@@ -4,16 +4,17 @@ using Stringification;
 
 namespace InterReact
 {
-    public sealed class Tag // input + output
+    public sealed record Tag // input + output
     {
         public string Name { get; }
         public string Value { get; }
+
         public Tag(string name, string value)
         {
             Name = name;
             Value = value;
         }
-        public Tag(ResponseReader c) : this(c.ReadString(), c.ReadString()) { }
+        public Tag(ResponseReader c) : this(c.ReadString(), c.ReadString())  {}
 
         internal static string Combine(IList<Tag>? tags)
         {

@@ -51,7 +51,9 @@ namespace InterReact
         internal int RequireVersion(int minimumVersion)
         {
             var v = GetVersion();
-            return (v >= minimumVersion) ? v : throw new InvalidDataException($"Invalid response version: {v} < {minimumVersion}.");
+            if (v < minimumVersion)
+                throw new InvalidDataException($"Invalid response version: {v} < {minimumVersion}.");
+            return v;
         }
         internal void AddStringsToList(IList<string> list)
         {

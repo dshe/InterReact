@@ -6,7 +6,6 @@ using System.Windows.Forms;
 using System.Reactive.Linq;
 using System.Threading;
 using InterReact;
-using InterReact.Extensions;
 using System.Diagnostics;
 using Stringification;
 
@@ -117,7 +116,8 @@ namespace WinFormsTicks
             bidPrices.Change().ToColor().Subscribe(c => BidPrice.ForeColor = c);
             askPrices.Change().ToColor().Subscribe(c => AskPrice.ForeColor = c);
             lastPrices.Change().ToColor().Subscribe(c => { Change.ForeColor = LastPrice.ForeColor = c; });
-            lastPrices.Change().WhereHasValue().Select(chg => chg.ToString(priceFormat)).Subscribe(s => Change.Text = s);
+            lastPrices.Change().WhereNotNull().Select(chg => chg.ToString(priceFormat)).Subscribe(s => Change.Text = s);
+            
 
             var sizeTicks = synchronizedTicks.OfType<TickSize>();
 

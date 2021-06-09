@@ -6,9 +6,9 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
-namespace InterReact.Extensions
+namespace InterReact
 {
-    internal static class ToCacheSourceExtension
+    public static partial class Extensions
     {
         /// <summary>
         /// Returns a ConnectableObservable which shares a single subscription to the source observable.

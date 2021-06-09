@@ -2,15 +2,24 @@
 {
     public sealed class AccountPosition
     {
-        public string Account { get; }
-        public Contract Contract { get; }
-        public double Position { get; }
-        public double AverageCost { get; }
+        public string Account { get; init; }
+        public Contract Contract { get; init; }
+        public double Position { get; init; }
+        public double AverageCost { get; init; }
+        public AccountPosition()
+        {
+            Account = "";
+            Contract = new Contract();
+        }
         internal AccountPosition(ResponseReader c)
         {
             c.RequireVersion(3);
             Account = c.ReadString();
-            Contract = new Contract
+            Contract = GetContract();
+            Position = c.Config.SupportsServerVersion(ServerVersion.FractionalPositions) ? c.ReadDouble() : c.ReadInt();
+            AverageCost = c.ReadDouble();
+
+            Contract GetContract() => new()
             {
                 ContractId = c.ReadInt(),
                 Symbol = c.ReadString(),
@@ -24,8 +33,6 @@
                 LocalSymbol = c.ReadString(),
                 TradingClass = c.ReadString()
             };
-            Position = c.Config.SupportsServerVersion(ServerVersion.FractionalPositions) ? c.ReadDouble() : c.ReadInt();
-            AverageCost = c.ReadDouble();
         }
     }
 

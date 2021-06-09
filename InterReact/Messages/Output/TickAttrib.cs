@@ -1,5 +1,4 @@
-﻿using InterReact.Utility;
-
+﻿
 namespace InterReact
 {
     public sealed class TickAttrib

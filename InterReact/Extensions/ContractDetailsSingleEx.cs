@@ -5,12 +5,11 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Text;
-
 using Stringification;
 
-namespace InterReact.Extensions
+namespace InterReact
 {
-    public static class ContractDataSingleExtensions
+    public static partial class Extensions
     {
         /// <summary>
         /// Completes successfully if the sequence contains exactly one contract details object.

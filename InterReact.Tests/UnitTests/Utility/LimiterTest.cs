@@ -1,5 +1,4 @@
-﻿using InterReact.Utility;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Threading;
 using Xunit;
 

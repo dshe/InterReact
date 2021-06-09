@@ -58,11 +58,11 @@
                 LastTradeDateOrContractMonth = c.ReadString(),
                 Strike = c.ReadDouble(),
                 Right = c.ReadStringEnum<OptionRightType>(),
-                Multiplier = messageVersion >= 32 ? c.ReadString() : string.Empty,
+                Multiplier = messageVersion >= 32 ? c.ReadString() : "",
                 Exchange = c.ReadString(),
                 Currency = c.ReadString(),
                 LocalSymbol = c.ReadString(),
-                TradingClass = messageVersion >= 32 ? c.ReadString() : string.Empty
+                TradingClass = messageVersion >= 32 ? c.ReadString() : ""
             };
             Order = new Order
             {

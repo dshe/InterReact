@@ -1,8 +1,8 @@
 ﻿using System;
 
-namespace InterReact.Utility
+namespace InterReact
 {
-    internal sealed class BitMask
+    internal struct BitMask
     {
         private readonly int Mask;
         internal BitMask(int i) => Mask = i;

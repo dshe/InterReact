@@ -42,15 +42,15 @@ namespace InterReact.SystemTests.Service
         public async Task T04_AccountUpdates()
         {
             // Results are cached so that all subscribers receive everything.
-            var updates = Client.Services.CreateAccountUpdatesConnectableObservable();
+            var updates = Client.Services.CreateAccountUpdatesObservable();
 
-            var connection = updates.Connect();
+            //var connection = updates.Connect();
 
             var list = updates.TakeWhile(x => !(x is AccountUpdateEnd)).ToList().ToTask();
 
             await list;
 
-            connection.Dispose();
+            //connection.Dispose();
         }
     }
 }

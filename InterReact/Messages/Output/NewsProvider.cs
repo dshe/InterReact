@@ -4,7 +4,7 @@ namespace InterReact
 {
     public sealed class NewsProviders
     {
-        public List<NewsProvider> Providors = new List<NewsProvider>();
+        public List<NewsProvider> Providors = new();
         internal NewsProviders(ResponseReader c)
         {
             var n = c.ReadInt();

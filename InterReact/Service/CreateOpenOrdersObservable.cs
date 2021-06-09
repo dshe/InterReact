@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reactive.Linq;
-using InterReact.Extensions;
 
 namespace InterReact
 {
@@ -22,7 +21,7 @@ namespace InterReact
             };
             return Response
                 .Where(m => m is OpenOrder || m is OrderStatusReport || m is OpenOrderEnd)
-                .ToObservable<IHasOrderId, OpenOrderEnd>(start)
+                .ToObservableMultiple<IHasOrderId, OpenOrderEnd>(start)
                 .ToShareSource();
         }
     }
