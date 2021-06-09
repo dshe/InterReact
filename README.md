@@ -9,7 +9,6 @@
 ```csharp
 interface IInterReact : IAsyncDisposable
 {
-    Config Config { get; }
     Request Request { get; }
     IObservable<object> Response { get; }
     Services Services { get; }
