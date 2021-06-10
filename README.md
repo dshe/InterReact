@@ -3,13 +3,12 @@
 ***Reactive C# API to Interactive Brokers***
 - compatible with Interactive Brokers TWS/Gateway API 9.73
 - supports **.NET 5.0**
-- dependencies: RxSockets, StringEnums, Stringification, NodaTime, Reactive Extensions.
+- dependencies: RxSockets, StringEnums, Stringification, Reactive Extensions, NodaTime.
 - demo applications: Console, WPF.
 
 ```csharp
-interface IInterReactClient : IAsyncDisposable
+interface IInterReact : IAsyncDisposable
 {
-    Config Config { get; }
     Request Request { get; }
     IObservable<object> Response { get; }
     Services Services { get; }
@@ -17,8 +16,14 @@ interface IInterReactClient : IAsyncDisposable
 ```
 ### Example ###
 ```csharp
-// Create the InterReact client by connecting to TWS/Gateway.
-IInterReactClient client = await new InterReactClientBuilder().BuildAsync();
+using System;
+using System.Threading.Tasks;
+using System.Reactive.Linq;
+using InterReact;
+```
+```csharp
+// Create the InterReact client by first connecting to TWS/Gateway on the local host.
+IInterReact interReact = await new InterReactBuilder().BuildAsync();
 
 // Create a contract object.
 Contract contract = new Contract
@@ -29,15 +34,15 @@ Contract contract = new Contract
    Exchange     = "SMART"
 };
 
-// Create an observable which will receive ticks for the contract.
-IObservable<Tick> tickObservable = client.Services.CreateTickObservable(contract);
+// Create an observable which can observe ticks for the contract.
+IObservable<Tick> tickObservable = interReact.Services.CreateTickObservable(contract);
 
-// Subscribe to the observable to start receiving ticks.
+// Subscribe to the observable to start observing ticks.
 IDisposable subscription = tickObservable
     .OfType<TickPrice>()
     .Subscribe(onNext: tickPrice =>
     {
-        // Write ticks to the console.
+        // Write price ticks to the console.
         Console.WriteLine($"{Enum.GetName(tickPrice.TickType)} = {tickPrice.Price}");
     });
 
@@ -45,11 +50,11 @@ Console.WriteLine(Environment.NewLine + "press a key to exit...");
 Console.ReadKey();
 Console.Clear();
 
-// Dispose the subscription to stop receiving ticks.
+// Dispose the subscription to stop observing ticks.
 subscription.Dispose();
 
 // Disconnect from TWS/Gateway.
-await client.DisposeAsync();
+interReact.DisposeAsync();
 ```
 ### Notes ###
 
