@@ -27,7 +27,7 @@ namespace InterReact.SystemTests.Service
             // The demo account may or may not have positions.
             Logger.LogInformation("resr");
 
-            if (!Client.Config.IsDemoAccount)
+            if (!Client.Request.Config.IsDemoAccount)
                 Assert.NotEmpty(list);
         }
 

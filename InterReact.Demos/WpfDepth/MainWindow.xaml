@@ -3,58 +3,54 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:c="using:Microsoft.Xaml.Behaviors"        
+        
         WindowStyle="ToolWindow"
         ResizeMode="CanResizeWithGrip"
         Loaded="MainWindow_OnLoaded"
         Closing="MainWindow_OnClosing"
         xmlns:wpfDepth="clr-namespace:WpfDepth"
-        xmlns:local="clr-namespace:WpfDepth"
+        xmlns:local="clr-namespace:WpfDepth" d:DataContext="{d:DesignInstance Type=wpfDepth:MainWindow}"
         mc:Ignorable="d"
-        d:DataContext="{d:DesignInstance wpfDepth:MainViewModel, IsDesignTimeCreatable=True}"
-        Title="{Binding Title}" Height="200" Width="350">
+        
+        FontSize="16"
+        SizeToContent="WidthAndHeight"
+        Title="InterReact" >
 
-    <Window.Resources>
-        <Style TargetType="{x:Type DataGrid}">
-            <Setter Property="AutoGenerateColumns" Value="false"/>
-            <Setter Property="Margin" Value="0"/>
-            <Setter Property="BorderThickness" Value="0"/>
-            <Setter Property="GridLinesVisibility" Value="None"/>
-            <Setter Property="AlternatingRowBackground" Value="#EEE"/>
-            <Setter Property="CanUserResizeRows" Value="false"/>
-            <Setter Property="IsReadOnly" Value="true"/>
-            <Setter Property="RowHeaderWidth" Value="0"/>
-        </Style>
-        <Style TargetType="{x:Type DataGridColumnHeader}">
-            <Setter Property="HorizontalContentAlignment" Value="Right" />
-        </Style>
-        <Style TargetType="{x:Type DataGridCell}">
-            <Setter Property="HorizontalAlignment" Value="Right" />
-        </Style>
-    </Window.Resources>
-
-    <Grid>
+    <Grid Margin="20">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition />
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*"/>
+            <RowDefinition  />
+            <RowDefinition  />
+            <RowDefinition  />
+            <RowDefinition  />
         </Grid.RowDefinitions>
 
-        <DataGrid Name="BidsDataGrid" Grid.Column="0" Grid.Row="0" Padding="10,10,5,10" ItemsSource="{Binding MarketDepthCollections.Bids}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Size" Binding="{Binding Size, StringFormat='{}{0:#,##0}'}" Width="*" />
-                <DataGridTextColumn Header="Bid" Binding="{Binding Price, StringFormat='{}{0:#,##0.00000}'}" Width="*" />
-            </DataGrid.Columns>
-        </DataGrid>
+        <StackPanel Grid.Row="0" Grid.ColumnSpan="4" Orientation="Horizontal" Background="Pink" HorizontalAlignment="Center" Margin="0,0,0,10">
+            <Label Content="Symbol:" FontWeight="Bold" VerticalAlignment="Center" />
+            <TextBox VerticalAlignment="Center" Text="{Binding Symbol, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" CharacterCasing="Upper" Width="100" />
+        </StackPanel>
 
-        <DataGrid Name="AsksDataGrid" Grid.Column="1" Grid.Row="0" Padding="5,10,10,10" ItemsSource="{Binding MarketDepthCollections.Asks}">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Ask" Binding="{Binding Price, StringFormat='{}{0:#,##0.00000}'}" Width="*" />
-                <DataGridTextColumn Header="Size" Binding="{Binding Size, StringFormat='{}{0:#,##0}'}" Width="*" />
-            </DataGrid.Columns>
-        </DataGrid>
+        <TextBlock Grid.Row="1" Grid.ColumnSpan="4" Text="{Binding Description, Mode=OneWay}" Background="LightGray" TextAlignment="Center" FontWeight="Bold"/>
 
+        <Label     Grid.Row="2" Grid.Column="0" Content="Bid"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding BidPrice, StringFormat=N2}"/>
+
+        <Label     Grid.Row="2" Grid.Column="1" Content="Ask"/>
+        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AskPrice, StringFormat=N2}"/>
+
+        <Label     Grid.Row="2" Grid.Column="2" Content="Last"/>
+        <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding LastPrice, StringFormat=N2}"/>
+
+        <Label     Grid.Row="2" Grid.Column="3" Content="Change"/>
+        <TextBlock Grid.Row="3" Grid.Column="3" Text="change"/>
     </Grid>
 
 </Window>

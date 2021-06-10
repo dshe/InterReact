@@ -1,39 +1,20 @@
 ﻿using System;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using InterReact;
-
+//using Stringification;
 /*
 * Be sure that Trader Workstation (TWS) is running on your machine and that the following is set:
 * File / GlobalConfiguration / API / Settings/ "Enable ActiveX and Socket Clients".
 */
-namespace HelloWorld
+namespace InterReactSamples
 {
-    internal static class Program
+    public class SimpleExample
     {
-        public static async Task Main()
+        public async Task Test()
         {
-            Console.Title = "InterReact";
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                Console.SetWindowSize(140, 30);
-                Console.SetBufferSize(140, 60);
-            }
-
             // Create the InterReact client by connecting to TWS/Gateway on your local machine.
-            IInterReact? interReact;
-            try
-            {
-                interReact = await new InterReactBuilder().BuildAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                Console.ReadKey();
-                return;
-            }
+            IInterReact interReact = await new InterReactBuilder().BuildAsync();
 
             var contract = new Contract
             {

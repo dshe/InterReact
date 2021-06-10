@@ -14,7 +14,7 @@ namespace WinFormsTicks
     public partial class Form1 : Form
     {
         private readonly SynchronizationContext synchronizationContext;
-        private IInterReactClient? client;
+        private IInterReact? interReact;
         private IDisposable? connection;
 
         public Form1()
@@ -27,7 +27,7 @@ namespace WinFormsTicks
         {
             try
             {
-                client = await new InterReactClientBuilder().BuildAsync().ConfigureAwait(false);
+                interReact = await new InterReactBuilder().BuildAsync().ConfigureAwait(false);
             }
             catch (Exception exception)
             {
@@ -37,11 +37,15 @@ namespace WinFormsTicks
 
             // Write all incoming messages to the debug window to see what's happening.
             // Also observe any exceptions.
-            client.Response.StringifyItems().Subscribe(Console.WriteLine, exception => ShowMessage(exception.Message));
+            interReact.Response.StringifyItems().Subscribe(Console.WriteLine, exception => ShowMessage(exception.Message));
 
+            SymbolLabel.Invoke(new MethodInvoker(delegate
+            {
+                SymbolLabel.Visible = Symbol.Visible = true;
+            }));
 
             //crash
-            SymbolLabel.Visible = Symbol.Visible = true;
+            //SymbolLabel.Visible = Symbol.Visible = true;
 
             // Listen for textbox TextChanged messages to determine the symbol.
             Observable.FromEventPattern(Symbol, "TextChanged")
@@ -74,7 +78,7 @@ namespace WinFormsTicks
             try
             {
                 // Create the observable and capture the single contract details object to determine the full name of the contract.
-                var contractData = await client!.Services.CreateContractDataObservable(contract).ContractDataSingle();
+                var contractData = await interReact!.Services.CreateContractDataObservable(contract).ContractDataSingle();
                 // Display the stock name in the title bar.
                 Text = $"{contractData.LongName} ({symbol})";
             }
@@ -84,10 +88,10 @@ namespace WinFormsTicks
                 return;
             }
 
-            client.Request.RequestMarketDataType(MarketDataType.Delayed);
+            interReact.Request.RequestMarketDataType(MarketDataType.Delayed);
 
             // Create the object containing the observable which will emit realtime updates.
-            var ticks = client.Services.CreateTickConnectableObservable(contract);
+            var ticks = interReact.Services.CreateTickConnectableObservable(contract);
 
             SubscribeToTicks(ticks.Undelay().ObserveOn(synchronizationContext));
 
@@ -148,8 +152,8 @@ namespace WinFormsTicks
 
         private async void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (client != null)
-                await client.DisposeAsync();
+            if (interReact != null)
+                await interReact.DisposeAsync();
         }
     }
 

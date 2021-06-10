@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
-// internal set for testiong
 namespace InterReact
 {
     internal enum ContractDetailsType { ContractData, BondContractData, ScannerContractData }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -15,26 +16,35 @@ namespace InterReact
         {
             return Observable.Create<T>(observer =>
             {
-                var requestId = getNextId();
+                int requestId = getNextId();
                 bool? cancelable = null;
 
-                var subscription = source
+                IDisposable subscription = source
                     .WithRequestId(requestId)
                     .Finally(() => cancelable = false)
-                    .SubscribeSafe(Observer.Create<object>(
+                    .SubscribeSafe(Observer.Create<IHasRequestId>(
                         onNext: m =>
                         {
+                            cancelable = false;
+                            if (m is T t1)
+                            {
+                                observer.OnNext(t1);
+                                observer.OnCompleted();
+                                return;
+                            }
                             if (m is Alert alert)
                             {
-                                cancelable = false;
+                                T? t2 = Utilities.TryConstructSubclassTaking<T>(alert);
+                                if (t2 != null)
+                                {
+                                    observer.OnNext(t2);
+                                    observer.OnCompleted();
+                                    return;
+                                }
                                 observer.OnError(alert);
                                 return;
                             }
-                            if (m is not T t)
-                                throw new InvalidCastException($"Invalid type: {m.GetType()}.");
-                            observer.OnNext(t);
-                            cancelable = false;
-                            observer.OnCompleted();
+                            throw new InvalidDataException($"Invalid type: {m.GetType()}.");
                         },
                         onError: observer.OnError,
                         onCompleted: observer.OnCompleted));
@@ -61,30 +71,39 @@ namespace InterReact
         {
             return Observable.Create<T>(observer =>
             {
-                var requestId = getNextId();
+                int requestId = getNextId();
                 bool? cancelable = null;
 
-                var subscription = source
+                IDisposable subscription = source
                     .WithRequestId(requestId)
                     .Finally(() => cancelable = false)
-                    .SubscribeSafe(Observer.Create<object>(
+                    .SubscribeSafe(Observer.Create<IHasRequestId>(
                         onNext: m =>
                         {
+                            if (m is T t1)
+                            {
+                                observer.OnNext(t1);
+                                return;
+                            }
                             if (m is Alert alert)
                             {
+                                T? t2 = Utilities.TryConstructSubclassTaking<T>(alert);
+                                if (t2 != null)
+                                {
+                                    observer.OnNext(t2);
+                                    return;
+                                }
                                 cancelable = false;
                                 observer.OnError(alert);
                                 return;
                             }
-                            if (m is T t)
+                            if (m is TEnd)
                             {
-                                observer.OnNext(t);
+                                cancelable = false;
+                                observer.OnCompleted();
                                 return;
                             }
-                            if (m is not TEnd t2)
-                                throw new InvalidCastException($"Invalid type: {m.GetType()}.");
-                            cancelable = false;
-                            observer.OnCompleted();
+                            throw new InvalidDataException($"Invalid type: {m.GetType()}.");
                         },
                         onError: observer.OnError,
                         onCompleted: observer.OnCompleted));
@@ -111,24 +130,33 @@ namespace InterReact
         {
             return Observable.Create<T>(observer =>
             {
-                var requestId = getNextId();
+                int requestId = getNextId();
                 bool? cancelable = null;
 
-                var subscription = source
+                IDisposable subscription = source
                     .WithRequestId(requestId)
                     .Finally(() => cancelable = false)
-                    .SubscribeSafe(Observer.Create<object>(
+                    .SubscribeSafe(Observer.Create<IHasRequestId>(
                         onNext: m =>
                         {
+                            if (m is T t1)
+                            {
+                                observer.OnNext(t1);
+                                return;
+                            }
                             if (m is Alert alert)
                             {
+                                T? t2 = Utilities.TryConstructSubclassTaking<T>(alert);
+                                if (t2 != null)
+                                {
+                                    observer.OnNext(t2);
+                                    return;
+                                }
                                 cancelable = false;
                                 observer.OnError(alert);
                                 return;
                             }
-                            if (m is not T t)
-                                throw new InvalidCastException($"Invalid type: {m.GetType()}.");
-                            observer.OnNext(t);
+                            throw new InvalidDataException($"Invalid type: {m.GetType()}.");
                         },
                         onError: observer.OnError,
                         onCompleted: observer.OnCompleted));

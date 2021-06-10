@@ -1,8 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows;
-
-
+using System.Windows.Threading;
 
 namespace WpfDepth
 {
@@ -33,7 +32,7 @@ namespace WpfDepth
 
         public static void RunOnDispatcher(Action action)
         {
-            var dispatcher = Application.Current.Dispatcher;
+            Dispatcher dispatcher = Application.Current.Dispatcher;
             if (dispatcher.CheckAccess())
                 action();
             else

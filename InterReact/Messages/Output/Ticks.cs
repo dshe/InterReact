@@ -3,7 +3,20 @@ using NodaTime;
 
 namespace InterReact
 {
-    public abstract class Tick : IHasRequestId
+    public interface ITick : IHasRequestId { }
+
+    public class TickAlert : ITick
+    {
+        public int RequestId { get; }
+        public Alert Alert { get; }
+        public TickAlert(Alert alert)
+        {
+            Alert = alert;
+            RequestId = alert.RequestId;
+        }
+    }
+
+    public abstract class Tick : ITick
     {
         public int RequestId { get; protected set; }
         public TickType TickType { get; protected set; }
@@ -11,8 +24,8 @@ namespace InterReact
 
         internal static object[] CreatePriceAndSizeTicks(ResponseReader p)
         {
-            var version = p.GetVersion();
-            var requestId = p.ReadInt();
+            int version = p.GetVersion();
+            int requestId = p.ReadInt();
             if (requestId == int.MaxValue)
                 p.ReadDouble(); // IMPORTANT: trigger parse exception for testing
             var priceTickType = p.ReadEnum<TickType>();
@@ -63,6 +76,11 @@ namespace InterReact
             TickType.DelayedLastTimeStamp => TickType.LastTimeStamp,
             _ => tickType
         };
+    }
+
+    public class TickMessage : Tick
+    {
+
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

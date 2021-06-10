@@ -11,7 +11,7 @@ namespace InterReact.UnitTests.Analysis
         public Interface_Checker(ITestOutputHelper output) : base(output) { }
 
         private static readonly List<TypeInfo> Types =
-            typeof(InterReactClient)
+            typeof(InterReact)
             .Assembly
             .DefinedTypes.Where(t => t.IsClass)
             .ToList();

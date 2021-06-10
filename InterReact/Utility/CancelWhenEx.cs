@@ -11,7 +11,7 @@ namespace InterReact
         {
             return Observable.Create<T>(observer =>
             {
-                var subscription = source.SubscribeSafe(observer);
+                IDisposable subscription = source.SubscribeSafe(observer);
 
                 CancellationTokenRegistration? regx = null;
                 regx = ct.Register(() =>

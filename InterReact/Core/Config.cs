@@ -8,11 +8,11 @@ namespace InterReact
     {
         private static readonly Random Random = new();
 
-        public Config() { }
-        public IClock Clock { get; internal set; } = SystemClock.Instance;
+        internal Config() { }
+        internal IClock Clock { get; set; } = SystemClock.Instance;
 
         public IPEndPoint IPEndPoint { get; internal set; } = new(IPAddress.IPv6Loopback, 0);
-        internal int[] Ports = { (int)DefaultPort.TwsRegularAccount, (int)DefaultPort.TwsDemoAccount, (int)DefaultPort.GatewayRegularAccount, (int)DefaultPort.GatewayDemoAccount };
+        public int[] Ports { get; internal set; } = { (int)DefaultPort.TwsRegularAccount, (int)DefaultPort.TwsDemoAccount, (int)DefaultPort.GatewayRegularAccount, (int)DefaultPort.GatewayDemoAccount };
         public bool IsDemoAccount => IPEndPoint.Port == (int)DefaultPort.TwsDemoAccount || IPEndPoint.Port == (int)DefaultPort.GatewayDemoAccount;
         public int ClientId { get; internal set; } = Random.Next(1000, 1000000);
         public int MaxRequestsPerSecond { get; internal set; } = 50;

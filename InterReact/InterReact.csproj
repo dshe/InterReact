@@ -31,7 +31,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="NodaTime" Version="3.0.5" />
-    <PackageReference Include="RxSockets" Version="3.0.0" />
+    <PackageReference Include="RxSockets" Version="3.0.1" />
     <PackageReference Include="StringEnums" Version="2.0.0-beta" />
     <PackageReference Include="Stringification" Version="2.0.0-beta" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />

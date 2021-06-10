@@ -39,7 +39,7 @@ namespace InterReact
                 string code = reader.ReadString(); // read the code (first string)
                 if (code == "1")
                 {
-                    var tickMessages = Tick.CreatePriceAndSizeTicks(reader);
+                    object[] tickMessages = Tick.CreatePriceAndSizeTicks(reader);
                     reader.VerifyMessageEnd();
                     return tickMessages;
                 }
@@ -49,7 +49,7 @@ namespace InterReact
             }
             catch (Exception e)
             {
-                var m = $"ResponseComposer error: [{strings.JoinStrings(", ")}].";
+                string m = $"ResponseComposer error: [{strings.JoinStrings(", ")}].";
                 Logger.LogError(e, m);
                 throw new InvalidDataException(m, e);
             }

@@ -17,9 +17,9 @@ namespace InterReact
 
         internal static TickByTick Create(ResponseReader c)
         {
-            var requestId = c.ReadInt();
-            var tickType = c.ReadEnum<TickByTickType>();
-            var time = c.ReadLong();
+            int requestId = c.ReadInt();
+            TickByTickType tickType = c.ReadEnum<TickByTickType>();
+            long time = c.ReadLong();
             return tickType switch
             {
                 TickByTickType.None => new TickByTickNone(),
@@ -27,7 +27,7 @@ namespace InterReact
                 TickByTickType.AllLast => new TickByTickAllLast(requestId, tickType, time, c),
                 TickByTickType.BidAsk => new TickByTickBidAsk(requestId, tickType, time, c),
                 TickByTickType.MidPoint => new TickByTickMidpoint(requestId, tickType, time, c),
-                _ => throw new Exception("Invalid TickByTick type.")
+                _ => throw new ArgumentException("Invalid TickByTick type.")
             };
         }
 

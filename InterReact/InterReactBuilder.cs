@@ -15,14 +15,14 @@ using RxSockets;
 
 namespace InterReact
 {
-    public sealed class InterReactClientBuilder : EditorBrowsableNever
+    public sealed class InterReactBuilder : EditorBrowsableNever
     {
         private readonly ILogger Logger;
         private readonly Config Config = new();
 
-        public InterReactClientBuilder() : this(NullLogger.Instance) { }
-        public InterReactClientBuilder(ILogger<InterReactClient> logger) : this((ILogger)logger) { }
-        public InterReactClientBuilder(ILogger logger) // supports testing
+        public InterReactBuilder() : this(NullLogger.Instance) { }
+        public InterReactBuilder(ILogger<InterReact> logger) : this((ILogger)logger) { }
+        public InterReactBuilder(ILogger logger) // supports testing
         {
             Logger = logger;
             var name = GetType().Assembly.GetName();
@@ -32,7 +32,7 @@ namespace InterReact
         /// <summary>
         /// Specify an IPAddress to connect to TWS/Gateway.
         /// </summary>
-        public InterReactClientBuilder SetIpAddress(IPAddress address)
+        public InterReactBuilder SetIpAddress(IPAddress address)
         {
             Config.IPEndPoint.Address = address;
             return this;
@@ -42,7 +42,7 @@ namespace InterReact
         /// Specify one or more ports to attempt connection to TWS/Gateway.
         /// Otherwise, connection will be attempted on ports 7496 and 7497, 4001, 4002.
         /// </summary>
-        public InterReactClientBuilder SetPort(params int[] ports)
+        public InterReactBuilder SetPort(params int[] ports)
         {
             Config.Ports = (ports != null && ports.Any()) ? ports : throw new ArgumentNullException(nameof(ports));
             return this;
@@ -52,7 +52,7 @@ namespace InterReact
         /// Up to 8 clients can attach to TWS/Gateway. Each client requires a unique Id. The default Id is random.
         /// Only ClientId = 0 is able to modify orders submitted manually through TWS.
         /// </summary>
-        public InterReactClientBuilder SetClientId(int id)
+        public InterReactBuilder SetClientId(int id)
         {
             Config.ClientId = id >= 0 ? id : throw new ArgumentException("invalid", nameof(id));
             return this;
@@ -61,19 +61,19 @@ namespace InterReact
         /// <summary>
         /// Indicate the maximum number of requests per second sent to to TWS/Gateway.
         /// </summary>
-        public InterReactClientBuilder SetMaxRequestsPerSecond(int requests)
+        public InterReactBuilder SetMaxRequestsPerSecond(int requests)
         {
             Config.MaxRequestsPerSecond = requests > 0 ? requests : throw new ArgumentException("invalid", nameof(requests));
             return this;
         }
 
-        public InterReactClientBuilder SetOptionalCapabilities(string capabilities)
+        public InterReactBuilder SetOptionalCapabilities(string capabilities)
         {
             Config.OptionalCapabilities = capabilities;
             return this;
         }
 
-        public InterReactClientBuilder SetClock(IClock clock)
+        public InterReactBuilder SetClock(IClock clock)
         {
             Config.Clock = clock;
             return this;
@@ -81,7 +81,7 @@ namespace InterReact
 
         /////////////////////////////////////////////////////////////
 
-        public async Task<IInterReactClient> BuildAsync(CancellationToken ct = default)
+        public async Task<IInterReact> BuildAsync(CancellationToken ct = default)
         {
             var rxSocket = await ConnectAsync(Config, Logger, ct).ConfigureAwait(false);
 
@@ -107,9 +107,9 @@ namespace InterReact
                     .AddSingleton(new Limiter(Config.MaxRequestsPerSecond)) // configured instance
                     .AddSingleton<Request>()
                     .AddSingleton<Services>()
-                    .AddSingleton<IInterReactClient, InterReactClient>()
+                    .AddSingleton<IInterReact, InterReact>()
                     .BuildServiceProvider()
-                    .GetService<IInterReactClient>() ?? throw new InvalidOperationException("service");
+                    .GetService<IInterReact>() ?? throw new InvalidOperationException("service");
             }
             catch (Exception ex)
             {

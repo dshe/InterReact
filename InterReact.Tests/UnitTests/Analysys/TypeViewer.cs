@@ -9,7 +9,7 @@ namespace InterReact.UnitTests.Analysis
     {
         public Type_Viewer(ITestOutputHelper output) : base(output) { }
 
-        private static readonly Assembly Assembly = typeof(InterReactClient).Assembly;
+        private static readonly Assembly Assembly = typeof(InterReact).Assembly;
 
         [Fact]
         public void View_Interfaces()

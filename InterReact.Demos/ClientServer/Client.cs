@@ -13,7 +13,7 @@ namespace CoreClientServer
     {
         internal static async Task Run(int port, ILogger logger, ILogger libLogger)
         {
-            var client = await new InterReactClientBuilder(libLogger)
+            var client = await new InterReactBuilder(libLogger)
                 .SetPort(port)
                 .BuildAsync()
                 .ConfigureAwait(false);

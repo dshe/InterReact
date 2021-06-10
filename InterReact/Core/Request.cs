@@ -15,7 +15,7 @@ namespace InterReact
     /// </summary>
     public sealed class Request : IEditorBrowsableNever
     {
-        private readonly Config Config;
+        public Config Config { get; }
         private readonly IRxSocketClient RxSocket;
         private readonly Limiter Limiter;
 

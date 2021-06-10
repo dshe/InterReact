@@ -23,9 +23,9 @@ namespace InterReact.UnitTests.Experimental
                     .SetMinimumLevel(LogLevel.Trace))
                 .ConfigureServices((context, services) => services
                     //.AddLogging()
-                    .AddSingleton<InterReactClientBuilder>()
-                    .AddSingleton<Task<IInterReactClient>>(providor =>
-                        providor.GetRequiredService<InterReactClientBuilder>().BuildAsync())
+                    .AddSingleton<InterReactBuilder>()
+                    .AddSingleton<Task<IInterReact>>(providor =>
+                        providor.GetRequiredService<InterReactBuilder>().BuildAsync())
                     .AddHostedService<StartupService>(services => new StartupService(services)))
                 .Build();
 
@@ -48,17 +48,17 @@ namespace InterReact.UnitTests.Experimental
     {
         private readonly IServiceProvider Providor;
         private readonly ILogger Logger;
-        internal IInterReactClient? Client = null;
+        internal IInterReact? Client = null;
 
         public StartupService(IServiceProvider providor)
         {
             Providor = providor;
-            Logger = providor.GetService<ILogger<InterReactClient>>()!;
+            Logger = providor.GetService<ILogger<InterReact>>()!;
         }
 
         public async Task StartAsync(CancellationToken ct)
         {
-            var task = Providor.GetRequiredService<Task<IInterReactClient>>();
+            var task = Providor.GetRequiredService<Task<IInterReact>>();
             Client = await task;
         }
 
