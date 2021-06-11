@@ -1,6 +1,8 @@
 ﻿using InterReact;
+using Stringification;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
@@ -54,14 +56,12 @@ namespace WpfDepth
                 return;
             }
 
-            //InterReactInstance.Response.Subscribe();
-
-
+            InterReactInstance.Response.Subscribe(x => Debug.WriteLine(x.Stringify()));
 
             InterReactInstance.Request.RequestMarketDataType(MarketDataType.Delayed);
 
             Subscription = SymbolSubject
-                .Throttle(TimeSpan.FromSeconds(1))
+                .Throttle(TimeSpan.FromMilliseconds(600))
                 .DistinctUntilChanged()
                 .ObserveOn(Application.Current.Dispatcher)
                 .Subscribe(UpdateSymbol);
@@ -112,7 +112,7 @@ namespace WpfDepth
             // Create the observable which will emit realtime updates.
             IConnectableObservable<Tick> ticks = InterReactInstance!.Services
                 .CreateTickObservable(contract)
-                //.Undelay()
+                .Undelay()
                 .ObserveOn(Application.Current.Dispatcher)
                 .Publish();
 
@@ -121,32 +121,27 @@ namespace WpfDepth
         }
         private void SubscribeToTicks(IObservable<Tick> ticks)
         {
+            // display warnings
+            ticks.OfType<TickAlert>().Subscribe(m => MessageBox.Show(m.Alert.Message, "InterReact"));
+
             var priceTicks = ticks.OfType<TickPrice>();
-            //priceTicks.Subscribe(x => Debug.WriteLine("Here is price: " + x.Price + " " + x.TickType));
 
-            // Observe any errors.
-            //ticks.Subscribe(m => { }, ex => Utilities.MessageBoxShow(ex.Message, "InterReact2", terminate: false));
-            
-            ticks.Subscribe(m => { }, ex => MessageBox.Show(ex.Message, "InterReact2"));
-            // what to do about alert warnings
-            //
-
-            
-
-            var bidPrices  = priceTicks.Where(t => t.TickType == TickType.BidPrice).Subscribe(t =>
+            var bidPrices = priceTicks.Where(t => t.TickType == TickType.BidPrice).Subscribe(t =>
             {
                 BidPrice = t.Price;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BidPrice)));
 
             });
-            var askPrices  = priceTicks.Where(t => t.TickType == TickType.AskPrice).Subscribe(t => AskPrice = t.Price);
+            var askPrices = priceTicks.Where(t => t.TickType == TickType.AskPrice).Subscribe(t =>
+            {
+                AskPrice = t.Price;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AskPrice)));
+            });
             var lastPrices = priceTicks.Where(t => t.TickType == TickType.LastPrice).Subscribe(t =>
             {
                 LastPrice = t.Price;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastPrice)));
             });
-
-            //lastPrices.Subscribe(x => Debug.WriteLine("Here is price: " + x));
 
             //askPrices.Select(p => p.ToString(priceFormat)).Subscribe(s => AskPrice.Text = s);
             //lastPrices.Select(p => p.ToString(priceFormat)).Subscribe(s => LastPrice.Text = s);
@@ -156,7 +151,6 @@ namespace WpfDepth
             //lastPrices.Change().ToColor().Subscribe(c => { Change.ForeColor = LastPrice.ForeColor = c; });
             //lastPrices.Change().WhereNotNull().Select(chg => chg.ToString(priceFormat)).Subscribe(s => Change.Text = s);
 
-
             //var sizeTicks = synchronizedTicks.OfType<TickSize>();
 
             //const string sizeFormat = "N0";
@@ -165,16 +159,6 @@ namespace WpfDepth
             //sizeTicks.Where(t => t.TickType == TickType.LastSize).Select(t => t.Size.ToString(sizeFormat)).Subscribe(s => LastSize.Text = s);
             //sizeTicks.Where(t => t.TickType == TickType.Volume).Select(t => t.Size.ToString(sizeFormat)).Subscribe(s => Volume.Text = s);
         }
-
-
-        // Observe any exceptions.
-        //depthObservable.Subscribe(onNext: _ => { }, onError: e => Utilities.MessageBoxShow(e.Message, "InterReact", terminate: true));
-
-        // Notify UI that all (2) properties changed.
-        //NotifyPropertiesChanged();
-
-        //depthObservable.Connect();
-        //}
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

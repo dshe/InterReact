@@ -190,7 +190,7 @@ namespace InterReact
                     break;
 
                 case ContractDetailsType.BondContractData:
-                    var version = c.RequireVersion(6);
+                    int version = c.RequireVersion(6);
                     RequestId = c.ReadInt();
 
                     Contract.Symbol = c.ReadString();
@@ -256,7 +256,7 @@ namespace InterReact
         {
             if (lastTradeDateOrContractMonth == "")
                 return;
-            var split = Regex.Split(lastTradeDateOrContractMonth, "\\s+");
+            string[] split = Regex.Split(lastTradeDateOrContractMonth, "\\s+");
             if (split.Length > 0)
             {
                 if (isBond)
@@ -271,14 +271,13 @@ namespace InterReact
         }
     }
 
-    public sealed class ContractDataEnd : IHasRequestId
+    public sealed class ContractDetailsEnd : IHasRequestId
     {
         public int RequestId { get; }
-        internal ContractDataEnd(ResponseReader c)
+        internal ContractDetailsEnd(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();
         }
-
     }
 }

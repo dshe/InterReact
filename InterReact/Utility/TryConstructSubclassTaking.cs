@@ -7,8 +7,9 @@ namespace InterReact
 {
     public static class Utilities
     {
-        // return an instance of a subclass of T which constructed with the single inputParameter.
-        internal static T? TryConstructSubclassTaking<T>(object inputParameter)
+        // return an instance, if any, of the subclass of T constructed with the single inputParameter.
+        // for example: TickAlert tickAlert = TryConstructSubclassTaking<Tick>(Alert alert);
+        internal static T? TryConstructSubclassTakingParameter<T>(object inputParameter)
         {
             Type[] inputParameterTypes = new[] { inputParameter.GetType() };
 

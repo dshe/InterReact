@@ -53,7 +53,7 @@ namespace InterReact
 
         private IObservable<IReadOnlyList<ContractDetails>> ContractDataObservableImpl(Contract contract) =>
             Response
-                .ToObservableWithIdMultiple<ContractDetails,ContractDataEnd>(Request.GetNextId, 
+                .ToObservableWithIdMultiple<ContractDetails,ContractDetailsEnd>(Request.GetNextId, 
                     id => Request.RequestContractData(id, contract))
                 .ToArray();
     }

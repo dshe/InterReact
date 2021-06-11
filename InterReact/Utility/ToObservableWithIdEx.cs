@@ -34,14 +34,14 @@ namespace InterReact
                             }
                             if (m is Alert alert)
                             {
-                                T? t2 = Utilities.TryConstructSubclassTaking<T>(alert);
+                                T? t2 = Utilities.TryConstructSubclassTakingParameter<T>(alert);
                                 if (t2 != null)
                                 {
                                     observer.OnNext(t2);
                                     observer.OnCompleted();
                                     return;
                                 }
-                                observer.OnError(alert);
+                                observer.OnError(alert.ToException());
                                 return;
                             }
                             throw new InvalidDataException($"Invalid type: {m.GetType()}.");
@@ -87,14 +87,14 @@ namespace InterReact
                             }
                             if (m is Alert alert)
                             {
-                                T? t2 = Utilities.TryConstructSubclassTaking<T>(alert);
+                                T? t2 = Utilities.TryConstructSubclassTakingParameter<T>(alert);
                                 if (t2 != null)
                                 {
                                     observer.OnNext(t2);
                                     return;
                                 }
                                 cancelable = false;
-                                observer.OnError(alert);
+                                observer.OnError(alert.ToException());
                                 return;
                             }
                             if (m is TEnd)
@@ -146,14 +146,14 @@ namespace InterReact
                             }
                             if (m is Alert alert)
                             {
-                                T? t2 = Utilities.TryConstructSubclassTaking<T>(alert);
+                                T? t2 = Utilities.TryConstructSubclassTakingParameter<T>(alert);
                                 if (t2 != null)
                                 {
-                                    observer.OnNext(t2);
+                                    observer.OnNext(t2!);
                                     return;
                                 }
                                 cancelable = false;
-                                observer.OnError(alert);
+                                observer.OnError(alert.ToException());
                                 return;
                             }
                             throw new InvalidDataException($"Invalid type: {m.GetType()}.");

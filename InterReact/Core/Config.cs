@@ -22,7 +22,7 @@ namespace InterReact
         /// The version of the currently connected server.
         /// </summary>
         public ServerVersion ServerVersionCurrent { get; internal set; }
-        public const ServerVersion ServerVersionMin = ServerVersion.VT100; // always 100
+        public const ServerVersion ServerVersionMin = ServerVersion.VT100;
         public const ServerVersion ServerVersionMax = ServerVersion.UnderlyingInfo;
 
         public string ManagedAccounts { get; internal set; } = "";

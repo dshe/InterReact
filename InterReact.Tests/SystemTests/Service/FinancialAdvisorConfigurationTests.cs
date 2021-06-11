@@ -1,5 +1,6 @@
 ﻿using InterReact;
 using InterReact.SystemTests;
+using System;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -15,7 +16,7 @@ namespace InterReact.SystemTests.Service
         public async Task TestFinancialAdvisorConfiguration()
         {
             var observable = Client.Services.CreateFinancialAdvisorConfigurationObservable(FinancialAdvisorDataType.Profiles);
-            await Assert.ThrowsAsync<Alert>(async () => await observable);
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await observable);
             // Throws: Not a financial advisor account.
         }
 

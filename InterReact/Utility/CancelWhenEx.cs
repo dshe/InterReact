@@ -16,8 +16,8 @@ namespace InterReact
                 CancellationTokenRegistration? regx = null;
                 regx = ct.Register(() =>
                 {
-                    subscription.Dispose();
                     observer.OnError(new OperationCanceledException(ct));
+                    subscription.Dispose();
                     regx?.Dispose();
                 });
 

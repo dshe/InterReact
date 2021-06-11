@@ -85,7 +85,7 @@ namespace InterReact
             "49" => new CurrentTime(reader),
             "50" => new RealtimeBar(reader),
             "51" => new FundamentalData(reader),
-            "52" => new ContractDataEnd(reader),
+            "52" => new ContractDetailsEnd(reader),
             "53" => new OpenOrderEnd(reader),
             "54" => new AccountUpdateEnd(reader),
             "55" => new ExecutionEnd(reader),

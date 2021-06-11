@@ -3,46 +3,37 @@ using NodaTime;
 
 namespace InterReact
 {
-    public interface ITick : IHasRequestId { }
-
-    public class TickAlert : ITick
-    {
-        public int RequestId { get; }
-        public Alert Alert { get; }
-        public TickAlert(Alert alert)
-        {
-            Alert = alert;
-            RequestId = alert.RequestId;
-        }
-    }
-
-    public abstract class Tick : ITick
+    public abstract class Tick : IHasRequestId
     {
         public int RequestId { get; protected set; }
-        public TickType TickType { get; protected set; }
+        public TickType TickType { get; protected set; } = TickType.Undefined;
         internal void Undelay() => TickType = GetTickTypeUndelayed(TickType);
 
-        internal static object[] CreatePriceAndSizeTicks(ResponseReader p)
+        internal static object[] CreatePriceAndSizeTicks(ResponseReader r)
         {
-            int version = p.GetVersion();
-            int requestId = p.ReadInt();
-            if (requestId == int.MaxValue)
-                p.ReadDouble(); // IMPORTANT: trigger parse exception for testing
-            var priceTickType = p.ReadEnum<TickType>();
-            var price = p.ReadDouble();
-            var size = version >= 2 ? p.ReadInt() : 0;
+            int version = r.GetVersion();
+            int requestId = r.ReadInt();
+            TickType priceTickType = r.ReadEnum<TickType>();
+            double price = r.ReadDouble();
+            int size = version >= 2 ? r.ReadInt() : 0;
 
-            var tickPrice = new TickPrice(requestId, priceTickType, price, new TickAttrib(version >= 3 ? p : null));
+            // IMPORTANT: trigger parse exception error for testing
+            //if (requestId == int.MaxValue)
+            //    r.ReadDouble();
+
+            TickAttrib attr = new(version >= 3 ? r : null);
+            TickPrice tickPrice = new(requestId, priceTickType, price, attr);
+
             if (version >= 2)
             {
-                var tickTypeSize = GetTickTypeSize(priceTickType);
+                TickType tickTypeSize = GetTickTypeSize(priceTickType);
                 if (tickTypeSize != TickType.Undefined)
                 {
-                    var tickSize = new TickSize(requestId, tickTypeSize, size);
+                    TickSize tickSize = new(requestId, tickTypeSize, size);
                     return new object[] { tickPrice, tickSize };
                 }
             }
-            return new object[] { tickPrice };
+            return new[] { tickPrice };
         }
 
         private static TickType GetTickTypeSize(TickType tickType) => tickType switch
@@ -58,29 +49,24 @@ namespace InterReact
 
         private static TickType GetTickTypeUndelayed(TickType tickType) => tickType switch
         {
-            TickType.DelayedBidPrice => TickType.BidSize,
+            TickType.DelayedBidPrice => TickType.BidPrice,
             TickType.DelayedAskPrice => TickType.AskPrice,
             TickType.DelayedLastPrice => TickType.LastPrice,
             TickType.DelayedBidSize => TickType.BidSize,
             TickType.DelayedAskSize => TickType.AskSize,
             TickType.DelayedLastSize => TickType.LastSize,
-            TickType.DelayedHigh => TickType.HighPrice,
-            TickType.DelayedLow => TickType.LowPrice,
+            TickType.DelayedHighPrice => TickType.HighPrice,
+            TickType.DelayedLowPrice => TickType.LowPrice,
             TickType.DelayedVolume => TickType.Volume,
-            TickType.DelayedClose => TickType.ClosePrice,
-            TickType.DelayedOpen => TickType.OpenPrice,
-            TickType.DelayedBidOption => TickType.BidOptionComputation,
-            TickType.DelayedAskOption => TickType.AskOptionComputation,
-            TickType.DelayedLastOption => TickType.LastOptionComputation,
-            TickType.DelayedModelOption => TickType.ModelOptionComputation,
+            TickType.DelayedClosePrice => TickType.ClosePrice,
+            TickType.DelayedOpenPrice => TickType.OpenPrice,
+            TickType.DelayedBidOptionComputation => TickType.BidOptionComputation,
+            TickType.DelayedAskOptionComputation => TickType.AskOptionComputation,
+            TickType.DelayedLastOptionComputation => TickType.LastOptionComputation,
+            TickType.DelayedModelOptionComputation => TickType.ModelOptionComputation,
             TickType.DelayedLastTimeStamp => TickType.LastTimeStamp,
             _ => tickType
         };
-    }
-
-    public class TickMessage : Tick
-    {
-
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -88,6 +74,16 @@ namespace InterReact
     // There are many tick types, as identified by the enum TickType. For example: TickType.BidSize.
     // Each tick type maps to one of the classes below. For example, TickType.BidSize is represented by objects of class type TickSize.
     // https://www.interactivebrokers.com/en/software/api/apiguide/tables/tick_types.htm
+
+    public class TickAlert : Tick
+    {
+        public Alert Alert { get; }
+        public TickAlert(Alert alert)
+        {
+            Alert = alert;
+            RequestId = alert.RequestId;
+        }
+    }
 
     /// <summary>
     /// Size only. For example, a trade/bid/ask at the previous trade/bid/ask price.
@@ -121,6 +117,8 @@ namespace InterReact
     {
         public double Price { get; }
         public TickAttrib TickAttrib { get; }
+
+        internal TickPrice() { TickAttrib = new TickAttrib(); } // ctor for Stringify
         internal TickPrice(int requestId, TickType tickType, double price, TickAttrib attrib)
         {
             RequestId = requestId;
@@ -133,7 +131,7 @@ namespace InterReact
     public sealed class TickString : Tick
     {
         public string Value { get; }
-        public TickString(int requestId, TickType tickType, string value)
+        internal TickString(int requestId, TickType tickType, string value)
         {
             RequestId = requestId;
             TickType = tickType;
@@ -143,9 +141,9 @@ namespace InterReact
         internal static Tick Create(ResponseReader c)
         {
             c.IgnoreVersion();
-            var requestId = c.ReadInt();
-            var tickType = c.ReadEnum<TickType>();
-            var str = c.ReadString();
+            int requestId = c.ReadInt();
+            TickType tickType = c.ReadEnum<TickType>();
+            string str = c.ReadString();
             if (tickType == TickType.RealtimeVolume)
                 return new TickRealtimeVolume(requestId, str, c.Parser);
             if (tickType == TickType.LastTimeStamp)
@@ -192,7 +190,7 @@ namespace InterReact
         {
             RequestId = requestId;
             TickType = TickType.RealtimeVolume;
-            var parts = str.Split(';');
+            string[] parts = str.Split(';');
             Price = ResponseParser.ParseDouble(parts[0]);
             Size = ResponseParser.ParseInt(parts[1]);
             Instant = Instant.FromUnixTimeMilliseconds(long.Parse(parts[2], NumberFormatInfo.InvariantInfo));
@@ -274,7 +272,7 @@ namespace InterReact
             if (Delta == -2)
                 Delta = null;
 
-            if (version >= 6 || TickType == TickType.ModelOptionComputation || TickType == TickType.DelayedModelOption)
+            if (version >= 6 || TickType == TickType.ModelOptionComputation || TickType == TickType.DelayedModelOptionComputation)
             {
                 OptPrice = c.ReadDoubleNullable();
                 if (OptPrice == -1)
@@ -335,7 +333,7 @@ namespace InterReact
     public sealed class TickSnapshotEnd : IHasRequestId
     {
         public int RequestId { get; }
-        public TickSnapshotEnd(ResponseReader c)
+        internal TickSnapshotEnd(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();

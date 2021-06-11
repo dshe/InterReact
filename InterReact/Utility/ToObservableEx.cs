@@ -15,8 +15,9 @@ namespace InterReact
         {
             return Observable.Create<T>(observer =>
             {
-                var subscription = source.OfType<T>().SubscribeSafe(
-                    Observer.Create<T>(
+                IDisposable subscription = source
+                    .OfType<T>()
+                    .SubscribeSafe(Observer.Create<T>(
                         onNext: t =>
                         {
                             observer.OnNext(t);
@@ -33,21 +34,24 @@ namespace InterReact
 
 
         // Multiple results: AccountPositions, OpenOrders
-        internal static IObservable<T> ToObservableMultiple<T,TEnd>(this IObservable<object> source,
+        internal static IObservable<T> ToObservableMultiple<T, TEnd>(this IObservable<object> source,
             Action startRequest, Action? stopRequest = null) where T : class
         {
             return Observable.Create<T>(observer =>
             {
                 bool? cancelable = null;
 
-                var subscription = source
+                IDisposable subscription = source
                     .Finally(() => cancelable = false)
                     .SubscribeSafe(Observer.Create<object>(
                         onNext: o =>
                         {
                             if (o is T t)
+                            {
                                 observer.OnNext(t);
-                            else if (o is TEnd)
+                                return;
+                            }
+                            if (o is TEnd)
                             {
                                 cancelable = false;
                                 observer.OnCompleted();
@@ -79,7 +83,7 @@ namespace InterReact
             {
                 bool? cancelable = null;
 
-                var subscription = source
+                IDisposable subscription = source
                     .OfType<T>()
                     .Finally(() => cancelable = false)
                     .SubscribeSafe(Observer.Create<T>(

@@ -4,6 +4,7 @@ namespace InterReact
 {
     public abstract class TickByTick : IHasRequestId
     {
+        public static readonly TickByTick None = new TickByTickNone();
         public int RequestId { get; }
         public TickByTickType TickType { get; } // not used when BidAsk
         public long Time { get; }
@@ -22,7 +23,8 @@ namespace InterReact
             long time = c.ReadLong();
             return tickType switch
             {
-                TickByTickType.None => new TickByTickNone(),
+                //TickByTickType.None => new TickByTickNone(),
+                TickByTickType.None => None,
                 TickByTickType.Last => new TickByTickAllLast(requestId, tickType, time, c),
                 TickByTickType.AllLast => new TickByTickAllLast(requestId, tickType, time, c),
                 TickByTickType.BidAsk => new TickByTickBidAsk(requestId, tickType, time, c),
@@ -30,8 +32,6 @@ namespace InterReact
                 _ => throw new ArgumentException("Invalid TickByTick type.")
             };
         }
-
-        public static readonly TickByTick None = new TickByTickNone();
     }
 
     public sealed class TickByTickNone : TickByTick
@@ -46,7 +46,8 @@ namespace InterReact
         public TickAttribLast TickAttribLast { get; }
         public string Exchange { get; }
         public string SpecialConditions { get; }
-        public TickByTickAllLast(int requestId, TickByTickType tickType, long time, ResponseReader c) : base(requestId, tickType, time)
+        public TickByTickAllLast(int requestId, TickByTickType tickType, long time, ResponseReader c)
+            : base(requestId, tickType, time)
         {
             Price = c.ReadDouble();
             Size = c.ReadInt();
@@ -63,7 +64,8 @@ namespace InterReact
         public int BidSize { get; }
         public int AskSize { get; }
         public TickAttribBidAsk TickAttribBidAsk { get; }
-        public TickByTickBidAsk(int requestId, TickByTickType tickType, long time, ResponseReader c) : base(requestId, tickType, time)
+        public TickByTickBidAsk(int requestId, TickByTickType tickType, long time, ResponseReader c)
+            : base(requestId, tickType, time)
         {
             BidPrice = c.ReadDouble();
             AskPrice = c.ReadDouble();
@@ -76,7 +78,8 @@ namespace InterReact
     public sealed class TickByTickMidpoint : TickByTick
     {
         public double Midpoint { get; }
-        public TickByTickMidpoint(int requestId, TickByTickType tickType, long time, ResponseReader c) : base(requestId, tickType, time)
+        public TickByTickMidpoint(int requestId, TickByTickType tickType, long time, ResponseReader c)
+            : base(requestId, tickType, time)
         {
             Midpoint = c.ReadDouble();
         }

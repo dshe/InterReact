@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using NodaTime;
 using Stringification;
 using RxSockets;
+using System.Reflection;
 
 namespace InterReact
 {
@@ -25,7 +26,7 @@ namespace InterReact
         public InterReactBuilder(ILogger logger) // supports testing
         {
             Logger = logger;
-            var name = GetType().Assembly.GetName();
+            AssemblyName name = GetType().Assembly.GetName();
             Logger.LogTrace($"{name.Name} version {name.Version}.");
         }
 
@@ -83,21 +84,20 @@ namespace InterReact
 
         public async Task<IInterReact> BuildAsync(CancellationToken ct = default)
         {
-            var rxSocket = await ConnectAsync(Config, Logger, ct).ConfigureAwait(false);
+            IRxSocketClient rxSocket = await ConnectAsync(Config, Logger, ct).ConfigureAwait(false);
 
             try
             {
                 await Login(rxSocket, Config, Logger, ct).ConfigureAwait(false);
 
-                var response = rxSocket
+                IObservable<object> response = rxSocket
                     .ReceiveAllAsync()
                     .ToArraysFromBytesWithLengthPrefix()
                     .ToStringArrays()
                     .ToObservableFromAsyncEnumerable()
                     .ToMessages(Config, Logger)
-                    .DoIntercept(Config, Logger)
                     .Publish()
-                    .AutoConnect();
+                    .AutoConnect(); // connect on first subscription
 
                 return new ServiceCollection()
                     .AddSingleton(Logger)
@@ -121,7 +121,7 @@ namespace InterReact
 
     private static async Task<IRxSocketClient> ConnectAsync(Config config, ILogger logger, CancellationToken ct)
         {
-            foreach (var port in config.Ports)
+            foreach (int port in config.Ports)
             {
                 config.IPEndPoint.Port = port;
                 try
@@ -143,11 +143,8 @@ namespace InterReact
 
             // Report a range of supported API versions to TWS.
             SendWithPrefix($"v{Config.ServerVersionMin}..{Config.ServerVersionMax}");
-            SendWithPrefix(
-                ((int)RequestCode.StartApi).ToString(),
-                "2", 
-                config.ClientId.ToString(),
-                config.OptionalCapabilities);
+            SendWithPrefix(((int)RequestCode.StartApi).ToString(),
+                "2", config.ClientId.ToString(), config.OptionalCapabilities);
 
             string[] message = await GetMessage().ConfigureAwait(false);
             if (!Enum.TryParse(message[0], out ServerVersion version))
@@ -161,36 +158,23 @@ namespace InterReact
 
             logger.LogInformation($"Logged into Tws/Gateway using ClientId: {config.ClientId}, ServerVersion: {config.ServerVersionCurrent}.");
 
-            void Send(string str) => rxsocket.Send(str.ToByteArray());
-            void SendWithPrefix(params string[] strings) => rxsocket.Send(strings.ToByteArray().ToByteArrayWithLengthPrefix());
-            async Task<string[]> GetMessage() => await rxsocket
+            // local methods
+            void Send(string str) => 
+                rxsocket
+                .Send(str.ToByteArray());
+            
+            void SendWithPrefix(params string[] strings) => 
+                rxsocket
+                .Send(strings.ToByteArray()
+                .ToByteArrayWithLengthPrefix());
+            
+            async Task<string[]> GetMessage() => 
+                await rxsocket
                 .ReceiveAllAsync()
                 .ToArraysFromBytesWithLengthPrefix()
                 .ToStringArrays()
                 .FirstAsync(ct)
                 .ConfigureAwait(false);
-        }
-    }
-
-    public static partial class Extensions
-    {
-        internal static IObservable<object> DoIntercept(this IObservable<object> source, Config config, ILogger logger)
-        {
-            return source.Do(obj =>
-            {
-                if (obj is NextId nextId)
-                {
-                    int id = nextId.Id;
-                    logger.LogDebug($"NextId: {id}.");
-                    config.NextIdValue = id;
-                }
-                else if (obj is ManagedAccounts managedAccounts)
-                {
-                    string accounts = managedAccounts.Accounts;
-                    logger.LogDebug($"ManagedAccounts: {accounts}.");
-                    config.ManagedAccounts = accounts;
-                }
-            });
         }
     }
 }

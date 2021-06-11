@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace InterReact
 {
@@ -7,32 +8,39 @@ namespace InterReact
     /// The Id, when >= 0, indicates that the message is associated with a particular request(requestId) or order(orderId).
     /// For messages which are not associated with a particular request or order, the Id is -1.
     /// In order to be compatible with the IHasRequestId and IHasOrderId interfaces, both requestId and orderId properties are included in Alert.
-    /// They are always set to the same value.
     /// </summary>
-    public sealed class Alert : Exception, IHasRequestId, IHasOrderId
+    public sealed class Alert : IHasRequestId, IHasOrderId
     {
-        public int Code { get; }
         public int RequestId { get; }
         public int OrderId { get; }
+        public int Code { get; }
+        public string Message { get; }
         public AlertType AlertType { get; }
 
-        internal Alert(int id, int code, string message) : base(message)
+        internal Alert(int id, int code, string message)
         {
-            RequestId = OrderId = id; // id refers to either a requestId or an orderId.
+            RequestId = OrderId = id;
             Code = code;
-            if (string.IsNullOrWhiteSpace(message))
-                throw new ArgumentException(nameof(message));
+            Message = message;
             AlertType = GetAlertTypeFromCode(code, id);
         }
-        internal static Alert Create(ResponseReader c)
+
+        internal static Alert Create(ResponseReader r)
         {
-            c.RequireVersion(2);
-            return new Alert(c.ReadInt(), c.ReadInt(), c.ReadString());
+            r.RequireVersion(2);
+            return new Alert(r.ReadInt(), r.ReadInt(), r.ReadString());
+        }
+
+        internal InvalidOperationException ToException()
+        {
+            InvalidOperationException exception = new(Message);
+            exception.Data.Add("Alert", this);
+            return exception;
         }
 
         public override string ToString()
         {
-            var m = Message;
+            string m = Message;
             if (!m.EndsWith("."))
                 m += ".";
             if (Code >= 0)
@@ -44,11 +52,11 @@ namespace InterReact
 
         private static AlertType GetAlertTypeFromCode(int code, int id)
         {
-            if (code == 1100 || code == 2110)
+            if (code is 1100 or 2110)
                 return AlertType.ConnectionLost;
-            if (code == 1101 || code == 1102)
+            if (code is 1101 or 1102)
                 return AlertType.ConnectionRestored;
-            if (code >= 2103 && code <= 2108)
+            if (code is >= 2103 and <= 2108)
                 return AlertType.DataFarm;
             if (id >= 0)
                 return AlertType.HasId;

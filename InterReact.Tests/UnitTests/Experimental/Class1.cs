@@ -64,8 +64,8 @@ namespace InterReact.UnitTests.Experimental
         [Fact]
         public void Test1()
         {
-            var xxx = GetSubclassOf<ITick>(new Alert(1,1,"message"));
-            var typ = xxx.GetType();
+            //var xxx = GetSubclassOf<ITick>(new Alert(1,1,"message"));
+            //var typ = xxx.GetType();
 
             //var xx1 = typeof(T2).IsSubclassOf(typeof(T1));
             //var xx2 = typeof(T2).IsAssignableFrom(typeof(T1));

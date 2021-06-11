@@ -12,24 +12,15 @@ using NodaTime.Text;
 
 namespace InterReact
 {
-    public sealed record ContractDataTimeEvent
-    {
-        public ZonedDateTime Time { get; init; }
-        public ContractTimeStatus Status { get; init; }
-    }
-
-    public sealed record ContractDataTimePeriod
-    {
-        public ContractDataTimeEvent? Previous { get; init; }
-        public ContractDataTimeEvent? Next { get; init; }
-    }
+    public sealed record ContractDataTimeEvent(ZonedDateTime Time, ContractTimeStatus Status);
+    public sealed record ContractDataTimePeriod(ContractDataTimeEvent? Previous, ContractDataTimeEvent? Next);
 
     public sealed class ContractDataTime
     {
         private static readonly LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HHmm");
         private static readonly LocalDatePattern DatePattern = LocalDatePattern.CreateWithInvariantCulture("yyyyMMdd");
         private readonly ContractDetails ContractData;
-        private readonly IScheduler Sched;
+        private readonly IScheduler TheScheduler;
         public DateTimeZone TimeZone { get; } // null if not available
         public IReadOnlyList<ContractDataTimeEvent> Events { get; } = new List<ContractDataTimeEvent>();
         // empty if no hours or timeZone
@@ -38,10 +29,10 @@ namespace InterReact
         public ContractDataTime(ContractDetails contractData, ILogger logger, IScheduler? scheduler = null)
         {
             ContractData = contractData;
-            Sched = scheduler ?? Scheduler.CurrentThread;
+            TheScheduler = scheduler ?? Scheduler.Default;
             ContractTimeObservable = CreateContractTimeObservable();
 
-            var tzi = contractData.TimeZoneId;
+            string tzi = contractData.TimeZoneId;
             if (string.IsNullOrEmpty(tzi)) // for expired Future Options there is no TimeZoneId(?)
                 tzi = "Etc/GMT";
             TimeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull(tzi) ?? throw new ArgumentException($"TimeZoneId '{tzi}' not found.");
@@ -51,7 +42,7 @@ namespace InterReact
         private List<ContractDataTimeEvent> GetList()
         {
             // sorted list is used to ensure that dates are unique and to maintain order
-            var list = new SortedList<LocalDateTime, ContractTimeStatus>();
+            SortedList<LocalDateTime, ContractTimeStatus> list = new();
 
             foreach (var (start, end) in GetSessions(ContractData.TradingHours))
             {
@@ -64,29 +55,30 @@ namespace InterReact
                 list.Add(start, ContractTimeStatus.Liquid);
                 list.Add(end, previous.Value == ContractTimeStatus.Trading ? ContractTimeStatus.Trading : ContractTimeStatus.Closed);
             }
-            return list.Select(x => new ContractDataTimeEvent { Time = x.Key.InZoneLeniently(TimeZone), Status = x.Value }).ToList();
+            //return list.Select(x => new ContractDataTimeEvent { Time = x.Key.InZoneLeniently(TimeZone), Status = x.Value }).ToList();
+            return list.Select(x => new ContractDataTimeEvent(x.Key.InZoneLeniently(TimeZone), x.Value)).ToList();
         }
 
         private static List<(LocalDateTime start, LocalDateTime end)> GetSessions(string s)
         {
-            var list = new List<(LocalDateTime start, LocalDateTime end)>();
+            List<(LocalDateTime start, LocalDateTime end)> list = new();
 
             if (string.IsNullOrEmpty(s))
                 return list;
 
-            var days = s.Split(';');
-            foreach (var day in days)
+            string[] days = s.Split(';');
+            foreach (string day in days)
             {
-                var parts = day.Split(':');
+                string[] parts = day.Split(':');
 
-                Debug.Assert(parts.Count() == 2);
-                var date = DatePattern.Parse(parts[0]).Value;
+                Debug.Assert(parts.Length == 2);
+                LocalDate date = DatePattern.Parse(parts[0]).Value;
                 var sessions = parts[1].Split(',').Distinct(); // the sessions may be repeated(?)
-                foreach (var session in sessions.Where(x => x != "CLOSED"))
+                foreach (string session in sessions.Where(x => x != "CLOSED"))
                 {
                     var times = GetSessionTime(session);
-                    var start = date.At(times.start);
-                    var end = date.At(times.end);
+                    LocalDateTime start = date.At(times.start);
+                    LocalDateTime end = date.At(times.end);
                     if (end < start)
                         start = start.PlusDays(-1); //end = end.PlusDays(1); ??
                     if (list.Any() && (start <= list.Last().end || end <= start)) // ensure consecutive, non-overlapping periods
@@ -99,25 +91,23 @@ namespace InterReact
             // local
             static (LocalTime start, LocalTime end) GetSessionTime(string session)
             {
-                var times = session.Split('-').Select(t => TimePattern.Parse(t).Value).ToList();
-                Debug.Assert(times.Count == 2);
+                LocalTime[] times = session.Split('-').Select(t => TimePattern.Parse(t).Value).ToArray();
+                Debug.Assert(times.Length == 2);
                 return (times[0], times[1]);
             }
         }
 
         // get the current time from the scheduler
-        public ContractDataTimePeriod? Get() => Get(Instant.FromDateTimeOffset(Sched.Now));
+        public ContractDataTimePeriod? Get() => Get(Instant.FromDateTimeOffset(TheScheduler.Now));
 
         public ContractDataTimePeriod? Get(Instant dt)
         {
             if (!Events.Any())
                 return null;
 
-            return new ContractDataTimePeriod
-            {
-                Previous = Events.Where(x => x.Time.ToInstant() <= dt).LastOrDefault(),
-                Next = Events.Where(x => x.Time.ToInstant() > dt).FirstOrDefault()
-            };
+            return new ContractDataTimePeriod(
+                Events.LastOrDefault(x => x.Time.ToInstant() <= dt),
+                Events.FirstOrDefault(x => x.Time.ToInstant() > dt));
         }
 
         /// <summary>
@@ -127,7 +117,7 @@ namespace InterReact
         {
             return Observable.Create<ContractDataTimePeriod>(observer =>
             {
-                var initialResult = Get();
+                ContractDataTimePeriod? initialResult = Get();
                 if (initialResult != null)
                     observer.OnNext(initialResult);
                 if (initialResult?.Next == null)
@@ -140,7 +130,7 @@ namespace InterReact
                 {
                     try
                     {
-                        var result = Get();
+                        ContractDataTimePeriod? result = Get();
                         if (result != null)
                             observer.OnNext(result);
                         if (result?.Next == null)
@@ -154,7 +144,7 @@ namespace InterReact
                     }
                 }
 
-                return Sched.Schedule(initialResult.Next.Time.ToDateTimeOffset(), work);
+                return TheScheduler.Schedule(initialResult.Next.Time.ToDateTimeOffset(), work);
             });
         }
     }

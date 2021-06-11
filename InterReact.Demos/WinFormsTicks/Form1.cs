@@ -117,10 +117,10 @@ namespace WinFormsTicks
             askPrices.Select(p => p.ToString(priceFormat)).Subscribe(s => AskPrice.Text = s);
             lastPrices.Select(p => p.ToString(priceFormat)).Subscribe(s => LastPrice.Text = s);
 
-            bidPrices.Change().ToColor().Subscribe(c => BidPrice.ForeColor = c);
-            askPrices.Change().ToColor().Subscribe(c => AskPrice.ForeColor = c);
-            lastPrices.Change().ToColor().Subscribe(c => { Change.ForeColor = LastPrice.ForeColor = c; });
-            lastPrices.Change().WhereNotNull().Select(chg => chg.ToString(priceFormat)).Subscribe(s => Change.Text = s);
+            //bidPrices.Change().ToColor().Subscribe(c => BidPrice.ForeColor = c);
+            //askPrices.Change().ToColor().Subscribe(c => AskPrice.ForeColor = c);
+            //lastPrices.Change().ToColor().Subscribe(c => { Change.ForeColor = LastPrice.ForeColor = c; });
+            //lastPrices.Change().WhereNotNull().Select(chg => chg.ToString(priceFormat)).Subscribe(s => Change.Text = s);
             
 
             var sizeTicks = synchronizedTicks.OfType<TickSize>();
