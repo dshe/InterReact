@@ -4,7 +4,7 @@ using Stringification;
 
 namespace InterReact
 {
-    public sealed record Tag // input + output
+    public sealed class Tag // input + output
     {
         public string Name { get; }
         public string Value { get; }

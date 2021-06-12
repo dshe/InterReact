@@ -35,13 +35,13 @@
 
         <StackPanel Grid.Row="0" Grid.ColumnSpan="4" Orientation="Horizontal" Background="Pink" HorizontalAlignment="Center" Margin="0,0,0,10">
             <Label Content="Symbol:" FontWeight="Bold" VerticalAlignment="Center" />
-            <TextBox VerticalAlignment="Center" Text="{Binding Symbol, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" CharacterCasing="Upper" Width="100" />
+            <TextBox VerticalAlignment="Center" Text="{Binding Symbol, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged, Delay=2000}" CharacterCasing="Upper" Width="100" />
         </StackPanel>
 
         <TextBlock Grid.Row="1" Grid.ColumnSpan="4" Text="{Binding Description, Mode=OneWay}" Background="LightGray" TextAlignment="Center" FontWeight="Bold"/>
 
         <Label     Grid.Row="2" Grid.Column="0" Content=" Bid "/>
-        <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding BidPrice, StringFormat=N2, Mode=OneWay}"/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding BidPrice, StringFormat=N2, Mode=OneWay}" Foreground="{Binding BidForeGround}" />
 
         <Label     Grid.Row="2" Grid.Column="1" Content=" Ask "/>
         <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AskPrice, StringFormat=N2, Mode=OneWay}"/>

@@ -7,7 +7,6 @@ namespace InterReact
     {
         public int RequestId { get; protected set; }
         public TickType TickType { get; protected set; } = TickType.Undefined;
-        internal void Undelay() => TickType = GetTickTypeUndelayed(TickType);
 
         internal static object[] CreatePriceAndSizeTicks(ResponseReader r)
         {
@@ -16,10 +15,6 @@ namespace InterReact
             TickType priceTickType = r.ReadEnum<TickType>();
             double price = r.ReadDouble();
             int size = version >= 2 ? r.ReadInt() : 0;
-
-            // IMPORTANT: trigger parse exception error for testing
-            //if (requestId == int.MaxValue)
-            //    r.ReadDouble();
 
             TickAttrib attr = new(version >= 3 ? r : null);
             TickPrice tickPrice = new(requestId, priceTickType, price, attr);
@@ -47,6 +42,7 @@ namespace InterReact
             _ => TickType.Undefined
         };
 
+        public void Undelay() => TickType = GetTickTypeUndelayed(TickType);
         private static TickType GetTickTypeUndelayed(TickType tickType) => tickType switch
         {
             TickType.DelayedBidPrice => TickType.BidPrice,

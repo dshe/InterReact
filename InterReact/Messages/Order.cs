@@ -282,7 +282,7 @@ namespace InterReact
         public ClearingIntent ClearingIntent { get; set; } = ClearingIntent.Default;
 
         public string AlgoStrategy { get; set; } = "";
-        public List<Tag> AlgoParams { get; } = new List<Tag>(); // input + output
+        public List<Tag> AlgoParams { get; } = new(); // input + output
 
         public bool WhatIf { get; set; }
 
@@ -290,9 +290,9 @@ namespace InterReact
 
         public bool NotHeld { get; set; }
 
-        public List<Tag> SmartComboRoutingParams { get; } = new List<Tag>(); // input + output
-        public List<OrderComboLeg> ComboLegs { get; } = new List<OrderComboLeg>(); // input + output
-        public List<Tag> MiscOptions { get; } = new List<Tag>(); // input
+        public List<Tag> SmartComboRoutingParams { get; } = new(); // input + output
+        public List<OrderComboLeg> ComboLegs { get; } = new(); // input + output
+        public List<Tag> MiscOptions { get; } = new(); // input
 
         /// <summary>
         /// For GTC(good-till cancelled) orders.
@@ -327,7 +327,7 @@ namespace InterReact
         public double? AdjustedStopLimitPrice { get; set; }
         public double? AdjustedTrailingAmount { get; set; }
         public int AdjustableTrailingUnit { get; set; }
-        public List<OrderCondition> Conditions { get; } = new List<OrderCondition>();
+        public List<OrderCondition> Conditions { get; } = new();
         public bool ConditionsIgnoreRegularTradingHours { get; set; }
         public bool ConditionsCancelOrder { get; set; }
         public SoftDollarTier? SoftDollarTier { get; set; }

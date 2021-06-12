@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 
-
 namespace InterReact
 {
     public sealed class Contract // input + output
@@ -72,13 +71,12 @@ namespace InterReact
         /// <summary>
         /// The legs of a combined contract definition.
         /// </summary>
-        public List<ContractComboLeg> ComboLegs { get; } = new List<ContractComboLeg>(); // input + output
+        public List<ContractComboLeg> ComboLegs { get; } = new(); // input + output
 
         /// <summary>
         /// Delta and underlying price for Delta-Neutral combo orders.
         /// </summary>
         public DeltaNeutralContract? DeltaNeutralContract { get; set; }
-
     }
 
 }

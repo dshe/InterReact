@@ -5,38 +5,38 @@
         /// <summary>
         /// The unique contract identifier.
         /// </summary>
-        public int ContractId { get; set; }
+        public int ContractId { get; init; }
 
         /// <summary>
         /// The relative number of contracts for the leg.
         /// </summary>
-        public int Ratio { get; set; }
+        public int Ratio { get; init; }
 
-        public TradeAction TradeAction { get; set; } = TradeAction.Undefined;
+        public TradeAction TradeAction { get; init; } = TradeAction.Undefined;
 
         /// <summary>
         /// The exchange to which the order will be routed.
         /// </summary>
-        public string Exchange { get; set; } = "";
+        public string Exchange { get; init; } = "";
 
-        public ComboOpenClose OpenClose { get; set; } = ComboOpenClose.Undefined;
+        public ComboOpenClose OpenClose { get; init; } = ComboOpenClose.Undefined;
 
         /// <summary>
         /// For stock legs when doing a short sale.
         /// ShortSaleSlot of ThirdParty requires DesignatedLocation to be specified. 
         /// Non-empty DesignatedLocation Values for all Status cases will cause orders to be rejected.
         /// </summary>
-        public ComboShortSaleSlot ComboShortSaleSlot { get; set; }
+        public ComboShortSaleSlot ComboShortSaleSlot { get; init; }
 
         /// <summary>
         /// Use only when ComboShortSaleSlot is ThirdParty.
         /// </summary>
-        public string DesignatedLocation { get; set; } = "";
+        public string DesignatedLocation { get; init; } = "";
 
         /// <summary>
         /// Short Sale Exempt Code
         /// </summary>
-        public int ExemptCode { get; set; } = -1;
+        public int ExemptCode { get; init; } = -1;
 
         public ContractComboLeg() { }
 

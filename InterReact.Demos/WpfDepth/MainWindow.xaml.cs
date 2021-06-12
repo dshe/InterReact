@@ -15,6 +15,82 @@ namespace WpfDepth
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        public string Symbol
+        {
+            set => SymbolSubject.OnNext(value);
+        }
+        private readonly Subject<string> SymbolSubject = new();
+
+        private string description = "";
+        public string Description
+        {
+            get => description;
+            private set
+            {
+                if (value == description)
+                    return;
+                description = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Description)));
+            }
+        }
+
+
+        private double bidPrice;
+        public double BidPrice
+        {
+            get => bidPrice;
+            private set
+            {
+                if (value == bidPrice)
+                    return;
+                bidPrice = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BidPrice)));
+            }
+        }
+
+        private double askPrice;
+        public double AskPrice
+        {
+            get => askPrice;
+            private set
+            {
+                if (value == askPrice)
+                    return;
+                askPrice = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AskPrice)));
+            }
+        }
+
+        private double lastPrice;
+        public double LastPrice
+        {
+            get => lastPrice;
+            private set
+            {
+                if (value == lastPrice)
+                    return;
+                lastPrice = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastPrice)));
+            }
+        }
+
+        private double priceChange;
+        public double PriceChange
+        {
+            get => priceChange;
+            private set
+            {
+                if (value == priceChange)
+                    return;
+                priceChange = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PriceChange)));
+            }
+        }
+
+
+        private IInterReact? InterReactInstance;
+        private IDisposable? TicksConnection;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -25,21 +101,6 @@ namespace WpfDepth
             var t1 = Application.Current.Dispatcher.Thread.ManagedThreadId;
             ;
         }
-
-        public string Symbol
-        {
-            set => SymbolSubject.OnNext(value);
-        }
-        private readonly Subject<string> SymbolSubject = new();
-
-        public string Description { get; private set; } = "";
-
-        public double BidPrice { get; private set; }
-        public double AskPrice { get; private set; }
-        public double LastPrice { get; private set; }
-        private IDisposable? Subscription;
-        private IInterReact? InterReactInstance;
-        private IDisposable? TicksConnection;
 
         private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
@@ -60,7 +121,7 @@ namespace WpfDepth
 
             InterReactInstance.Request.RequestMarketDataType(MarketDataType.Delayed);
 
-            Subscription = SymbolSubject
+            SymbolSubject
                 .Throttle(TimeSpan.FromMilliseconds(600))
                 .DistinctUntilChanged()
                 .ObserveOn(Application.Current.Dispatcher)
@@ -73,13 +134,12 @@ namespace WpfDepth
             var t1 = Application.Current.Dispatcher.Thread.ManagedThreadId;
 
             Description = "";
-            //BidPrice.Text = AskPrice.Text = LastPrice.Text = BidSize.Text = AskSize.Text = LastSize.Text = Change.Text = Volume.Text = null;
             BidPrice = AskPrice = LastPrice = 0;
 
             // Disposing the connection cancels the IB data subscription and conveniently disposes all subscriptions to the observable.
             TicksConnection?.Dispose();
 
-            if (string.IsNullOrEmpty(symbol))
+            if (string.IsNullOrWhiteSpace(symbol))
                 return;
 
             Contract contract = new()
@@ -96,11 +156,10 @@ namespace WpfDepth
                 ContractDetails cd = await InterReactInstance!.Services.CreateContractDataObservable(contract).ContractDataSingle();
                 // Display the stock name in the title bar.
                 Description = cd.LongName;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Description)));
             }
             catch (Exception exception)
             {
-                MessageBox.Show($"ContractData exception:\n\n {exception.Message}", "InterReact");
+                MessageBox.Show($"ContractDetails:\n\n {exception.Message}");
                 return;
             }
 
@@ -112,7 +171,7 @@ namespace WpfDepth
             // Create the observable which will emit realtime updates.
             IConnectableObservable<Tick> ticks = InterReactInstance!.Services
                 .CreateTickObservable(contract)
-                .Undelay()
+                .Do(tick => tick.Undelay())
                 .ObserveOn(Application.Current.Dispatcher)
                 .Publish();
 
@@ -121,43 +180,22 @@ namespace WpfDepth
         }
         private void SubscribeToTicks(IObservable<Tick> ticks)
         {
-            // display warnings
-            ticks.OfType<TickAlert>().Subscribe(m => MessageBox.Show(m.Alert.Message, "InterReact"));
+            // Display warnings, if any.
+            ticks.OfType<TickAlert>().Subscribe(m => MessageBox.Show(m.Alert.Message));
 
             var priceTicks = ticks.OfType<TickPrice>();
+            var bidPrices = priceTicks.Where(t => t.TickType == TickType.BidPrice).Select(t => t.Price);
+            var askPrices = priceTicks.Where(t => t.TickType == TickType.AskPrice).Select(t => t.Price);
+            var lastPrices = priceTicks.Where(t => t.TickType == TickType.LastPrice).Select(t => t.Price);
+            var lastPriceChanges = lastPrices
+                .Buffer(2, 1)
+                .Where(x => x.Count == 2)
+                .Select(x => x[1] - x[0]);
 
-            var bidPrices = priceTicks.Where(t => t.TickType == TickType.BidPrice).Subscribe(t =>
-            {
-                BidPrice = t.Price;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BidPrice)));
-
-            });
-            var askPrices = priceTicks.Where(t => t.TickType == TickType.AskPrice).Subscribe(t =>
-            {
-                AskPrice = t.Price;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AskPrice)));
-            });
-            var lastPrices = priceTicks.Where(t => t.TickType == TickType.LastPrice).Subscribe(t =>
-            {
-                LastPrice = t.Price;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastPrice)));
-            });
-
-            //askPrices.Select(p => p.ToString(priceFormat)).Subscribe(s => AskPrice.Text = s);
-            //lastPrices.Select(p => p.ToString(priceFormat)).Subscribe(s => LastPrice.Text = s);
-
-            //bidPrices.Change().ToColor().Subscribe(c => BidPrice.ForeColor = c);
-            //askPrices.Change().ToColor().Subscribe(c => AskPrice.ForeColor = c);
-            //lastPrices.Change().ToColor().Subscribe(c => { Change.ForeColor = LastPrice.ForeColor = c; });
-            //lastPrices.Change().WhereNotNull().Select(chg => chg.ToString(priceFormat)).Subscribe(s => Change.Text = s);
-
-            //var sizeTicks = synchronizedTicks.OfType<TickSize>();
-
-            //const string sizeFormat = "N0";
-            ///sizeTicks.Where(t => t.TickType == TickType.BidSize).Select(t => t.Size.ToString(sizeFormat)).Subscribe(s => BidSize.Text = s);
-            //sizeTicks.Where(t => t.TickType == TickType.AskSize).Select(t => t.Size.ToString(sizeFormat)).Subscribe(s => AskSize.Text = s);
-            //sizeTicks.Where(t => t.TickType == TickType.LastSize).Select(t => t.Size.ToString(sizeFormat)).Subscribe(s => LastSize.Text = s);
-            //sizeTicks.Where(t => t.TickType == TickType.Volume).Select(t => t.Size.ToString(sizeFormat)).Subscribe(s => Volume.Text = s);
+            bidPrices.Subscribe(p => BidPrice = p);
+            askPrices.Subscribe(p => AskPrice = p);
+            lastPrices.Subscribe(p => LastPrice = p);
+            lastPriceChanges.Subscribe(p => PriceChange = p);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -168,5 +206,7 @@ namespace WpfDepth
                 await InterReactInstance.DisposeAsync();
         }
     }
+
+
 
 }

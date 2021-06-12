@@ -93,7 +93,7 @@ namespace WinFormsTicks
             // Create the object containing the observable which will emit realtime updates.
             var ticks = interReact.Services.CreateTickConnectableObservable(contract);
 
-            SubscribeToTicks(ticks.Undelay().ObserveOn(synchronizationContext));
+            SubscribeToTicks(ticks.Do(t => t.Undelay()).ObserveOn(synchronizationContext));
 
             connection = ticks.Connect();
         }
