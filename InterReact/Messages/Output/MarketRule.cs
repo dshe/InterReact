@@ -9,7 +9,7 @@ namespace InterReact
         internal MarketRule(ResponseReader c)
         {
             MarketRuleId = c.ReadInt();
-            var n = c.ReadInt();
+            int n = c.ReadInt();
             for (int i = 0; i < n; i++)
                 PriceIncrements.Add(new PriceIncrement(c));
         }

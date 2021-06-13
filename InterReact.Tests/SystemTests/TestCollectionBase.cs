@@ -16,11 +16,11 @@ namespace InterReact.SystemTests
     public class TestFixture : IAsyncLifetime
     {
         internal readonly DynamicLogger DynamicLogger = new();
-        internal IInterReact? Client;
+        internal IInterReactClient? Client;
         public TestFixture() { }
         public async Task InitializeAsync()
         {
-            Client = await new InterReactBuilder(DynamicLogger).BuildAsync().ConfigureAwait(false);
+            Client = await new InterReactClientBuilder(DynamicLogger).BuildAsync().ConfigureAwait(false);
         }
         public async Task DisposeAsync()
         {
@@ -43,7 +43,7 @@ namespace InterReact.SystemTests
     {
         protected readonly Action<string> Write;
         protected readonly ILogger Logger;
-        protected readonly IInterReact Client;
+        protected readonly IInterReactClient Client;
         protected int Id;
 
         public TestCollectionBase(ITestOutputHelper output, TestFixture fixture)

@@ -11,27 +11,58 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Experimental
 {
-    public interface T1
+    public interface IGroup : IHasRequestId { }
+    //public abstract class Group { }
+
+    public class Class1 : IGroup
     {
-
-
+        public int RequestId => throw new NotImplementedException();
     }
-    public class T2 : T1
+    public class Class2 : IGroup
     {
-
+        public int RequestId => throw new NotImplementedException();
     }
-    public class T3 : T1
+
+    public static class Extensions
     {
-        public string Message;
-        public T3(Alert alert)
+        public static IObservable<Class1> OfTypeClass1(this IObservable<IGroup> source)
         {
-            Message = alert.Message;
+            return source.OfType<Class1>();
+        }
+        public static IObservable<Alert> OfTypeAlert(this IObservable<IGroup> source)
+        {
+            return source.OfType<Alert>();
+        }
+
+
+        public static void Test()
+        {
+            IObservable<IGroup> OGroup = Observable.Empty<IGroup>();
+
+            var xx = OGroup.OfTypeClass1();
+
+
         }
 
     }
 
+    public interface T1
+    {
+    }
+    public class T2 : T1
+    {
+    }
+    public class T3 : T1
+    {
+        public string Message1 = "";
+        public string Message2 = "";
 
+        //public T3(Alert alert)
+        //{
+            //Message = alert.Message;
+        //}
 
+    }
 
     public class TestClass : BaseUnitTest
     {

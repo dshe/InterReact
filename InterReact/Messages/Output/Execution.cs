@@ -2,7 +2,9 @@
 
 namespace InterReact
 {
-    public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
+    public interface IExecution : IHasRequestId { }
+
+    public sealed class Execution : IExecution, IHasOrderId, IHasExecutionId
     {
         // Store executions by executionId so that they can be associated with CommissionReport (above).
         // This assumes that CommissionReport always follows Execution.
@@ -85,8 +87,8 @@ namespace InterReact
         internal Execution(ResponseReader c)
         {
             c.RequireVersion(10);
-            var requestId = c.ReadInt();
-            var orderId = c.ReadInt();
+            int requestId = c.ReadInt();
+            int orderId = c.ReadInt();
             Contract = new Contract
             {
                 ContractId = c.ReadInt(),
@@ -127,7 +129,7 @@ namespace InterReact
         }
     }
 
-    public sealed class ExecutionEnd : IHasRequestId
+    public sealed class ExecutionEnd : IExecution
     {
         public int RequestId { get; }
         internal ExecutionEnd(ResponseReader c)

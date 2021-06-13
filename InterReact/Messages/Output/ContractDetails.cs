@@ -5,7 +5,9 @@ namespace InterReact
 {
     internal enum ContractDetailsType { ContractData, BondContractData, ScannerContractData }
 
-    public sealed class ContractDetails : IHasRequestId // output
+    public interface IContractDetails : IHasRequestId { }
+
+    public sealed class ContractDetails : IContractDetails // output
     {
         /// <summary>
         /// The Id that was used to make the request to receive this ContractData.
@@ -271,7 +273,7 @@ namespace InterReact
         }
     }
 
-    public sealed class ContractDetailsEnd : IHasRequestId
+    public sealed class ContractDetailsEnd : IContractDetails
     {
         public int RequestId { get; }
         internal ContractDetailsEnd(ResponseReader c)

@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 
-
 namespace InterReact
 {
-    public sealed class ScannerData : IHasRequestId
+    public interface IScannerData : IHasRequestId { }
+
+    public sealed class ScannerData : IScannerData
     {
         public int RequestId { get; }
         public List<ScannerDataItem> Items { get; } = new List<ScannerDataItem>();
@@ -11,7 +12,7 @@ namespace InterReact
         {
             c.RequireVersion(3);
             RequestId = c.ReadInt();
-            var n = c.ReadInt();
+            int n = c.ReadInt();
             for (int i = 0; i < n; i++)
                 Items.Add(new ScannerDataItem(c));
         }

@@ -5,6 +5,8 @@ using System.Reflection;
 
 namespace InterReact
 {
+    /*
+     * Utilities.TryConstructSubclassTakingParameter<T>(alert);
     public static class Utilities
     {
         // return an instance, if any, of the subclass of T constructed with the single inputParameter.
@@ -29,4 +31,5 @@ namespace InterReact
             return (T)instance;
         }
     }
+    */
 }

@@ -12,15 +12,15 @@ namespace InterReact.SystemTests
     public abstract class TestBase : IAsyncLifetime, IDisposable
     {
         internal static readonly DynamicLoggers DynamicLoggers = new();
-        private static readonly Task<IInterReact> ClientTask;
-        protected static IInterReact Client => ClientTask.Result;
+        private static readonly Task<IInterReactClient> ClientTask;
+        protected static IInterReactClient Client => ClientTask.Result;
         protected readonly Action<string> Write;
         protected readonly ILogger Logger;
         protected int Id;
 
         static TestBase()
         {
-            ClientTask = new InterReactBuilder().BuildAsync();
+            ClientTask = new InterReactClientBuilder().BuildAsync();
             AppDomain.CurrentDomain.DomainUnload += async (sender, e) =>
             {
                 if (!ClientTask.IsCompletedSuccessfully)

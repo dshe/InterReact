@@ -20,8 +20,8 @@ namespace InterReact.SystemTests.Orders
                 throw new Exception("Cannot place order. Not the demo account");
 
             var task = Client.Response
-                .WithOrderId(Id)
                 .OfType<Execution>()
+                .WithOrderId(Id)
                 .FirstAsync().Timeout(TimeSpan.FromSeconds(3)).ToTask();
 
             var order = new Order
@@ -45,8 +45,8 @@ namespace InterReact.SystemTests.Orders
 
             // find the price
             var taskPrice = Client.Response
-                .WithRequestId(Id)
                 .OfType<TickPrice>()
+                .WithRequestId(Id)
                 .Where(x => x.TickType == TickType.AskPrice)
                 .FirstAsync()
                 .Timeout(TimeSpan.FromSeconds(3))
@@ -60,8 +60,8 @@ namespace InterReact.SystemTests.Orders
 
             // place the order
             var taskOpenOrder = Client.Response
-                .WithOrderId(Id)
                 .OfType<OpenOrder>()
+                .WithOrderId(Id)
                 .FirstAsync()
                 .Timeout(TimeSpan.FromSeconds(3))
                 .ToTask();
@@ -81,8 +81,8 @@ namespace InterReact.SystemTests.Orders
 
             // cancel the order
             var taskCancelled = Client.Response
-                .WithOrderId(Id)
                 .OfType<OrderStatusReport>()
+                .WithOrderId(Id)
                 .Where(x => x.Status == OrderStatus.Cancelled)
                 .FirstAsync()
                 .Timeout(TimeSpan.FromSeconds(3))
@@ -111,8 +111,8 @@ namespace InterReact.SystemTests.Orders
         public async Task TestRequestExecutions()
         {
             var task = Client.Response
-                .WithRequestId(Id)
                 .OfType<ExecutionEnd>()
+                .WithRequestId(Id)
                 .FirstAsync()
                 .Timeout(TimeSpan.FromSeconds(3))
                 .ToTask();

@@ -14,7 +14,7 @@ namespace InterReactSamples
         public async Task Test()
         {
             // Create the InterReact client by connecting to TWS/Gateway on your local machine.
-            IInterReact interReact = await new InterReactBuilder().BuildAsync();
+            IInterReactClient interReact = await new InterReactClientBuilder().BuildAsync();
 
             var contract = new Contract
             {
@@ -24,7 +24,7 @@ namespace InterReactSamples
                 Exchange = "SMART"
             };
 
-            IObservable<Tick> tickObservable = interReact.Services.CreateTickObservable(contract);
+            IObservable<ITick> tickObservable = interReact.Services.CreateTickObservable(contract);
 
             IDisposable subscription = tickObservable
                 .OfType<TickPrice>()

@@ -13,11 +13,11 @@ namespace InterReact.SystemTests.Service
         public HistoricalDataTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
         [Fact]
-        public async Task T01_HistoricalData()
+        public async Task T01_HistoricalBarData()
         {
-            var data = await Client.Services.CreateHistoricalDataObservable(Stock1,
+            HistoricalData data = await Client.Services.CreateHistoricalDataObservable(Stock1,
                 HistoricalBarSize.OneHour,
-                HistoricalDuration.OneDay);
+                HistoricalDuration.OneDay).OfTypeHistoricalData();
 
             Write($"\n\nStart {data.Start}, End: {data.End}\n");
             foreach (var item in data.Bars)

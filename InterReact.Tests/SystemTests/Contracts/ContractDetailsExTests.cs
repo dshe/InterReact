@@ -23,7 +23,9 @@ namespace InterReact.SystemTests.Contracts
                 Currency = "USD",
                 Exchange = "GLOBEX"
             };
-            var cds = await Client.Services.CreateContractDataObservable(contract);
+            var cds = await Client.Services.CreateContractDetailsObservable(contract)
+                .OfTypeContractDetails()
+                .ToList();
             var cd = cds.ContractDataExpiryFilter(0).Single();
 
             Write(cd.Stringify());
@@ -47,7 +49,10 @@ namespace InterReact.SystemTests.Contracts
                 Multiplier = "100",
                 Strike = 200
             };
-            var cds = await Client.Services.CreateContractDataObservable(contract);
+            var cds = await Client.Services
+                .CreateContractDetailsObservable(contract)
+                .OfTypeContractDetails()
+                .ToList();
             foreach (var cd in cds.OrderBy(x => x.Contract.LastTradeDateOrContractMonth))
                 Write(cd.Contract.LastTradeDateOrContractMonth);
             Assert.True(cds.All(cd => cd.Contract.Strike == 200));

@@ -1,29 +1,56 @@
-﻿namespace InterReact
+﻿using NodaTime;
+using NodaTime.Text;
+using System.Collections.Generic;
+
+namespace InterReact
 {
-    public sealed class HistoricalData : IHasRequestId
+    public interface IHistoricalData : IHasRequestId { }
+
+    public sealed class HistoricalData : IHistoricalData // output
     {
+        internal static readonly LocalDateTimePattern DateTimePattern = LocalDateTimePattern.CreateWithInvariantCulture("yyyyMMdd  HH:mm:ss");
+
         public int RequestId { get; }
-        public int BarCount { get; }
-        public string Date { get; }
+        public LocalDateTime Start { get; }
+        public LocalDateTime End { get; }
+        public List<HistoricalDataBar> Bars { get; } = new List<HistoricalDataBar>();
+        internal HistoricalData(ResponseReader c) // a one-shot deal
+        {
+            if (!c.Config.SupportsServerVersion(ServerVersion.SyntRealtimeBars))
+                c.RequireVersion(3);
+            
+            RequestId = c.ReadInt();
+            Start = c.ReadLocalDateTime(DateTimePattern);
+            End = c.ReadLocalDateTime(DateTimePattern);
+            int n = c.ReadInt();
+            for (int i = 0; i < n; i++)
+                Bars.Add(new HistoricalDataBar(c));
+        }
+    }
+
+    public sealed class HistoricalDataBar
+    {
+        public LocalDateTime Date { get; }
         public double Open { get; }
-        public double Close { get; }
         public double High { get; }
         public double Low { get; }
-        public double WAP { get; }
+        public double Close { get; }
         public long Volume { get; }
-        internal HistoricalData(ResponseReader c)
+        public double WeightedAveragePrice { get; }
+        public int Count { get; }
+
+        internal HistoricalDataBar(ResponseReader c)
         {
-            RequestId = c.ReadInt();
-            BarCount = c.ReadInt();
-            Date = c.ReadString();
+            Date = c.ReadLocalDateTime(HistoricalData.DateTimePattern);
             Open = c.ReadDouble();
-            Close = c.ReadDouble();
             High = c.ReadDouble();
             Low = c.ReadDouble();
-            WAP = c.ReadDouble();
+            Close = c.ReadDouble();
             Volume = c.ReadLong();
+            WeightedAveragePrice = c.ReadDouble();
+            if (!c.Config.SupportsServerVersion(ServerVersion.SyntRealtimeBars))
+                c.ReadString(); /*string hasGaps = */
+            Count = c.ReadInt();
         }
-
-
     }
 }

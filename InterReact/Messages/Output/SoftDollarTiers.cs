@@ -9,9 +9,11 @@ namespace InterReact
         internal SoftDollarTiers(ResponseReader c)
         {
             RequestId = c.ReadInt();
-            var n = c.ReadInt();
+            int n = c.ReadInt();
             for (int i = 0; i < n; i++)
+            {
                 Tiers.Add(new SoftDollarTier(c));
+            }
         }
     }
 

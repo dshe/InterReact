@@ -3,7 +3,9 @@ using NodaTime;
 
 namespace InterReact
 {
-    public abstract class Tick : IHasRequestId
+    public interface ITick : IHasRequestId { }
+
+    public abstract class Tick : ITick
     {
         public int RequestId { get; protected set; }
         public TickType TickType { get; protected set; } = TickType.Undefined;
@@ -42,7 +44,7 @@ namespace InterReact
             _ => TickType.Undefined
         };
 
-        public void Undelay() => TickType = GetTickTypeUndelayed(TickType);
+        internal void Undelay() => TickType = GetTickTypeUndelayed(TickType);
         private static TickType GetTickTypeUndelayed(TickType tickType) => tickType switch
         {
             TickType.DelayedBidPrice => TickType.BidPrice,
@@ -70,16 +72,6 @@ namespace InterReact
     // There are many tick types, as identified by the enum TickType. For example: TickType.BidSize.
     // Each tick type maps to one of the classes below. For example, TickType.BidSize is represented by objects of class type TickSize.
     // https://www.interactivebrokers.com/en/software/api/apiguide/tables/tick_types.htm
-
-    public class TickAlert : Tick
-    {
-        public Alert Alert { get; }
-        public TickAlert(Alert alert)
-        {
-            Alert = alert;
-            RequestId = alert.RequestId;
-        }
-    }
 
     /// <summary>
     /// Size only. For example, a trade/bid/ask at the previous trade/bid/ask price.
@@ -326,7 +318,7 @@ namespace InterReact
         }
     }
 
-    public sealed class TickSnapshotEnd : IHasRequestId
+    public sealed class TickSnapshotEnd : ITick
     {
         public int RequestId { get; }
         internal TickSnapshotEnd(ResponseReader c)
@@ -336,4 +328,3 @@ namespace InterReact
         }
     };
 }
-

@@ -4,11 +4,11 @@
     {
         VT100 = 100, // min support
         FractionalPositions = 101,
-        PeggedToBenchmark = 102, // (old min support)
+        PeggedToBenchmark = 102,
         ModelsSupport = 103,
         SecurityDefinitionOptionalParametersRequest = 104,
         ExtOperator = 105,
-        SoftDollarTier = 106, // max support of version 9.72 (stable)
+        SoftDollarTier = 106, // max support of version 9.72
         RequestFamilyCodes = 107,
         RequestMatchingSymbols = 108,
         PastLimit = 109,
@@ -32,7 +32,7 @@
         Pnl = 127,
         NewsQueryOrigins = 128,
         UnrealizedPnl = 129,
-        HistoricalTicks = 130, // ???
+        HistoricalTicks = 130,
         MarketCapPrice = 131,
         PreOpenBidAsk = 132,
         RealExpirationDate = 134,
@@ -52,12 +52,15 @@
         DPegOrders = 148,
         MktDepthPrimExchange = 149,
         ReqCompletedOorders = 150,
-        PriceMgmtAlgo = 151, // max support of 9.76 (latest)
+        PriceMgmtAlgo = 151, // max support of 9.76
         STOCK_TYPE = 152,
         ENCODE_MSG_ASCII7 = 153,
         SEND_ALL_FAMILY_CODES = 154,
         NO_DEFAULT_OPEN_CLOSE = 155,
         PRICE_BASED_VOLATILITY = 156,
-        REPLACE_FA_END = 157
+        REPLACE_FA_END = 157,
+        DURATION = 158,
+        MARKET_DATA_IN_SHARES = 159,
+        POST_TO_ATS = 160
     }
 }

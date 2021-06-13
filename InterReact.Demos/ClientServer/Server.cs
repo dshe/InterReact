@@ -34,32 +34,46 @@ namespace CoreClientServer
                 throw new InvalidDataException("'API' not received.");
             Logger.LogInformation("Received 'API'.");
 
-            // Start receiving with length prefix.
-            var messages1 = await accept.ReceiveAllAsync().ToArraysFromBytesWithLengthPrefix().ToStringArrays().FirstAsync();
+            // Start receiving messages with length prefix.
+            // Get the first message (string array).
+            var messages1 = await accept
+                .ReceiveAllAsync()
+                .ToArraysFromBytesWithLengthPrefix()
+                .ToStringArrays()
+                .FirstAsync();
+
+            // Get the first string of the first message,
             var versions = messages1.Single();
 
             if (!versions.StartsWith("v"))
                 throw new InvalidDataException("Versions not received.");
             Logger.LogInformation($"Received supported server versions: '{versions}'.");
 
-            var messages2 = await accept.ReceiveAllAsync().ToArraysFromBytesWithLengthPrefix().ToStringArrays().FirstAsync();
+            // Get the second message.
+            var messages2 = await accept
+                .ReceiveAllAsync()
+                .ToArraysFromBytesWithLengthPrefix()
+                .ToStringArrays()
+                .FirstAsync();
 
-            if (messages2[0] != "71") // receive StartApi message
+            if (messages2[0] != "71")
                 throw new InvalidDataException("StartApi message not received.");
             Logger.LogInformation("Received StartApi message.");
 
-            //new RequestMessage(accept.Send, Limiter)
+            // Send server version.
             new RequestMessage(accept, Limiter)
-                .Write(149) // server version
+                .Write(157) 
                 .Write(DateTime.Now.ToString("yyyyMMdd HH:mm:ss XXX"))
                 .Send();
 
+            // Send managed accounts
             new RequestMessage(accept, Limiter)
                 .Write("15")
                 .Write("1")
                 .Write("123,456,789")
                 .Send();
 
+            // Send NextId = 1
             new RequestMessage(accept, Limiter)
                 .Write("9")
                 .Write("1")
@@ -70,19 +84,24 @@ namespace CoreClientServer
 
             ////////////////////////////////////////////////////
 
-            var obs = accept.ReceiveAllAsync()
+            var obs = accept
+                .ReceiveAllAsync()
                 .ToArraysFromBytesWithLengthPrefix()
                 .ToStringArrays()
                 .ToObservableFromAsyncEnumerable()
-                .Publish().RefCount();
+                .Publish()
+                .AutoConnect();
 
             // receive test start signal
             await obs.FirstAsync();
 
             var watch = new Stopwatch();
             watch.Start();
+
             var count = await obs.TakeWhile(m => m[0] == "2").Count();
+            
             watch.Stop();
+            
             var frequency = Stopwatch.Frequency * (count + 1) / watch.ElapsedTicks;
             Logger.LogInformation($"Received {frequency:N0} messages/second.");
 
@@ -101,7 +120,7 @@ namespace CoreClientServer
 
             accept.Send(ms.ToArray());
 
-            Logger.LogInformation("Sending messages...");
+            Logger.LogInformation("Sending some messages...");
 
             // wait for OnCompleted()
             await obs.LastOrDefaultAsync();

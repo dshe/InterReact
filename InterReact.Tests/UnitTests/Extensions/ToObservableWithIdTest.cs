@@ -16,12 +16,13 @@ namespace InterReact.UnitTests.Extensions
         private int subscribeCalls, unsubscribeCalls;
         private readonly Subject<object> subject = new Subject<object>();
 
-        public class SomeClass : IHasRequestId
+        public interface ISomeClass : IHasRequestId { }
+        public class SomeClass : ISomeClass
         {
             public int RequestId { get; } = Id;
             public long Ticks { get; } = Stopwatch.GetTimestamp();
         }
-        public class SomeClassEnd : IHasRequestId
+        public class SomeClassEnd : ISomeClass
         {
             public int RequestId { get; } = Id;
         }
@@ -63,7 +64,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Multi_Ok()
         {
-            var observable = subject.ToObservableWithIdMultiple<SomeClass, SomeClassEnd>(
+            var observable = subject.ToObservableWithIdMultiple<ISomeClass, SomeClassEnd>(
                 () => Id,
                 requestId =>
                 {
@@ -109,7 +110,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Alert_multi()
         {
-            var observable = subject.ToObservableWithIdMultiple<SomeClass, SomeClassEnd>(
+            var observable = subject.ToObservableWithIdMultiple<ISomeClass, SomeClassEnd>(
                 () => Id,
                 requestId =>
                 {

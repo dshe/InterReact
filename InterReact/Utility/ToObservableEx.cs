@@ -11,7 +11,7 @@ namespace InterReact
     {
         // Returns a single result: CurrentTime, ManagedAccounts, ScannerParameters
         internal static IObservable<T> ToObservableSingle<T>
-            (this IObservable<object> source, Action startRequest) where T : class
+            (this IObservable<object> source, Action startRequest)
         {
             return Observable.Create<T>(observer =>
             {
@@ -35,7 +35,7 @@ namespace InterReact
 
         // Multiple results: AccountPositions, OpenOrders
         internal static IObservable<T> ToObservableMultiple<T, TEnd>(this IObservable<object> source,
-            Action startRequest, Action? stopRequest = null) where T : class
+            Action startRequest, Action? stopRequest = null)
         {
             return Observable.Create<T>(observer =>
             {
@@ -77,7 +77,7 @@ namespace InterReact
 
         // Continuous results: AccountUpdate, NewsBulletins
         internal static IObservable<T> ToObservableContinuous<T>(this IObservable<object> source,
-            Action startRequest, Action stopRequest) where T : class
+            Action startRequest, Action stopRequest)
         {
             return Observable.Create<T>(observer =>
             {
@@ -86,13 +86,7 @@ namespace InterReact
                 IDisposable subscription = source
                     .OfType<T>()
                     .Finally(() => cancelable = false)
-                    .SubscribeSafe(Observer.Create<T>(
-                        onNext: o =>
-                        {
-                            observer.OnNext(o);
-                        },
-                        onError: observer.OnError,
-                        onCompleted: observer.OnCompleted));
+                    .SubscribeSafe(observer);
 
                 if (cancelable == null)
                     startRequest();
@@ -107,6 +101,5 @@ namespace InterReact
                 });
             });
         }
-
     }
 }

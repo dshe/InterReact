@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using InterReact;
-
 using Microsoft.Extensions.Logging;
 
 namespace CoreClientServer
@@ -13,16 +12,15 @@ namespace CoreClientServer
     {
         internal static async Task Run(int port, ILogger logger, ILogger libLogger)
         {
-            var client = await new InterReactBuilder(libLogger)
+            var client = await new InterReactClientBuilder(libLogger)
                 .SetPort(port)
                 .BuildAsync()
                 .ConfigureAwait(false);
 
             logger.LogInformation("Connected to server.");
-            client.Response.OfType<string>().Subscribe(x => logger.LogDebug(x));
 
-            logger.LogInformation("Sending messages...");
-            Enumerable.Range(0, 100).ToList().ForEach(client.Request.CancelMarketData);
+            logger.LogInformation("Sending some messages...");
+            Enumerable.Range(0, 50).ToList().ForEach(client.Request.CancelMarketData);
 
             // indicate test end
             client.Request.RequestMarketData(42, new Contract());

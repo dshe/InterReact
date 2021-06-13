@@ -3,7 +3,9 @@ using NodaTime;
 
 namespace InterReact
 {
-    public sealed class RealtimeBar : IHasRequestId
+    public interface IRealtimeBar : IHasRequestId { }
+
+    public sealed class RealtimeBar : IRealtimeBar
     {
         public int RequestId { get; }
         public Instant Time { get; }

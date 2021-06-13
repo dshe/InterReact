@@ -22,7 +22,7 @@ namespace InterReact.ConnectTests
             Logger = LoggerFactory.CreateLogger("InterReact");
         }
 
-        protected async Task TestClient(IInterReact client)
+        protected async Task TestClient(IInterReactClient client)
         {
             client.Response.StringifyItems().Subscribe(s => Write($"response: {s}"));
             var instant = await client.Services.CreateCurrentTimeObservable();

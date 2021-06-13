@@ -1,6 +1,7 @@
 ﻿namespace InterReact
 {
-    public sealed class AccountSummary : IHasRequestId
+    public interface IAccountSummary : IHasRequestId { }
+    public sealed class AccountSummary : IAccountSummary
     {
         public int RequestId { get; }
         public string Account { get; }
@@ -19,7 +20,7 @@
         }
     }
 
-    public sealed class AccountSummaryEnd : IHasRequestId
+    public sealed class AccountSummaryEnd : IAccountSummary
     {
         public int RequestId { get; }
         internal AccountSummaryEnd(ResponseReader c)

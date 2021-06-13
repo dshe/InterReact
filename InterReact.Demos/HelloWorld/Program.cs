@@ -23,10 +23,10 @@ namespace HelloWorld
             }
 
             // Create the InterReact client by connecting to TWS/Gateway on your local machine.
-            IInterReact? interReact;
+            IInterReactClient? client;
             try
             {
-                interReact = await new InterReactBuilder().BuildAsync();
+                client = await new InterReactClientBuilder().BuildAsync();
             }
             catch (Exception e)
             {
@@ -43,7 +43,7 @@ namespace HelloWorld
                 Exchange = "SMART"
             };
 
-            IObservable<Tick> tickObservable = interReact.Services.CreateTickObservable(contract);
+            IObservable<ITick> tickObservable = client.Services.CreateTickObservable(contract);
 
             IDisposable subscription = tickObservable
                 .OfType<TickPrice>()
@@ -57,7 +57,7 @@ namespace HelloWorld
             Console.Clear();
 
             subscription.Dispose();
-            await interReact.DisposeAsync();
+            await client.DisposeAsync();
         }
     }
 }

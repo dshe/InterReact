@@ -16,12 +16,12 @@ namespace InterReact
         internal SmartComponents(ResponseReader c)
         {
             RequestId = c.ReadInt();
-            var n = c.ReadInt();
-            for (var i = 0; i < n; i++)
+            int n = c.ReadInt();
+            for (int i = 0; i < n; i++)
             {
-                var bitNumber = c.ReadInt();
-                var exchange = c.ReadString();
-                var exchangeLetter = c.ReadChar();
+                int bitNumber = c.ReadInt();
+                string exchange = c.ReadString();
+                char exchangeLetter = c.ReadChar();
                 Map.Add(bitNumber, new KeyValuePair<string, char>(exchange, exchangeLetter));
             }
         }

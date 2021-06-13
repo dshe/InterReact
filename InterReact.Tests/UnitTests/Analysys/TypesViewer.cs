@@ -17,7 +17,7 @@ namespace InterReact.UnitTests.Analysis
         public Types_Viewer(ITestOutputHelper output) : base(output) { }
 
         private static readonly List<TypeInfo> Types =
-            typeof(InterReact)
+            typeof(InterReactClient)
             .Assembly
             .DefinedTypes
             .Where(t => !t.Name.Contains("<>"))

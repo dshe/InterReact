@@ -1,6 +1,8 @@
 ﻿namespace InterReact
 {
-    public sealed class FundamentalData : IHasRequestId
+    public interface IFundamentalData : IHasRequestId { }
+
+    public sealed class FundamentalData : IFundamentalData
     {
         public int RequestId { get; }
 

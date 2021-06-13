@@ -1,0 +1,59 @@
+﻿<Window x:Class="TicksWpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:c="using:Microsoft.Xaml.Behaviors"        
+        
+        WindowStyle="ToolWindow"
+        ResizeMode="CanResizeWithGrip"
+        Loaded="MainWindow_OnLoaded"
+        Closing="MainWindow_OnClosing"
+        xmlns:wpfDepth="clr-namespace:TicksWpf"
+        xmlns:local="clr-namespace:TicksWpf" 
+        d:DataContext="{d:DesignInstance Type=local:MainWindow}"
+        mc:Ignorable="d"
+        
+        FontSize="16"
+        SizeToContent="WidthAndHeight"
+        Title="InterReact" >
+
+    <Grid Margin="20">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition  />
+            <RowDefinition  />
+            <RowDefinition  />
+            <RowDefinition  />
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Grid.ColumnSpan="4" Orientation="Horizontal" Background="Pink" HorizontalAlignment="Center" Margin="0,0,0,10">
+            <Label Content="Symbol:" FontWeight="Bold" VerticalAlignment="Center" />
+            <TextBox VerticalAlignment="Center" Text="{Binding Symbol, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged, Delay=2000}" CharacterCasing="Upper" Width="100" />
+        </StackPanel>
+
+        <TextBlock Grid.Row="1" Grid.ColumnSpan="4" Text="{Binding Description, Mode=OneWay}" Background="LightGray" TextAlignment="Center" FontWeight="Bold"/>
+
+        <Label     Grid.Row="2" Grid.Column="0" Content=" Bid "/>
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="{Binding BidPrice, StringFormat=N2, Mode=OneWay}" Foreground="{Binding BidForeGround}" />
+
+        <Label     Grid.Row="2" Grid.Column="1" Content=" Ask "/>
+        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding AskPrice, StringFormat=N2, Mode=OneWay}"/>
+
+        <Label     Grid.Row="2" Grid.Column="2" Content=" Last "/>
+        <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding LastPrice, StringFormat=N2, Mode=OneWay}"/>
+
+        <Label     Grid.Row="2" Grid.Column="3" Content="Change"/>
+        <TextBlock Grid.Row="3" Grid.Column="3" Text="change"/>
+    </Grid>
+
+</Window>
+
+

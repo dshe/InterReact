@@ -17,7 +17,11 @@ namespace InterReact.SystemTests.Contracts
         public async Task TestContractDataSingle()
         {
             var c = new Contract { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
-            var item = await Client.Services.CreateContractDataObservable(c).Timeout(TimeSpan.FromSeconds(10));
+            var item = await Client.Services
+                .CreateContractDetailsObservable(c)
+                .Timeout(TimeSpan.FromSeconds(10))
+                .OfTypeContractDetails()
+                .ToList();
             Assert.Equal(1, item.Count);
         }
 
@@ -25,7 +29,7 @@ namespace InterReact.SystemTests.Contracts
         public async Task TestContractDataMultiple()
         {
             var c = new Contract { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD" };
-            var list = await Client.Services.CreateContractDataObservable(c);
+            var list = await Client.Services.CreateContractDetailsObservable(c).ToList();
             Assert.NotEmpty(list); // multiple exchanges
         }
 
@@ -33,7 +37,10 @@ namespace InterReact.SystemTests.Contracts
         public async Task TestContractDataContractId()
         {
             var contract = new Contract { ContractId = 8314 };
-            var cds = await Client.Services.CreateContractDataObservable(contract);
+            var cds = await Client.Services
+                .CreateContractDetailsObservable(contract)
+                .OfTypeContractDetails()
+                .ToList();
             Assert.Equal("IBM", cds.Single().Contract.Symbol);
         }
 
@@ -41,7 +48,7 @@ namespace InterReact.SystemTests.Contracts
         public async Task TestContractDataSecurityId()
         {
             var c = new Contract { SecurityIdType = SecurityIdType.Isin, SecurityId = "IE00B5BMR087" };
-            var list = await Client.Services.CreateContractDataObservable(c);
+            var list = await Client.Services.CreateContractDetailsObservable(c).ToList();
             Assert.True(list.Count > 1); // multiple exchanges
         }
 
@@ -49,7 +56,7 @@ namespace InterReact.SystemTests.Contracts
         public async Task TestContractDataRequestNotFound()
         {
             var contract = new Contract { ContractId = 99999 };
-            var alert = await Assert.ThrowsAsync<InvalidOperationException>(async () => await Client.Services.CreateContractDataObservable(contract));
+            var alert = await Assert.ThrowsAsync<InvalidOperationException>(async () => await Client.Services.CreateContractDetailsObservable(contract));
             //Assert.Equal(200, alert.Code);
         }
 
@@ -57,9 +64,9 @@ namespace InterReact.SystemTests.Contracts
         public async Task TestContractDataMultipleRequests()
         {
             var contract = new Contract { ContractId = 8314 };
-            var task1 = Client.Services.CreateContractDataObservable(contract).ToTask();
-            var task2 = Client.Services.CreateContractDataObservable(contract).ToTask();
-            var task3 = Client.Services.CreateContractDataObservable(contract).ToTask();
+            var task1 = Client.Services.CreateContractDetailsObservable(contract).ToList().ToTask();
+            var task2 = Client.Services.CreateContractDetailsObservable(contract).ToList().ToTask();
+            var task3 = Client.Services.CreateContractDetailsObservable(contract).ToList().ToTask();
             await Task.WhenAll(task1, task2, task3);
             Assert.Equal(1, task1.Result.Count);
             Assert.Equal(1, task2.Result.Count);
@@ -70,7 +77,7 @@ namespace InterReact.SystemTests.Contracts
         public async Task TestContractDataTimeout()
         {
             var contract = new Contract { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "EUR" };
-            await Assert.ThrowsAsync<TimeoutException>(async () => await Client.Services.CreateContractDataObservable(contract).Timeout(TimeSpan.Zero));
+            await Assert.ThrowsAsync<TimeoutException>(async () => await Client.Services.CreateContractDetailsObservable(contract).Timeout(TimeSpan.Zero));
         }
     }
 }
