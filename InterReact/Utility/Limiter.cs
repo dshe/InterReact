@@ -27,7 +27,7 @@ namespace InterReact
                 if (Rate > 0)
                 {
                     Index = (Index == Rate - 1) ? 0 : Index + 1;
-                    var wait = 1 + (Ring[Index] - Stopwatch.GetTimestamp()) / (double)Stopwatch.Frequency;
+                    double wait = 1 + ((Ring[Index] - Stopwatch.GetTimestamp()) / (double)Stopwatch.Frequency);
                     if (wait > 0)
                     {
                         //Debug.WriteLine("{0} delay: {1:N0}", index, wait / Stopwatch.Frequency * 1000);

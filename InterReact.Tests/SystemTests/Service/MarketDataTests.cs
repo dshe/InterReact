@@ -31,6 +31,7 @@ namespace InterReact.SystemTests.Service
             Assert.NotEmpty(ticks);
         }
 
+        /*
         [Fact]
         public async Task T02_MarketDataTicks()
         {
@@ -44,7 +45,10 @@ namespace InterReact.SystemTests.Service
 
             connection.Dispose();
         }
+        */
 
+
+        /*
         [Fact]
         public async Task T03_MarketDataRealtimeVolume()
         {
@@ -59,5 +63,6 @@ namespace InterReact.SystemTests.Service
             ;
             connection.Dispose();
         }
+        */
     }
 }

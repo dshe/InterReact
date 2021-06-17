@@ -46,7 +46,7 @@ namespace InterReact.SystemTests.Service
 
             //var connection = updates.Connect();
 
-            var list = updates.TakeWhile(x => !(x is AccountUpdateEnd)).ToList().ToTask();
+            var list = updates.TakeWhile(x => !(x.Source is AccountUpdateEnd)).ToList().ToTask();
 
             await list;
 

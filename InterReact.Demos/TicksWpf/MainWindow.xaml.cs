@@ -88,7 +88,6 @@ namespace TicksWpf
             }
         }
 
-
         private IInterReactClient? Client;
         private IDisposable? TicksConnection;
 
@@ -107,7 +106,6 @@ namespace TicksWpf
         {
             var t0 = Thread.CurrentThread.ManagedThreadId;
             var t1 = Application.Current.Dispatcher.Thread.ManagedThreadId;
-            ;
             try
             {
                 Client = await new InterReactClientBuilder().BuildAsync();
@@ -145,35 +143,30 @@ namespace TicksWpf
 
             Contract contract = new()
             {
-                SecurityType = SecurityType.Stock,
+                SecurityType = SecurityType.Stock,//SecurityType.Cash,
                 Symbol = symbol,
                 Currency = "USD",
-                Exchange = "SMART"
+                Exchange = "SMART"    //"IDEAL" //"IDEALPRO" //"SMART"
             };
 
-            try
+            // Create the observable and capture the single contract details object to determine the full name of the contract.
+            //ContractDetails cd = await InterReactInstance!.Services.CreateContractDataObservable(contract).ContractDataSingle();
+            var response = Client!.Services.CreateContractDetailsObservable(contract);
+            response.OfType<Alert>().Subscribe(alert =>
             {
-                // Create the observable and capture the single contract details object to determine the full name of the contract.
-                //ContractDetails cd = await InterReactInstance!.Services.CreateContractDataObservable(contract).ContractDataSingle();
-                var response = Client!.Services.CreateContractDetailsObservable(contract);
-                response.OfTypeAlert().Subscribe(alert =>
-                {
-                    MessageBox.Show($"ContractDetails:\n\n {alert.Message}");
-                    return;
-                });
-
-                var cds = await response.OfTypeContractDetails().ToList();
-                // Multiple contracts may be returned. Take the first one.
-                var cd = cds.First();
-
-                // Display the stock name in the title bar.
-                Description = cd.LongName;
-            }
-            catch (Exception exception)
-            {
-                MessageBox.Show($"ContractDetails:\n\n {exception.Message}");
+                MessageBox.Show($"ContractDetails:\n\n {alert.Message}");
                 return;
-            }
+            });
+
+            var cds = await response.OfType<ContractDetails>().ToList();
+
+            // Multiple contracts may be returned. Take the first one.
+            var cd = cds.FirstOrDefault();
+            if (cd == null)
+                return;
+
+            // Display the stock name in the title bar.
+            Description = cd.LongName;
 
             SubscribeToTicks(contract);
         }
@@ -181,21 +174,24 @@ namespace TicksWpf
         private void SubscribeToTicks(Contract contract)
         {
             // Create the observable which will emit realtime updates.
-            IConnectableObservable<IHasRequestId> ticks = Client!.Services
+            var ticks = Client!.Services
                 .CreateTickObservable(contract)
                 .UndelayTicks()
                 .ObserveOn(Application.Current.Dispatcher)
                 .Publish();
 
             SubscribeToTicks(ticks);
+
             TicksConnection = ticks.Connect();
         }
-        private void SubscribeToTicks(IObservable<IHasRequestId> ticks)
+
+        private void SubscribeToTicks(IObservable<ITick> ticks)
         {
             // Display warnings, if any.
-            ticks.OfType<Alert>().Subscribe(m => MessageBox.Show(m.Message));
+            ticks.OfType(t => t.Alert).Subscribe(m => MessageBox.Show(m.Message));
 
-            var priceTicks = ticks.OfType<TickPrice>();
+            var priceTicks = ticks.OfType(t => t.TickPrice);
+
             var bidPrices = priceTicks.Where(t => t.TickType == TickType.BidPrice).Select(t => t.Price);
             var askPrices = priceTicks.Where(t => t.TickType == TickType.AskPrice).Select(t => t.Price);
             var lastPrices = priceTicks.Where(t => t.TickType == TickType.LastPrice).Select(t => t.Price);

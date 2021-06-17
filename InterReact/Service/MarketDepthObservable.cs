@@ -9,21 +9,16 @@ namespace InterReact
         /// <summary>
         /// Creates an observable which emits market depth for the specified contract.
         /// </summary>
-        public IObservable<IMarketDepth> CreateMarketDepthObservable(Contract contract, int rows = 3, IList<Tag>? options = null)
+        public IObservable<Union<MarketDepth, Alert>> CreateMarketDepthObservable(Contract contract, int rows = 3, IList<Tag>? options = null)
         {
             if (rows < 1)
                 throw new ArgumentException("rows < 1", nameof(rows));
 
-            return Response.ToObservableWithIdContinuous<IMarketDepth>(
+            return Response.ToObservableWithIdContinuous(
                     Request.GetNextId,
                     requestId => Request.RequestMarketDepth(requestId, contract, rows, options),
-                    requestId => Request.CancelMarketDepth(requestId));
+                    requestId => Request.CancelMarketDepth(requestId))
+                .Select(x => new Union<MarketDepth, Alert>(x));
         }
     }
-
-    public static partial class Extensions
-    {
-        public static IObservable<MarketDepth> OfTypeMarketDepth(this IObservable<IMarketDepth> source) => source.OfType<MarketDepth>();
-    }
-
 }

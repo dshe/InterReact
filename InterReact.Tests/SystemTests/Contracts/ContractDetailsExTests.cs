@@ -24,7 +24,7 @@ namespace InterReact.SystemTests.Contracts
                 Exchange = "GLOBEX"
             };
             var cds = await Client.Services.CreateContractDetailsObservable(contract)
-                .OfTypeContractDetails()
+                .OfType<ContractDetails>()
                 .ToList();
             var cd = cds.ContractDataExpiryFilter(0).Single();
 
@@ -51,7 +51,7 @@ namespace InterReact.SystemTests.Contracts
             };
             var cds = await Client.Services
                 .CreateContractDetailsObservable(contract)
-                .OfTypeContractDetails()
+                .OfType<ContractDetails>()
                 .ToList();
             foreach (var cd in cds.OrderBy(x => x.Contract.LastTradeDateOrContractMonth))
                 Write(cd.Contract.LastTradeDateOrContractMonth);

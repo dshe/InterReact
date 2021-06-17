@@ -5,7 +5,7 @@ namespace InterReact
 {
     public interface ITick : IHasRequestId { }
 
-    public abstract class Tick : ITick
+    public abstract class TickBase : ITick
     {
         public int RequestId { get; protected set; }
         public TickType TickType { get; protected set; } = TickType.Undefined;
@@ -76,7 +76,7 @@ namespace InterReact
     /// <summary>
     /// Size only. For example, a trade/bid/ask at the previous trade/bid/ask price.
     /// </summary>
-    public sealed class TickSize : Tick
+    public sealed class TickSize : TickBase
     {
         public int Size { get; }
         internal TickSize(int requestId, TickType tickType, int size)
@@ -101,7 +101,7 @@ namespace InterReact
     /// You can either choose to ignore the size property in TickPrice,
     /// or else filter out the redundant TickSize messages using TickRedundentSizeFilter.
     /// </summary>
-    public sealed class TickPrice : Tick
+    public sealed class TickPrice : TickBase
     {
         public double Price { get; }
         public TickAttrib TickAttrib { get; }
@@ -116,7 +116,7 @@ namespace InterReact
         }
     }
 
-    public sealed class TickString : Tick
+    public sealed class TickString : TickBase
     {
         public string Value { get; }
         internal TickString(int requestId, TickType tickType, string value)
@@ -126,7 +126,7 @@ namespace InterReact
             Value = value;
         }
 
-        internal static Tick Create(ResponseReader c)
+        internal static TickBase Create(ResponseReader c)
         {
             c.IgnoreVersion();
             int requestId = c.ReadInt();
@@ -140,7 +140,7 @@ namespace InterReact
         }
     }
 
-    public sealed class TickTime : Tick // from TickString
+    public sealed class TickTime : TickBase // from TickString
     {
         /// <summary>
         /// Seconds precision.
@@ -160,7 +160,7 @@ namespace InterReact
     /// TickRealtimeVolume ticks are obtained by parsing TickString.
     /// When TickRealtimeVolume is used, redundant Tick messages (above) can be removed using the TickRedundantRealtimeVolumeFilter.
     /// </summary>
-    public sealed class TickRealtimeVolume : Tick // from TickString
+    public sealed class TickRealtimeVolume : TickBase // from TickString
     {
         public double Price { get; }
         public int Size { get; }
@@ -188,7 +188,7 @@ namespace InterReact
         }
     };
 
-    public sealed class TickGeneric : Tick
+    public sealed class TickGeneric : TickBase
     {
         public double Value { get; }
         internal TickGeneric(int requestId, TickType tickType, double value)
@@ -197,7 +197,7 @@ namespace InterReact
             TickType = tickType;
             Value = value;
         }
-        internal static Tick Create(ResponseReader c)
+        internal static TickBase Create(ResponseReader c)
         {
             c.IgnoreVersion();
             var requestId = c.ReadInt();
@@ -209,7 +209,7 @@ namespace InterReact
         }
     };
 
-    public sealed class TickExchangeForPhysical : Tick
+    public sealed class TickExchangeForPhysical : TickBase
     {
         public double BasisPoints { get; }
         public string FormattedBasisPoints { get; }
@@ -237,7 +237,7 @@ namespace InterReact
     /// Missing Values are indicated with null.
     /// IB's Java client indicates missing Values using DOUBLE_MAX.
     /// </summary>
-    public sealed class TickOptionComputation : Tick
+    public sealed class TickOptionComputation : TickBase
     {
         public double? ImpliedVolatility { get; }
         public double? Delta { get; }
@@ -290,7 +290,7 @@ namespace InterReact
     /// <summary>
     /// TickHalted is obtained from from TickGeneric.
     /// </summary>
-    public sealed class TickHalted : Tick
+    public sealed class TickHalted : TickBase
     {
         public HaltType HaltType { get; }
         internal TickHalted(int requestId, TickType tickType, HaltType haltType)
@@ -306,7 +306,7 @@ namespace InterReact
     /// This message indicates a change in MarketDataType. 
     /// This response could also result from calling: RequestMarketData(returns Tick),
     /// </summary>
-    public sealed class TickMarketDataType : Tick
+    public sealed class TickMarketDataType : TickBase
     {
         public MarketDataType MarketDataType { get; }
         internal TickMarketDataType(ResponseReader c)
@@ -318,7 +318,7 @@ namespace InterReact
         }
     }
 
-    public sealed class TickSnapshotEnd : ITick
+    public sealed class TickSnapshotEnd : IHasRequestId
     {
         public int RequestId { get; }
         internal TickSnapshotEnd(ResponseReader c)

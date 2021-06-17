@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reactive.Linq;
 
 namespace InterReact
 {
@@ -9,9 +10,11 @@ namespace InterReact
         /// </summary>
         public IObservable<AccountPosition> CreateAccountPositionsObservable() =>
             Response
-                .ToObservableMultiple<AccountPosition, AccountPositionEnd>(
+                .Where(x => x is AccountPosition || x is AccountPositionEnd)
+                .ToObservableMultiple<AccountPositionEnd>(
                     Request.RequestAccountPositions,
                     Request.CancelAccountPositions)
+                .Cast<AccountPosition>()
                 .ToShareSource();
     }
 }

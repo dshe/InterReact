@@ -4,7 +4,7 @@
     /// Sent after trades and after calling RequestExecutions.
     /// (OrderId can be determined using the executionId from Execution)
     /// </summary>
-    public sealed class CommissionReport : IHasExecutionId, IHasOrderId, IHasRequestId
+    public sealed class CommissionReport : IHasRequestId, IHasOrderId, IHasExecutionId
     {
         public int RequestId { get; } = -1;
         public int OrderId { get; } = -1;

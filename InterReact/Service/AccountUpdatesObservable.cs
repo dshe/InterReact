@@ -14,13 +14,16 @@ namespace InterReact
         /// Call Connect() to start receiving updates.
         /// Call Dispose() the value returned from Connect() to disconnect from the source, release all subscriptions and clear the cache.
         /// </summary>
-        public IObservable<IAccountUpdates> CreateAccountUpdatesObservable() =>
-            Response.ToObservableContinuous<IAccountUpdates>(
+        public IObservable<Union<AccountValue, PortfolioValue, AccountUpdateTime, AccountUpdateEnd>> CreateAccountUpdatesObservable() =>
+            Response
+                .Where(x => x is AccountValue || x is PortfolioValue || x is AccountUpdateTime || x is AccountUpdateEnd)
+                .ToObservableContinuous(
                 () => Request.RequestAccountUpdates(start: true),
-                () => Request.RequestAccountUpdates(start: false));
+                () => Request.RequestAccountUpdates(start: false))
+            .Select(x => new Union<AccountValue, PortfolioValue, AccountUpdateTime, AccountUpdateEnd>(x));
 
         // The key identifies unique items to be cached and specifies the order.
-        public static string AccountUpdatesCacheKey(IAccountUpdates v)
+        public static string AccountUpdatesCacheKey(object v)
         {
             if (v is AccountUpdateTime)
                 return "!"; // top
@@ -34,14 +37,6 @@ namespace InterReact
             // AccountUpdateEnd is last and indicates that the initial values for the partcular account have been emitted.
             return $"{((AccountUpdateEnd)v).Account} (3)";
         }
-    }
-
-    public static partial class Extensions
-    {
-        public static IObservable<AccountValue> OfTypeAccountValue(this IObservable<IAccountUpdates> source) => source.OfType<AccountValue>();
-        public static IObservable<PortfolioValue> OfTypePortfolioValue(this IObservable<IAccountUpdates> source) => source.OfType<PortfolioValue>();
-        public static IObservable<AccountUpdateTime> OfTypeAccountUpdateTime(this IObservable<IAccountUpdates> source) => source.OfType<AccountUpdateTime>();
-        public static IObservable<AccountUpdateEnd> OfTypeAccountUpdateEnd(this IObservable<IAccountUpdates> source) => source.OfType<AccountUpdateEnd>();
     }
 
 }

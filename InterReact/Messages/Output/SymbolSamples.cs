@@ -2,9 +2,7 @@
 
 namespace InterReact
 {
-    public interface ISymbolSamples : IHasRequestId { }
-
-    public sealed class SymbolSamples : ISymbolSamples // output
+    public sealed class SymbolSamples : IHasRequestId // output
     {
         public int RequestId { get; }
         public List<ContractDescription> Descriptions { get; } = new List<ContractDescription>();

@@ -43,7 +43,7 @@ namespace HelloWorld
                 Exchange = "SMART"
             };
 
-            IObservable<ITick> tickObservable = client.Services.CreateTickObservable(contract);
+            IObservable<IHasRequestId> tickObservable = client.Services.CreateTickObservable(contract);
 
             IDisposable subscription = tickObservable
                 .OfType<TickPrice>()

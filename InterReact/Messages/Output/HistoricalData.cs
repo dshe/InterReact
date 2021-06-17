@@ -4,9 +4,7 @@ using System.Collections.Generic;
 
 namespace InterReact
 {
-    public interface IHistoricalData : IHasRequestId { }
-
-    public sealed class HistoricalData : IHistoricalData // output
+    public sealed class HistoricalData : IHasRequestId
     {
         internal static readonly LocalDateTimePattern DateTimePattern = LocalDateTimePattern.CreateWithInvariantCulture("yyyyMMdd  HH:mm:ss");
 

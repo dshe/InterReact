@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Compile Remove="Extensions\CollectionBinarySearcherExtensions.cs" />
+    <Compile Remove="Utility\TryConstructSubclassTaking.cs" />
     <Compile Remove="~\AccountObservableCollections.cs" />
     <Compile Remove="~\DistinctByExtension.cs" />
     <Compile Remove="~\MarketDepthObservableCollections.cs" />
@@ -37,6 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="~\TryConstructSubclassTaking.cs" />
     <None Include="~\CollectionBinarySearcherExtensions.cs" />
     <None Include="worm64.png" Pack="true" PackagePath="\" />
     <None Include="~\AccountObservableCollections.cs" />

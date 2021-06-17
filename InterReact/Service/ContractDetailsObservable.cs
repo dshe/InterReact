@@ -24,7 +24,7 @@ namespace InterReact
         /// Unfortunately, this operation may not be cancelled.
         /// This observable may be chained to the contract details filters located in the Extensions namespace.
         /// </summary>
-        public IObservable<IContractDetails> CreateContractDetailsObservable(Contract contract)
+        public IObservable<Union<ContractDetails, Alert>> CreateContractDetailsObservable(Contract contract)
         {
             if (contract.ComboLegs.Any())
                 throw new InvalidDataException("Contract must not include ComboLegs.");
@@ -36,8 +36,9 @@ namespace InterReact
                 throw new ArgumentException("Invalid SecurityId/SecurityIdType combination.");
 
             return Response
-                .ToObservableWithIdMultiple<IContractDetails, ContractDetailsEnd>(
-                    Request.GetNextId, id => Request.RequestContractData(id, contract));
+                .ToObservableWithIdMultiple<ContractDetailsEnd>(
+                    Request.GetNextId, id => Request.RequestContractData(id, contract))
+                .Select(x => new Union<ContractDetails, Alert>(x));
             /*
             return Observable.Create<IContractDetails[]>(observer =>
             {
@@ -55,11 +56,6 @@ namespace InterReact
             });
             */
         }
-    }
-    public static partial class Extensions
-    {
-        public static IObservable<ContractDetails> OfTypeContractDetails(this IObservable<IContractDetails> source) =>
-            source.OfType<ContractDetails>();
     }
 
 }

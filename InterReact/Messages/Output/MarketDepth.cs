@@ -1,8 +1,6 @@
 ﻿namespace InterReact
 {
-    public interface IMarketDepth : IHasRequestId { }
-
-    public sealed class MarketDepth : IMarketDepth
+    public sealed class MarketDepth : IHasRequestId
     {
         public int RequestId { get; }
 

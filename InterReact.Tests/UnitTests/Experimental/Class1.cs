@@ -11,97 +11,37 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Experimental
 {
-    public interface IGroup : IHasRequestId { }
-    //public abstract class Group { }
-
-    public class Class1 : IGroup
+    public class A
     {
-        public int RequestId => throw new NotImplementedException();
+        public override string ToString() => "A";
     }
-    public class Class2 : IGroup
+    public class B
     {
-        public int RequestId => throw new NotImplementedException();
+        public override string ToString() => "B";
     }
-
-    public static class Extensions
+    public class C
     {
-        public static IObservable<Class1> OfTypeClass1(this IObservable<IGroup> source)
-        {
-            return source.OfType<Class1>();
-        }
-        public static IObservable<Alert> OfTypeAlert(this IObservable<IGroup> source)
-        {
-            return source.OfType<Alert>();
-        }
-
-
-        public static void Test()
-        {
-            IObservable<IGroup> OGroup = Observable.Empty<IGroup>();
-
-            var xx = OGroup.OfTypeClass1();
-
-
-        }
-
+        public override string ToString() => "C";
     }
 
-    public interface T1
-    {
-    }
-    public class T2 : T1
-    {
-    }
-    public class T3 : T1
-    {
-        public string Message1 = "";
-        public string Message2 = "";
-
-        //public T3(Alert alert)
-        //{
-            //Message = alert.Message;
-        //}
-
-    }
 
     public class TestClass : BaseUnitTest
     {
         public TestClass(ITestOutputHelper output) : base(output) { }
 
-
-        // return an instance of the subclass of T which is constructed with the inputParameter.
-        private static T? GetSubclassOf<T>(object inputParameter)
-        {
-            Type[] inputParameterTypes = new[] { inputParameter.GetType() };
-
-            ConstructorInfo? ctor = typeof(T).Assembly.GetTypes()
-                //.Where(t => t.IsSubclassOf(typeof(T)))
-                //.Where(t => t.IsAssignableFrom(typeof(T)))
-                .Where(t => t.IsAssignableTo(typeof(T)))
-                .Where(t => t.IsPublic && !t.IsAbstract)
-                .Select(t => t.GetConstructor(inputParameterTypes))
-                .Where(c => c != null)
-                .Cast<ConstructorInfo>()
-                .SingleOrDefault();
-
-            if (ctor == default)
-                return default;
-
-            object instance = ctor.Invoke(new object[] { inputParameter });
-            
-            return (T)instance;
-        }
-
         [Fact]
         public void Test1()
         {
-            //var xxx = GetSubclassOf<ITick>(new Alert(1,1,"message"));
-            //var typ = xxx.GetType();
+            var a = new A();
+            var b = new B();
+            var c = new C();
 
-            //var xx1 = typeof(T2).IsSubclassOf(typeof(T1));
-            //var xx2 = typeof(T2).IsAssignableFrom(typeof(T1));
-            //var xx3 = typeof(T2).IsAssignableTo(typeof(T1));
-            ;
+            List<object> list = new();
+            list.Add(a);
+            list.Add(b);
+
+            list.Cast<C>().ToList().ForEach(x => Write(x.ToString()));
+
         }
 
     }

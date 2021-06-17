@@ -6,7 +6,7 @@ namespace InterReact
 {
     public interface IHistogramItems : IHasRequestId { }
 
-    public sealed class HistogramItems : IHistogramItems // output
+    public sealed class HistogramItems : IHistogramItems
     {
         public int RequestId { get; }
         public List<HistogramItem> Items { get; } = new List<HistogramItem>();

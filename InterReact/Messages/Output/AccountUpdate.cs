@@ -3,9 +3,7 @@ using NodaTime.Text;
 
 namespace InterReact
 {
-    public interface IAccountUpdates { }
-
-    public sealed class AccountValue : IAccountUpdates
+    public sealed class AccountValue
     {
         public string Account { get; init; }
         public string Key { get; init; }
@@ -22,7 +20,7 @@ namespace InterReact
         }
     }
 
-    public sealed class PortfolioValue : IAccountUpdates
+    public sealed class PortfolioValue
     {
         public string Account { get; init; }
         public Contract Contract { get; init; }
@@ -64,7 +62,7 @@ namespace InterReact
         }
     }
 
-    public sealed class AccountUpdateTime : IAccountUpdates
+    public sealed class AccountUpdateTime
     {
         private static readonly LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HH:mm");
         public LocalTime Time { get; init; }
@@ -79,7 +77,7 @@ namespace InterReact
     /// <summary>
     /// This signals the end of update values for a particular account, not the end of the observable.
     /// </summary>
-    public sealed class AccountUpdateEnd : IAccountUpdates
+    public sealed class AccountUpdateEnd
     {
         public string Account { get; init; }
         public AccountUpdateEnd(string account = "") => Account = account;

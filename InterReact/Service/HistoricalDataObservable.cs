@@ -12,7 +12,7 @@ namespace InterReact
         /// This method accepts arguments which will not necessarily be accepted by Tws/Gateway.
         /// Note that IB imposes limitations on the timing of historical data requests.
         /// </summary>
-        public IObservable<IHistoricalData> CreateHistoricalDataObservable(
+        public IObservable<Union<HistoricalData, Alert>> CreateHistoricalDataObservable(
             Contract contract,
             HistoricalBarSize? barSize = null,
             HistoricalDuration? duration = null,
@@ -21,7 +21,7 @@ namespace InterReact
             bool regularTradingHoursOnly = true,
             IList<Tag>? options = null) =>
                 Response
-                    .ToObservableWithIdSingle<IHistoricalData>(
+                    .ToObservableWithIdSingle(
                         Request.GetNextId,
                         requestId => Request.RequestHistoricalData(
                             requestId,
@@ -33,13 +33,7 @@ namespace InterReact
                             regularTradingHoursOnly,
                             options),
                         Request.CancelHistoricalData)
+                    .Select(x => new Union<HistoricalData, Alert>(x))
                     .ToShareSource();
     }
-
-    public static partial class Extensions
-    {
-        public static IObservable<HistoricalData> OfTypeHistoricalData(this IObservable<IHistoricalData> source) =>
-            source.OfType<HistoricalData>();
-    }
-
 }

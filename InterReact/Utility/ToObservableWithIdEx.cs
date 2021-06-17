@@ -9,20 +9,19 @@ namespace InterReact
     public static partial class Extensions
     {
         // Single result: HistoricalData, FundamentalData, ScannerData
-        internal static IObservable<T> ToObservableWithIdSingle<T>(this IObservable<object> source,
+        internal static IObservable<IHasRequestId> ToObservableWithIdSingle(this IObservable<object> source,
             Func<int> getNextId, Action<int> startRequest, Action<int>? stopRequest = null)
-                where T : IHasRequestId
         {
-            return Observable.Create<T>(observer =>
+            return Observable.Create<IHasRequestId>(observer =>
             {
                 int requestId = getNextId();
                 bool? cancelable = null;
 
                 IDisposable subscription = source
-                    .OfType<T>()
-                    .WithRequestId(requestId)
+                    .OfType<IHasRequestId>()
+                    .Where(m => m.RequestId == requestId)
                     .Finally(() => cancelable = false)
-                    .SubscribeSafe(Observer.Create<T>(
+                    .SubscribeSafe(Observer.Create<IHasRequestId>(
                         onNext: m =>
                         {
                             observer.OnNext(m);
@@ -50,20 +49,20 @@ namespace InterReact
 
 
         // Multiple results: TickSnapshot, ContractData, AccountSummary, Executions
-        internal static IObservable<T> ToObservableWithIdMultiple<T, TEnd>(
+        internal static IObservable<IHasRequestId> ToObservableWithIdMultiple<TEnd>(
             this IObservable<object> source, Func<int> getNextId, Action<int> startRequest, Action<int>? stopRequest = null)
-                where T : IHasRequestId where TEnd : T
+                where TEnd: IHasRequestId
         {
-            return Observable.Create<T>(observer =>
+            return Observable.Create<IHasRequestId>(observer =>
             {
                 int requestId = getNextId();
                 bool? cancelable = null;
 
                 IDisposable subscription = source
-                    .OfType<T>()
-                    .WithRequestId(requestId)
+                    .OfType<IHasRequestId>()
+                    .Where(m => m.RequestId == requestId)
                     .Finally(() => cancelable = false)
-                    .SubscribeSafe(Observer.Create<T>(
+                    .SubscribeSafe(Observer.Create<IHasRequestId>(
                         onNext: m =>
                         {
                             if (m is not TEnd)
@@ -93,18 +92,17 @@ namespace InterReact
 
 
         // Continuous results: Tick, MarketDepth, RealtimeBar
-        internal static IObservable<T> ToObservableWithIdContinuous<T>(this IObservable<object> source,
+        internal static IObservable<IHasRequestId> ToObservableWithIdContinuous(this IObservable<object> source,
             Func<int> getNextId, Action<int> startRequest, Action<int> stopRequest)
-                where T : IHasRequestId
         {
-            return Observable.Create<T>(observer =>
+            return Observable.Create<IHasRequestId>(observer =>
             {
                 int requestId = getNextId();
                 bool? cancelable = null;
 
                 IDisposable subscription = source
-                    .OfType<T>()
-                    .WithRequestId(requestId)
+                    .OfType<IHasRequestId>()
+                    .Where(m => m.RequestId == requestId)
                     .Finally(() => cancelable = false)
                     .SubscribeSafe(observer);
 

@@ -2,9 +2,7 @@
 
 namespace InterReact
 {
-    public interface IExecution : IHasRequestId { }
-
-    public sealed class Execution : IExecution, IHasOrderId, IHasExecutionId
+    public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
     {
         // Store executions by executionId so that they can be associated with CommissionReport (above).
         // This assumes that CommissionReport always follows Execution.
@@ -129,7 +127,7 @@ namespace InterReact
         }
     }
 
-    public sealed class ExecutionEnd : IExecution
+    public sealed class ExecutionEnd : IHasRequestId
     {
         public int RequestId { get; }
         internal ExecutionEnd(ResponseReader c)

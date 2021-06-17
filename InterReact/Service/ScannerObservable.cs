@@ -10,27 +10,22 @@ namespace InterReact
         /// Creates an observable which, upon subscription, emits scanner results, then completes.
         /// returns: ScannerData, Alert
         /// </summary>
-        public IObservable<IHasRequestId> CreateScannerObservable(
+        public IObservable<Union<ScannerData, Alert>> CreateScannerObservable(
             ScannerSubscription subscription, IList<Tag>? subscriptionOptions = null)
         {
             if (subscription == null)
                 throw new ArgumentNullException(nameof(subscription));
 
             return Response
-                .ToObservableWithIdSingle<IScannerData>(
+                .ToObservableWithIdSingle(
                     Request.GetNextId,
                     requestId => Request.RequestScannerSubscription(
                         requestId,
                         subscription,
                         subscriptionOptions),
                     Request.CancelScannerSubscription)
+                .Select(x => new Union<ScannerData, Alert>(x))
                 .ToShareSource();
         }
-    }
-
-    public static partial class Extensions
-    {
-        public static IObservable<ScannerData> OfTypeScannerData(this IObservable<IScannerData> source) =>
-            source.OfType<ScannerData>();
     }
 }

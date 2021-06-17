@@ -24,7 +24,7 @@ namespace InterReactSamples
                 Exchange = "SMART"
             };
 
-            IObservable<ITick> tickObservable = interReact.Services.CreateTickObservable(contract);
+            IObservable<IHasRequestId> tickObservable = interReact.Services.CreateTickObservable(contract);
 
             IDisposable subscription = tickObservable
                 .OfType<TickPrice>()

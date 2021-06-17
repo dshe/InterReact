@@ -12,7 +12,8 @@ namespace InterReact
         /// </summary>
         public IObservable<NewsBulletin> CreateNewsBulletinsObservable() =>
             Response
-                .ToObservableContinuous<NewsBulletin>(
+                .OfType<NewsBulletin>()
+                .ToObservableContinuous(
                     () => Request.RequestNewsBulletins(), Request.CancelNewsBulletins)
                 .Publish()
                 .RefCount();

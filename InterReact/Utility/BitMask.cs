@@ -11,7 +11,7 @@ namespace InterReact
             get
             {
                 if (index < 0 || index >= 32)
-                    throw new IndexOutOfRangeException();
+                    throw new ArgumentException(nameof(index));
                 return (Mask & (1 << index)) != 0;
             }
         }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 
 namespace InterReact
@@ -8,18 +10,11 @@ namespace InterReact
         /// <summary>
         /// An observable which emits one or more account summary items, then completes.
         /// </summary>
-        public IObservable<IAccountSummary> CreateAccountSummaryObservable() =>
+        public IObservable<Union<AccountSummary, Alert>> CreateAccountSummaryObservable() =>
             Response
-                .ToObservableWithIdMultiple<IAccountSummary, AccountSummaryEnd>(
-                    Request.GetNextId,
-                    id => Request.RequestAccountSummary(id),
-                    Request.CancelAccountSummary)
+                .ToObservableWithIdMultiple<AccountSummaryEnd>(
+                    Request.GetNextId, id => Request.RequestAccountSummary(id), Request.CancelAccountSummary)
+                .Select(x => new Union<AccountSummary, Alert>(x))
                 .ToShareSource();
     }
-
-    public static partial class Extensions
-    {
-        public static IObservable<AccountSummary> OfTypeAccountSummary(this IObservable<IAccountSummary> source) => source.OfType<AccountSummary>();
-    }
-
 }

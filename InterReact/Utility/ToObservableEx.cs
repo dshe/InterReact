@@ -16,7 +16,7 @@ namespace InterReact
             return Observable.Create<T>(observer =>
             {
                 IDisposable subscription = source
-                    .OfType<T>()
+                    .OfType<T>() // IMPORTANT!
                     .SubscribeSafe(Observer.Create<T>(
                         onNext: t =>
                         {
@@ -34,28 +34,25 @@ namespace InterReact
 
 
         // Multiple results: AccountPositions, OpenOrders
-        internal static IObservable<T> ToObservableMultiple<T, TEnd>(this IObservable<object> source,
+        internal static IObservable<object> ToObservableMultiple<TEnd>(this IObservable<object> filteredSource,
             Action startRequest, Action? stopRequest = null)
         {
-            return Observable.Create<T>(observer =>
+            return Observable.Create<object>(observer =>
             {
                 bool? cancelable = null;
 
-                IDisposable subscription = source
+                IDisposable subscription = filteredSource
                     .Finally(() => cancelable = false)
                     .SubscribeSafe(Observer.Create<object>(
                         onNext: o =>
                         {
-                            if (o is T t)
-                            {
-                                observer.OnNext(t);
-                                return;
-                            }
                             if (o is TEnd)
                             {
                                 cancelable = false;
                                 observer.OnCompleted();
+                                return;
                             }
+                            observer.OnNext(o);
                         },
                         onError: observer.OnError,
                         onCompleted: observer.OnCompleted));
@@ -76,15 +73,14 @@ namespace InterReact
 
 
         // Continuous results: AccountUpdate, NewsBulletins
-        internal static IObservable<T> ToObservableContinuous<T>(this IObservable<object> source,
+        internal static IObservable<T> ToObservableContinuous<T>(this IObservable<T> filteredSource,
             Action startRequest, Action stopRequest)
         {
             return Observable.Create<T>(observer =>
             {
                 bool? cancelable = null;
 
-                IDisposable subscription = source
-                    .OfType<T>()
+                IDisposable subscription = filteredSource
                     .Finally(() => cancelable = false)
                     .SubscribeSafe(observer);
 

@@ -55,7 +55,7 @@ namespace InterReact
 
     public static partial class Extensions
     {
-        public static IObservable<TickBidAskPrice> ToBidAskTicks(this IObservable<Tick> source)
+        public static IObservable<TickBidAskPrice> ToBidAskTicks(this IObservable<TickBase> source)
         {
             var bal = new TickBidAskPrice();
 

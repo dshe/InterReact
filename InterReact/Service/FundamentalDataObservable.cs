@@ -8,19 +8,13 @@ namespace InterReact
         /// <summary>
         /// Creates an observable which emits fundamental data for the company represented by the contract, then completes.
         /// </summary>
-        public IObservable<IFundamentalData> CreateFundamentalDataObservable(Contract contract, FundamentalDataReportType? reportType = null) =>
+        public IObservable<Union<FundamentalData, Alert>> CreateFundamentalDataObservable(Contract contract, FundamentalDataReportType? reportType = null) =>
             Response
-                .ToObservableWithIdSingle<IFundamentalData>(
+                .ToObservableWithIdSingle(
                     Request.GetNextId,
                     id => Request.RequestFundamentalData(id, contract, reportType),
                     Request.CancelFundamentalData)
+                .Select(x => new Union<FundamentalData, Alert>(x))
                 .ToShareSource();
     }
-
-    public static partial class Extensions
-    {
-        public static IObservable<FundamentalData> OfTypeFundamentalData(this IObservable<IFundamentalData> source) =>
-            source.OfType<FundamentalData>();
-    }
-
 }

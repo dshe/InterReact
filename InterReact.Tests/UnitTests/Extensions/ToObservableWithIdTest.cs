@@ -32,7 +32,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Ok()
         {
-            var observable = subject.ToObservableWithIdSingle<SomeClass>(
+            var observable = subject.ToObservableWithIdSingle(
                 () => Id,
                 requestId =>
                 {
@@ -44,7 +44,8 @@ namespace InterReact.UnitTests.Extensions
                 {
                     Assert.Equal(Id, requestId);
                     Interlocked.Increment(ref unsubscribeCalls);
-                });
+                })
+                .Cast<SomeClass>();
 
             var n1 = await observable.Materialize().ToList();
             Assert.Equal(2, n1.Count);
@@ -64,7 +65,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Multi_Ok()
         {
-            var observable = subject.ToObservableWithIdMultiple<ISomeClass, SomeClassEnd>(
+            var observable = subject.ToObservableWithIdMultiple<SomeClassEnd>(
                 () => Id,
                 requestId =>
                 {
@@ -88,7 +89,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Alert()
         {
-            var observable = subject.ToObservableWithIdSingle<SomeClass>(
+            var observable = subject.ToObservableWithIdSingle(
                 () => Id,
                 requestId =>
                 {
@@ -110,7 +111,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Alert_multi()
         {
-            var observable = subject.ToObservableWithIdMultiple<ISomeClass, SomeClassEnd>(
+            var observable = subject.ToObservableWithIdMultiple<SomeClassEnd>(
                 () => Id,
                 requestId =>
                 {
@@ -132,7 +133,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Subscribe_Error()
         {
-            var observable = subject.ToObservableWithIdSingle<SomeClass>(
+            var observable = subject.ToObservableWithIdSingle(
                 () => Id,
                 requestId => { throw new BarrierPostPhaseException(); },
                 requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -143,7 +144,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Source_Error()
         {
-            var observable = subject.ToObservableWithIdSingle<SomeClass>(
+            var observable = subject.ToObservableWithIdSingle(
                 () => Id,
                 requestId => subject.OnError(new BarrierPostPhaseException()),
                 requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -154,7 +155,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Source_Completed()
         {
-            var observable = subject.ToObservableWithIdSingle<SomeClass>(
+            var observable = subject.ToObservableWithIdSingle(
                 () => Id,
                 requestId => subject.OnCompleted(),
                 requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -172,7 +173,7 @@ namespace InterReact.UnitTests.Extensions
         {
             var ts = ticks == -1 ? TimeSpan.Zero : TimeSpan.FromTicks(ticks);
 
-            var observable = subject.ToObservableWithIdSingle<SomeClass>(
+            var observable = subject.ToObservableWithIdSingle(
                 () => Id,
                 requestId => Interlocked.Increment(ref subscribeCalls),
                 requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -186,7 +187,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public void Test_Unsubscribe_Error()
         {
-            var observable = subject.ToObservableWithIdSingle<SomeClass>(
+            var observable = subject.ToObservableWithIdSingle(
                 () => Id,
                 requestId => Interlocked.Increment(ref subscribeCalls),
                 requestId => { throw new BarrierPostPhaseException(); });

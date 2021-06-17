@@ -1,6 +1,6 @@
 ﻿namespace InterReact
 {
-    public sealed class NewsArticle : IHasRequestId // output
+    public sealed class NewsArticle : IHasRequestId
     {
         public int RequestId { get; }
         public int ArticleType { get; }

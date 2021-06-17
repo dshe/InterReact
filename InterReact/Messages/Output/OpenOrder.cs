@@ -1,6 +1,6 @@
 ﻿namespace InterReact
 {
-    public sealed class OpenOrder : IOrder, IHasOrderId
+    public sealed class OpenOrder : IHasOrderId
     {
         public Order Order { get; }
         public int OrderId { get; }

@@ -16,6 +16,9 @@ namespace InterReact.UnitTests.Experimental
         public async Task<int> AsyncFunction(CancellationToken ct)
         {
             await Task.Delay(10000, ct); // some work
+
+            var xx = new Union<string, int, int>("kk");
+
             return 1;
         }
 
@@ -34,7 +37,13 @@ namespace InterReact.UnitTests.Experimental
             {
                 Write("cancelled");
             }
+
+            var o = Observable.Empty<string>();
+            //o.Splitt<string,string,string>().
+
         }
+
+
 
     }
 

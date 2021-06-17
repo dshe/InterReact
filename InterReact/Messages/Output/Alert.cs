@@ -1,6 +1,4 @@
-﻿using System;
-using System.Reactive.Linq;
-
+﻿
 namespace InterReact
 {
     /// <summary>
@@ -9,8 +7,7 @@ namespace InterReact
     /// For messages which are not associated with a particular request or order, the Id is -1.
     /// In order to be compatible with the IHasRequestId and IHasOrderId interfaces, both requestId and orderId properties are included in Alert.
     /// </summary>
-    public sealed class Alert :
-        IHasRequestId, IAccountSummary, IContractDetails, ITick
+    public sealed class Alert : IHasRequestId, IHasOrderId, ITick
     {
         public int RequestId { get; }
         public int OrderId { get; }
@@ -32,18 +29,6 @@ namespace InterReact
             return new Alert(r.ReadInt(), r.ReadInt(), r.ReadString());
         }
 
-        public override string ToString()
-        {
-            string m = Message;
-            if (!m.EndsWith("."))
-                m += ".";
-            if (Code >= 0)
-                m += " Code=" + Code + ".";
-            if (RequestId >= 0)
-                m += $" Id={RequestId}.";
-            return m;
-        }
-
         private static AlertType GetAlertTypeFromCode(int code, int id)
         {
             if (code is 1100 or 2110)
@@ -57,11 +42,4 @@ namespace InterReact
             return AlertType.Undefined;
         }
     }
-
-    public static partial class Extensions
-    {
-        public static IObservable<Alert> OfTypeAlert(
-            this IObservable<object> source) => source.OfType<Alert>();
-    }
-
 }

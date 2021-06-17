@@ -15,7 +15,7 @@ namespace InterReact.UnitTests.Extensions
         public ToObservableTest(ITestOutputHelper output) : base(output) { }
 
         private int subscribeCalls, unsubscribeCalls;
-        private readonly Subject<object> subject = new Subject<object>();
+        private readonly Subject<object> subject = new();
 
         public class SomeClass
         {
@@ -54,7 +54,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Multi_Ok()
         {
-            var observable = subject.ToObservableMultiple<SomeClass, SomeClassEnd>(
+            var observable = subject.ToObservableMultiple<SomeClassEnd>(
                 () =>
                 {
                     Interlocked.Increment(ref subscribeCalls);
@@ -101,7 +101,7 @@ namespace InterReact.UnitTests.Extensions
         public async Task Test_Timeout(int ticks)
         {
             var ts = ticks == -1 ? TimeSpan.Zero : TimeSpan.FromTicks(ticks);
-            var observable = subject.ToObservableContinuous<string>(() => Interlocked.Increment(ref subscribeCalls), () => Interlocked.Increment(ref unsubscribeCalls));
+            var observable = subject.ToObservableContinuous(() => Interlocked.Increment(ref subscribeCalls), () => Interlocked.Increment(ref unsubscribeCalls));
             await Assert.ThrowsAsync<TimeoutException>(async () => await observable.Timeout(ts));
             await Task.Delay(1);
             Assert.Equal(1, subscribeCalls);

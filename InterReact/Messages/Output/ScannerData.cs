@@ -2,9 +2,7 @@
 
 namespace InterReact
 {
-    public interface IScannerData : IHasRequestId { }
-
-    public sealed class ScannerData : IScannerData
+    public sealed class ScannerData : IHasRequestId
     {
         public int RequestId { get; }
         public List<ScannerDataItem> Items { get; } = new List<ScannerDataItem>();

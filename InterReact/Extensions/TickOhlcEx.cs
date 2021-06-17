@@ -27,7 +27,7 @@ namespace InterReact
 
     public static partial class Extensions
     {
-        public static IObservable<TickOhlc> TickOpenHighLowClose(this IObservable<Tick> source, TimeSpan barSize) =>
+        public static IObservable<TickOhlc> TickOpenHighLowClose(this IObservable<TickBase> source, TimeSpan barSize) =>
             source
                 .OfType<TickPrice>()
                 .Where(x => x.TickType == TickType.LastPrice)

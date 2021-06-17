@@ -9,7 +9,7 @@ namespace InterReact
         /// Creates an observable which, upon subscription, returns open orders and order status reports, then completes.
         /// Multiple simultaneous observers among different OpenOrderRequestTypes is not supported.
         /// </summary>
-        public IObservable<IOrder> CreateOpenOrdersObservable(OpenOrdersRequestType type = OpenOrdersRequestType.AllOpenOrders)
+        public IObservable<Union<OpenOrder, OrderStatusReport>> CreateOpenOrdersObservable(OpenOrdersRequestType type = OpenOrdersRequestType.AllOpenOrders)
         {
             Action start = type switch
             {
@@ -19,16 +19,14 @@ namespace InterReact
                 OpenOrdersRequestType.AutoOpenOrdersWithBind => () => Request.RequestAutoOpenOrders(true),
                 _ => throw new ArgumentOutOfRangeException(nameof(type), type, null),
             };
+
             return Response
                 .Where(m => m is OpenOrder || m is OrderStatusReport || m is OpenOrderEnd)
-                .ToObservableMultiple<IOrder, OpenOrderEnd>(start)
+                .ToObservableMultiple<OpenOrderEnd>(start)
+                .Select(x => new Union<OpenOrder, OrderStatusReport>(x))
                 .ToShareSource();
         }
     }
-    public static partial class Extensions
-    {
-        public static IObservable<OpenOrder> OfTypeOpenOrder(this IObservable<IOrder> source) => source.OfType<OpenOrder>();
-        public static IObservable<OrderStatusReport> OfTypeOrderStatusReport(this IObservable<IOrder> source) => source.OfType<OrderStatusReport>();
-    }
+
 }
 
