@@ -39,7 +39,7 @@ IObservable<ITick> tickObservable = interReact.Services.CreateTickObservable(con
 
 // Subscribe to the observable to start observing ticks.
 IDisposable subscription = tickObservable
-    .OfType<TickPrice>()
+    .OfType(selector => selector.TickPrice)
     .Subscribe(onNext: tickPrice =>
     {
         // Write price ticks to the console.
