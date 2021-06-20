@@ -35,11 +35,11 @@ Contract contract = new Contract
 };
 
 // Create an observable which can observe ticks for the contract.
-IObservable<Tick> tickObservable = interReact.Services.CreateTickObservable(contract);
+IObservable<ITick> tickObservable = interReact.Services.CreateTickObservable(contract);
 
 // Subscribe to the observable to start observing ticks.
 IDisposable subscription = tickObservable
-    .OfType<TickPrice>()
+    .OfType(selector => selector.TickPrice)
     .Subscribe(onNext: tickPrice =>
     {
         // Write price ticks to the console.
