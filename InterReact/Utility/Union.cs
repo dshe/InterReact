@@ -11,7 +11,7 @@ namespace InterReact
 {
     public abstract class Union
     {
-        internal object Source { get; }
+        public object Source { get; }
         public Union(object source) => Source = source;
     }
 
@@ -50,8 +50,8 @@ namespace InterReact
 
     public static partial class Extensions
     {
-        public static IObservable<T> OfTypex<T>(this IObservable<Union> source) =>
-            source.Where(x => x.Source is T).Select(x => (T)x.Source);
+        public static IObservable<T> OfTypeUnionSource<T>(this IObservable<Union> source) =>
+            source.Select(x => x.Source).OfType<T>();
     }
 
 }

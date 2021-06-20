@@ -21,7 +21,7 @@ namespace InterReact.UnitTests.Extensions
                 OnNext(100, "1"),
                 OnCompleted<string>(1000)
             );
-            var sharedObservable = observable.ToShareSource();
+            var sharedObservable = observable.ShareSource();
 
             sharedObservable.SubscribeOn(testScheduler).Subscribe(observer1);
 
@@ -62,7 +62,7 @@ namespace InterReact.UnitTests.Extensions
                 OnNext(400, "4"),
                 OnNext(500, "5"),
                 OnCompleted<string>(600));
-            var sharedObservable = observable.ToShareSource();
+            var sharedObservable = observable.ShareSource();
 
             sharedObservable.SubscribeOn(testScheduler).Subscribe(observer1);
 
@@ -109,7 +109,7 @@ namespace InterReact.UnitTests.Extensions
                 OnNext(400, "4"),
                 OnNext(500, "5"),
                 OnCompleted<string>(600));
-            var sharedObservable = observable.ToShareSource();
+            var sharedObservable = observable.ShareSource();
 
             sharedObservable.SubscribeOn(testScheduler).Subscribe(observer1);
             sharedObservable.SubscribeOn(testScheduler).Subscribe(observer2);

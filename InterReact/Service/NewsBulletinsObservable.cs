@@ -10,7 +10,9 @@ namespace InterReact
         /// News bulletins inform of important exchange disruptions.
         /// This observable starts with the first subscription and completes when the last observer unsubscribes.
         /// </summary>
-        public IObservable<NewsBulletin> CreateNewsBulletinsObservable() =>
+        public IObservable<NewsBulletin> NewsBulletinsObservable { get; }
+
+        private IObservable<NewsBulletin> CreateNewsBulletinsObservable() =>
             Response
                 .OfType<NewsBulletin>()
                 .ToObservableContinuous(

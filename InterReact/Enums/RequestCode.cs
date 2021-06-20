@@ -40,10 +40,10 @@
         RequestGlobalCancel = 58,
         RequestMarketDataType = 59,
 
-        RequestAccountPositions = 61,
+        RequestPositions = 61,
         RequestAccountSummary = 62,
         CancelAccountSummary = 63,
-        CancelAccountPositions = 64,
+        CancelPositions = 64,
         VerifyRequest = 65,
         VerifyMessage = 66,
         QueryDisplayGroups = 67,

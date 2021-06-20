@@ -132,7 +132,7 @@ namespace InterReact.ConnectTests
             var client = await new InterReactClientBuilder(Logger).BuildAsync();
             await client.DisposeAsync();
             Assert.ThrowsAny<Exception>(() => client.Request.RequestCurrentTime());
-            await Assert.ThrowsAnyAsync<Exception>(async () => await client.Services.CreateCurrentTimeObservable());
+            await Assert.ThrowsAnyAsync<Exception>(async () => await client.Services.CurrentTimeObservable);
         }
     }
 }

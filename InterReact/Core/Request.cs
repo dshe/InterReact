@@ -44,7 +44,7 @@ namespace InterReact
             IList<GenericTickType>? genericTickTypes = null, bool marketDataOff = false,
             bool isSnapshot = false, IList<Tag>? options = null)
         {
-            var m = CreateMessage();
+            RequestMessage m = CreateMessage();
 
             m.Write(RequestCode.RequestMarketData, "11", requestId,
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
@@ -54,7 +54,7 @@ namespace InterReact
             if (contract.SecurityType == SecurityType.Bag)
             {
                 m.Write(contract.ComboLegs.Count);
-                foreach (var leg in contract.ComboLegs)
+                foreach (ContractComboLeg leg in contract.ComboLegs)
                     m.Write(leg.ContractId, leg.Ratio, leg.TradeAction, leg.Exchange);
             }
             m.Write(contract.DeltaNeutralContract != null);
@@ -64,20 +64,23 @@ namespace InterReact
             if (Config.SupportsServerVersion(ServerVersion.SmartComponents))
                 m.Write(false); // regulatory snapshot ($.01)
             m.Write(Tag.Combine(options)).Send();
-        }
 
-        private static string MakeGenericTicksList(IList<GenericTickType>? genericTickTypes, bool marketDataOff = false)
-        {
-            var strings = new List<string>();
-            if (genericTickTypes != null && genericTickTypes.Any())
-                strings.AddRange(genericTickTypes.Cast<Enum>().Select(Convert.ToInt32).Select(n => n.ToString()));
-            if (marketDataOff)
-                strings.Add("mdoff");
-            return strings.JoinStrings(",");
+            // local
+            static string MakeGenericTicksList(IList<GenericTickType>? genericTickTypes, bool marketDataOff = false)
+            {
+                List<string> strings = new();
+                if (genericTickTypes != null && genericTickTypes.Any())
+                    strings.AddRange(genericTickTypes.Cast<Enum>().Select(Convert.ToInt32).Select(n => n.ToString()));
+                if (marketDataOff)
+                    strings.Add("mdoff");
+                return strings.JoinStrings(",");
+            }
         }
 
         public void CancelMarketData(int requestId) =>
-            CreateMessage().Write(RequestCode.CancelMarketData, "1", requestId).Send();
+            CreateMessage()
+                .Write(RequestCode.CancelMarketData, "1", requestId)
+                .Send();
 
         public void PlaceOrder(int orderId, Order order, Contract contract) // the monster
         {
@@ -86,7 +89,7 @@ namespace InterReact
             if (order.CashQty != null)
                 Config.RequireServerVersion(ServerVersion.CashQty);
 
-            var m = CreateMessage();
+            RequestMessage m = CreateMessage();
 
             m.Write(RequestCode.PlaceOrder);
             m.Write("45");
@@ -110,14 +113,14 @@ namespace InterReact
             if (contract.SecurityType == SecurityType.Bag)
             {
                 m.Write(contract.ComboLegs.Count);
-                foreach (var leg in contract.ComboLegs)
+                foreach (ContractComboLeg leg in contract.ComboLegs)
                     m.Write(leg.ContractId, leg.Ratio, leg.TradeAction, leg.Exchange,
                         leg.OpenClose, leg.ComboShortSaleSlot, leg.DesignatedLocation, leg.ExemptCode);
                 m.Write(order.ComboLegs.Count);
-                foreach (var leg in order.ComboLegs)
+                foreach (OrderComboLeg leg in order.ComboLegs)
                     m.Write(leg.Price);
                 m.Write(order.SmartComboRoutingParams.Count);
-                foreach (var tag in order.SmartComboRoutingParams)
+                foreach (Tag tag in order.SmartComboRoutingParams)
                     m.Write(tag.Name, tag.Value);
             }
             m.Write("", // deprecated SharesAllocation field
@@ -172,7 +175,7 @@ namespace InterReact
             if (!string.IsNullOrEmpty(order.AlgoStrategy))
             {
                 m.Write(order.AlgoParams.Count);
-                foreach (var tag in order.AlgoParams)
+                foreach (Tag tag in order.AlgoParams)
                     m.Write(tag.Name, tag.Value);
             }
 
@@ -184,11 +187,11 @@ namespace InterReact
                 if (order.OrderType == OrderType.PeggedToBenchmark)
                     m.Write(order.ReferenceContractId, order.IsPeggedChangeAmountDecrease,
                         order.PeggedChangeAmount, order.ReferenceChangeAmount, order.ReferenceExchange);
-                var n = order.Conditions.Count;
+                int n = order.Conditions.Count;
                 m.Write(n);
                 if (n > 0)
                 {
-                    foreach (var condition in order.Conditions)
+                    foreach (OrderCondition condition in order.Conditions)
                         condition.Serialize(m);
                     m.Write(order.ConditionsIgnoreRegularTradingHours, order.ConditionsCancelOrder);
                 }
@@ -210,16 +213,21 @@ namespace InterReact
 
         public void CancelOrder(int orderId) => CreateMessage().Write(RequestCode.CancelOrder, "1", orderId).Send();
 
-        public void RequestOpenOrders() => CreateMessage().Write(RequestCode.RequestOpenOrders, "1").Send();
+        public void RequestOpenOrders() =>
+            CreateMessage()
+                .Write(RequestCode.RequestOpenOrders, "1")
+                .Send();
 
         /// <summary>
         /// Call this function to start receiving account updates.
         /// Returns AccountVaue, PortfolioUpdate and TimeUpdate messages.
-        /// Updates for all accounts are returned when accountCode is null.
+        /// Updates for all accounts are returned when accountCode is null(?).
         /// This information is updated every three minutes.
         /// </summary>
         public void RequestAccountUpdates(bool start, string? accountCode = null) =>
-            CreateMessage().Write(RequestCode.RequestAccountData, "2", start, accountCode).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestAccountData, "2", start, accountCode)
+                .Send();
 
         /// <summary>
         /// When this method is called, execution reports from the last 24 hours that meet the filter criteria are retrieved.
@@ -228,29 +236,37 @@ namespace InterReact
         /// Note that the valid format for time is "yyyymmdd-hh:mm:ss"
         /// </summary>
         public void RequestExecutions(int requestId, ExecutionFilter? filter = null) =>
-            CreateMessage().Write(RequestCode.RequestExecutions, "3", requestId,
-                filter?.ClientId, filter?.Account,
-                filter == null ? null : LocalDateTimePattern.CreateWithInvariantCulture("yyyyMMdd-HH:mm:ss").Format(filter.Time),
-                filter?.Symbol, filter?.SecurityType,
-                filter?.Exchange, filter?.Side).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestExecutions, "3", requestId,
+                    filter?.ClientId, filter?.Account,
+                    filter == null ? null : LocalDateTimePattern.CreateWithInvariantCulture("yyyyMMdd-HH:mm:ss").Format(filter.Time),
+                    filter?.Symbol, filter?.SecurityType,
+                    filter?.Exchange, filter?.Side)
+                .Send();
 
         /// <summary>
         /// In case there are multiple API clients attached to TWS, the OrderId may not be unique among the clients.
         /// Call this function to request an OrderId that can be used with multiple clients.
         /// </summary>
-        public void RequestNextOrderId() => CreateMessage().Write(RequestCode.RequestIds, "1", "1").Send();
+        public void RequestNextOrderId() =>
+            CreateMessage()
+                .Write(RequestCode.RequestIds, "1", "1")
+                .Send();
 
         /// <summary>
         /// Call this method to retrieve one or more ContractData objects for the specified selector contract.
         /// </summary>
-        public void RequestContractData(int requestId, Contract contract)
+        public void RequestContractDetails(int requestId, Contract contract)
         {
-            CreateMessage().Write(RequestCode.RequestContractData, "8", requestId,
-                contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
-                contract.Strike, contract.Right, contract.Multiplier,
-                contract.Exchange, contract.PrimaryExchange,
-                contract.Currency, contract.LocalSymbol, contract.TradingClass,
-                contract.IncludeExpired, contract.SecurityIdType, contract.SecurityId).Send();
+            CreateMessage()
+                .Write(
+                    RequestCode.RequestContractData, "8", requestId,
+                    contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
+                    contract.Strike, contract.Right, contract.Multiplier,
+                    contract.Exchange, contract.PrimaryExchange,
+                    contract.Currency, contract.LocalSymbol, contract.TradingClass,
+                    contract.IncludeExpired, contract.SecurityIdType, contract.SecurityId)
+                .Send();
         }
 
         /// <summary>
@@ -258,36 +274,62 @@ namespace InterReact
         /// </summary>
         public void RequestMarketDepth(int requestId, Contract contract, int numRows = 3, IList<Tag>? options = null)
         {
-            var m = CreateMessage().Write(RequestCode.RequestMarketDepth, "5", requestId,
-                contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
-                contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
-                contract.Currency, contract.LocalSymbol, contract.TradingClass, numRows);
-            m.Write(Tag.Combine(options)).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestMarketDepth, "5", requestId,
+                    contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
+                    contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
+                    contract.Currency, contract.LocalSymbol, contract.TradingClass, numRows,
+                    Tag.Combine(options))
+                .Send();
         }
 
-        public void CancelMarketDepth(int requestId) => CreateMessage().Write(RequestCode.CancelMarketDepth, "1", requestId).Send();
+        public void CancelMarketDepth(int requestId) => 
+            CreateMessage()
+                .Write(RequestCode.CancelMarketDepth, "1", requestId)
+                .Send();
 
         /// <summary>
         /// Call this method to start receiving news bulletins, such as information about exchange status.
         /// </summary>
-        public void RequestNewsBulletins(bool all = true) => CreateMessage().Write(RequestCode.RequestNewsBulletins, "1", all).Send();
+        public void RequestNewsBulletins(bool all = true) =>
+            CreateMessage()
+                .Write(RequestCode.RequestNewsBulletins, "1", all)
+                .Send();
 
-        public void CancelNewsBulletins() => CreateMessage().Write(RequestCode.CancelNewsBulletins, "1").Send();
+        public void CancelNewsBulletins() =>
+            CreateMessage()
+                .Write(RequestCode.CancelNewsBulletins, "1")
+                .Send();
 
         public void ChangeServerLogLevel(LogEntryLevel logLevel) =>
-            CreateMessage().Write(RequestCode.ChangeServerLogLevel, "1", logLevel).Send();
+            CreateMessage()
+                .Write(RequestCode.ChangeServerLogLevel, "1", logLevel)
+                .Send();
 
-        public void RequestAutoOpenOrders(bool autoBind) => CreateMessage().Write(RequestCode.RequestAutoOpenOrders, "1", autoBind).Send();
+        public void RequestAutoOpenOrders(bool autoBind) =>
+            CreateMessage()
+                .Write(RequestCode.RequestAutoOpenOrders, "1", autoBind)
+                .Send();
 
-        public void RequestAllOpenOrders() => CreateMessage().Write(RequestCode.RequestAllOpenOrders, "1").Send();
+        public void RequestAllOpenOrders() =>
+            CreateMessage()
+                .Write(RequestCode.RequestAllOpenOrders, "1")
+                .Send();
 
-        public void RequestManagedAccounts() => CreateMessage().Write(RequestCode.RequestManagedAccounts, "1").Send();
+        public void RequestManagedAccounts() =>
+            CreateMessage()
+                .Write(RequestCode.RequestManagedAccounts, "1")
+                .Send();
 
         public void RequestFinancialAdvisorConfiguration(FinancialAdvisorDataType dataType) =>
-            CreateMessage().Write(RequestCode.RequestFinancialAdvisorConfiguration, "1", dataType).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestFinancialAdvisorConfiguration, "1", dataType)
+                .Send();
 
         public void ReplaceFinancialAdvisorConfiguration(FinancialAdvisorDataType dataType, string xml) =>
-            CreateMessage().Write(RequestCode.ReplaceFinancialAdvisorConfiguration, "1", dataType, xml).Send();
+            CreateMessage()
+                .Write(RequestCode.ReplaceFinancialAdvisorConfiguration, "1", dataType, xml)
+                .Send();
 
         /// <summary>
         /// Call this method to receive historical data.
@@ -309,23 +351,23 @@ namespace InterReact
             if (endDate == default)
                 endDate = Config.Clock.GetCurrentInstant();
 
-            var m = CreateMessage().Write(RequestCode.RequestHistoricalData);
-            m.Write("6");
+            RequestMessage m = CreateMessage()
+                .Write(RequestCode.RequestHistoricalData, "6",
+                    requestId, contract.ContractId, contract.Symbol, contract.SecurityType,
+                    contract.LastTradeDateOrContractMonth, contract.Strike, contract.Right,
+                    contract.Multiplier, contract.Exchange, contract.PrimaryExchange,
+                    contract.Currency, contract.LocalSymbol, contract.TradingClass, contract.IncludeExpired,
+                    InstantPattern.CreateWithInvariantCulture("yyyyMMdd HH:mm:ss").Format(endDate) + " GMT",
+                    barSize ?? HistoricalBarSize.OneHour,
+                    duration ?? HistoricalDuration.OneDay,
+                    regularTradingHoursOnly,
+                    dataType ?? HistoricalDataType.Trades,
+                    "1"); // return date as text
 
-            m.Write(requestId, contract.ContractId, contract.Symbol, contract.SecurityType,
-                contract.LastTradeDateOrContractMonth, contract.Strike, contract.Right,
-                contract.Multiplier, contract.Exchange, contract.PrimaryExchange,
-                contract.Currency, contract.LocalSymbol, contract.TradingClass, contract.IncludeExpired,
-                InstantPattern.CreateWithInvariantCulture("yyyyMMdd HH:mm:ss").Format(endDate) + " GMT",
-                barSize ?? HistoricalBarSize.OneHour,
-                duration ?? HistoricalDuration.OneDay,
-                regularTradingHoursOnly,
-                dataType ?? HistoricalDataType.Trades,
-                "1"); // return date as text
             if (contract.SecurityType == SecurityType.Bag)
             {
                 m.Write(contract.ComboLegs.Count);
-                foreach (var leg in contract.ComboLegs)
+                foreach (ContractComboLeg leg in contract.ComboLegs)
                     m.Write(leg.ContractId, leg.Ratio, leg.TradeAction, leg.Exchange);
             }
             m.Write(Tag.Combine(options)).Send();
@@ -334,11 +376,13 @@ namespace InterReact
         public void ExerciseOptions(int requestId, Contract contract, OptionExerciseAction exerciseAction, int exerciseQuantity,
             string account, bool overrideOrder)
         {
-            CreateMessage().Write(RequestCode.ExerciseOptions, "2", requestId,
-                contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
-                contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
-                contract.Currency, contract.LocalSymbol, contract.TradingClass,
-                exerciseAction, exerciseQuantity, account, overrideOrder).Send();
+            CreateMessage()
+                .Write(RequestCode.ExerciseOptions, "2", requestId,
+                    contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
+                    contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
+                    contract.Currency, contract.LocalSymbol, contract.TradingClass,
+                    exerciseAction, exerciseQuantity, account, overrideOrder)
+                .Send();
         }
 
 
@@ -347,38 +391,47 @@ namespace InterReact
         /// </summary>
         public void RequestScannerSubscription(int requestId, ScannerSubscription subscription, IList<Tag>? subscriptionOptions = null)
         {
-            var m = CreateMessage().Write(RequestCode.RequestScannerSubscription);
-            m.Write("4");
-            m.Write(requestId, subscription.NumberOfRows, subscription.Instrument,
-                subscription.LocationCode, subscription.ScanCode,
-                subscription.AbovePrice, subscription.BelowPrice, subscription.AboveVolume,
-                subscription.MarketCapAbove, subscription.MarketCapBelow,
-                subscription.MoodyRatingAbove, subscription.MoodyRatingBelow,
-                subscription.SpRatingAbove, subscription.SpRatingBelow,
-                subscription.MaturityDateAbove, subscription.MaturityDateBelow,
-                subscription.CouponRateAbove, subscription.CouponRateBelow,
-                subscription.ExcludeConvertible, subscription.AverageOptionVolumeAbove,
-                subscription.ScannerSettingPairs, subscription.StockType);
-
-            m.Write(Tag.Combine(subscriptionOptions)).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestScannerSubscription,"4",
+                    requestId, subscription.NumberOfRows, subscription.Instrument,
+                    subscription.LocationCode, subscription.ScanCode,
+                    subscription.AbovePrice, subscription.BelowPrice, subscription.AboveVolume,
+                    subscription.MarketCapAbove, subscription.MarketCapBelow,
+                    subscription.MoodyRatingAbove, subscription.MoodyRatingBelow,
+                    subscription.SpRatingAbove, subscription.SpRatingBelow,
+                    subscription.MaturityDateAbove, subscription.MaturityDateBelow,
+                    subscription.CouponRateAbove, subscription.CouponRateBelow,
+                    subscription.ExcludeConvertible, subscription.AverageOptionVolumeAbove,
+                    subscription.ScannerSettingPairs, subscription.StockType,
+                    Tag.Combine(subscriptionOptions))
+                .Send();
         }
 
         public void CancelScannerSubscription(int requestId) =>
-            CreateMessage().Write(RequestCode.CancelScannerSubscription, "1", requestId).Send();
+            CreateMessage()
+                .Write(RequestCode.CancelScannerSubscription, "1", requestId)
+            .Send();
 
         /// <summary>
         /// Call the this method to receive an XML document that describes the valid parameters that a scanner subscription can have.
         /// </summary>ca
         public void RequestScannerParameters() =>
-            CreateMessage().Write(RequestCode.RequestScannerParameters, "1").Send();
+            CreateMessage()
+                .Write(RequestCode.RequestScannerParameters, "1")
+            .Send();
 
         public void CancelHistoricalData(int requestId) =>
-            CreateMessage().Write(RequestCode.CancelHistoricalData, "1", requestId).Send();
+            CreateMessage()
+                .Write(RequestCode.CancelHistoricalData, "1", requestId)
+            .Send();
 
         /// <summary>
         /// This is the time reported by TWS. Seconds precision.
         /// </summary>
-        public void RequestCurrentTime() => CreateMessage().Write(RequestCode.RequestCurrentTime, 1).Send();
+        public void RequestCurrentTime() =>
+            CreateMessage()
+                .Write(RequestCode.RequestCurrentTime, 1)
+            .Send();
 
         /// <summary>
         /// Call this method to start receiving realtime bar data.
@@ -386,16 +439,21 @@ namespace InterReact
         public void RequestRealTimeBars(int requestId, Contract contract, RealtimeBarType? whatToShow = null,
             bool regularTradingHoursOnly = false, IList<Tag>? options = null)
         {
-            CreateMessage().Write(RequestCode.RequestRealtimeBars, "3", requestId,
-                contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
-                contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
-                contract.PrimaryExchange, contract.Currency, contract.LocalSymbol, contract.TradingClass,
-                "5", // only 5 seconds bars are available
-                whatToShow ?? RealtimeBarType.Trades,
-                regularTradingHoursOnly, Tag.Combine(options)).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestRealtimeBars, "3", requestId,
+                    contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
+                    contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
+                    contract.PrimaryExchange, contract.Currency, contract.LocalSymbol, contract.TradingClass,
+                    "5", // only 5 seconds bars are available
+                    whatToShow ?? RealtimeBarType.Trades,
+                    regularTradingHoursOnly, Tag.Combine(options))
+                .Send();
         }
 
-        public void CancelRealTimeBars(int requestId) => CreateMessage().Write(RequestCode.CancelRealtimeBars, "1", requestId).Send();
+        public void CancelRealTimeBars(int requestId) =>
+            CreateMessage()
+                .Write(RequestCode.CancelRealtimeBars, "1", requestId)
+                .Send();
 
         /// <summary>
         /// Call this method to receive Reuters global fundamental data for stocks.
@@ -404,25 +462,32 @@ namespace InterReact
         /// </summary>
         public void RequestFundamentalData(int requestId, Contract contract, FundamentalDataReportType? reportTypeN = null, IList<Tag>? options = null)
         {
-            var reportType = reportTypeN ?? FundamentalDataReportType.CompanyOverview;
-            CreateMessage().Write(RequestCode.RequestFundamentalData, "3", requestId,
-                contract.ContractId, contract.Symbol, contract.SecurityType, contract.Exchange,
-                contract.PrimaryExchange, contract.Currency, contract.LocalSymbol,
-                reportType.ToString(), Tag.Combine(options)).Send();
+            FundamentalDataReportType reportType = reportTypeN ?? FundamentalDataReportType.CompanyOverview;
+            CreateMessage()
+                .Write(RequestCode.RequestFundamentalData, "3", requestId,
+                    contract.ContractId, contract.Symbol, contract.SecurityType, contract.Exchange,
+                    contract.PrimaryExchange, contract.Currency, contract.LocalSymbol,
+                    reportType.ToString(), Tag.Combine(options))
+                .Send();
         }
 
-        public void CancelFundamentalData(int requestId) => CreateMessage().Write(RequestCode.CancelFundamentalData, "1", requestId).Send();
+        public void CancelFundamentalData(int requestId) =>
+            CreateMessage()
+                .Write(RequestCode.CancelFundamentalData, "1", requestId)
+                .Send();
 
         /// <summary>
         /// Call this function to calculate volatility for a supplied option price and underlying price.
         /// </summary>
         public void CalculateImpliedVolatility(int requestId, Contract contract, double optionPrice, double underlyingPrice, IList<Tag>? options = null)
         {
-            CreateMessage().Write(RequestCode.RequestCalculatedImpliedVolatility, "3", requestId,
-                contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
-                contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
-                contract.PrimaryExchange, contract.Currency, contract.LocalSymbol, contract.TradingClass,
-                optionPrice, underlyingPrice, Tag.Combine(options)).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestCalculatedImpliedVolatility, "3", requestId,
+                    contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
+                    contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
+                    contract.PrimaryExchange, contract.Currency, contract.LocalSymbol, contract.TradingClass,
+                    optionPrice, underlyingPrice, Tag.Combine(options))
+                .Send();
         }
 
         /// <summary>
@@ -438,15 +503,22 @@ namespace InterReact
         }
 
         public void CancelCalculateImpliedVolatility(int requestId) =>
-            CreateMessage().Write(RequestCode.CancelCalculatedImpliedVolatility, "1", requestId).Send();
+            CreateMessage()
+                .Write(RequestCode.CancelCalculatedImpliedVolatility, "1", requestId)
+                .Send();
 
         public void CancelCalculateOptionPrice(int requestId) =>
-            CreateMessage().Write(RequestCode.CancelCalculatedOptionPrice, "1", requestId).Send();
+            CreateMessage()
+                .Write(RequestCode.CancelCalculatedOptionPrice, "1", requestId)
+                .Send();
 
         /// <summary>
         /// Use this method to cancel all open orders globally. It cancels both API and TWS open orders.
         /// </summary>
-        public void RequestGlobalCancel() => CreateMessage().Write(RequestCode.RequestGlobalCancel, "1").Send();
+        public void RequestGlobalCancel() =>
+            CreateMessage()
+                .Write(RequestCode.RequestGlobalCancel, "1")
+                .Send();
 
         /// <summary>
         /// The API can receive frozen market data from TWS. Frozen market data is the last data recorded in IB's system.
@@ -454,60 +526,86 @@ namespace InterReact
         /// If you use this function, you are telling TWS to automatically switch to frozen market data after the close.
         /// Then, before the opening of the next trading day, market data will automatically switch back to real-time market data.
         /// </summary>
-        public void RequestMarketDataType(MarketDataType marketDataType)
-            => CreateMessage().Write(RequestCode.RequestMarketDataType, "1", marketDataType).Send();
+        public void RequestMarketDataType(MarketDataType marketDataType) =>
+            CreateMessage()
+                .Write(RequestCode.RequestMarketDataType, "1", marketDataType)
+                .Send();
 
         /// <summary>
         /// Subscribes to position updates for all accessible accounts. All positions sent initially, and then only updates as positions change. 
         /// </summary>
-        public void RequestAccountPositions() => CreateMessage().Write(RequestCode.RequestAccountPositions, "1").Send();
-
+        public void RequestPositions() =>
+            CreateMessage()
+                .Write(RequestCode.RequestPositions, "1")
+                .Send();
 
         /// <summary>
-        /// Call this method to request the data that appears on the TWS Account Window Summary tab. 
+        /// Subscribea to data that appears on the TWS Account Window Summary tab. 
         /// If no tags are specified, data for all tags will be requested.
         /// </summary>
         public void RequestAccountSummary(int requestId, string group = "All", IList<AccountSummaryTag>? tags = null)
         {
-            var tagNames = tags?.Select(tag => tag.ToString()).ToList();
+            List<string>? tagNames = tags?.Select(tag => tag.ToString()).ToList();
             if (tagNames == null || !tagNames.Any())
                 tagNames = Enum.GetNames(typeof(AccountSummaryTag)).ToList();
-            CreateMessage().Write(RequestCode.RequestAccountSummary, "1", requestId, group, string.Join(",", tagNames)).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestAccountSummary, "1", requestId, group, string.Join(",", tagNames))
+                .Send();
         }
 
         public void CancelAccountSummary(int requestId) =>
-            CreateMessage().Write(RequestCode.CancelAccountSummary, "1", requestId).Send();
+            CreateMessage()
+                .Write(RequestCode.CancelAccountSummary, "1", requestId)
+                .Send();
 
-        public void CancelAccountPositions() =>
-            CreateMessage().Write(RequestCode.CancelAccountPositions, "1").Send();
+        public void CancelPositions() =>
+            CreateMessage()
+                .Write(RequestCode.CancelPositions, "1")
+                .Send();
 
         // For IB's internal purpose. Allows to provide means of verification between the TWS and third party programs.
         public void VerifyRequest(string apiName, string apiVersion) =>
-            CreateMessage().Write(RequestCode.VerifyRequest, "1", apiName, apiVersion).Send();
+            CreateMessage()
+                .Write(RequestCode.VerifyRequest, "1", apiName, apiVersion)
+                .Send();
 
         //  For IB's internal purpose.Allows to provide means of verification between the TWS and third party programs.
         public void VerifyMessage(string apiData) =>
-            CreateMessage().Write(RequestCode.VerifyMessage, "1", apiData).Send();
+            CreateMessage()
+                .Write(RequestCode.VerifyMessage, "1", apiData)
+                .Send();
 
         public void QueryDisplayGroups(int requestId) =>
-            CreateMessage().Write(RequestCode.QueryDisplayGroups, "1", requestId).Send();
+            CreateMessage()
+                .Write(RequestCode.QueryDisplayGroups, "1", requestId)
+                .Send();
 
         public void SubscribeToGroupEvents(int requestId, int groupId) =>
-            CreateMessage().Write(RequestCode.SubscribeToGroupEvents, "1", requestId, groupId).Send();
+            CreateMessage()
+                .Write(RequestCode.SubscribeToGroupEvents, "1", requestId, groupId)
+                .Send();
 
         public void UpdateDisplayGroup(int requestId, string contractInfo) =>
-            CreateMessage().Write(RequestCode.UpdateDisplayGroup, "1", requestId, contractInfo).Send();
+            CreateMessage()
+                .Write(RequestCode.UpdateDisplayGroup, "1", requestId, contractInfo)
+                .Send();
 
         public void UnsubscribeFromGroupEvents(int requestId) =>
-            CreateMessage().Write(RequestCode.UnsubscribeFromGroupEvents, "1", requestId).Send();
+            CreateMessage()
+                .Write(RequestCode.UnsubscribeFromGroupEvents, "1", requestId)
+                .Send();
 
         // For IB's internal purpose. Allows to provide means of verification between the TWS and third party programs.
         public void VerifyAndAuthorizeRequest(string apiName, string apiVersion, string opaqueIsvKey) =>
-            CreateMessage().Write(RequestCode.VerifyAndAuthorizeRequest, "1", apiName, apiVersion, opaqueIsvKey).Send();
+            CreateMessage()
+                .Write(RequestCode.VerifyAndAuthorizeRequest, "1", apiName, apiVersion, opaqueIsvKey)
+                .Send();
 
         // For IB's internal purpose. Allows to provide means of verification between the TWS and third party programs.
         public void VerifyAndAuthorizeMessage(string apiData, string xyzResponse) =>
-            CreateMessage().Write(RequestCode.VerifyAndAuthorizeMessage, "1", apiData, xyzResponse).Send();
+            CreateMessage()
+                .Write(RequestCode.VerifyAndAuthorizeMessage, "1", apiData, xyzResponse)
+                .Send();
 
         /**
         * Requests position subscription for account and/or model
@@ -519,85 +617,108 @@ namespace InterReact
         public void RequestPositionsMulti(int requestId, string account, string modelCode)
         {
             Config.RequireServerVersion(ServerVersion.ModelsSupport);
-            CreateMessage().Write(RequestCode.RequestPositionsMulti, "1", requestId, account, modelCode).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestPositionsMulti, "1", requestId, account, modelCode)
+                .Send();
         }
 
         public void CancelPositionsMulti(int requestId)
         {
             Config.RequireServerVersion(ServerVersion.ModelsSupport);
-            CreateMessage().Write(RequestCode.CancelPositionsMulti, "1", requestId).Send();
+            CreateMessage()
+                .Write(RequestCode.CancelPositionsMulti, "1", requestId)
+                .Send();
         }
 
         public void RequestAccountUpdatesMulti(int requestId, string account, string modelCode, bool ledgerAndNlv)
         {
             Config.RequireServerVersion(ServerVersion.ModelsSupport);
-            CreateMessage().Write(RequestCode.RequestAccountUpdatesMulti, "1", requestId, account, modelCode, ledgerAndNlv).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestAccountUpdatesMulti, "1", requestId, account, modelCode, ledgerAndNlv)
+                .Send();
         }
 
         public void CancelAccountUpdatesMulti(int requestId)
         {
             Config.RequireServerVersion(ServerVersion.ModelsSupport);
-            CreateMessage().Write(RequestCode.CancelAccountUpdatesMulti, "1", requestId).Send();
+            CreateMessage()
+                .Write(RequestCode.CancelAccountUpdatesMulti, "1", requestId)
+                .Send();
         }
 
         public void RequestSecDefOptParams(int requestId, string underlyingSymbol, string futFopExchange, string underlyingSecType, int underlyingConId)
         {
             Config.RequireServerVersion(ServerVersion.SecurityDefinitionOptionalParametersRequest);
-            CreateMessage().Write(RequestCode.RequestSecurityDefinitionOptionalParameters, requestId,
-                underlyingSymbol, futFopExchange, underlyingSecType, underlyingConId).Send(); // no version!
+            CreateMessage()
+                .Write(RequestCode.RequestSecurityDefinitionOptionalParameters, requestId,
+                    underlyingSymbol, futFopExchange, underlyingSecType, underlyingConId)
+                .Send();
         }
 
         public void RequestSoftDollarTiers(int requestId)
         {
             Config.RequireServerVersion(ServerVersion.SoftDollarTier);
-            CreateMessage().Write(RequestCode.RequestSoftDollarTiers, requestId).Send(); // no version!
+            CreateMessage()
+                .Write(RequestCode.RequestSoftDollarTiers, requestId)
+                .Send();
         }
 
         public void RequestFamilyCodes()
         {
             Config.RequireServerVersion(ServerVersion.RequestFamilyCodes);
-            CreateMessage().Write(RequestCode.RequestFamilyCodes).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestFamilyCodes)
+                .Send();
         }
 
         public void RequestMatchingSymbols(int requestId, string pattern)
         {
             Config.RequireServerVersion(ServerVersion.RequestMatchingSymbols);
-            CreateMessage().Write(RequestCode.RequestMatchingSymbols, requestId, pattern).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestMatchingSymbols, requestId, pattern)
+                .Send();
         }
 
         // venues for which market data is returned to updateMktDepthL2(those with market makers)
         public void RequestMarketDepthExchanges()
         {
             Config.RequireServerVersion(ServerVersion.RequestMktDepthExchanges);
-            CreateMessage().Write(RequestCode.RequestMktDepthExchanges).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestMktDepthExchanges)
+                .Send();
         }
 
         // Returns the mapping of single letter codes to exchange names given the mapping identifier
         public void RequestSmartComponents(int requestId, string bboExchange)
         {
             Config.RequireServerVersion(ServerVersion.RequestMktDepthExchanges);
-            CreateMessage().Write(RequestCode.RequestSmartComponents, requestId, bboExchange).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestSmartComponents, requestId, bboExchange)
+                .Send();
         }
 
         public void RequestNewsArticle(int requestId, string providerCode, string articleId)
         {
             Config.RequireServerVersion(ServerVersion.RequestNewsArticle);
-            var m = CreateMessage().Write(RequestCode.RequestNewsArticle, requestId, providerCode, articleId);
-            m.Send();
+            CreateMessage()
+                .Write(RequestCode.RequestNewsArticle, requestId, providerCode, articleId)
+                .Send();
         }
 
         public void RequestNewsProviders()
         {
             Config.RequireServerVersion(ServerVersion.RequestNewsProviders);
-            CreateMessage().Write(RequestCode.RequestNewsProviders).Send();
+            CreateMessage()
+                .Write(RequestCode.RequestNewsProviders)
+                .Send();
         }
 
         public void RequestHistoricalNews(int requestId, int conId, string providerCodes, string startTime, string endTime, int totalResults)
         {
             Config.RequireServerVersion(ServerVersion.RequestHistoricalNews);
-            var m = CreateMessage();
-            m.Write(RequestCode.RequestHistoricalNews, requestId, conId, providerCodes, startTime, endTime, totalResults);
-            m.Send();
+            CreateMessage()
+                .Write(RequestCode.RequestHistoricalNews, requestId, conId, providerCodes, startTime, endTime, totalResults)
+                .Send();
         }
 
         // Returns the timestamp of earliest available historical data for a contract and data type
@@ -628,8 +749,9 @@ namespace InterReact
         public void CancelHistogramData(int requestId)
         {
             Config.RequireServerVersion(ServerVersion.RequestHistogramData);
-            CreateMessage().Write(RequestCode.CancelHistogramData, requestId).Send();
+            CreateMessage()
+                .Write(RequestCode.CancelHistogramData, requestId)
+                .Send();
         }
-
     }
 }

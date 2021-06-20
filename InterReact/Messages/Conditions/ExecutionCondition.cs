@@ -25,7 +25,7 @@
                 return false;
             try
             {
-                var parser = new StringSuffixParser(cond.Replace(header, ""));
+                StringSuffixParser parser = new(cond.Replace(header, ""));
 
                 Symbol = parser.GetNextSuffixedValue(symbolSuffix);
                 Exchange = parser.GetNextSuffixedValue(exchangeSuffix);

@@ -18,7 +18,7 @@ namespace InterReact.SystemTests.Service
             HistoricalData data = await Client.Services.CreateHistoricalDataObservable(Stock1,
                 HistoricalBarSize.OneHour,
                 HistoricalDuration.OneDay)
-                .OfType<HistoricalData>();
+                .OfTypeUnionSource<HistoricalData>();
 
             Write($"\n\nStart {data.Start}, End: {data.End}\n");
             foreach (var item in data.Bars)

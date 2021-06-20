@@ -19,13 +19,13 @@ namespace InterReact
             return Response
                 .ToObservableWithIdSingle(
                     Request.GetNextId,
-                    requestId => Request.RequestScannerSubscription(
-                        requestId,
+                    id => Request.RequestScannerSubscription(
+                        id,
                         subscription,
                         subscriptionOptions),
                     Request.CancelScannerSubscription)
                 .Select(x => new Union<ScannerData, Alert>(x))
-                .ToShareSource();
+                .ShareSource();
         }
     }
 }

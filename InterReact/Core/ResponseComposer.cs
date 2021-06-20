@@ -13,7 +13,7 @@ namespace InterReact
     {
         internal static IObservable<object> ToMessages(this IObservable<string[]> source, Config config, ILogger logger)
         {
-            var responseComposer = new ResponseComposer(config, logger);
+            ResponseComposer responseComposer = new(config, logger);
             return source.Select(strings => responseComposer.Compose(strings)).SelectMany(x => x);
         }
     }
@@ -94,8 +94,8 @@ namespace InterReact
             "58" => new TickMarketDataType(reader),
             "59" => new CommissionReport(reader),
 
-            "61" => new AccountPosition(reader),
-            "62" => new AccountPositionEnd(reader),
+            "61" => new Position(reader),
+            "62" => new PositionEnd(reader),
             "63" => new AccountSummary(reader),
             "64" => new AccountSummaryEnd(reader),
             "65" => new VerifyMessageApi(reader),

@@ -27,21 +27,22 @@ namespace InterReact
 
         private static string ErrorMessage(IReadOnlyList<ContractDetails> cds)
         {
-            var c = new Contract();
-            var sb = new StringBuilder();
+            Contract c = new();
+            StringBuilder sb = new();
 
-            foreach (var property in typeof(Contract).GetTypeInfo()
+            foreach (PropertyInfo property in typeof(Contract).GetTypeInfo()
                 .DeclaredProperties
                 .Where(p => p.Name != nameof(c.ContractId) && p.Name != nameof(c.LocalSymbol))
                 .OrderBy(p => p.Name, StringComparer.Ordinal))
             {
-                var values = cds
+                List<string> values = cds
                     .Select(cd => property.GetValue(cd.Contract))
                     .Select(value => value?.ToString() ?? "(null)") // should not be null
                     .Distinct()
-                    .OrderBy(value => value, StringComparer.Ordinal);
+                    .OrderBy(value => value, StringComparer.Ordinal)
+                    .ToList();
 
-                if (values.Count() > 1)
+                if (values.Any())
                     sb.AppendFormat($"{property.Name}: {values.JoinStrings(", ")}" + Environment.NewLine + Environment.NewLine);
             }
 

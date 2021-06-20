@@ -17,8 +17,8 @@ namespace InterReact
 
             return Response.ToObservableWithIdContinuous(
                     Request.GetNextId,
-                    requestId => Request.RequestRealTimeBars(requestId, contract, whatToShow, regularTradingHours, options),
-                    requestId => Request.CancelRealTimeBars(requestId))
+                    id => Request.RequestRealTimeBars(id, contract, whatToShow, regularTradingHours, options),
+                    id => Request.CancelRealTimeBars(id))
                 .Select(x => new Union<RealtimeBar, Alert>(x))
                 .Publish().RefCount();
         }

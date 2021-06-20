@@ -10,7 +10,7 @@ namespace InterReact
 
         public static OrderCondition Create(OrderConditionType type)
         {
-            var result = type switch
+            OrderCondition result = type switch
             {
                 OrderConditionType.Execution => new ExecutionCondition() as OrderCondition,
                 OrderConditionType.Margin => new MarginCondition(),

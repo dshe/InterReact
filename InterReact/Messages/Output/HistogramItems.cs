@@ -13,7 +13,7 @@ namespace InterReact
         internal HistogramItems(ResponseReader c)
         {
             RequestId = c.ReadInt();
-            var n = c.ReadInt();
+            int n = c.ReadInt();
             for (int i = 0; i < n; i++)
                 Items.Add(new HistogramItem(c));
         }

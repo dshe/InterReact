@@ -92,24 +92,6 @@ namespace InterReact.UnitTests.Experimental
             }
         }
 
-        [Fact]
-        public async Task Test_Cancellation()
-        {
-            var observable = GetObservable();
-            var cts = new CancellationTokenSource();
-            //cts.Cancel();
-            cts.CancelAfter(100);
-            try
-            {
-                var result = await observable.CancelWhen(cts.Token);
-                Write("not cancelled");
-            }
-            catch (OperationCanceledException e)
-            {
-                Write(e.Message);
-            }
-        }
-
         /////////////////////////////////////////////////////////
 
         public byte b = 0;

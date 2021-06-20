@@ -5,10 +5,12 @@ namespace InterReact
 {
     public sealed partial class Services
     {
-        public IObservable<string> CreateManagedAccountsObservable() =>
+        public IObservable<string> ManagedAccountsObservable { get; }
+
+        private IObservable<string> CreateManagedAccountsObservable() =>
             Response
                 .ToObservableSingle<ManagedAccounts>(Request.RequestManagedAccounts)
                 .Select(m => m.Accounts)
-                .ToShareSource();
+                .ShareSource();
     }
 }

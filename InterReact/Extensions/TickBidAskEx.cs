@@ -57,7 +57,7 @@ namespace InterReact
     {
         public static IObservable<TickBidAskPrice> ToBidAskTicks(this IObservable<TickBase> source)
         {
-            var bal = new TickBidAskPrice();
+            TickBidAskPrice bal = new();
 
             return Observable.Create<TickBidAskPrice>(observer =>
             {
@@ -65,7 +65,7 @@ namespace InterReact
                     .Subscribe(Observer.Create<TickPrice>(
                         onNext: tickPrice =>
                         {
-                            var price = tickPrice.Price;
+                            double price = tickPrice.Price;
                             if (tickPrice.TickType == TickType.BidPrice && bal.BidPrice != price)
                                 bal.BidPrice = price;
                             else if (tickPrice.TickType == TickType.AskPrice && bal.AskPrice != price)

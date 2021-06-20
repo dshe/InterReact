@@ -15,6 +15,6 @@ namespace InterReact
                     id => Request.RequestFundamentalData(id, contract, reportType),
                     Request.CancelFundamentalData)
                 .Select(x => new Union<FundamentalData, Alert>(x))
-                .ToShareSource();
+                .ShareSource();
     }
 }

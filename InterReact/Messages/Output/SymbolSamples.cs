@@ -9,7 +9,7 @@ namespace InterReact
         internal SymbolSamples(ResponseReader c)
         {
             RequestId = c.ReadInt();
-            var n = c.ReadInt();
+            int n = c.ReadInt();
             for (int i = 0; i < n; i++)
                 Descriptions.Add(new ContractDescription(c));
         }

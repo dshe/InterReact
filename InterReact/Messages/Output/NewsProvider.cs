@@ -7,7 +7,7 @@ namespace InterReact
         public List<NewsProvider> Providors = new();
         internal NewsProviders(ResponseReader c)
         {
-            var n = c.ReadInt();
+            int n = c.ReadInt();
             for (int i = 0; i < n; i++)
                 Providors.Add(new NewsProvider(c));
         }

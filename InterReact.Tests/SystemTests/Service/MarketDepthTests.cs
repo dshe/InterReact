@@ -22,7 +22,7 @@ namespace InterReact.SystemTests.Service
 
             var contract = new Contract { SecurityType = SecurityType.Cash, Symbol = "USD", Currency = "JPY", Exchange = "IDEALPRO" };
 
-            var depth = Client.Services.CreateMarketDepthObservable(contract).OfType<MarketDepth>();
+            var depth = Client.Services.CreateMarketDepthObservable(contract).OfTypeUnionSource<MarketDepth>();
 
             await depth.Take(10);
         }

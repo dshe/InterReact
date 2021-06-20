@@ -26,16 +26,16 @@ namespace InterReact
                 .OrderBy(g => g.Key)
                 .ToList();
 
-            var strikes = groups.Select(y => y.Key).ToList();
+            List<double> strikes = groups.Select(y => y.Key).ToList();
 
             if (strikes.Any(key => key <= 0))
                 throw new InvalidDataException("Invalid strike.");
 
-            var pos = strikes.BinarySearch(reference);
+            int pos = strikes.BinarySearch(reference);
             if (pos < 0)
                 pos = ~pos;
 
-            var index = offset + pos;
+            int index = offset + pos;
 
             if (index < 0 || index > groups.Count - 1) // invalid index
                 return new List<ContractDetails>();

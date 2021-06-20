@@ -7,7 +7,7 @@ namespace InterReact
         public List<FamilyCode> Codes { get; } = new List<FamilyCode>();
         internal FamilyCodes(ResponseReader c)
         {
-            var n = c.ReadInt();
+            int n = c.ReadInt();
             for (int i = 0; i < n; i++)
                 Codes.Add(new FamilyCode(c));
         }

@@ -3,25 +3,22 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
-using NodaTime;
 using Stringification;
 
 namespace InterReact
 {
     public sealed partial class Services
     {
-        //private readonly Dictionary<string, IObservable<IContractDetails[]>> cache = new();
-        //public Duration ContractDataExpiry { get; set; } = Duration.FromHours(12);
+        private readonly Dictionary<string, IObservable<Union<ContractDetails, Alert>>> ContractDetailsCache = new();
 
         /// <summary>
-        /// Returns an observable which emits a list of ContractData objects using the supplied contract as selector, then completes.
-        /// Results are cached. The default cache expiry is 12 hours.
+        /// Returns an observable which emits a list of ContractDetails objects. and possibly alerts,
+        /// using the supplied contract as selector, then completes. Results are cached. 
         /// If expiry is not specified, ContractData objects are retrieved for all expiries.
         /// If strike is not specified, ContractData objects are retrieved for all strikes.
         /// And so on. So beware that calling this method may result in attempting to retrieve a large number of contracts.
-        /// This operation may take a long time and is subject to usage limiting, so you may want to append the Timeout() operator.
-        /// Unfortunately, this operation may not be cancelled.
+        /// This operation may take a long time and is subject to usage limiting, 
+        /// so you may want to append the Timeout() operator.
         /// This observable may be chained to the contract details filters located in the Extensions namespace.
         /// </summary>
         public IObservable<Union<ContractDetails, Alert>> CreateContractDetailsObservable(Contract contract)
@@ -35,27 +32,27 @@ namespace InterReact
             if ((contract.SecurityIdType == null || contract.SecurityIdType == SecurityIdType.Undefined) ^ string.IsNullOrEmpty(contract.SecurityId))
                 throw new ArgumentException("Invalid SecurityId/SecurityIdType combination.");
 
-            return Response
-                .ToObservableWithIdMultiple<ContractDetailsEnd>(
-                    Request.GetNextId, id => Request.RequestContractData(id, contract))
-                .Select(x => new Union<ContractDetails, Alert>(x));
-            /*
-            return Observable.Create<IContractDetails[]>(observer =>
+            string key = contract.Stringify();
+
+            return Observable.Create<Union<ContractDetails, Alert>>(observer =>
             {
-                // This key identifies the request, not necessarily the contract details(s) returned.
-                var key = contract.Stringify();
-                lock (cache)
+                lock (ContractDetailsCache)
                 {
-                    if (!cache.TryGetValue(key, out IObservable<IContractDetails[]>? item))
+                    if (!ContractDetailsCache.TryGetValue(key, out IObservable<Union<ContractDetails, Alert>>? item))
                     {
-                        item = ContractDataObservableImpl(contract).ToAsyncSource(ContractDataExpiry, Config.Clock);
-                        cache.Add(key, item);
+                        item = ContractDetailsObservableImpl(contract).Replay().RefCount();
+                        ContractDetailsCache.Add(key, item);
                     }
                     return item.Subscribe(observer);
                 }
             });
-            */
         }
-    }
 
+        private IObservable<Union<ContractDetails, Alert>> ContractDetailsObservableImpl(Contract contract) =>
+            Response
+                .ToObservableWithIdMultiple<ContractDetailsEnd>(
+                    Request.GetNextId, id => Request.RequestContractDetails(id, contract))
+                .Select(x => new Union<ContractDetails, Alert>(x));
+    }
 }
+

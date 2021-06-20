@@ -14,7 +14,7 @@ namespace InterReact.SystemTests.Other
         [Fact]
         public async Task TestTime()
         {
-            var dt = await Client.Services.CreateCurrentTimeObservable();
+            var dt = await Client.Services.CurrentTimeObservable;
             //Assert.Equal(DateTimeZone.Utc, dt.Zone);
             //Assert.InRange((DateTime.UtcNow - dt).Duration().TotalSeconds, 0, 3);
             //Write($"Time: {dt}");

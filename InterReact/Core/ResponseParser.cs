@@ -77,7 +77,7 @@ namespace InterReact
 
         internal T ParseEnum<T>(string numberString) where T : Enum
         {
-            var type = typeof(T);
+            Type type = typeof(T);
             if (!enumCache.TryGetValue(type, out var enumValues))
             {
                 enumValues = Enum.GetValues(type).OfType<object>().ToDictionary(x => ((int)(x)).ToString());
@@ -85,7 +85,7 @@ namespace InterReact
             }
             if (!enumValues.TryGetValue(numberString, out object? e))
             {
-                if (!int.TryParse(numberString, out var number))
+                if (!int.TryParse(numberString, out int number))
                     throw new ArgumentException($"ParseEnum<{type.Name}>('{numberString}') is not an integer.");
                 e = Enum.ToObject(type, number);
                 enumValues.Add(numberString, e);
@@ -96,7 +96,7 @@ namespace InterReact
 
         internal T ParseStringEnum<T>(string s) where T : StringEnum<T>, new()
         {
-            var e = StringEnum<T>.ToStringEnum(s);
+            T? e = StringEnum<T>.ToStringEnum(s);
             if (e == null)
             {
                 e = StringEnum<T>.Add(s);

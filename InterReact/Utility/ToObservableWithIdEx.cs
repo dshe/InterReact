@@ -8,18 +8,18 @@ namespace InterReact
     // For requests that use RequestId.
     public static partial class Extensions
     {
-        // Single result: HistoricalData, FundamentalData, ScannerData
+        // Single result: HistoricalData, FundamentalData, ScannerData, SymbolSamples.
         internal static IObservable<IHasRequestId> ToObservableWithIdSingle(this IObservable<object> source,
             Func<int> getNextId, Action<int> startRequest, Action<int>? stopRequest = null)
         {
             return Observable.Create<IHasRequestId>(observer =>
             {
-                int requestId = getNextId();
+                int id = getNextId();
                 bool? cancelable = null;
 
                 IDisposable subscription = source
                     .OfType<IHasRequestId>()
-                    .Where(m => m.RequestId == requestId)
+                    .Where(m => m.RequestId == id)
                     .Finally(() => cancelable = false)
                     .SubscribeSafe(Observer.Create<IHasRequestId>(
                         onNext: m =>
@@ -34,87 +34,74 @@ namespace InterReact
                         onCompleted: observer.OnCompleted));
 
                 if (cancelable == null)
-                    startRequest(requestId);
+                    startRequest(id);
                 if (cancelable == null)
                     cancelable = true;
 
                 return Disposable.Create(() =>
                 {
                     if (cancelable == true)
-                        stopRequest?.Invoke(requestId);
+                        stopRequest?.Invoke(id);
                     subscription.Dispose();
                 });
             });
         }
 
 
-        // Multiple results: TickSnapshot, ContractData, AccountSummary, Executions
+        // Multiple results: TickSnapshot, ContractDetails, Executions.
         internal static IObservable<IHasRequestId> ToObservableWithIdMultiple<TEnd>(
-            this IObservable<object> source, Func<int> getNextId, Action<int> startRequest, Action<int>? stopRequest = null)
+            this IObservable<object> source, Func<int> getNextId, Action<int> startRequest)
                 where TEnd: IHasRequestId
         {
             return Observable.Create<IHasRequestId>(observer =>
             {
-                int requestId = getNextId();
-                bool? cancelable = null;
+                int id = getNextId();
 
                 IDisposable subscription = source
                     .OfType<IHasRequestId>()
-                    .Where(m => m.RequestId == requestId)
-                    .Finally(() => cancelable = false)
+                    .Where(m => m.RequestId == id)
                     .SubscribeSafe(Observer.Create<IHasRequestId>(
                         onNext: m =>
                         {
-                            if (m is not TEnd)
-                            {
+                            if (m is TEnd)
+                                observer.OnCompleted();
+                            else
                                 observer.OnNext(m);
-                                return;
-                            }
-                            cancelable = false;
-                            observer.OnCompleted();
                         },
                         onError: observer.OnError,
                         onCompleted: observer.OnCompleted));
 
-                if (cancelable == null)
-                    startRequest(requestId);
-                if (cancelable == null)
-                    cancelable = true;
+                startRequest(id);
 
-                return Disposable.Create(() =>
-                {
-                    if (cancelable == true)
-                        stopRequest?.Invoke(requestId);
-                    subscription.Dispose();
-                });
+                return subscription;
             });
         }
 
 
-        // Continuous results: Tick, MarketDepth, RealtimeBar
+        // Continuous results: AccountSummary, Tick, MarketDepth, RealtimeBar.
         internal static IObservable<IHasRequestId> ToObservableWithIdContinuous(this IObservable<object> source,
             Func<int> getNextId, Action<int> startRequest, Action<int> stopRequest)
         {
             return Observable.Create<IHasRequestId>(observer =>
             {
-                int requestId = getNextId();
+                int id = getNextId();
                 bool? cancelable = null;
 
                 IDisposable subscription = source
                     .OfType<IHasRequestId>()
-                    .Where(m => m.RequestId == requestId)
+                    .Where(m => m.RequestId == id)
                     .Finally(() => cancelable = false)
                     .SubscribeSafe(observer);
 
                 if (cancelable == null)
-                    startRequest(requestId);
+                    startRequest(id);
                 if (cancelable == null)
                     cancelable = true;
 
                 return Disposable.Create(() =>
                 {
                     if (cancelable == true)
-                        stopRequest.Invoke(requestId);
+                        stopRequest.Invoke(id);
                     subscription.Dispose();
                 });
             });

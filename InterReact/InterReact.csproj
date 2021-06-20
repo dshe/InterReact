@@ -21,12 +21,17 @@
     <Compile Remove="Extensions\CollectionBinarySearcherExtensions.cs" />
     <Compile Remove="Utility\TryConstructSubclassTaking.cs" />
     <Compile Remove="~\AccountObservableCollections.cs" />
+    <Compile Remove="~\CancelWhenEx.cs" />
     <Compile Remove="~\DistinctByExtension.cs" />
     <Compile Remove="~\MarketDepthObservableCollections.cs" />
     <Compile Remove="~\NotifyPropertyChanged.cs" />
     <Compile Remove="~\OrderMonitor.cs" />
     <Compile Remove="~\ReadOnlyObservableList.cs" />
+    <Compile Remove="~\ToAsyncSourceEx.cs" />
+    <Compile Remove="~\ToAsyncSourceTests.cs" />
+    <Compile Remove="~\ToCacheSourceEx.cs" />
     <Compile Remove="~\ToObservableCollectionEx.cs" />
+    <Compile Remove="~\WhereNotNullEx.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,6 +43,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="~\CancelWhenEx.cs" />
+    <None Include="~\ToAsyncSourceEx.cs" />
+    <None Include="~\ToAsyncSourceTests.cs" />
+    <None Include="~\ToCacheSourceEx.cs" />
     <None Include="~\TryConstructSubclassTaking.cs" />
     <None Include="~\CollectionBinarySearcherExtensions.cs" />
     <None Include="worm64.png" Pack="true" PackagePath="\" />
@@ -48,6 +57,7 @@
     <None Include="~\OrderMonitor.cs" />
     <None Include="~\ReadOnlyObservableList.cs" />
     <None Include="~\ToObservableCollectionEx.cs" />
+    <None Include="~\WhereNotNullEx.cs" />
   </ItemGroup>
 
 </Project>

@@ -11,6 +11,6 @@ namespace InterReact
         public IObservable<FinancialAdvisor> CreateFinancialAdvisorConfigurationObservable(FinancialAdvisorDataType type) =>
             Response
                 .ToObservableSingle<FinancialAdvisor>(() => Request.RequestFinancialAdvisorConfiguration(type))
-                .ToShareSource();
+                .ShareSource();
     }
 }

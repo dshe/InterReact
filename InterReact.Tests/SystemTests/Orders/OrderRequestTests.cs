@@ -21,7 +21,7 @@ namespace InterReact.SystemTests.Orders
 
             var task = Client.Response
                 .OfType<Execution>()
-                .WithOrderId(Id)
+                .Where(x => x.RequestId == Id)
                 .FirstAsync().Timeout(TimeSpan.FromSeconds(3)).ToTask();
 
             var order = new Order
@@ -46,7 +46,7 @@ namespace InterReact.SystemTests.Orders
             // find the price
             var taskPrice = Client.Response
                 .OfType<TickPrice>()
-                .WithRequestId(Id)
+                .Where(x => x.RequestId == Id)
                 .Where(x => x.TickType == TickType.AskPrice)
                 .FirstAsync()
                 .Timeout(TimeSpan.FromSeconds(3))
@@ -61,7 +61,7 @@ namespace InterReact.SystemTests.Orders
             // place the order
             var taskOpenOrder = Client.Response
                 .OfType<OpenOrder>()
-                .WithOrderId(Id)
+                .Where(x => x.OrderId == Id)
                 .FirstAsync()
                 .Timeout(TimeSpan.FromSeconds(3))
                 .ToTask();
@@ -82,7 +82,7 @@ namespace InterReact.SystemTests.Orders
             // cancel the order
             var taskCancelled = Client.Response
                 .OfType<OrderStatusReport>()
-                .WithOrderId(Id)
+                .Where(x => x.OrderId == Id)
                 .Where(x => x.Status == OrderStatus.Cancelled)
                 .FirstAsync()
                 .Timeout(TimeSpan.FromSeconds(3))
@@ -112,7 +112,7 @@ namespace InterReact.SystemTests.Orders
         {
             var task = Client.Response
                 .OfType<ExecutionEnd>()
-                .WithRequestId(Id)
+                .Where(x => x.RequestId == Id)
                 .FirstAsync()
                 .Timeout(TimeSpan.FromSeconds(3))
                 .ToTask();

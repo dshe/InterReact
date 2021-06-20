@@ -25,7 +25,7 @@ namespace InterReact.ConnectTests
         protected async Task TestClient(IInterReactClient client)
         {
             client.Response.StringifyItems().Subscribe(s => Write($"response: {s}"));
-            var instant = await client.Services.CreateCurrentTimeObservable();
+            var instant = await client.Services.CurrentTimeObservable;
             Write($"Instant: {instant}");
             await Task.Delay(500);
         }

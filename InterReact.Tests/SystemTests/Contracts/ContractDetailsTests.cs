@@ -20,7 +20,7 @@ namespace InterReact.SystemTests.Contracts
             var item = await Client.Services
                 .CreateContractDetailsObservable(c)
                 .Timeout(TimeSpan.FromSeconds(10))
-                .OfType<ContractDetails>()
+                .OfTypeUnionSource<ContractDetails>()
                 .ToList();
             Assert.Equal(1, item.Count);
         }
@@ -39,7 +39,7 @@ namespace InterReact.SystemTests.Contracts
             var contract = new Contract { ContractId = 8314 };
             var cds = await Client.Services
                 .CreateContractDetailsObservable(contract)
-                .OfType<ContractDetails>()
+                .OfTypeUnionSource<ContractDetails>()
                 .ToList();
             Assert.Equal("IBM", cds.Single().Contract.Symbol);
         }

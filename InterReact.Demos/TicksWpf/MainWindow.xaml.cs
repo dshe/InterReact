@@ -118,10 +118,13 @@ namespace TicksWpf
 
             Client.Response.Subscribe(x => Debug.WriteLine(x.Stringify()));
 
+            Client.Request.RequestPositions();
+            Client.Request.RequestAccountSummary(99);
+            Client.Request.RequestAccountUpdates(true);
+
             Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
             SymbolSubject
-                .Throttle(TimeSpan.FromMilliseconds(600))
                 .DistinctUntilChanged()
                 .ObserveOn(Application.Current.Dispatcher)
                 .Subscribe(UpdateSymbol);
@@ -131,6 +134,7 @@ namespace TicksWpf
         {
             var t0 = Thread.CurrentThread.ManagedThreadId;
             var t1 = Application.Current.Dispatcher.Thread.ManagedThreadId;
+            Debug.WriteLine($"Symbol: {symbol}");
 
             Description = "";
             BidPrice = AskPrice = LastPrice = 0;
@@ -150,15 +154,16 @@ namespace TicksWpf
             };
 
             // Create the observable and capture the single contract details object to determine the full name of the contract.
-            //ContractDetails cd = await InterReactInstance!.Services.CreateContractDataObservable(contract).ContractDataSingle();
             var response = Client!.Services.CreateContractDetailsObservable(contract);
-            response.OfType<Alert>().Subscribe(alert =>
+
+            response.OfTypeUnionSource<Alert>().Subscribe(alert =>
             {
                 MessageBox.Show($"ContractDetails:\n\n {alert.Message}");
                 return;
             });
 
-            var cds = await response.OfType<ContractDetails>().ToList();
+
+            var cds = await response.OfTypeUnionSource<ContractDetails>().ToList();
 
             // Multiple contracts may be returned. Take the first one.
             var cd = cds.FirstOrDefault();
@@ -168,7 +173,7 @@ namespace TicksWpf
             // Display the stock name in the title bar.
             Description = cd.LongName;
 
-            SubscribeToTicks(contract);
+            //SubscribeToTicks(contract);
         }
 
         private void SubscribeToTicks(Contract contract)

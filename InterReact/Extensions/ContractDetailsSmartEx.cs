@@ -15,10 +15,10 @@ namespace InterReact
 
         internal static List<ContractDetails> ContractDataSmartFilter(IEnumerable<ContractDetails> cds)
         {
-            var list = new List<ContractDetails>();
+            List<ContractDetails> list = new();
             foreach (var group in cds.GroupBy(cd => cd.Contract.ContractId))
             {
-                var smart = group.Where(cd => cd.Contract.Exchange == "SMART").ToList();
+                List<ContractDetails> smart = group.Where(cd => cd.Contract.Exchange == "SMART").ToList();
                 if (smart.Any())
                     list.AddRange(smart);
                 else

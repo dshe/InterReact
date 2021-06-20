@@ -11,7 +11,7 @@ namespace InterReact
         public HistoricalTicks(ResponseReader c)
         {
             RequestId = c.ReadInt();
-            var n = c.ReadInt();
+            int n = c.ReadInt();
             for (int i = 0; i < n; i++)
                 Ticks.Add(new HistoricalTick(c));
             Done = c.ReadBool();
@@ -41,7 +41,7 @@ namespace InterReact
         public HistoricalLastTicks(ResponseReader c)
         {
             RequestId = c.ReadInt();
-            var n = c.ReadInt();
+            int n = c.ReadInt();
 
             Ticks = Enumerable.Repeat(new HistoricalLastTick(c), n).ToList();
             Done = c.ReadBool();
@@ -76,7 +76,7 @@ namespace InterReact
         public HistoricalBidAskTicks(ResponseReader c)
         {
             RequestId = c.ReadInt();
-            var n = c.ReadInt();
+            int n = c.ReadInt();
             for (int i = 0; i < n; i++)
                 Ticks.Add(new HistoricalTick(c));
             Done = c.ReadBool();

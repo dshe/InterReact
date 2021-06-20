@@ -1,22 +1,22 @@
 ﻿namespace InterReact
 {
-    public sealed class AccountPosition
+    public sealed class Position
     {
         public string Account { get; init; }
         public Contract Contract { get; init; }
-        public double Position { get; init; }
+        public double Quantity { get; init; }
         public double AverageCost { get; init; }
-        public AccountPosition()
+        public Position()
         {
             Account = "";
             Contract = new Contract();
         }
-        internal AccountPosition(ResponseReader c)
+        internal Position(ResponseReader c)
         {
             c.RequireVersion(3);
             Account = c.ReadString();
             Contract = GetContract();
-            Position = c.Config.SupportsServerVersion(ServerVersion.FractionalPositions) ? c.ReadDouble() : c.ReadInt();
+            Quantity = c.Config.SupportsServerVersion(ServerVersion.FractionalPositions) ? c.ReadDouble() : c.ReadInt();
             AverageCost = c.ReadDouble();
 
             Contract GetContract() => new()
@@ -36,8 +36,8 @@
         }
     }
 
-    public sealed class AccountPositionEnd
+    public sealed class PositionEnd
     {
-        internal AccountPositionEnd(ResponseReader c) => c.IgnoreVersion();
+        internal PositionEnd(ResponseReader c) => c.IgnoreVersion();
     }
 }

@@ -16,14 +16,14 @@ namespace InterReact.SystemTests.Service
         [Fact]
         public async Task T01_ManagedAccounts()
         {
-            var accounts = await Client.Services.CreateManagedAccountsObservable();
+            var accounts = await Client.Services.ManagedAccountsObservable;
             Assert.NotEmpty(accounts);
         }
 
         [Fact]
         public async Task T02_AccountPositions()
         {
-            var list = await Client.Services.CreateAccountPositionsObservable().ToList();
+            var list = await Client.Services.PositionsObservable.ToList();
             // The demo account may or may not have positions.
             Logger.LogInformation("resr");
 
@@ -34,7 +34,7 @@ namespace InterReact.SystemTests.Service
         [Fact]
         public async Task T03_AccountSummary()
         {
-            var list = await Client.Services.CreateAccountSummaryObservable().ToList();
+            var list = await Client.Services.AccountSummaryObservable.ToList();
             Assert.NotEmpty(list);
         }
 
@@ -42,7 +42,7 @@ namespace InterReact.SystemTests.Service
         public async Task T04_AccountUpdates()
         {
             // Results are cached so that all subscribers receive everything.
-            var updates = Client.Services.CreateAccountUpdatesObservable();
+            var updates = Client.Services.AccountUpdatesObservable;
 
             //var connection = updates.Connect();
 

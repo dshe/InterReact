@@ -11,10 +11,24 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Experimental
 {
-    public class A
+    public partial class A
     {
+        private readonly int X;
+        public A()
+        {
+            X = Init();
+        }
         public override string ToString() => "A";
     }
+    public partial class A
+    {
+        public int Init()
+        {
+            return 1;
+        }
+    }
+
+
     public class B
     {
         public override string ToString() => "B";

@@ -58,7 +58,7 @@
 
         internal OrderStatusReport(ResponseReader c)
         {
-            var version = c.ReadInt();
+            int version = c.ReadInt();
             OrderId = c.ReadInt();
             Status = c.ReadStringEnum<OrderStatus>();
 

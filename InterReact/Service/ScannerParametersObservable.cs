@@ -8,10 +8,12 @@ namespace InterReact
         /// <summary>
         /// An observable which, upon subscription, emits scanner parameters, then completes.
         /// </summary>
-        public IObservable<string> CreateScannerParametersObservable() =>
+        public IObservable<string> ScannerParametersObservable { get; }
+
+        private IObservable<string> CreateScannerParametersObservable() =>
             Response
                 .ToObservableSingle<ScannerParameters>(Request.RequestScannerParameters)
                 .Select(m => m.Parameters)
-                .ToShareSource();
+                .ShareSource();
     }
 }

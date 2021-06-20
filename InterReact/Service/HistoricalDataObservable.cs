@@ -23,8 +23,8 @@ namespace InterReact
                 Response
                     .ToObservableWithIdSingle(
                         Request.GetNextId,
-                        requestId => Request.RequestHistoricalData(
-                            requestId,
+                        id => Request.RequestHistoricalData(
+                            id,
                             contract,
                             end,
                             duration,
@@ -34,6 +34,6 @@ namespace InterReact
                             options),
                         Request.CancelHistoricalData)
                     .Select(x => new Union<HistoricalData, Alert>(x))
-                    .ToShareSource();
+                    .ShareSource();
     }
 }

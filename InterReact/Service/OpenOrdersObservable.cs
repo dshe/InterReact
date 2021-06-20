@@ -24,7 +24,7 @@ namespace InterReact
                 .Where(m => m is OpenOrder || m is OrderStatusReport || m is OpenOrderEnd)
                 .ToObservableMultiple<OpenOrderEnd>(start)
                 .Select(x => new Union<OpenOrder, OrderStatusReport>(x))
-                .ToShareSource();
+                .ShareSource();
         }
     }
 

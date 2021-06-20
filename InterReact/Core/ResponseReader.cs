@@ -50,20 +50,20 @@ namespace InterReact
         internal int GetVersion() => ReadInt();
         internal int RequireVersion(int minimumVersion)
         {
-            var v = GetVersion();
+            int v = GetVersion();
             if (v < minimumVersion)
                 throw new InvalidDataException($"Invalid response version: {v} < {minimumVersion}.");
             return v;
         }
         internal void AddStringsToList(IList<string> list)
         {
-            var n = ReadInt();
+            int n = ReadInt();
             for (int i = 0; i < n; i++)
                 list.Add(ReadString());
         }
         internal void AddTagsToList(IList<Tag> list)
         {
-            var n = ReadInt();
+            int n = ReadInt();
             for (int i = 0; i < n; i++)
                 list.Add(new Tag(this));
         }

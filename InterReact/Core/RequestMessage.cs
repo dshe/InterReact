@@ -31,7 +31,7 @@ namespace InterReact
                 Strings.Add(string.Empty);
             else if (objs.Length == 0)
                 throw new ArgumentException("invalid length", nameof(objs));
-            else foreach (var o in objs)
+            else foreach (object? o in objs)
                     Strings.Add(GetString(o));
             return this;
         }
@@ -48,16 +48,16 @@ namespace InterReact
                 case bool bo:
                     return bo ? "1" : "0";
                 case Enum e:
-                    var ut = Enum.GetUnderlyingType(e.GetType());
+                    Type ut = Enum.GetUnderlyingType(e.GetType());
                     return Convert.ChangeType(e, ut).ToString() ?? "";
             }
 
-            var type = o.GetType();
+            Type type = o.GetType();
 
             if (type.IsStringEnum())
                 return o.ToString() ?? "";
 
-            var utype = Nullable.GetUnderlyingType(type);
+            Type? utype = Nullable.GetUnderlyingType(type);
             if (utype != null)
             {
                 if (utype != typeof(int) && utype != typeof(long) && utype != typeof(double))

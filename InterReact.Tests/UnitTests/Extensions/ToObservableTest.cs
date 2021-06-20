@@ -61,9 +61,7 @@ namespace InterReact.UnitTests.Extensions
                     subject.OnNext(new SomeClass());
                     subject.OnNext(new SomeClass());
                     subject.OnNext(new SomeClassEnd());
-                },
-                () =>
-                    Interlocked.Increment(ref unsubscribeCalls));
+                });
             var list = await observable.ToList();
             Assert.Equal(2, list.Count);
             Assert.Equal(1, subscribeCalls);

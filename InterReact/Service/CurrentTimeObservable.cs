@@ -6,10 +6,16 @@ namespace InterReact
 {
     public sealed partial class Services
     {
-        public IObservable<Instant> CreateCurrentTimeObservable() =>
+        /// <summary>
+        /// An observable which emits the current time, then completes.
+        /// </summary>
+        public IObservable<Instant> CurrentTimeObservable { get; }
+
+        private IObservable<Instant> CreateCurrentTimeObservable() =>
             Response
                 .ToObservableSingle<CurrentTime>(Request.RequestCurrentTime)
                 .Select(m => m.Time)
-                .ToShareSource();
+                .ShareSource();
     }
 }
+

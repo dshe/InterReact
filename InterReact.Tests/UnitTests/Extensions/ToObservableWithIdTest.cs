@@ -74,11 +74,6 @@ namespace InterReact.UnitTests.Extensions
                     subject.OnNext(new SomeClass());
                     subject.OnNext(new SomeClass());
                     subject.OnNext(new SomeClassEnd());
-                },
-                requestId =>
-                {
-                    Assert.Equal(Id, requestId);
-                    Interlocked.Increment(ref unsubscribeCalls);
                 });
             var list = await observable.ToList();
             Assert.Equal(2, list.Count);
@@ -118,11 +113,6 @@ namespace InterReact.UnitTests.Extensions
                     Assert.Equal(Id, requestId);
                     Interlocked.Increment(ref subscribeCalls);
                     subject.OnNext(new Alert(requestId, 1, "some error"));
-                },
-                requestId =>
-                {
-                    Assert.Equal(Id, requestId);
-                    Interlocked.Increment(ref unsubscribeCalls);
                 });
             var alert = await Assert.ThrowsAsync<InvalidOperationException>(async () => await observable);
             //Assert.Equal(Id, alert.RequestId);

@@ -16,8 +16,8 @@ namespace InterReact
 
             return Response.ToObservableWithIdContinuous(
                     Request.GetNextId,
-                    requestId => Request.RequestMarketDepth(requestId, contract, rows, options),
-                    requestId => Request.CancelMarketDepth(requestId))
+                    id => Request.RequestMarketDepth(id, contract, rows, options),
+                    id => Request.CancelMarketDepth(id))
                 .Select(x => new Union<MarketDepth, Alert>(x));
         }
     }

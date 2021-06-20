@@ -163,11 +163,11 @@
             if (messageVersion >= 29)
             {
                 int n = c.ReadInt();
-                for (var i = 0; i < n; i++)
+                for (int i = 0; i < n; i++)
                     Contract.ComboLegs.Add(new ContractComboLeg(c));
 
                 n = c.ReadInt();
-                for (var i = 0; i < n; i++)
+                for (int i = 0; i < n; i++)
                     Order.ComboLegs.Add(new OrderComboLeg(c.ReadDoubleNullable()));
             }
 

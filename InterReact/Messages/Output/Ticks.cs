@@ -3,6 +3,7 @@ using NodaTime;
 
 namespace InterReact
 {
+    // ITick is also be set on Alert
     public interface ITick : IHasRequestId { }
 
     public abstract class TickBase : ITick
@@ -200,9 +201,9 @@ namespace InterReact
         internal static TickBase Create(ResponseReader c)
         {
             c.IgnoreVersion();
-            var requestId = c.ReadInt();
-            var tickType = c.ReadEnum<TickType>();
-            var value = c.ReadDouble();
+            int requestId = c.ReadInt();
+            TickType tickType = c.ReadEnum<TickType>();
+            double value = c.ReadDouble();
             if (tickType == TickType.Halted)
                 return new TickHalted(requestId, tickType, value == 0 ? HaltType.NotHalted : HaltType.GeneralHalt);
             return new TickGeneric(requestId, tickType, value);
@@ -249,7 +250,7 @@ namespace InterReact
         public double? UndPrice { get; }
         internal TickOptionComputation(ResponseReader c)
         {
-            var version = c.GetVersion();
+            int version = c.GetVersion();
             RequestId = c.ReadInt();
             TickType = c.ReadEnum<TickType>();
             ImpliedVolatility = c.ReadDoubleNullable();

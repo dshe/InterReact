@@ -8,6 +8,19 @@ namespace InterReact
     public sealed partial class Services
     {
         /// <summary>
+        /// Creates an observable which emits a snapshot of market ticks, then completes.
+        /// </summary>
+        public IObservable<ITick> CreateTickSnapshotObservable(Contract contract)
+        {
+            return Response
+                .ToObservableWithIdMultiple<TickSnapshotEnd>(
+                    Request.GetNextId,
+                    id => Request.RequestMarketData(id, contract, genericTickTypes: null, isSnapshot: true))
+                .Cast<ITick>()
+                .ShareSource();
+        }
+
+        /// <summary>
         /// Creates an observable which continually emits market data ticks for the specified contract.
         /// The latest values are cached for replay to new subscribers.
         /// Call Publish() Connect() to start receiving updates.
@@ -22,23 +35,26 @@ namespace InterReact
             return Response
                 .ToObservableWithIdContinuous(
                     Request.GetNextId,
-                    requestId => Request.RequestMarketData(requestId, contract, genericTickTypes, marketDataOff, false, options),
-                    requestId => Request.CancelMarketData(requestId))
-            .Cast<ITick>();
+                    id => Request.RequestMarketData(id, contract, genericTickTypes, marketDataOff, false, options),
+                    id => Request.CancelMarketData(id))
+            .Cast<ITick>()
+            .ShareSourceCache(GetCacheKey);
+
+            // local
+            static string GetCacheKey(ITick itick)
+            {
+                return itick switch
+                {
+                    TickPrice tp => $"{tp.TickType}+{tp.TickAttrib}",
+                    TickSize ts => $"{ts.TickType}",
+                    Alert alert => $"{alert.Code}+{alert.Message}",
+                    _ => ""
+                };
+            }
+
+
         }
 
-        /// <summary>
-        /// Creates an observable which emits a snapshot of market ticks, then completes.
-        /// </summary>
-        public IObservable<ITick> CreateTickSnapshotObservable(Contract contract)
-        {
-            return Response
-                .ToObservableWithIdMultiple<TickSnapshotEnd>(
-                    Request.GetNextId,
-                    requestId => Request.RequestMarketData(requestId, contract, genericTickTypes: null, isSnapshot: true))
-                .Cast<ITick>()
-                .ToShareSource();
-        }
     }
 
     public class TickSelector

@@ -14,7 +14,7 @@ namespace InterReact.SystemTests.Other
         [Fact]
         public async Task TestNewsBulletins()
         {
-            var sub = Client.Services.CreateNewsBulletinsObservable().StringifyItems().Subscribe(x => Write(x));
+            var sub = Client.Services.NewsBulletinsObservable.StringifyItems().Subscribe(x => Write(x));
             // allow some time to print news bulletins, if any, to the console.
             await Task.Delay(1000);
             sub.Dispose();

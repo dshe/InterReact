@@ -9,7 +9,7 @@ namespace InterReact
     // For requests that do not use requestId. 
     public static partial class Extensions
     {
-        // Returns a single result: CurrentTime, ManagedAccounts, ScannerParameters
+        // Returns a single result: CurrentTime, FinancialAdvisor, ManagedAccounts, ScannerParameters.
         internal static IObservable<T> ToObservableSingle<T>
             (this IObservable<object> source, Action startRequest)
         {
@@ -33,46 +33,32 @@ namespace InterReact
         }
 
 
-        // Multiple results: AccountPositions, OpenOrders
-        internal static IObservable<object> ToObservableMultiple<TEnd>(this IObservable<object> filteredSource,
-            Action startRequest, Action? stopRequest = null)
+        // Multiple results: OpenOrders.
+        internal static IObservable<object> ToObservableMultiple<TEnd>(
+            this IObservable<object> filteredSource, Action startRequest)
         {
             return Observable.Create<object>(observer =>
             {
-                bool? cancelable = null;
-
                 IDisposable subscription = filteredSource
-                    .Finally(() => cancelable = false)
                     .SubscribeSafe(Observer.Create<object>(
                         onNext: o =>
                         {
                             if (o is TEnd)
-                            {
-                                cancelable = false;
                                 observer.OnCompleted();
-                                return;
-                            }
-                            observer.OnNext(o);
+                            else
+                                observer.OnNext(o); // IMPORTANT!
                         },
                         onError: observer.OnError,
                         onCompleted: observer.OnCompleted));
 
-                if (cancelable == null)
-                    startRequest();
-                if (cancelable == null)
-                    cancelable = true;
+                startRequest();
 
-                return Disposable.Create(() =>
-                {
-                    if (cancelable == true)
-                        stopRequest?.Invoke();
-                    subscription.Dispose();
-                });
+                return subscription;
             });
         }
 
 
-        // Continuous results: AccountUpdate, NewsBulletins
+        // Continuous results: AccountUpdates, NewsBulletins, Positions.
         internal static IObservable<T> ToObservableContinuous<T>(this IObservable<T> filteredSource,
             Action startRequest, Action stopRequest)
         {
