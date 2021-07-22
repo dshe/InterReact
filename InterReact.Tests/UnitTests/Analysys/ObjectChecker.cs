@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Analysis
 {
-    public class Interface_Checker : BaseUnitTest
+    public class Interface_Checker : UnitTestsBase
     {
         public Interface_Checker(ITestOutputHelper output) : base(output) { }
 

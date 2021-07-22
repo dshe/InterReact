@@ -117,9 +117,9 @@ namespace InterReact
                 await rxSocket.DisposeAsync().ConfigureAwait(false);
                 throw;
             }
-    }
+        }
 
-    private static async Task<IRxSocketClient> ConnectAsync(Config config, ILogger logger, CancellationToken ct)
+        private static async Task<IRxSocketClient> ConnectAsync(Config config, ILogger logger, CancellationToken ct)
         {
             foreach (int port in config.Ports)
             {

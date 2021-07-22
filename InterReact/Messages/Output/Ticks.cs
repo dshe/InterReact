@@ -6,7 +6,7 @@ namespace InterReact
     // ITick is also be set on Alert
     public interface ITick : IHasRequestId { }
 
-    public abstract class TickBase : ITick
+    public abstract class BaseTick : ITick
     {
         public int RequestId { get; protected set; }
         public TickType TickType { get; protected set; } = TickType.Undefined;
@@ -20,14 +20,14 @@ namespace InterReact
             int size = version >= 2 ? r.ReadInt() : 0;
 
             TickAttrib attr = new(version >= 3 ? r : null);
-            TickPrice tickPrice = new(requestId, priceTickType, price, attr);
+            PriceTick tickPrice = new(requestId, priceTickType, price, attr);
 
             if (version >= 2)
             {
                 TickType tickTypeSize = GetTickTypeSize(priceTickType);
                 if (tickTypeSize != TickType.Undefined)
                 {
-                    TickSize tickSize = new(requestId, tickTypeSize, size);
+                    SizeTick tickSize = new(requestId, tickTypeSize, size);
                     return new object[] { tickPrice, tickSize };
                 }
             }
@@ -77,16 +77,16 @@ namespace InterReact
     /// <summary>
     /// Size only. For example, a trade/bid/ask at the previous trade/bid/ask price.
     /// </summary>
-    public sealed class TickSize : TickBase
+    public sealed class SizeTick : BaseTick
     {
         public int Size { get; }
-        internal TickSize(int requestId, TickType tickType, int size)
+        internal SizeTick(int requestId, TickType tickType, int size)
         {
             RequestId = requestId;
             TickType = tickType;
             Size = size;
         }
-        internal TickSize(ResponseReader r)
+        internal SizeTick(ResponseReader r)
         {
             r.IgnoreVersion();
             RequestId = r.ReadInt();
@@ -102,13 +102,13 @@ namespace InterReact
     /// You can either choose to ignore the size property in TickPrice,
     /// or else filter out the redundant TickSize messages using TickRedundentSizeFilter.
     /// </summary>
-    public sealed class TickPrice : TickBase
+    public sealed class PriceTick : BaseTick
     {
         public double Price { get; }
         public TickAttrib TickAttrib { get; }
 
-        internal TickPrice() { TickAttrib = new TickAttrib(); } // ctor for Stringify
-        internal TickPrice(int requestId, TickType tickType, double price, TickAttrib attrib)
+        internal PriceTick() { TickAttrib = new TickAttrib(); } // ctor for Stringify
+        internal PriceTick(int requestId, TickType tickType, double price, TickAttrib attrib)
         {
             RequestId = requestId;
             TickType = tickType;
@@ -117,37 +117,37 @@ namespace InterReact
         }
     }
 
-    public sealed class TickString : TickBase
+    public sealed class StringTick : BaseTick
     {
         public string Value { get; }
-        internal TickString(int requestId, TickType tickType, string value)
+        internal StringTick(int requestId, TickType tickType, string value)
         {
             RequestId = requestId;
             TickType = tickType;
             Value = value;
         }
 
-        internal static TickBase Create(ResponseReader c)
+        internal static BaseTick Create(ResponseReader c)
         {
             c.IgnoreVersion();
             int requestId = c.ReadInt();
             TickType tickType = c.ReadEnum<TickType>();
             string str = c.ReadString();
             if (tickType == TickType.RealtimeVolume)
-                return new TickRealtimeVolume(requestId, str, c.Parser);
+                return new RealtimeVolumeTick(requestId, str, c.Parser);
             if (tickType == TickType.LastTimeStamp)
-                return new TickTime(requestId, str);
-            return new TickString(requestId, tickType, str);
+                return new TimeTick(requestId, str);
+            return new StringTick(requestId, tickType, str);
         }
     }
 
-    public sealed class TickTime : TickBase // from TickString
+    public sealed class TimeTick : BaseTick // from TickString
     {
         /// <summary>
         /// Seconds precision.
         /// </summary>
         public Instant Time { get; }
-        internal TickTime(int requestId, string str)
+        internal TimeTick(int requestId, string str)
         {
             RequestId = requestId;
             TickType = TickType.LastTimeStamp;
@@ -161,7 +161,7 @@ namespace InterReact
     /// TickRealtimeVolume ticks are obtained by parsing TickString.
     /// When TickRealtimeVolume is used, redundant Tick messages (above) can be removed using the TickRedundantRealtimeVolumeFilter.
     /// </summary>
-    public sealed class TickRealtimeVolume : TickBase // from TickString
+    public sealed class RealtimeVolumeTick : BaseTick // from TickString
     {
         public double Price { get; }
         public int Size { get; }
@@ -175,7 +175,7 @@ namespace InterReact
         /// Milliseconds precision.
         /// </summary>
         public Instant Instant { get; }
-        internal TickRealtimeVolume(int requestId, string str, ResponseParser c)
+        internal RealtimeVolumeTick(int requestId, string str, ResponseParser c)
         {
             RequestId = requestId;
             TickType = TickType.RealtimeVolume;
@@ -189,28 +189,28 @@ namespace InterReact
         }
     };
 
-    public sealed class TickGeneric : TickBase
+    public sealed class GenericTick : BaseTick
     {
         public double Value { get; }
-        internal TickGeneric(int requestId, TickType tickType, double value)
+        internal GenericTick(int requestId, TickType tickType, double value)
         {
             RequestId = requestId;
             TickType = tickType;
             Value = value;
         }
-        internal static TickBase Create(ResponseReader c)
+        internal static BaseTick Create(ResponseReader c)
         {
             c.IgnoreVersion();
             int requestId = c.ReadInt();
             TickType tickType = c.ReadEnum<TickType>();
             double value = c.ReadDouble();
             if (tickType == TickType.Halted)
-                return new TickHalted(requestId, tickType, value == 0 ? HaltType.NotHalted : HaltType.GeneralHalt);
-            return new TickGeneric(requestId, tickType, value);
+                return new HaltedTick(requestId, tickType, value == 0 ? HaltType.NotHalted : HaltType.GeneralHalt);
+            return new GenericTick(requestId, tickType, value);
         }
     };
 
-    public sealed class TickExchangeForPhysical : TickBase
+    public sealed class ExchangeForPhysicalTick : BaseTick
     {
         public double BasisPoints { get; }
         public string FormattedBasisPoints { get; }
@@ -219,7 +219,7 @@ namespace InterReact
         public string FutureExpiry { get; }
         public double DividendImpact { get; }
         public double DividendsToLastTradeDate { get; }
-        internal TickExchangeForPhysical(ResponseReader c)
+        internal ExchangeForPhysicalTick(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();
@@ -238,7 +238,7 @@ namespace InterReact
     /// Missing Values are indicated with null.
     /// IB's Java client indicates missing Values using DOUBLE_MAX.
     /// </summary>
-    public sealed class TickOptionComputation : TickBase
+    public sealed class OptionComputationTick : BaseTick
     {
         public double? ImpliedVolatility { get; }
         public double? Delta { get; }
@@ -248,7 +248,7 @@ namespace InterReact
         public double? Vega { get; }
         public double? Theta { get; }
         public double? UndPrice { get; }
-        internal TickOptionComputation(ResponseReader c)
+        internal OptionComputationTick(ResponseReader c)
         {
             int version = c.GetVersion();
             RequestId = c.ReadInt();
@@ -291,10 +291,10 @@ namespace InterReact
     /// <summary>
     /// TickHalted is obtained from from TickGeneric.
     /// </summary>
-    public sealed class TickHalted : TickBase
+    public sealed class HaltedTick : BaseTick
     {
         public HaltType HaltType { get; }
-        internal TickHalted(int requestId, TickType tickType, HaltType haltType)
+        internal HaltedTick(int requestId, TickType tickType, HaltType haltType)
         {
             RequestId = requestId;
             TickType = tickType;
@@ -307,10 +307,10 @@ namespace InterReact
     /// This message indicates a change in MarketDataType. 
     /// This response could also result from calling: RequestMarketData(returns Tick),
     /// </summary>
-    public sealed class TickMarketDataType : TickBase
+    public sealed class MarketDataTypeTick : BaseTick
     {
         public MarketDataType MarketDataType { get; }
-        internal TickMarketDataType(ResponseReader c)
+        internal MarketDataTypeTick(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();
@@ -319,10 +319,10 @@ namespace InterReact
         }
     }
 
-    public sealed class TickSnapshotEnd : IHasRequestId
+    public sealed class SnapshotEndTick : IHasRequestId
     {
         public int RequestId { get; }
-        internal TickSnapshotEnd(ResponseReader c)
+        internal SnapshotEndTick(ResponseReader c)
         {
             c.IgnoreVersion();
             RequestId = c.ReadInt();

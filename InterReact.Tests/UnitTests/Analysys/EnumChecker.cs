@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Analysis
 {
-    public class Enum_Checker : BaseUnitTest
+    public class Enum_Checker : UnitTestsBase
     {
         public Enum_Checker(ITestOutputHelper output) : base(output) { }
 

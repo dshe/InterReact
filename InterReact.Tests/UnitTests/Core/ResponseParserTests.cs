@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Core
 {
-    public class Response_Parser_Tests : BaseUnitTest
+    public class Response_Parser_Tests : UnitTestsBase
     {
         private readonly List<object> alerts = new List<object>();
         private readonly ResponseParser parser;

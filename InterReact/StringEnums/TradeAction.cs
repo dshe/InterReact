@@ -4,19 +4,19 @@ namespace InterReact
 {
     public sealed class TradeAction : StringEnum<TradeAction>
     {
-        public static readonly TradeAction Undefined = Create("");
+        public static TradeAction Undefined { get; } = Create("");
 
-        public static readonly TradeAction Buy = Create("BUY");
-        public static readonly TradeAction Sell = Create("SELL");
+        public static TradeAction Buy { get; } = Create("BUY");
+        public static TradeAction Sell { get; } = Create("SELL");
 
         /// <summary>
         /// SSHORT is only supported for institutional account configured with Long/Short account segments or clearing with a separate account.
         /// </summary>
-        public static readonly TradeAction SellShort = Create("SSHORT");
+        public static TradeAction SellShort { get; } = Create("SSHORT");
 
         /// <summary>
         /// Allows orders to be marked as exempt from SEC Rule 201.
         /// </summary>
-        //public static readonly TradeAction SellShortExemptFromSecRule201 = Create("SSHORTX");
+        //public static TradeAction SellShortExemptFromSecRule201 { get; } = Create("SSHORTX");
     }
 }

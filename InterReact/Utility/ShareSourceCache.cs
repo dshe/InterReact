@@ -15,19 +15,22 @@ namespace InterReact
         /// <summary>
         /// Returns an observable which shares a single subscription to the source observable.
         /// Messages are cached for replay to new subscribers.
+        /// Caching begins with the first observer and ends when there are no observers.
         /// </summary>
         internal static IObservable<T> ShareSourceCache<T, TKey>
-            (this IObservable<T> source, Func<T, TKey> keySelector)
+            (this IObservable<T> source, Func<T, TKey?> keySelector)
                 where TKey : notnull
         {
             long index = 0;
             Dictionary<TKey, (T Item, long Index)> cache = new();
 
-            var cachedSource = source.Do(m =>
+            IObservable<T> cachedSource = source.Do(m =>
             {
+                TKey? key = keySelector(m);
+                if (key == null)
+                    return;
                 lock (cache)
                 {
-                    var key = keySelector(m);
                     if (cache.TryGetValue(key, out var item))
                         item.Item = m;
                     else
@@ -36,22 +39,23 @@ namespace InterReact
             }).Finally(() =>
             {
                 lock (cache)
+                {
                     cache.Clear();
+                }
             }).Publish().RefCount();
 
-            return Observable.Create<T>(observer =>
+            return Observable.Defer(() =>
             {
                 lock (cache)
                 {
-                    cache
-                        .Select(kvp => kvp.Value)
-                        .OrderBy(k => k.Index)
-                        .Select(kvp => kvp.Item)
+                    return cache
+                        .Values
+                        .OrderBy(v => v.Index)
+                        .Select(v => v.Item)
                         .ToList()
-                        .ForEach(observer.OnNext);
+                        .ToObservable();
                 }
-                return cachedSource.Subscribe(observer);
-            });
+            }).Concat(cachedSource);
         }
     }
 }

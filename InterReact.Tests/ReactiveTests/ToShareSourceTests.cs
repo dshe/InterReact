@@ -7,7 +7,7 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Extensions
 {
-    public sealed class ToShareSourceTests : BaseReactiveTest
+    public sealed class ToShareSourceTests : ReactiveTestsBase
     {
         public ToShareSourceTests(ITestOutputHelper output) : base(output) { }
 

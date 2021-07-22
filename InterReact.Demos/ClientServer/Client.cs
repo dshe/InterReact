@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -12,7 +11,7 @@ namespace CoreClientServer
     {
         internal static async Task Run(int port, ILogger logger, ILogger libLogger)
         {
-            var client = await new InterReactClientBuilder(libLogger)
+            IInterReactClient? client = await new InterReactClientBuilder(libLogger)
                 .SetPort(port)
                 .BuildAsync()
                 .ConfigureAwait(false);
@@ -26,17 +25,17 @@ namespace CoreClientServer
             client.Request.RequestMarketData(42, new Contract());
 
             // wait to get the first tickSize message, indicating test start
-            await client.Response.OfType<TickSize>().FirstAsync();
+            await client.Response.OfType<SizeTick>().FirstAsync();
 
             logger.LogInformation("Receiving...");
 
             // receive some messages to measure throughput
-            var watch = new Stopwatch();
+            Stopwatch? watch = new();
             watch.Start();
-            var count = await client.Response.TakeWhile(m => m is TickSize).Count();
+            int count = await client.Response.TakeWhile(m => m is SizeTick).Count();
             watch.Stop();
 
-            var frequency = Stopwatch.Frequency * count / watch.ElapsedTicks;
+            long frequency = Stopwatch.Frequency * count / watch.ElapsedTicks;
             logger.LogInformation($"Received {frequency:N0} messages/second.");
 
             logger.LogInformation("Disconnecting.");

@@ -25,10 +25,10 @@ namespace CoreClientServer
         internal async Task Run()
         {
             Logger.LogInformation("Waiting for client.");
-            var accept = await SocketServer.AcceptObservable.FirstAsync();
+            IRxSocketClient? accept = await SocketServer.AcceptAllAsync().FirstAsync();
             Logger.LogInformation("Client connection accepted.");
 
-            var firstString = await accept.ReceiveAllAsync().ToStrings().FirstAsync();
+            string firstString = await accept.ReceiveAllAsync().ToStrings().FirstAsync();
 
             if (firstString != "API")
                 throw new InvalidDataException("'API' not received.");
@@ -36,21 +36,21 @@ namespace CoreClientServer
 
             // Start receiving messages with length prefix.
             // Get the first message (string array).
-            var messages1 = await accept
+            string[] messages1 = await accept
                 .ReceiveAllAsync()
                 .ToArraysFromBytesWithLengthPrefix()
                 .ToStringArrays()
                 .FirstAsync();
 
             // Get the first string of the first message,
-            var versions = messages1.Single();
+            string versions = messages1.Single();
 
             if (!versions.StartsWith("v"))
                 throw new InvalidDataException("Versions not received.");
             Logger.LogInformation($"Received supported server versions: '{versions}'.");
 
             // Get the second message.
-            var messages2 = await accept
+            string[] messages2 = await accept
                 .ReceiveAllAsync()
                 .ToArraysFromBytesWithLengthPrefix()
                 .ToStringArrays()
@@ -84,7 +84,7 @@ namespace CoreClientServer
 
             ////////////////////////////////////////////////////
 
-            var obs = accept
+            IObservable<string[]> obs = accept
                 .ReceiveAllAsync()
                 .ToArraysFromBytesWithLengthPrefix()
                 .ToStringArrays()
@@ -95,18 +95,18 @@ namespace CoreClientServer
             // receive test start signal
             await obs.FirstAsync();
 
-            var watch = new Stopwatch();
+            Stopwatch? watch = new();
             watch.Start();
 
-            var count = await obs.TakeWhile(m => m[0] == "2").Count();
+            int count = await obs.TakeWhile(m => m[0] == "2").Count();
             
             watch.Stop();
-            
-            var frequency = Stopwatch.Frequency * (count + 1) / watch.ElapsedTicks;
+
+            long frequency = Stopwatch.Frequency * (count + 1) / watch.ElapsedTicks;
             Logger.LogInformation($"Received {frequency:N0} messages/second.");
 
-            var ms = new MemoryStream();
-            for (var i = 0; i < 100_000; i++)
+            MemoryStream? ms = new();
+            for (int i = 0; i < 100_000; i++)
             {
                 ms.Write(
                 new RequestMessage(accept, Limiter)

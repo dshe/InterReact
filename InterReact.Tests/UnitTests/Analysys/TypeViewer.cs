@@ -5,7 +5,7 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Analysis
 {
-    public class Type_Viewer : BaseUnitTest
+    public class Type_Viewer : UnitTestsBase
     {
         public Type_Viewer(ITestOutputHelper output) : base(output) { }
 

@@ -22,15 +22,28 @@
     <Compile Remove="Utility\TryConstructSubclassTaking.cs" />
     <Compile Remove="~\AccountObservableCollections.cs" />
     <Compile Remove="~\CancelWhenEx.cs" />
+    <Compile Remove="~\ChangeEx.cs" />
+    <Compile Remove="~\ContractDetailsExpiryEx.cs" />
+    <Compile Remove="~\ContractDetailsExpiryTest.cs" />
+    <Compile Remove="~\ContractDetailsSingleEx.cs" />
+    <Compile Remove="~\ContractDetailsSingleTest.cs" />
+    <Compile Remove="~\ContractDetailsSmartEx.cs" />
+    <Compile Remove="~\ContractDetailsSmartTest.cs" />
+    <Compile Remove="~\ContractDetailsStrikeEx.cs" />
+    <Compile Remove="~\ContractDetailsStrikeTest.cs" />
     <Compile Remove="~\DistinctByExtension.cs" />
     <Compile Remove="~\MarketDepthObservableCollections.cs" />
     <Compile Remove="~\NotifyPropertyChanged.cs" />
     <Compile Remove="~\OrderMonitor.cs" />
     <Compile Remove="~\ReadOnlyObservableList.cs" />
+    <Compile Remove="~\TickBidAskEx.cs" />
+    <Compile Remove="~\TickOhlcEx.cs" />
+    <Compile Remove="~\TimeoutXEx.cs" />
     <Compile Remove="~\ToAsyncSourceEx.cs" />
     <Compile Remove="~\ToAsyncSourceTests.cs" />
     <Compile Remove="~\ToCacheSourceEx.cs" />
     <Compile Remove="~\ToObservableCollectionEx.cs" />
+    <Compile Remove="~\ToObservableCollectionExTest.cs" />
     <Compile Remove="~\WhereNotNullEx.cs" />
   </ItemGroup>
 
@@ -44,9 +57,22 @@
 
   <ItemGroup>
     <None Include="~\CancelWhenEx.cs" />
+    <None Include="~\ChangeEx.cs" />
+    <None Include="~\ContractDetailsExpiryEx.cs" />
+    <None Include="~\ContractDetailsExpiryTest.cs" />
+    <None Include="~\ContractDetailsSingleEx.cs" />
+    <None Include="~\ContractDetailsSingleTest.cs" />
+    <None Include="~\ContractDetailsSmartEx.cs" />
+    <None Include="~\ContractDetailsSmartTest.cs" />
+    <None Include="~\ContractDetailsStrikeEx.cs" />
+    <None Include="~\ContractDetailsStrikeTest.cs" />
+    <None Include="~\TickBidAskEx.cs" />
+    <None Include="~\TickOhlcEx.cs" />
+    <None Include="~\TimeoutXEx.cs" />
     <None Include="~\ToAsyncSourceEx.cs" />
     <None Include="~\ToAsyncSourceTests.cs" />
     <None Include="~\ToCacheSourceEx.cs" />
+    <None Include="~\ToObservableCollectionExTest.cs" />
     <None Include="~\TryConstructSubclassTaking.cs" />
     <None Include="~\CollectionBinarySearcherExtensions.cs" />
     <None Include="worm64.png" Pack="true" PackagePath="\" />

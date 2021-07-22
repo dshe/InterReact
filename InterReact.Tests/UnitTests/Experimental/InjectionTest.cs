@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Experimental
 {
-    public class Test_Logging : BaseUnitTest
+    public class Test_Logging : UnitTestsBase
     {
         public Test_Logging(ITestOutputHelper output) : base(output) { }
 

@@ -8,7 +8,7 @@ using Xunit.Abstractions;
 
 namespace InterReact.ConnectTests
 {
-    public class ConnectDefault : BaseConnectTest
+    public class ConnectDefault : ConnectTestsBase
     {
         public ConnectDefault(ITestOutputHelper output) : base(output) { }
 
@@ -21,7 +21,7 @@ namespace InterReact.ConnectTests
         }
     }
 
-    public class ConnectIPv4Test : BaseConnectTest
+    public class ConnectIPv4Test : ConnectTestsBase
     {
         public ConnectIPv4Test(ITestOutputHelper output) : base(output) { }
 
@@ -34,7 +34,7 @@ namespace InterReact.ConnectTests
         }
     }
 
-    public class ConnectIPv6Test : BaseConnectTest
+    public class ConnectIPv6Test : ConnectTestsBase
     {
         public ConnectIPv6Test(ITestOutputHelper output) : base(output) { }
 
@@ -47,7 +47,7 @@ namespace InterReact.ConnectTests
         }
     }
 
-    public class ConnectArgumentsTest : BaseConnectTest
+    public class ConnectArgumentsTest : ConnectTestsBase
     {
         public ConnectArgumentsTest(ITestOutputHelper output) : base(output) { }
 
@@ -73,7 +73,7 @@ namespace InterReact.ConnectTests
 
     }
 
-    public class MessageSendRateDefaultTest : BaseConnectTest
+    public class MessageSendRateDefaultTest : ConnectTestsBase
     {
         public MessageSendRateDefaultTest(ITestOutputHelper output) : base(output) { }
 
@@ -97,7 +97,7 @@ namespace InterReact.ConnectTests
 
     }
 
-    public class MessageSendRateChangeTest : BaseConnectTest
+    public class MessageSendRateChangeTest : ConnectTestsBase
     {
         public MessageSendRateChangeTest(ITestOutputHelper output) : base(output) { }
 
@@ -122,7 +122,7 @@ namespace InterReact.ConnectTests
         }
     }
 
-    public class DisposedTest : BaseConnectTest
+    public class DisposedTest : ConnectTestsBase
     {
         public DisposedTest(ITestOutputHelper output) : base(output) { }
 

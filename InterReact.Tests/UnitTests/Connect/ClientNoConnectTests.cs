@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.NoConnect
 {
-    public class Client_No_Connect_Tests : BaseUnitTest
+    public class Client_No_Connect_Tests : UnitTestsBase
     {
         public Client_No_Connect_Tests(ITestOutputHelper output) : base(output) { }
 

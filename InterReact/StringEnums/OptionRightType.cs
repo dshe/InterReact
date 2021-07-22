@@ -7,16 +7,16 @@ namespace InterReact
         /// <summary>
         /// Contract is not an option.
         /// </summary>
-        public static readonly OptionRightType Undefined = Create("0", "", "?");
+        public static OptionRightType Undefined { get; } = Create("0", "", "?");
 
         /// <summary>
         /// Option type is PUT.
         /// </summary>
-        public static readonly OptionRightType Put = Create("P");
+        public static OptionRightType Put { get; } = Create("P");
 
         /// <summary>
         /// Option type is a CALL.
         /// </summary>
-        public static readonly OptionRightType Call = Create("C");
+        public static OptionRightType Call { get; } = Create("C");
     }
 }

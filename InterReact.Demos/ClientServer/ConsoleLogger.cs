@@ -18,8 +18,8 @@ namespace CoreClientServer
         {
             if (logLevel <= LogLevel.Debug)
                 return;
-            var color = Color;
-            var oldColor = Console.ForegroundColor;
+            ConsoleColor color = Color;
+            ConsoleColor oldColor = Console.ForegroundColor;
             Console.ForegroundColor = color;
             Console.WriteLine(CategoryName + formatter(state, exception));
             Console.ForegroundColor = oldColor;

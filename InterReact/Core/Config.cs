@@ -15,7 +15,7 @@ namespace InterReact
         public int[] Ports { get; internal set; } = { (int)DefaultPort.TwsRegularAccount, (int)DefaultPort.TwsDemoAccount, (int)DefaultPort.GatewayRegularAccount, (int)DefaultPort.GatewayDemoAccount };
         public bool IsDemoAccount => IPEndPoint.Port == (int)DefaultPort.TwsDemoAccount || IPEndPoint.Port == (int)DefaultPort.GatewayDemoAccount;
         public int ClientId { get; internal set; } = Random.Next(1000, 1000000);
-        public int MaxRequestsPerSecond { get; internal set; } = 50;
+        public int MaxRequestsPerSecond { get; set; } = 50;
         public string OptionalCapabilities { get; internal set; } = "";
 
         /// <summary>

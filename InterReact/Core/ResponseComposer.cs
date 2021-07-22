@@ -39,7 +39,7 @@ namespace InterReact
                 string code = reader.ReadString(); // read the code (first string)
                 if (code == "1")
                 {
-                    object[] tickMessages = TickBase.CreatePriceAndSizeTicks(reader);
+                    object[] tickMessages = BaseTick.CreatePriceAndSizeTicks(reader);
                     reader.VerifyMessageEnd();
                     return tickMessages;
                 }
@@ -57,7 +57,7 @@ namespace InterReact
 
         private static object GetMessage(string code, ResponseReader reader) => code switch
         {
-            "2" => new TickSize(reader),
+            "2" => new SizeTick(reader),
             "3" => new OrderStatusReport(reader),
             "4" => Alert.Create(reader),
             "5" => new OpenOrder(reader),
@@ -76,11 +76,11 @@ namespace InterReact
             "18" => new ContractDetails(reader, ContractDetailsType.BondContractData),
             "19" => new ScannerParameters(reader),
             "20" => new ScannerData(reader),
-            "21" => new TickOptionComputation(reader),
+            "21" => new OptionComputationTick(reader),
 
-            "45" => TickGeneric.Create(reader),
-            "46" => TickString.Create(reader),
-            "47" => new TickExchangeForPhysical(reader),
+            "45" => GenericTick.Create(reader),
+            "46" => StringTick.Create(reader),
+            "47" => new ExchangeForPhysicalTick(reader),
 
             "49" => new CurrentTime(reader),
             "50" => new RealtimeBar(reader),
@@ -90,8 +90,8 @@ namespace InterReact
             "54" => new AccountUpdateEnd(reader),
             "55" => new ExecutionEnd(reader),
             "56" => new DeltaNeutralContract(reader, true),
-            "57" => new TickSnapshotEnd(reader),
-            "58" => new TickMarketDataType(reader),
+            "57" => new SnapshotEndTick(reader),
+            "58" => new MarketDataTypeTick(reader),
             "59" => new CommissionReport(reader),
 
             "61" => new Position(reader),

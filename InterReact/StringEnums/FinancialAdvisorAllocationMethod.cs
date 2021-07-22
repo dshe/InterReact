@@ -4,10 +4,10 @@ namespace InterReact
 {
     public sealed class FinancialAdvisorAllocationMethod : StringEnum<FinancialAdvisorAllocationMethod>
     {
-        public static readonly FinancialAdvisorAllocationMethod None = Create("");
-        public static readonly FinancialAdvisorAllocationMethod PercentChange = Create("PctChange");
-        public static readonly FinancialAdvisorAllocationMethod AvailableEquity = Create("AvailableEquity");
-        public static readonly FinancialAdvisorAllocationMethod NetLiquidity = Create("NetLiq");
-        public static readonly FinancialAdvisorAllocationMethod EqualQuantity = Create("EqualQuantity");
+        public static FinancialAdvisorAllocationMethod None { get; } = Create("");
+        public static FinancialAdvisorAllocationMethod PercentChange { get; } = Create("PctChange");
+        public static FinancialAdvisorAllocationMethod AvailableEquity { get; } = Create("AvailableEquity");
+        public static FinancialAdvisorAllocationMethod NetLiquidity { get; } = Create("NetLiq");
+        public static FinancialAdvisorAllocationMethod EqualQuantity { get; } = Create("EqualQuantity");
     }
 }

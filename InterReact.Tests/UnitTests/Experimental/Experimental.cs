@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Experimental
 {
-    public class Test_Async : BaseUnitTest
+    public class Test_Async : UnitTestsBase
     {
         public Test_Async(ITestOutputHelper output) : base(output) { }
 
@@ -47,7 +47,7 @@ namespace InterReact.UnitTests.Experimental
 
     }
 
-    public class Test_Observable : BaseUnitTest
+    public class Test_Observable : UnitTestsBase
     {
         public Test_Observable(ITestOutputHelper output) : base(output) { }
 

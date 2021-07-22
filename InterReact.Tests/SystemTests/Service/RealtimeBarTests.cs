@@ -14,7 +14,7 @@ namespace InterReact.SystemTests.Service
         [Fact]
         public async Task T01_RealtimeBarTest()
         {
-            var observable = Client.Services.CreateRealtimeBarObservable(Stock1);
+            var observable = Client.Services.CreateRealtimeBarsObservable(Stock1);
 
             //if (!Client.Status.IsDemoAccount)
             await observable.FirstAsync().Timeout(TimeSpan.FromSeconds(10));

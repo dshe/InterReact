@@ -12,7 +12,10 @@ namespace InterReact
     public abstract class Union
     {
         public object Source { get; }
-        public Union(object source) => Source = source;
+        public Union(object source)
+        {
+            Source = source;
+        }
     }
 
     public class Union<T1, T2> : Union
@@ -21,7 +24,7 @@ namespace InterReact
     {
         public Union(object source) : base(source)
         {
-            Debug.Assert(source is T1 || source is T2);
+            Debug.Assert(source is T1 or T2);
         }
     }
 
@@ -32,7 +35,7 @@ namespace InterReact
     {
         public Union(object source) : base(source)
         {
-            Debug.Assert(source is T1 || source is T2 || source is T3);
+            Debug.Assert(source is T1 or T2 or T3);
         }
     }
 
@@ -44,7 +47,7 @@ namespace InterReact
     {
         public Union(object source) : base(source)
         {
-            Debug.Assert(source is T1 || source is T2 || source is T3 || source is T4);
+            Debug.Assert(source is T1 or T2 or T3 or T4);
         }
     }
 

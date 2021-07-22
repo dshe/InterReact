@@ -6,7 +6,7 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Core
 {
-    public class ResponseComposerTests : BaseUnitTest
+    public class ResponseComposerTests : UnitTestsBase
     {
         public ResponseComposer Composer;
         public ResponseComposerTests(ITestOutputHelper output) : base(output) =>
@@ -74,7 +74,7 @@ namespace InterReact.UnitTests.Core
                 "100", // size
                 "0" // AutoExec, true
             });
-            Assert.IsType<TickPrice>(messages.Single());
+            Assert.IsType<PriceTick>(messages.Single());
         }
     }
 

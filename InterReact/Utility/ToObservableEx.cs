@@ -68,7 +68,7 @@ namespace InterReact
 
                 IDisposable subscription = filteredSource
                     .Finally(() => cancelable = false)
-                    .SubscribeSafe(observer);
+                    .SubscribeSafe(observer); // IMPORTANT!
 
                 if (cancelable == null)
                     startRequest();

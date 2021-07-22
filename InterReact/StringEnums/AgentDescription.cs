@@ -7,16 +7,16 @@ namespace InterReact
     /// </summary>
     public sealed class AgentDescription : StringEnum<AgentDescription>
     {
-        public static readonly AgentDescription None = Create("");
-        public static readonly AgentDescription Individual = Create("I");
-        public static readonly AgentDescription Agency = Create("A");
-        public static readonly AgentDescription AgentOtherMember = Create("W");
-        public static readonly AgentDescription IndividualPtia = Create("J");
-        public static readonly AgentDescription AgencyPtia = Create("U");
-        public static readonly AgentDescription AgentOtherMemberPtia = Create("M");
-        public static readonly AgentDescription IndividualPt = Create("K");
-        public static readonly AgentDescription AgencyPt = Create("Y");
-        public static readonly AgentDescription AgentOtherMemberPt = Create("N");
+        public static AgentDescription None { get; } = Create("");
+        public static AgentDescription Individual { get; } = Create("I");
+        public static AgentDescription Agency { get; } = Create("A");
+        public static AgentDescription AgentOtherMember { get; } = Create("W");
+        public static AgentDescription IndividualPtia { get; } = Create("J");
+        public static AgentDescription AgencyPtia { get; } = Create("U");
+        public static AgentDescription AgentOtherMemberPtia { get; } = Create("M");
+        public static AgentDescription IndividualPt { get; } = Create("K");
+        public static AgentDescription AgencyPt { get; } = Create("Y");
+        public static AgentDescription AgentOtherMemberPt { get; } = Create("N");
     }
 
 }

@@ -9,6 +9,7 @@ using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Collections.Generic;
 
 //d:DataContext="{d:DesignInstance TicksWpf:MainViewModel, IsDesignTimeCreatable=False}"
 
@@ -104,8 +105,6 @@ namespace TicksWpf
 
         private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
-            var t0 = Thread.CurrentThread.ManagedThreadId;
-            var t1 = Application.Current.Dispatcher.Thread.ManagedThreadId;
             try
             {
                 Client = await new InterReactClientBuilder().BuildAsync();
@@ -119,7 +118,8 @@ namespace TicksWpf
             Client.Response.Subscribe(x => Debug.WriteLine(x.Stringify()));
 
             Client.Request.RequestPositions();
-            Client.Request.RequestAccountSummary(99);
+            int requestId = Client.Request.GetNextId();
+            Client.Request.RequestAccountSummary(requestId);
             Client.Request.RequestAccountUpdates(true);
 
             Client.Request.RequestMarketDataType(MarketDataType.Delayed);
@@ -132,8 +132,6 @@ namespace TicksWpf
 
         private async void UpdateSymbol(string symbol)
         {
-            var t0 = Thread.CurrentThread.ManagedThreadId;
-            var t1 = Application.Current.Dispatcher.Thread.ManagedThreadId;
             Debug.WriteLine($"Symbol: {symbol}");
 
             Description = "";
@@ -154,19 +152,18 @@ namespace TicksWpf
             };
 
             // Create the observable and capture the single contract details object to determine the full name of the contract.
-            var response = Client!.Services.CreateContractDetailsObservable(contract);
+            IObservable<Union<ContractDetails, Alert>> response =
+                Client!.Services.CreateContractDetailsObservable(contract);
 
             response.OfTypeUnionSource<Alert>().Subscribe(alert =>
             {
                 MessageBox.Show($"ContractDetails:\n\n {alert.Message}");
-                return;
             });
 
-
-            var cds = await response.OfTypeUnionSource<ContractDetails>().ToList();
+            IList<ContractDetails> cds = await response.OfTypeUnionSource<ContractDetails>().ToList();
 
             // Multiple contracts may be returned. Take the first one.
-            var cd = cds.FirstOrDefault();
+            ContractDetails? cd = cds.FirstOrDefault();
             if (cd == null)
                 return;
 
@@ -179,7 +176,7 @@ namespace TicksWpf
         private void SubscribeToTicks(Contract contract)
         {
             // Create the observable which will emit realtime updates.
-            var ticks = Client!.Services
+            IConnectableObservable<ITick> ticks = Client!.Services
                 .CreateTickObservable(contract)
                 .UndelayTicks()
                 .ObserveOn(Application.Current.Dispatcher)
@@ -193,14 +190,14 @@ namespace TicksWpf
         private void SubscribeToTicks(IObservable<ITick> ticks)
         {
             // Display warnings, if any.
-            ticks.OfType(t => t.Alert).Subscribe(m => MessageBox.Show(m.Message));
+            ticks.OfTickType(t => t.Alert).Subscribe(m => MessageBox.Show(m.Message));
 
-            var priceTicks = ticks.OfType(t => t.TickPrice);
+            IObservable<PriceTick> priceTicks = ticks.OfTickType(t => t.TickPrice);
 
-            var bidPrices = priceTicks.Where(t => t.TickType == TickType.BidPrice).Select(t => t.Price);
-            var askPrices = priceTicks.Where(t => t.TickType == TickType.AskPrice).Select(t => t.Price);
-            var lastPrices = priceTicks.Where(t => t.TickType == TickType.LastPrice).Select(t => t.Price);
-            var lastPriceChanges = lastPrices
+            IObservable<double> bidPrices = priceTicks.Where(t => t.TickType == TickType.BidPrice).Select(t => t.Price);
+            IObservable<double> askPrices = priceTicks.Where(t => t.TickType == TickType.AskPrice).Select(t => t.Price);
+            IObservable<double> lastPrices = priceTicks.Where(t => t.TickType == TickType.LastPrice).Select(t => t.Price);
+            IObservable<double> lastPriceChanges = lastPrices
                 .Buffer(2, 1)
                 .Where(x => x.Count == 2)
                 .Select(x => x[1] - x[0]);
@@ -219,7 +216,5 @@ namespace TicksWpf
                 await Client.DisposeAsync();
         }
     }
-
-
 
 }

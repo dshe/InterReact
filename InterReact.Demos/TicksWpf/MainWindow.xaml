@@ -16,16 +16,16 @@
         d:DataContext="{d:DesignInstance Type=local:MainWindow}"
         mc:Ignorable="d"
         
-        FontSize="16"
+        FontSize="18"
         SizeToContent="WidthAndHeight"
         Title="InterReact" >
 
     <Grid Margin="20">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition/>
-            <ColumnDefinition/>
-            <ColumnDefinition/>
+            <ColumnDefinition Width="10*" />
+            <ColumnDefinition Width="10*" />
+            <ColumnDefinition Width="10*" />
+            <ColumnDefinition Width="10*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition  />

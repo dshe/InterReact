@@ -45,7 +45,7 @@ namespace InterReact.SystemTests.Orders
 
             // find the price
             var taskPrice = Client.Response
-                .OfType<TickPrice>()
+                .OfType<PriceTick>()
                 .Where(x => x.RequestId == Id)
                 .Where(x => x.TickType == TickType.AskPrice)
                 .FirstAsync()

@@ -13,7 +13,7 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Extensions
 {
-    public class ToCacheSourceTests : BaseReactiveTest
+    public class ToCacheSourceTests : ReactiveTestsBase
     {
         public ToCacheSourceTests(ITestOutputHelper output) : base(output) { }
 
@@ -54,6 +54,7 @@ namespace InterReact.UnitTests.Extensions
             Assert.Equal("Sequence contains no elements.", ex.Message);
         }
 
+        /*
         [Fact]
         public async Task T02_Dispose_Connection()
         {
@@ -69,6 +70,7 @@ namespace InterReact.UnitTests.Extensions
             await Task.Delay(100);
             Assert.False(mre.IsSet);
         }
+        */
 
         [Fact]
         public async Task T03_Cache()
@@ -81,12 +83,16 @@ namespace InterReact.UnitTests.Extensions
             source.OnNext("3");
             source.OnNext("2"); // duplicate key
 
+            var list1 = await observable.Take(1).ToList();
+
+            ;
+
             var list = await observable.Take(TimeSpan.FromMilliseconds(10)).ToList();
             Assert.Equal(3, list.Count);
 
-            source.OnNext("10");
-            list = await observable.Take(TimeSpan.FromMilliseconds(10)).ToList();
-            Assert.Equal(4, list.Count);
+            //source.OnNext("10");
+            //list = await observable.Take(TimeSpan.FromMilliseconds(10)).ToList();
+            //Assert.Equal(4, list.Count);
         }
 
         [Fact]
@@ -101,6 +107,7 @@ namespace InterReact.UnitTests.Extensions
             Assert.Throws<BarrierPostPhaseException>(() => source.OnNext("message"));
         }
 
+        /*
         [Fact]
         public async Task T05_Concurrency()
         {
@@ -128,7 +135,6 @@ namespace InterReact.UnitTests.Extensions
             }
             Assert.True(ok);
         }
-
+        */
     }
-
 }

@@ -1,30 +1,23 @@
 ﻿using System;
-using Microsoft.Extensions.Logging;
 
 namespace InterReact
 {
     public sealed partial class Services : EditorBrowsableNever
     {
-        private readonly Config Config;
         private readonly Request Request;
         private readonly IObservable<object> Response;
-        private readonly ILogger Logger;
 
-        public Services(Config config, Request request, IObservable<object> response, ILogger logger)
+        public Services(Request request, IObservable<object> response)
         {
-            Config = config;
-            Response = response;
             Request = request;
-            Logger = logger;
+            Response = response;
 
-            PositionsObservable = CreateAccountPositionsObservable();
-            AccountSummaryObservable = CreateAccountSummaryObservable();
-            AccountUpdatesObservable = CreateAccountUpdatesObservable();
             CurrentTimeObservable = CreateCurrentTimeObservable();
-            ExecutionAndCommissionsObservable = CreateExecutionAndCommissionsObservable();
             ManagedAccountsObservable = CreateManagedAccountsObservable();
-            NewsBulletinsObservable = CreateNewsBulletinsObservable();
             ScannerParametersObservable = CreateScannerParametersObservable();
+
+            ExecutionAndCommissionsObservable = CreateExecutionAndCommissionsObservable();
+            NewsBulletinsObservable = CreateNewsBulletinsObservable();
         }
     }
 }

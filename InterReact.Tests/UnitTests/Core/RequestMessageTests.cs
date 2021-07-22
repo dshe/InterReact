@@ -38,7 +38,7 @@ namespace InterReact.UnitTests.Core
 
     }
 
-    public class Request_Message_Tests : BaseUnitTest
+    public class Request_Message_Tests : UnitTestsBase
     {
         private readonly RxSocketTestClient RxSocketTestClient = new();
         private readonly RequestMessage requestMessage;
