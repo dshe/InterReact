@@ -1,19 +1,15 @@
 ﻿namespace InterReact
 {
-    public sealed class OpenOrder : IHasOrderId
+    public sealed class CompletedOrder // does not have OrderId!
     {
-        public int OrderId { get; }
-        public Order Order { get; } = new Order();
         public Contract Contract { get; } = new Contract();
+        public Order Order { get; } = new Order();
         public OrderState OrderState { get; } = new OrderState();
 
-        internal OpenOrder(ResponseReader c)
+        public CompletedOrder(ResponseReader reader)
         {
-            int messageVersion = c.ServerVersion >= ServerVersion.ORDER_CONTAINER ? c.ServerVersion : c.ReadInt();
-            var decoder = new OrderDecoder(c, Contract, Order, OrderState, messageVersion, c.ServerVersion);
+            var decoder = new OrderDecoder(reader, Contract, Order, OrderState, int.MaxValue, reader.ServerVersion);
 
-            decoder.readOrderId();
-            OrderId = Order.OrderId;
             decoder.readContract();
             decoder.readAction();
             decoder.readTotalQuantity();
@@ -26,13 +22,11 @@
             decoder.readOpenClose();
             decoder.readOrigin();
             decoder.readOrderRef();
-            decoder.readClientId();
             decoder.readPermId();
             decoder.readOutsideRth();
             decoder.readHidden();
             decoder.readDiscretionaryAmount();
             decoder.readGoodAfterTime();
-            decoder.skipSharesAllocation();
             decoder.readFAParams();
             decoder.readModelCode();
             decoder.readGoodTillDate();
@@ -40,53 +34,45 @@
             decoder.readPercentOffset();
             decoder.readSettlingFirm();
             decoder.readShortSaleParams();
-            decoder.readAuctionStrategy();
             decoder.readBoxOrderParams();
             decoder.readPegToStkOrVolOrderParams();
             decoder.readDisplaySize();
-            decoder.readOldStyleOutsideRth();
-            decoder.readBlockOrder();
             decoder.readSweepToFill();
             decoder.readAllOrNone();
             decoder.readMinQty();
             decoder.readOcaType();
-            decoder.skipETradeOnly();
-            decoder.skipFirmQuoteOnly();
-            decoder.skipNbboPriceCap();
-            decoder.readParentId();
             decoder.readTriggerMethod();
-            decoder.readVolOrderParams(true);
+            decoder.readVolOrderParams(false);
             decoder.readTrailParams();
-            decoder.readBasisPoints();
             decoder.readComboLegs();
             decoder.readSmartComboRoutingParams();
             decoder.readScaleOrderParams();
             decoder.readHedgeParams();
-            decoder.readOptOutSmartRouting();
             decoder.readClearingParams();
             decoder.readNotHeld();
             decoder.readDeltaNeutral();
             decoder.readAlgoParams();
             decoder.readSolicited();
-            decoder.readWhatIfInfoAndCommission();
+            decoder.readOrderStatus();
             decoder.readVolRandomizeFlags();
             decoder.readPegToBenchParams();
-                decoder.readConditions();
-            decoder.readAdjustedOrderParams();
-            decoder.readSoftDollarTier();
+            decoder.readConditions();
+            decoder.readStopPriceAndLmtPriceOffset();
             decoder.readCashQty();
             decoder.readDontUseAutoPriceForHedge();
             decoder.readIsOmsContainer();
-            decoder.readDiscretionaryUpToLimitPrice();
-            decoder.readUsePriceMgmtAlgo();
-            decoder.readDuration();
-            decoder.readPostToAts();
+            decoder.readAutoCancelDate();
+            decoder.readFilledQuantity();
+            decoder.readRefFuturesConId();
+            decoder.readAutoCancelParent();
+            decoder.readShareholder();
+            decoder.readImbalanceOnly();
+            decoder.readRouteMarketableToBbo();
+            decoder.readParentPermId();
+            decoder.readCompletedTime();
+            decoder.readCompletedStatus();
         }
     }
 
-    public sealed class OpenOrderEnd
-    {
-        internal OpenOrderEnd(ResponseReader c) => c.IgnoreVersion();
-    }
-
+    public class CompletedOrdersEnd { }
 }

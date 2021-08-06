@@ -10,12 +10,7 @@ namespace InterReact
         public static SecurityType Option { get; } = Create("OPT");
         public static SecurityType Future { get; } = Create("FUT");
         public static SecurityType Index { get; } = Create("IND");
-
-        /// <summary>
-        /// FOP { get; } = options on futures
-        /// </summary>
         public static SecurityType FutureOption { get; } = Create("FOP");
-
         public static SecurityType Cash { get; } = Create("CASH");
 
         /// <summary>

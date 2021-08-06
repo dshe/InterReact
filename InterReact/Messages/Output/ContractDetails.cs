@@ -157,7 +157,7 @@ namespace InterReact
                     Contract.ContractId = c.ReadInt();
 
                     MinimumTick = c.ReadDouble();
-                    if (c.Config.SupportsServerVersion(ServerVersion.MdSizeMultiplier))
+                    if (c.Config.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER))
                         MdSizeMultiplier = c.ReadInt();
 
                     Contract.Multiplier = c.ReadString();
@@ -180,9 +180,9 @@ namespace InterReact
                     EconomicValueRule = c.ReadString();
                     EconomicValueMultiplier = c.ReadDouble();
                     c.AddTagsToList(SecurityIds);
-                    if (c.Config.SupportsServerVersion(ServerVersion.AggGroup))
+                    if (c.Config.SupportsServerVersion(ServerVersion.AGG_GROUP))
                         AggGroup = c.ReadInt();
-                    if (c.Config.SupportsServerVersion(ServerVersion.UnderlyingInfo))
+                    if (c.Config.SupportsServerVersion(ServerVersion.UNDERLYING_INFO))
                     {
                         UnderSymbol = c.ReadString();
                         UnderSecType = c.ReadString();
@@ -216,7 +216,7 @@ namespace InterReact
                     Contract.TradingClass = c.ReadString();
                     Contract.ContractId = c.ReadInt();
                     MinimumTick = c.ReadDouble();
-                    if (c.Config.SupportsServerVersion(ServerVersion.MdSizeMultiplier))
+                    if (c.Config.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER))
                         MdSizeMultiplier = c.ReadInt();
                     OrderTypes = c.ReadString();
                     ValidExchanges = c.ReadString();
@@ -232,7 +232,7 @@ namespace InterReact
                     }
                     if (version >= 5)
                         c.AddTagsToList(SecurityIds);
-                    if (c.Config.SupportsServerVersion(ServerVersion.AggGroup))
+                    if (c.Config.SupportsServerVersion(ServerVersion.AGG_GROUP))
                         AggGroup = c.ReadInt();
                     break;
 

@@ -4,12 +4,13 @@ using NodaTime;
 
 namespace InterReact
 {
-    public sealed class Config : EditorBrowsableNever
+    public class Config : EditorBrowsableNever
     {
         private static readonly Random Random = new();
 
         internal Config() { }
         internal IClock Clock { get; set; } = SystemClock.Instance;
+        internal bool LogIncomingMessages { get; set; }
 
         public IPEndPoint IPEndPoint { get; internal set; } = new(IPAddress.IPv6Loopback, 0);
         public int[] Ports { get; internal set; } = { (int)DefaultPort.TwsRegularAccount, (int)DefaultPort.TwsDemoAccount, (int)DefaultPort.GatewayRegularAccount, (int)DefaultPort.GatewayDemoAccount };
@@ -21,16 +22,14 @@ namespace InterReact
         /// <summary>
         /// The version of the currently connected server.
         /// </summary>
-        public ServerVersion ServerVersionCurrent { get; internal set; }
-        public const ServerVersion ServerVersionMin = ServerVersion.VT100;
-        public const ServerVersion ServerVersionMax = ServerVersion.UnderlyingInfo;
+        public int ServerVersionCurrent { get; internal set; }
+        public const int ServerVersionMin = ServerVersion.FRACTIONAL_POSITIONS;
+        public const int ServerVersionMax = ServerVersion.DURATION;
 
-        public string ManagedAccounts { get; internal set; } = "";
         public string Date { get; internal set; } = "";
-        internal int NextIdValue;
 
-        internal bool SupportsServerVersion(ServerVersion version) => version <= ServerVersionCurrent;
-        internal void RequireServerVersion(ServerVersion version)
+        internal bool SupportsServerVersion(int version) => version <= ServerVersionCurrent;
+        internal void RequireServerVersion(int version)
         {
             if (!SupportsServerVersion(version))
                 throw new ArgumentException($"The server does not support version: '{version}'.");

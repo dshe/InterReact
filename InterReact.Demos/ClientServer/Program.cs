@@ -16,16 +16,16 @@ namespace CoreClientServer
                 Console.SetBufferSize(100, 100);
             }
 
-            ConsoleLogger? clientLogger = new("Client:    ", ConsoleColor.DarkYellow);
-            ConsoleLogger? clientLibLogger = new("ClientLib: ", ConsoleColor.DarkGreen);
-            ConsoleLogger? serverLogger = new("Server:    ", ConsoleColor.DarkMagenta);
-            ConsoleLogger? serverLibLogger = new("ServerLib: ", ConsoleColor.DarkCyan);
+            ConsoleLogger clientLogger = new("Client:    ", ConsoleColor.DarkYellow);
+            ConsoleLogger clientLibLogger = new("ClientLib: ", ConsoleColor.DarkGreen);
+            ConsoleLogger serverLogger = new("Server:    ", ConsoleColor.DarkMagenta);
+            ConsoleLogger serverLibLogger = new("ServerLib: ", ConsoleColor.DarkCyan);
 
-            Server? server = new(serverLogger, serverLibLogger);
+            Server server = new(serverLogger, serverLibLogger);
             int port = server.SocketServer.IPEndPoint.Port;
-            Task? serverTask = server.Run();
+            Task serverTask = server.Run();
 
-            Task? clientTask = Client.Run(port, clientLogger, clientLibLogger);
+            Task clientTask = Client.Run(port, clientLogger, clientLibLogger);
 
             await Task.WhenAll(clientTask, serverTask);
             await Task.Delay(1000);

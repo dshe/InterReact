@@ -11,7 +11,7 @@ namespace InterReact.SystemTests
 {
     public abstract class TestBase : IAsyncLifetime, IDisposable
     {
-        internal static readonly DynamicLoggers DynamicLoggers = new();
+        internal static readonly DynamicLogger DynamicLogger = new();
         private static readonly Task<IInterReactClient> ClientTask;
         protected static IInterReactClient Client => ClientTask.Result;
         protected readonly Action<string> Write;
@@ -33,7 +33,7 @@ namespace InterReact.SystemTests
         {
             Write = output.WriteLine;
             Logger = new LoggerFactory().AddMXLogger(Write).CreateLogger("Test");
-            DynamicLoggers.Add(Logger);
+            DynamicLogger.Add(Logger);
         }
 
         public async Task InitializeAsync()
@@ -56,7 +56,7 @@ namespace InterReact.SystemTests
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
-                DynamicLoggers.Remove(Logger);
+                DynamicLogger.Remove(Logger);
         }
 
 

@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 
 namespace InterReact
 {
-    public sealed partial class Services
+    public partial class Services
     {
         /// <summary>
         /// Creates an observable which, upon subscription, emits scanner results, then completes.

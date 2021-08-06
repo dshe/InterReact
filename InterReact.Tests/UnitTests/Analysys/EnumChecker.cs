@@ -23,14 +23,7 @@ namespace InterReact.UnitTests.Analysis
         public void T01_Show_All()
         {
             foreach (var type in EnumTypes)
-                Write($"{type.Name}");
-        }
-
-        [Fact]
-        public void T02_Show_All_With_Values()
-        {
-            foreach (var type in EnumTypes)
-                Write($"{type.Name}: {string.Join(", ", type.GetEnumNames())}\n");
+                Write($"{type.Name}: {string.Join(", ", type.GetEnumNames())}");
         }
 
         [Fact]

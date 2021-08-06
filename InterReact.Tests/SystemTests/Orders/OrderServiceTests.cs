@@ -1,8 +1,12 @@
 ﻿using InterReact;
 using InterReact.SystemTests;
+using System;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using Stringification;
+using Microsoft.Extensions.Logging.Abstractions;
+using System.Reactive.Linq;
 
 namespace InterReact.SystemTests.Orders
 {
@@ -14,23 +18,33 @@ namespace InterReact.SystemTests.Orders
         public async Task TestPlaceOrder()
         {
             if (!Client.Request.Config.IsDemoAccount)
-                return;
+                throw new InvalidOperationException("Not demo account!");
 
-            //var order = new Order { TradeAction = TradeAction.Buy, TotalQuantity = 200, OrderType = OrderTypes.Limit, LimitPrice = 100 };
-            //order.GoodTillDate = "20161226 15:59:00 EST";
-            //order.MinimumQuantity = 100;
-            var contract = new Contract { SecurityType = SecurityType.Stock, Symbol = "AAPL", Currency = "USD", Exchange = "SMART" };
+            var contract = new Contract {
+                SecurityType = SecurityType.Stock, Symbol = "TSLA", Currency = "USD", Exchange = "SMART" };
+
+            Client.Request.RequestMarketDataType(MarketDataType.Delayed);
+
+            var ticks = Client.Services.CreateTickObservable(contract).Publish();
+            ticks.Connect();
+            var priceTick = await ticks.OfTickType(x => x.TickPrice).Where(x => x.TickType == TickType.BidPrice).FirstAsync();
+
+            Order order = new()
+            {
+                OrderAction = OrderAction.Buy,
+                OrderType = OrderType.Limit,
+                LimitPrice = priceTick.Price,
+                TotalQuantity = 100,
+                TimeInForce = TimeInForce.Day,
+            };
+
             var orderId = Client.Request.GetNextId();
 
-            await Task.Delay(1000);
+            Client.Request.PlaceOrder(orderId, order, contract);
 
-            //Client.Request.PlaceOrder(orderId, order, contract);
+            //Client.Request.CancelOrder(orderId);
 
             await Task.Delay(10000);
-
-            Client.Request.CancelOrder(orderId);
-
-            await Task.Delay(3000);
         }
 
 

@@ -1,7 +1,5 @@
 ﻿namespace InterReact
 {
-
-    //Note: At the present time, only types 1 and 2 are supported???
     public enum MarketDataType
     {
         // Live data is streamed back in real time. Market data subscriptions are required to receive live market data.

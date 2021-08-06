@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Stringification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,7 +21,10 @@ namespace InterReact.SystemTests
         public TestFixture() { }
         public async Task InitializeAsync()
         {
-            Client = await new InterReactClientBuilder(DynamicLogger).BuildAsync().ConfigureAwait(false);
+            Client = await new InterReactClientBuilder(DynamicLogger)
+                //.SetPort(7497)
+                .LogIncomingMessages()
+                .BuildAsync().ConfigureAwait(false);
         }
         public async Task DisposeAsync()
         {
@@ -49,9 +53,14 @@ namespace InterReact.SystemTests
         public TestCollectionBase(ITestOutputHelper output, TestFixture fixture)
         {
             Write = output.WriteLine;
-            Logger = new LoggerFactory().AddMXLogger(Write).CreateLogger("Test");
-            fixture.DynamicLogger.Set(Logger);
+            Logger = new LoggerFactory().AddMXLogger(Write, LogLevel.Debug).CreateLogger("Test");
+            fixture.DynamicLogger.Add(Logger, true);
             Client = fixture.Client ?? throw new Exception("Client");
+            Client.Response.Subscribe(m =>
+            {
+                var s = new Stringifier(Logger).Stringify(m);
+                Write(s);
+            });
             Id = Client.Request.GetNextId();
         }
 

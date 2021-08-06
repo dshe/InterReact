@@ -4,13 +4,13 @@ using Stringification;
 
 namespace InterReact
 {
-    public sealed partial class Services
+    public partial class Services
     {
         /// <summary>
         /// Creates an observable which continually emits account update objects for all accounts.
         /// AccountUpdateEnd is emitted after the initial values for each account have been emitted.
-        /// Use CreateAccountUpdatesObservable().Publish()[.RefCount()] to support multiple observers.
-        /// Use CreateAccountUpdatesObservable().ShareSourceCache(Services.GetAccountUpdatesCacheKey)
+        /// Use CreateAccountUpdatesObservable().Publish()[.RefCount() | .AutoConnect()] to support multiple observers.
+        /// Use CreateAccountUpdatesObservable().CacheSource(Services.GetAccountUpdatesCacheKey)
         /// to cache the latest values for replay to new subscribers.
         /// </summary>
         public IObservable<Union<AccountValue, PortfolioValue, AccountUpdateTime, AccountUpdateEnd>> CreateAccountUpdatesObservable()

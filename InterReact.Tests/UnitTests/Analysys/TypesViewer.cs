@@ -64,39 +64,44 @@ namespace InterReact.UnitTests.Analysis
             }
         }
 
-        /*
+
         [Fact]
         public void Auto_Type_And_Stringify_One()
         {
-            var type = typeof(ContractDetails);
-            var value = AutoData.Create(type);
-            Assert.NotNull(value);
-            Write(value!.Stringify());
-        }
-        */
+            Stringifier s = new(Logger);
 
-        /*
+            var type = typeof(PriceCondition).GetTypeInfo();
+
+            var instance = s.CreateInstance(type);
+
+            Assert.NotNull(instance);
+            Write(s.Stringify(instance));
+        }
+
         [Fact]
         public void Auto_Type_And_Stringify_All() // sometimes fails?
         {
+            Stringifier stringifier = new(Logger);
+
             foreach (var type in Types.Where(t =>
-                t.IsClass && t.IsSealed &&
-                t.Namespace != null && t.Namespace.Contains(".Messages")).ToList())
+                t.IsClass && t.IsPublic && t.IsSealed && !t.IsAbstract &&
+                t.Namespace == "InterReact").ToList())
             {
                 try
                 {
-                    var instance = AutoData.Create(type);
+                    var instance = stringifier.CreateInstance(type);
                     Assert.NotNull(instance);
-                    var str = instance!.Stringify();
-                    Write(str + "\n");
+                    string str = stringifier.Stringify(instance);
+                    Write($"Type: {str}");
                 }
                 catch (Exception e)
                 {
-                    Write($"Type: {type.Name} EXCEPTION\r\n{e}");
+                    //Write($"Type: {type.Name} EXCEPTION: {e.Message}");
+                    Write($"Type: {type.Name} EXCEPTION: {e.Message}");
                     throw;
                 }
             }
         }
-        */
+
     }
 }

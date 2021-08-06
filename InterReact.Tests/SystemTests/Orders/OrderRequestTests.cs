@@ -27,7 +27,7 @@ namespace InterReact.SystemTests.Orders
             var order = new Order
             {
                 OrderId = Id,
-                TradeAction = TradeAction.Buy,
+                OrderAction = OrderAction.Buy,
                 TotalQuantity = 100,
                 OrderType = OrderType.Market
             };
@@ -52,7 +52,7 @@ namespace InterReact.SystemTests.Orders
                 .Timeout(TimeSpan.FromSeconds(3))
                 .ToTask();
 
-            Client.Request.RequestMarketData(Id, Stock1, null, marketDataOff: false, isSnapshot: true);
+            Client.Request.RequestMarketData(Id, Stock1, null, isSnapshot: true);
 
             var priceTick = await taskPrice;
 
@@ -69,7 +69,7 @@ namespace InterReact.SystemTests.Orders
             var order = new Order
             {
                 OrderId = Id,
-                TradeAction = TradeAction.Buy,
+                OrderAction = OrderAction.Buy,
                 TotalQuantity = 100,
                 OrderType = OrderType.Limit,
                 LimitPrice = priceTick.Price - 1

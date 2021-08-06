@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 
 namespace InterReact
 {
-    public sealed partial class Services
+    public partial class Services
     {
         /// <summary>
         /// An observable which, upon subscription, emits scanner parameters, then completes.

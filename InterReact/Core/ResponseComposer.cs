@@ -5,16 +5,25 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Stringification;
 
 namespace InterReact
 {
     internal static class ToMessagesEx
     {
-        internal static IObservable<object> ToMessages(this IObservable<string[]> source, Config config, ILogger logger)
+        internal static IObservable<object> ToMessages(this IObservable<string[]> source, Config config, Stringifier stringifier, ILogger logger)
         {
             ResponseComposer responseComposer = new(config, logger);
-            return source.Select(strings => responseComposer.Compose(strings)).SelectMany(x => x);
+
+            return source
+                .Select(strings => responseComposer.Compose(strings))
+                .SelectMany(m => m)
+                .Do(m =>
+                {
+                    if (config.LogIncomingMessages)
+                        logger.LogInformation(stringifier.Stringify(m));
+                });
         }
     }
 
@@ -134,9 +143,9 @@ namespace InterReact
             "98" => new HistoricalLastTicks(reader),
             "99" => TickByTick.Create(reader),
             "100" => new OrderBound(reader),
-            //CompletedOrder = 101;
-            //CompletedOrdersEnd = 102;
-            //ReplaceFAEnd = 103;
+            "101" => new CompletedOrder(reader),
+            "102" => new CompletedOrdersEnd(),
+            "103" => new ReplaceFAEnd(reader),
             _ => throw new InvalidDataException($"Undefined code '{code}'.")
         };
     }

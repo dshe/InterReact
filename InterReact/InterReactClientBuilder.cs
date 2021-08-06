@@ -27,7 +27,7 @@ namespace InterReact
         {
             Logger = logger;
             AssemblyName name = GetType().Assembly.GetName();
-            Logger.LogTrace($"{name.Name} version {name.Version}.");
+            Logger.LogInformation($"{name.Name} version {name.Version}.");
         }
 
         /// <summary>
@@ -45,7 +45,9 @@ namespace InterReact
         /// </summary>
         public InterReactClientBuilder SetPort(params int[] ports)
         {
-            Config.Ports = (ports != null && ports.Any()) ? ports : throw new ArgumentNullException(nameof(ports));
+            if (ports == null || !ports.Any())
+                throw new ArgumentNullException(nameof(ports));
+            Config.Ports = ports;
             return this;
         }
 
@@ -80,11 +82,18 @@ namespace InterReact
             return this;
         }
 
+        public InterReactClientBuilder LogIncomingMessages()
+        {
+            Config.LogIncomingMessages = true;
+            return this;
+        }
+
         /////////////////////////////////////////////////////////////
 
         public async Task<IInterReactClient> BuildAsync(CancellationToken ct = default)
         {
             IRxSocketClient rxSocket = await ConnectAsync(Config, Logger, ct).ConfigureAwait(false);
+            Stringifier stringifier = new(Logger);
 
             try
             {
@@ -95,11 +104,12 @@ namespace InterReact
                     .ToArraysFromBytesWithLengthPrefix()
                     .ToStringArrays()
                     .ToObservableFromAsyncEnumerable()
-                    .ToMessages(Config, Logger)
+                    .ToMessages(Config, stringifier, Logger)
                     .Publish()
                     .AutoConnect(); // connect on first subscription
 
                 return new ServiceCollection()
+                    .AddSingleton(stringifier)
                     .AddSingleton(Logger)
                     .AddSingleton(Config)   // Config has no dependencies
                     .AddSingleton(rxSocket) // rxSocket is an instance of RxSocketClient
@@ -130,6 +140,7 @@ namespace InterReact
                 }
                 catch (SocketException e) when (e.SocketErrorCode == SocketError.ConnectionRefused || e.SocketErrorCode == SocketError.TimedOut)
                 {
+                    ;
                 }
             }
             string ports = config.Ports.Select(p => p.ToString()).JoinStrings(", ");
@@ -147,8 +158,9 @@ namespace InterReact
                 "2", config.ClientId.ToString(), config.OptionalCapabilities);
 
             string[] message = await GetMessage().ConfigureAwait(false);
-            if (!Enum.TryParse(message[0], out ServerVersion version))
+            if (!int.TryParse(message[0], out int version))
                 throw new InvalidDataException($"Could not parse server version '{message[0]}'.");
+
             config.ServerVersionCurrent = version;
             logger.LogDebug($"Server Version: {config.ServerVersionCurrent}.");
             // ServerVersion is the highest supported API version in the range specified.

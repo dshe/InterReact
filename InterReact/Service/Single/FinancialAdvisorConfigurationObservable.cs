@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 
 namespace InterReact
 {
-    public sealed partial class Services
+    public partial class Services
     {
         /// <summary>
         /// Creates an observable which, upon subscription, emits the specified financial advisor object, then completes.

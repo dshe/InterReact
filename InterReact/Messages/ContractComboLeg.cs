@@ -12,7 +12,7 @@
         /// </summary>
         public int Ratio { get; init; }
 
-        public TradeAction TradeAction { get; init; } = TradeAction.Undefined;
+        public OrderAction TradeAction { get; init; } = OrderAction.Undefined;
 
         /// <summary>
         /// The exchange to which the order will be routed.
@@ -44,7 +44,7 @@
         {
             ContractId = c.ReadInt();
             Ratio = c.ReadInt();
-            TradeAction = c.ReadStringEnum<TradeAction>();
+            TradeAction = c.ReadStringEnum<OrderAction>();
             Exchange = c.ReadString();
             OpenClose = c.ReadEnum<ComboOpenClose>();
             ComboShortSaleSlot = c.ReadEnum<ComboShortSaleSlot>();

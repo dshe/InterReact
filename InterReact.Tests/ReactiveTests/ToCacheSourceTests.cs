@@ -29,7 +29,7 @@ namespace InterReact.UnitTests.Extensions
                 OnNext(200, "two"),
                 OnNext(300, "three"));
 
-            var published = source.ShareSourceCache(x => x);
+            var published = source.CacheSource(x => x);
             var observable = published;
 
             observable.Subscribe(observer1);
@@ -49,7 +49,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task T01_Empty()
         {
-            var observable = Observable.Empty<string>().ShareSourceCache(x => x); // completes
+            var observable = Observable.Empty<string>().CacheSource(x => x); // completes
             var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => await observable);
             Assert.Equal("Sequence contains no elements.", ex.Message);
         }
@@ -76,12 +76,16 @@ namespace InterReact.UnitTests.Extensions
         public async Task T03_Cache()
         {
             var source = new Subject<string>();
-            var observable = source.ShareSourceCache(x => x);
+            var observable = source.CacheSource(x => x);
+
+            observable.Subscribe(); // start cache
 
             source.OnNext("1");
             source.OnNext("2");
             source.OnNext("3");
             source.OnNext("2"); // duplicate key
+
+            var first = await observable.FirstAsync();
 
             var list1 = await observable.Take(1).ToList();
 
@@ -99,7 +103,7 @@ namespace InterReact.UnitTests.Extensions
         public void T04_Throw_In_OnNext()
         {
             var source = new Subject<string>();
-            var observable = source.ShareSourceCache(x => x);
+            var observable = source.CacheSource(x => x);
 
             observable.Subscribe(x =>
                 throw new BarrierPostPhaseException("some exception"));

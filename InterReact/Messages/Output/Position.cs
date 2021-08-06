@@ -16,7 +16,7 @@
             c.RequireVersion(3);
             Account = c.ReadString();
             Contract = GetContract();
-            Quantity = c.Config.SupportsServerVersion(ServerVersion.FractionalPositions) ? c.ReadDouble() : c.ReadInt();
+            Quantity = c.ReadDouble();
             AverageCost = c.ReadDouble();
 
             Contract GetContract() => new()

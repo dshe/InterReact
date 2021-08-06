@@ -4,10 +4,11 @@ using System.Reactive.Linq;
 
 namespace InterReact
 {
-    public sealed partial class Services
+    public partial class Services
     {
         /// <summary>
         /// Creates an observable which emits market depth for the specified contract.
+        /// Use CreateMarketDepthObservable(...).Publish()[.RefCount() | .AutoConnect()] to share the subscription.
         /// </summary>
         public IObservable<Union<MarketDepth, Alert>> CreateMarketDepthObservable(Contract contract, int rows = 3, IList<Tag>? options = null)
         {
@@ -18,9 +19,7 @@ namespace InterReact
                     Request.GetNextId,
                     id => Request.RequestMarketDepth(id, contract, rows, options),
                     id => Request.CancelMarketDepth(id))
-                .Select(x => new Union<MarketDepth, Alert>(x))
-                .Publish()
-                .RefCount();
+                .Select(x => new Union<MarketDepth, Alert>(x));
         }
     }
 }

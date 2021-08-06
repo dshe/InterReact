@@ -52,7 +52,7 @@ namespace InterReact
                 LocalSymbol = c.ReadString(),
                 TradingClass = c.ReadString()
             };
-            Position = c.Config.SupportsServerVersion(ServerVersion.FractionalPositions) ? c.ReadDouble() : c.ReadInt();
+            Position = c.ReadDouble();
             MarketPrice = c.ReadDouble();
             MarketValue = c.ReadDouble();
             AverageCost = c.ReadDouble();

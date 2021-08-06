@@ -4,14 +4,14 @@ using System.Reactive.Linq;
 
 namespace InterReact
 {
-    public sealed partial class Services
+    public partial class Services
     {
         /// <summary>
         /// Creates an observable which emits postions for all accounts.
         /// All positions are sent initially, and then only updates as positions change. 
         /// PositionEnd is emitted after the initial values for each account have been emitted.
         /// Use CreatePositionsObservable().Publish()[.RefCount()] to share the subscription.
-        /// Use CreatePositionsObservable().ShareSourceCache(Services.GetPositionsCacheKey)
+        /// Use CreatePositionsObservable().CacheSource(Services.GetPositionsCacheKey)
         /// to cache the latest values for replay to new subscribers.
         /// </summary>
         public IObservable<Union<Position, PositionEnd>> CreatePositionsObservable()

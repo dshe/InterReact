@@ -11,11 +11,8 @@ namespace InterReact
 {
     public abstract class Union
     {
-        public object Source { get; }
-        public Union(object source)
-        {
-            Source = source;
-        }
+        public object Source { get; init; }
+        public Union(object source) => Source = source;
     }
 
     public class Union<T1, T2> : Union

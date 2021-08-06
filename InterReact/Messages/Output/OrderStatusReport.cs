@@ -58,21 +58,14 @@
 
         internal OrderStatusReport(ResponseReader c)
         {
-            int version = c.ReadInt();
+            int version = c.ServerVersion >= ServerVersion.MARKET_CAP_PRICE ? int.MaxValue : c.ReadInt();
+
             OrderId = c.ReadInt();
             Status = c.ReadStringEnum<OrderStatus>();
-
-            if (c.Config.SupportsServerVersion(ServerVersion.FractionalPositions))
-            {
-                Filled = c.ReadDouble();
-                Remaining = c.ReadDouble();
-            }
-            else
-            {
-                Filled = c.ReadInt();
-                Remaining = c.ReadInt();
-            }
+            Filled = c.ReadDouble();
+            Remaining = c.ReadDouble();
             AverageFillPrice = c.ReadDouble();
+
             if (version >= 2)
                 PermanentId = c.ReadInt();
             if (version >= 3)
@@ -83,6 +76,8 @@
                 ClientId = c.ReadInt();
             if (version >= 6)
                 WhyHeld = c.ReadString();
+            if (c.ServerVersion >= ServerVersion.MARKET_CAP_PRICE)
+                MktCapPrice = c.ReadDouble();
         }
     }
 }

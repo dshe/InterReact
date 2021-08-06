@@ -14,7 +14,7 @@ namespace InterReact
         public List<HistoricalDataBar> Bars { get; } = new List<HistoricalDataBar>();
         internal HistoricalData(ResponseReader c) // a one-shot deal
         {
-            if (!c.Config.SupportsServerVersion(ServerVersion.SyntRealtimeBars))
+            if (!c.Config.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
                 c.RequireVersion(3);
             
             RequestId = c.ReadInt();
@@ -46,7 +46,7 @@ namespace InterReact
             Close = c.ReadDouble();
             Volume = c.ReadLong();
             WeightedAveragePrice = c.ReadDouble();
-            if (!c.Config.SupportsServerVersion(ServerVersion.SyntRealtimeBars))
+            if (!c.Config.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
                 c.ReadString(); /*string hasGaps = */
             Count = c.ReadInt();
         }

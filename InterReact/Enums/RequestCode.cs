@@ -10,7 +10,7 @@
         RequestAccountData = 6,
         RequestExecutions = 7,
         RequestIds = 8,
-        RequestContractData = 9,
+        RequestContractDetails = 9,
         RequestMarketDepth = 10,
         CancelMarketDepth = 11,
         RequestNewsBulletins = 12,

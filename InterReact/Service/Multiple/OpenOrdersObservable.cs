@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 
 namespace InterReact
 {
-    public sealed partial class Services
+    public partial class Services
     {
         /// <summary>
         /// Creates an observable which, upon subscription, returns open orders and order status reports, then completes.

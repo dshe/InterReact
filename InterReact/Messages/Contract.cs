@@ -78,5 +78,4 @@ namespace InterReact
         /// </summary>
         public DeltaNeutralContract? DeltaNeutralContract { get; set; }
     }
-
 }

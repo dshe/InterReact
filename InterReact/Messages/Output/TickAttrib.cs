@@ -15,12 +15,12 @@
                 return;
             int value = r.ReadInt();
             CanAutoExecute = value == 1;
-            if (!r.Config.SupportsServerVersion(ServerVersion.PastLimit))
+            if (!r.Config.SupportsServerVersion(ServerVersion.PAST_LIMIT))
                 return;
             BitMask mask = new(value);
             CanAutoExecute = mask[0];
             PastLimit = mask[1];
-            if (r.Config.SupportsServerVersion(ServerVersion.PreOpenBidAsk))
+            if (r.Config.SupportsServerVersion(ServerVersion.PRE_OPEN_BID_ASK))
                 PreOpen = mask[2];
         }
     }

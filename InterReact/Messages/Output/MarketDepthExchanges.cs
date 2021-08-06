@@ -25,7 +25,7 @@ namespace InterReact
         {
             Exchange = c.ReadString();
             SecType = c.ReadString();
-            if (c.Config.SupportsServerVersion(ServerVersion.ServiceDataType))
+            if (c.Config.SupportsServerVersion(ServerVersion.SERVICE_DATA_TYPE))
             {
                 ListingExch = c.ReadString();
                 ServiceDataTyp = c.ReadString();

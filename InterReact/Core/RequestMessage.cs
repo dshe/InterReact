@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using StringEnums;
 using RxSockets;
+using System.Linq;
 
 namespace InterReact
 {
@@ -27,13 +28,17 @@ namespace InterReact
 
         internal RequestMessage Write(params object?[]? objs)
         {
-            if (objs == null)
-                Strings.Add(string.Empty);
-            else if (objs.Length == 0)
-                throw new ArgumentException("invalid length", nameof(objs));
-            else foreach (object? o in objs)
-                    Strings.Add(GetString(o));
+            Strings.AddRange(GetStrings(objs));
             return this;
+        }
+
+        internal static IEnumerable<string> GetStrings(params object?[]? objs)
+        {
+            if (objs == null)
+                return new[] { string.Empty };
+            if (objs.Length == 0)
+                throw new ArgumentException("invalid length", nameof(objs));
+            return objs.Select(o => GetString(o));
         }
 
         private static string GetString(object? o)
@@ -45,8 +50,8 @@ namespace InterReact
             {
                 case string s:
                     return s;
-                case bool bo:
-                    return bo ? "1" : "0";
+                case bool b:
+                    return b ? "1" : "0";
                 case Enum e:
                     Type ut = Enum.GetUnderlyingType(e.GetType());
                     return Convert.ChangeType(e, ut).ToString() ?? "";
@@ -67,6 +72,7 @@ namespace InterReact
 
             return o switch
             {
+                bool b => b ? "1" : "0",
                 int i => i.ToString(NumberFormatInfo.InvariantInfo),
                 long l => l.ToString(NumberFormatInfo.InvariantInfo),
                 double d => d.ToString(NumberFormatInfo.InvariantInfo),

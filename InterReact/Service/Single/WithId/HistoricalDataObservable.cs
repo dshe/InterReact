@@ -5,7 +5,7 @@ using NodaTime;
 
 namespace InterReact
 {
-    public sealed partial class Services
+    public partial class Services
     {
         /// <summary>
         /// Creates an observable which emits historical data, then completes.

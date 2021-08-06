@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using RxSockets;
 
@@ -11,7 +13,7 @@ namespace InterReact
         Services Services { get; }
     }
 
-    public sealed class InterReactClient : IInterReactClient
+    public class InterReactClient : IInterReactClient
     {
         private readonly IRxSocketClient RxSocket;
         public Request Request { get; }

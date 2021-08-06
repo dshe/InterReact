@@ -4,7 +4,7 @@ using NodaTime;
 
 namespace InterReact
 {
-    public sealed partial class Services
+    public partial class Services
     {
         /// <summary>
         /// An observable which emits the current time, then completes.

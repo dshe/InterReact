@@ -108,10 +108,7 @@ namespace InterReact
             Account = c.ReadString();
             Exchange = c.ReadString();
             Side = c.ReadStringEnum<ExecutionSide>();
-            if (c.Config.SupportsServerVersion(ServerVersion.FractionalPositions))
-                Shares = c.ReadDouble();
-            else
-                Shares = c.ReadInt();
+            Shares = c.ReadDouble();
             Price = c.ReadDouble();
             PermanentId = c.ReadInt();
             ClientId = c.ReadInt();
@@ -121,7 +118,7 @@ namespace InterReact
             OrderReference = c.ReadString();
             EconomicValueRule = c.ReadString();
             EconomicValueMultiplier = c.ReadDouble();
-            if (c.Config.SupportsServerVersion(ServerVersion.ModelsSupport))
+            if (c.Config.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
                 ModelCode = c.ReadString();
             Executions[ExecutionId] = this;
         }

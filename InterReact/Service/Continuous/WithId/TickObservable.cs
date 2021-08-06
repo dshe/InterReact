@@ -5,36 +5,42 @@ using System.Reactive.Linq;
 
 namespace InterReact
 {
-    public sealed partial class Services
+
+    //public void RequestMarketData(Contract contract,
+    //IList<GenericTickType>? genericTickTypes = null, bool marketDataOff = false,
+    //bool isSnapshot = false, IList<Tag>? options = null)
+
+    public partial class Services
     {
         /// <summary>
         /// Creates an observable which emits a snapshot of market ticks, then completes.
         /// Tick types may be selected by using the OfTickType extension method.
         /// </summary>
-        public IObservable<ITick> CreateTickSnapshotObservable(Contract contract)
+        public IObservable<ITick> CreateTickSnapshotObservable(
+            Contract contract, IEnumerable<GenericTickType>? genericTickTypes = null, bool isRegulatorySnapshot = false, List<Tag>? options = null)
         {
             return Response
                 .ToObservableMultipleWithId<SnapshotEndTick>(
                     Request.GetNextId,
-                    id => Request.RequestMarketData(id, contract, genericTickTypes: null, isSnapshot: true))
+                    id => Request.RequestMarketData(id, contract, genericTickTypes, true, isRegulatorySnapshot, options))
                 .Cast<ITick>()
                 .ShareSource();
         }
 
         /// <summary>
         /// Creates an observable which continually emits market data ticks for the specified contract.
-        /// Use CreateTickObservable(...).Publish()[.RefCount()] to share the subscription.
-        /// Use CreateTickObservable(...).ShareSourceCache(Services.GetTickCacheKey)
+        /// Use CreateTickObservable(...).Publish()[.RefCount() | .AutoConnect()] to share the subscription.
+        /// Use CreateTickObservable(...).CacheSource(Services.GetTickCacheKey)
         /// to cache the latest values for replay to new subscribers.
         /// Tick types may be selected by using the OfTickType extension method.
         /// </summary>
         public IObservable<ITick> CreateTickObservable(Contract contract,
-            IList<GenericTickType>? genericTickTypes = null, bool marketDataOff = false, IList<Tag>? options = null)
+            IEnumerable<GenericTickType>? genericTickTypes = null, IList<Tag>? options = null)
         {
             return Response
                 .ToObservableContinuousWithId(
                     Request.GetNextId,
-                    id => Request.RequestMarketData(id, contract, genericTickTypes, marketDataOff, false, options),
+                    id => Request.RequestMarketData(id, contract, genericTickTypes, false, false, options),
                     id => Request.CancelMarketData(id))
             .Cast<ITick>();
         }
@@ -68,6 +74,7 @@ namespace InterReact
         public IObservable<OptionComputationTick> TickOptionComputation => Source.OfType<OptionComputationTick>();
         public IObservable<HaltedTick> TickHalted => Source.OfType<HaltedTick>();
         public IObservable<MarketDataTypeTick> TickMarketDataType => Source.OfType<MarketDataTypeTick>();
+        public IObservable<TickReqParams> TickReqParams => Source.OfType<TickReqParams>();
         public IObservable<Alert> Alert => Source.OfType<Alert>();
     }
 

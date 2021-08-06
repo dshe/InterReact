@@ -19,15 +19,19 @@ namespace InterReact
 
     public sealed class SoftDollarTier
     {
-        public string Name { get; }
-        public string Value { get; }
-        public string DisplayName { get; }
-        internal SoftDollarTier(ResponseReader c)
+        public string Name { get; set; } = "";
+        public string Value { get; set; } = "";
+        public string DisplayName { get; set; } = "";
+        internal SoftDollarTier() { }
+        internal SoftDollarTier(ResponseReader c) 
+        {
+            Set(c);
+        }
+        internal void Set(ResponseReader c)
         {
             Name = c.ReadString();
             Value = c.ReadString();
             DisplayName = c.ReadString();
         }
     }
-
 }

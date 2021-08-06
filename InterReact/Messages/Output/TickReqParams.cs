@@ -1,6 +1,6 @@
 ﻿namespace InterReact
 {
-    public sealed class TickReqParams : IHasRequestId
+    public sealed class TickReqParams : ITick
     {
         public int RequestId { get; }
         public double MinTick { get; }

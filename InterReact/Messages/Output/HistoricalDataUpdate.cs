@@ -3,9 +3,7 @@ using System.Reactive.Linq;
 
 namespace InterReact
 {
-    public interface IHistoricalxxData : IHasRequestId { }
-
-    public sealed class HistoricalDataUpdate : IHistoricalxxData
+    public sealed class HistoricalDataUpdate : IHasRequestId
     {
         public int RequestId { get; }
         public int BarCount { get; }

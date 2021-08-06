@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 
 namespace InterReact
 {
-    public sealed partial class Services
+    public partial class Services
     {
         /// <summary>
         /// Creates an observable which emits fundamental data for the company represented by the contract, then completes.

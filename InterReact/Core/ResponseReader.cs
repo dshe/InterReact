@@ -11,12 +11,14 @@ namespace InterReact
     public class ResponseReader
     {
         private readonly IEnumerator<string> Enumerator;
-        internal Config Config { get; }
-        internal ResponseParser Parser { get; }
+        internal readonly Config Config;
+        internal readonly int ServerVersion;
+        internal readonly ResponseParser Parser;
 
         internal ResponseReader(Config config, ResponseParser responseParser, string[] strings)
         {
             Config = config;
+            ServerVersion = Config.ServerVersionCurrent;
             Parser = responseParser;
             Enumerator = strings.AsEnumerable().GetEnumerator();
         }
@@ -34,8 +36,18 @@ namespace InterReact
             throw new IndexOutOfRangeException("Message is shorter than expected.");
         }
 
-        internal char ReadChar() => ResponseParser.ParseChar(ReadString());
+        internal void IgnoreVersion() => ReadString();
+        internal int GetVersion() => ReadInt();
+        internal int RequireVersion(int minimumVersion)
+        {
+            int v = GetVersion();
+            if (v < minimumVersion)
+                throw new InvalidDataException($"Invalid response version: {v} < {minimumVersion}.");
+            return v;
+        }
+
         internal bool ReadBool() => ResponseParser.ParseBool(ReadString());
+        internal char ReadChar() => ResponseParser.ParseChar(ReadString());
         internal int ReadInt() => ResponseParser.ParseInt(ReadString());
         internal long ReadLong() => ResponseParser.ParseLong(ReadString());
         internal double ReadDouble() => ResponseParser.ParseDouble(ReadString());
@@ -46,21 +58,13 @@ namespace InterReact
         internal T ReadEnum<T>() where T : Enum => Parser.ParseEnum<T>(ReadString());
         internal T ReadStringEnum<T>() where T : StringEnum<T>, new() => Parser.ParseStringEnum<T>(ReadString());
 
-        internal void IgnoreVersion() => ReadString();
-        internal int GetVersion() => ReadInt();
-        internal int RequireVersion(int minimumVersion)
-        {
-            int v = GetVersion();
-            if (v < minimumVersion)
-                throw new InvalidDataException($"Invalid response version: {v} < {minimumVersion}.");
-            return v;
-        }
         internal void AddStringsToList(IList<string> list)
         {
             int n = ReadInt();
             for (int i = 0; i < n; i++)
                 list.Add(ReadString());
         }
+
         internal void AddTagsToList(IList<Tag> list)
         {
             int n = ReadInt();

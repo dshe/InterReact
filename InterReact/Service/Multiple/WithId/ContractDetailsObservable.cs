@@ -1,11 +1,19 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging.Abstractions;
+using Stringification;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace InterReact
 {
-    public sealed partial class Services
+    public partial class Services
     {
+        private readonly Dictionary<string, ContractDetails[]> Contracts = new();
+
         /// <summary>
         /// Returns an observable which emits a list of ContractDetails objects and possibly alerts,
         /// using the supplied contract as selector, then completes. Results are cached. 
@@ -27,11 +35,49 @@ namespace InterReact
             if ((contract.SecurityIdType == null || contract.SecurityIdType == SecurityIdType.Undefined) ^ string.IsNullOrEmpty(contract.SecurityId))
                 throw new ArgumentException("Invalid SecurityId/SecurityIdType combination.");
 
+            object[] objs = Request.ContractObjects(contract);
+            IEnumerable<string> strings = RequestMessage.GetStrings(objs);
+            string key = string.Join(',', strings);
+
+            /*
+            Observable.Create<Union<ContractDetails, Alert>>(observer =>
+            {
+                return Disposable.Empty;
+            });
+            */
+
             return Response
                 .ToObservableMultipleWithId<ContractDetailsEnd>(
                     Request.GetNextId, id => Request.RequestContractDetails(id, contract))
                 .Select(x => new Union<ContractDetails, Alert>(x));
         }
+
+        internal IObservable<IHasRequestId> ToObservableMultipleWithIdX(Contract contract)
+        {
+            return Observable.Create<IHasRequestId>(observer =>
+            {
+                int id = Request.GetNextId();
+
+                IDisposable subscription = Response
+                    .OfType<IHasRequestId>() // IMPORTANT!
+                    .Where(m => m.RequestId == id)
+                    .SubscribeSafe(Observer.Create<IHasRequestId>(
+                        onNext: m =>
+                        {
+                            if (m is not ContractDetailsEnd)
+                                observer.OnNext(m);
+                            if (m is ContractDetailsEnd or Alert)
+                                observer.OnCompleted();
+                        },
+                        onError: observer.OnError,
+                        onCompleted: observer.OnCompleted));
+
+                Request.RequestContractDetails(id, contract);
+
+                return subscription;
+            });
+        }
+
     }
 }
 

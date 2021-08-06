@@ -66,7 +66,6 @@ namespace InterReact.ConnectTests
             Assert.Equal(111, client.Request.Config.ClientId);
             //Assert.True(client.Config.IsDemoAccount);
             Assert.NotEmpty(client.Request.Config.Date);
-            Assert.NotEmpty(client.Request.Config.ManagedAccounts);
             Assert.True(client.Request.Config.ServerVersionCurrent >= Config.ServerVersionMin);
             await client.DisposeAsync();
         }

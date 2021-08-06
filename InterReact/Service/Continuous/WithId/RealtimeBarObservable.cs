@@ -4,11 +4,11 @@ using System.Reactive.Linq;
 
 namespace InterReact
 {
-    public sealed partial class Services
+    public partial class Services
     {
         /// <summary>
         /// Creates an observable which continually emits 5 second bars.
-        /// Use CreateRealtimeBarsObservable().Publish()[.RefCount()] to supoort multiple observers.
+        /// Use CreateRealtimeBarsObservable().Publish()[.RefCount() | .AutoConnect()] to supoort multiple observers.
         /// </summary>
         public IObservable<Union<RealtimeBar, Alert>> CreateRealtimeBarsObservable(Contract contract,
             RealtimeBarType? whatToShow = null, bool regularTradingHours = true, IList<Tag>? options = null)

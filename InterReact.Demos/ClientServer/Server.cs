@@ -25,7 +25,7 @@ namespace CoreClientServer
         internal async Task Run()
         {
             Logger.LogInformation("Waiting for client.");
-            IRxSocketClient? accept = await SocketServer.AcceptAllAsync().FirstAsync();
+            IRxSocketClient accept = await SocketServer.AcceptAllAsync().FirstAsync();
             Logger.LogInformation("Client connection accepted.");
 
             string firstString = await accept.ReceiveAllAsync().ToStrings().FirstAsync();
@@ -95,7 +95,7 @@ namespace CoreClientServer
             // receive test start signal
             await obs.FirstAsync();
 
-            Stopwatch? watch = new();
+            Stopwatch watch = new();
             watch.Start();
 
             int count = await obs.TakeWhile(m => m[0] == "2").Count();
@@ -105,7 +105,7 @@ namespace CoreClientServer
             long frequency = Stopwatch.Frequency * (count + 1) / watch.ElapsedTicks;
             Logger.LogInformation($"Received {frequency:N0} messages/second.");
 
-            MemoryStream? ms = new();
+            MemoryStream ms = new();
             for (int i = 0; i < 100_000; i++)
             {
                 ms.Write(

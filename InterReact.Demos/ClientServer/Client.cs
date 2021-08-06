@@ -30,7 +30,7 @@ namespace CoreClientServer
             logger.LogInformation("Receiving...");
 
             // receive some messages to measure throughput
-            Stopwatch? watch = new();
+            Stopwatch watch = new();
             watch.Start();
             int count = await client.Response.TakeWhile(m => m is SizeTick).Count();
             watch.Stop();

@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 
 namespace InterReact
 {
-    public sealed partial class Services
+    public partial class Services
     {
         public IObservable<string> ManagedAccountsObservable { get; }
 

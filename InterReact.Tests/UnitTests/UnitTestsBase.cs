@@ -15,7 +15,7 @@ namespace InterReact.UnitTests
         public UnitTestsBase(ITestOutputHelper output)
         {
             Write = output.WriteLine;
-            LoggerFactory = new LoggerFactory().AddMXLogger(Write);
+            LoggerFactory = new LoggerFactory().AddMXLogger(Write, LogLevel.Debug);
             Logger = LoggerFactory.CreateLogger("Test");
         }
     }

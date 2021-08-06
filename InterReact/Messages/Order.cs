@@ -23,7 +23,7 @@ namespace InterReact
         /// <summary>
         /// Identifies the order side.
         /// </summary>
-        public TradeAction TradeAction { get; set; } = TradeAction.Undefined;
+        public OrderAction OrderAction { get; set; } = OrderAction.Undefined;
 
         /// <summary>
         /// The number of units to trade.
@@ -88,7 +88,7 @@ namespace InterReact
         /// <summary>
         /// The publicly disclosed order size, used when placing Iceberg orders.
         /// </summary>
-        public int DisplaySize { get; set; }
+        public int? DisplaySize { get; set; }
 
         public TriggerMethod TriggerMethod { get; set; }
 
@@ -169,15 +169,6 @@ namespace InterReact
         /// The amount off the limit price allowed for discretionary orders.
         /// </summary>
         public double DiscretionaryAmount { get; set; }
-
-        public bool ElectronicTradeOnly { get; set; }
-
-        public bool FirmQuoteOnly { get; set; }
-
-        /// <summary>
-        /// Maximum smart order distance from the NBBO.s
-        /// </summary>
-        public double? NbboPriceCap { get; set; }
 
         /// <summary>
         /// Use to opt out of default SmartRouting for orders routed directly to ASX.
@@ -312,6 +303,20 @@ namespace InterReact
         public string Mifid2ExecutionTrader { get; set; } = "";
         public string Mifid2ExecutionAlgo { get; set; } = "";
         public bool DontUseAutoPriceForHedge { get; set; }
+        public string AutoCancelDate { get; set; } = "";
+        public double? FilledQuantity { get; set; }
+        public int RefFuturesConId { get; set; }
+
+        public bool AutoCancelParent { get; set; }
+
+        public string Shareholder { get; set; } = "";
+
+        public bool ImbalanceOnly { get; set; }
+
+        public bool RouteMarketableToBbo { get; set; }
+
+        public long ParentPermId { get; set; }
+
 
         public bool RandomizeSize { get; set; }
         public bool RandomizePrice { get; set; }
@@ -330,8 +335,11 @@ namespace InterReact
         public List<OrderCondition> Conditions { get; } = new();
         public bool ConditionsIgnoreRegularTradingHours { get; set; }
         public bool ConditionsCancelOrder { get; set; }
-        public SoftDollarTier? SoftDollarTier { get; set; }
+        public SoftDollarTier SoftDollarTier { get; } = new();
         public bool IsOmsContainer { get; set; }
         public bool DiscretionaryUpToLimitPrice { get; set; }
+        public bool? UsePriceMgmtAlgo { get; set; }
+        public int? Duration { get; set; }
+        public int? PostToAts { get; set; }
     }
 }

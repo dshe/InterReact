@@ -61,19 +61,8 @@ namespace InterReact
             throw new ArgumentException($"ParseDouble('{s}') failure.");
         }
 
-        internal static int? ParseIntNullable(string s)
-        {
-            if (s == "")
-                return null; // !
-            return ParseInt(s);
-        }
-
-        internal static double? ParseDoubleNullable(string s)
-        {
-            if (s == "")
-                return null; // !
-            return ParseDouble(s);
-        }
+        internal static int? ParseIntNullable(string s) => (s == "" || s == "2147483647") ? null : ParseInt(s);
+        internal static double? ParseDoubleNullable(string s) => (s == "" || s == "1.7976931348623157E308") ? null : ParseDouble(s);
 
         internal T ParseEnum<T>(string numberString) where T : Enum
         {

@@ -16,11 +16,14 @@ namespace InterReact
         }
         public Tag(ResponseReader c) : this(c.ReadString(), c.ReadString())  {}
 
-        internal static string Combine(IList<Tag>? tags)
+        internal static string Combine(IEnumerable<Tag>? tags)
         {
             if (tags == null || !tags.Any())
                 return "";
-            return tags.Select(tag => $"{tag.Name}={tag.Value}").JoinStrings(";");
+
+            return tags
+                .Select(tag => $"{tag.Name}={tag.Value}")
+                .JoinStrings(";");
         }
     }
 }

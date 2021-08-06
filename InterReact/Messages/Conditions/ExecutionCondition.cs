@@ -1,31 +1,50 @@
-﻿namespace InterReact
+﻿/* Copyright (C) 2019 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
+ * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
+
+using System.IO;
+
+namespace InterReact
 {
     /**
     * @class ExecutionCondition
     * @brief This class represents a condition requiring a specific execution event to be fulfilled.
     * Orders can be activated or canceled if a set of given conditions is met. An ExecutionCondition is met whenever a trade occurs on a certain product at the given exchange.
     */
-    public class ExecutionCondition : OrderCondition
+    public sealed class ExecutionCondition : OrderCondition
     {
+        /**
+        * @brief Exchange where the symbol needs to be traded.
+        */
         public string Exchange { get; set; } = "";
+
+        /**
+        * @brief Kind of instrument being monitored.
+        */
         public string SecType { get; set; } = "";
+
+        /**
+        * @brief Instrument's symbol
+        */
         public string Symbol { get; set; } = "";
 
-        private const string header = "trade occurs for ",
+        const string header = "trade occurs for ",
                      symbolSuffix = " symbol on ",
                      exchangeSuffix = " exchange for ",
                      secTypeSuffix = " security type";
 
-        public override string ToString() =>
-            header + Symbol + symbolSuffix + Exchange + exchangeSuffix + SecType + secTypeSuffix;
+        public override string ToString()
+        {
+            return header + Symbol + symbolSuffix + Exchange + exchangeSuffix + SecType + secTypeSuffix;
+        }
 
         protected override bool TryParse(string cond)
         {
             if (!cond.StartsWith(header))
                 return false;
+
             try
             {
-                StringSuffixParser parser = new(cond.Replace(header, ""));
+                var parser = new StringSuffixParser(cond.Replace(header, ""));
 
                 Symbol = parser.GetNextSuffixedValue(symbolSuffix);
                 Exchange = parser.GetNextSuffixedValue(exchangeSuffix);
@@ -38,6 +57,7 @@
             {
                 return false;
             }
+
             return true;
         }
 
@@ -55,16 +75,23 @@
             message.Write(SecType, Exchange, Symbol);
         }
 
+
         public override bool Equals(object? obj)
         {
-            return (obj is ExecutionCondition other)
-                && base.Equals(obj)
+            var other = obj as ExecutionCondition;
+
+            if (other == null)
+                return false;
+
+            return base.Equals(obj) 
                 && Exchange.Equals(other.Exchange)
                 && SecType.Equals(other.SecType)
                 && Symbol.Equals(other.Symbol);
         }
 
-        public override int GetHashCode() =>
-            base.GetHashCode() + Exchange.GetHashCode() + SecType.GetHashCode() + Symbol.GetHashCode();
+        public override int GetHashCode()
+        {
+            return base.GetHashCode() + Exchange.GetHashCode() + SecType.GetHashCode() + Symbol.GetHashCode();
+        }
     }
 }

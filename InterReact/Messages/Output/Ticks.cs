@@ -3,9 +3,6 @@ using NodaTime;
 
 namespace InterReact
 {
-    // ITick is also be set on Alert
-    public interface ITick : IHasRequestId { }
-
     public abstract class BaseTick : ITick
     {
         public int RequestId { get; protected set; }
@@ -106,8 +103,6 @@ namespace InterReact
     {
         public double Price { get; }
         public TickAttrib TickAttrib { get; }
-
-        internal PriceTick() { TickAttrib = new TickAttrib(); } // ctor for Stringify
         internal PriceTick(int requestId, TickType tickType, double price, TickAttrib attrib)
         {
             RequestId = requestId;

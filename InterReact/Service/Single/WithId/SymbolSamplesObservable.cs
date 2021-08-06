@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace InterReact
 {
-    public sealed partial class Services
+    public partial class Services
     {
         /// <summary>
         /// Creates an observable which emits matching symbols for the pattern, then completes.
