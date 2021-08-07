@@ -18,36 +18,48 @@ namespace InterReact
 {
     public sealed class InterReactClientBuilder : EditorBrowsableNever
     {
-        private readonly ILogger Logger;
+        public static InterReactClientBuilder Create() => new();
+        private InterReactClientBuilder() { }
+
+        private ILogger Logger = NullLogger.Instance;
         private readonly Config Config = new();
 
-        public InterReactClientBuilder() : this(NullLogger.Instance) { }
-        public InterReactClientBuilder(ILogger<InterReactClient> logger) : this((ILogger)logger) { }
-        public InterReactClientBuilder(ILogger logger) // supports testing
+        public InterReactClientBuilder WithLogger(ILogger logger, bool logIncomingMessages = false)
         {
             Logger = logger;
+            Config.LogIncomingMessages = logIncomingMessages;
             AssemblyName name = GetType().Assembly.GetName();
             Logger.LogInformation($"{name.Name} version {name.Version}.");
+            return this;
         }
 
         /// <summary>
         /// Specify an IPAddress to connect to TWS/Gateway.
         /// </summary>
-        public InterReactClientBuilder SetIpAddress(IPAddress address)
+        public InterReactClientBuilder WithMaxServerVersion(ServerVersion maxServerVersion)
+        {
+            if (maxServerVersion > ServerVersion.POST_TO_ATS)
+                throw new ArgumentException("ServerVersion");
+            Config.ServerVersionMax = maxServerVersion;
+            return this;
+        }
+
+        /// <summary>
+        /// Specify an IPAddress to connect to TWS/Gateway.
+        /// </summary>
+        public InterReactClientBuilder WithIpAddress(IPAddress address)
         {
             Config.IPEndPoint.Address = address;
             return this;
         }
 
         /// <summary>
-        /// Specify one or more ports to attempt connection to TWS/Gateway.
+        /// Specify a port to attempt connection to TWS/Gateway.
         /// Otherwise, connection will be attempted on ports 7496 and 7497, 4001, 4002.
         /// </summary>
-        public InterReactClientBuilder SetPort(params int[] ports)
+        public InterReactClientBuilder WithPort(int port)
         {
-            if (ports == null || !ports.Any())
-                throw new ArgumentNullException(nameof(ports));
-            Config.Ports = ports;
+            Config.Ports = new[] { port };
             return this;
         }
 
@@ -55,7 +67,7 @@ namespace InterReact
         /// Up to 8 clients can attach to TWS/Gateway. Each client requires a unique Id. The default Id is random.
         /// Only ClientId = 0 is able to modify orders submitted manually through TWS.
         /// </summary>
-        public InterReactClientBuilder SetClientId(int id)
+        public InterReactClientBuilder WithClientId(int id)
         {
             Config.ClientId = id >= 0 ? id : throw new ArgumentException("invalid", nameof(id));
             return this;
@@ -64,27 +76,21 @@ namespace InterReact
         /// <summary>
         /// Indicate the maximum number of requests per second sent to to TWS/Gateway.
         /// </summary>
-        public InterReactClientBuilder SetMaxRequestsPerSecond(int requests)
+        public InterReactClientBuilder WithMaxRequestsPerSecond(int requests)
         {
             Config.MaxRequestsPerSecond = requests > 0 ? requests : throw new ArgumentException("invalid", nameof(requests));
             return this;
         }
 
-        public InterReactClientBuilder SetOptionalCapabilities(string capabilities)
+        public InterReactClientBuilder WithOptionalCapabilities(string capabilities)
         {
             Config.OptionalCapabilities = capabilities;
             return this;
         }
 
-        public InterReactClientBuilder SetClock(IClock clock)
+        public InterReactClientBuilder WithClock(IClock clock)
         {
             Config.Clock = clock;
-            return this;
-        }
-
-        public InterReactClientBuilder LogIncomingMessages()
-        {
-            Config.LogIncomingMessages = true;
             return this;
         }
 
@@ -93,11 +99,12 @@ namespace InterReact
         public async Task<IInterReactClient> BuildAsync(CancellationToken ct = default)
         {
             IRxSocketClient rxSocket = await ConnectAsync(Config, Logger, ct).ConfigureAwait(false);
-            Stringifier stringifier = new(Logger);
 
             try
             {
                 await Login(rxSocket, Config, Logger, ct).ConfigureAwait(false);
+
+                Stringifier stringifier = new(Logger);
 
                 IObservable<object> response = rxSocket
                     .ReceiveAllAsync()
@@ -153,15 +160,18 @@ namespace InterReact
             Send("API");
 
             // Report a range of supported API versions to TWS.
-            SendWithPrefix($"v{Config.ServerVersionMin}..{Config.ServerVersionMax}");
+            SendWithPrefix($"v{config.ServerVersionMin}..{config.ServerVersionMax}");
             SendWithPrefix(((int)RequestCode.StartApi).ToString(),
                 "2", config.ClientId.ToString(), config.OptionalCapabilities);
 
             string[] message = await GetMessage().ConfigureAwait(false);
-            if (!int.TryParse(message[0], out int version))
-                throw new InvalidDataException($"Could not parse server version '{message[0]}'.");
+            //if (!int.TryParse(message[0], out int version))
+            //    throw new InvalidDataException($"Could not parse server version '{message[0]}'.");
 
+            if (!Enum.TryParse(message[0], out ServerVersion version))
+                throw new InvalidDataException($"Could not parse server version '{message[0]}'.");
             config.ServerVersionCurrent = version;
+
             logger.LogDebug($"Server Version: {config.ServerVersionCurrent}.");
             // ServerVersion is the highest supported API version in the range specified.
 

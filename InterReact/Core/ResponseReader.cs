@@ -12,7 +12,7 @@ namespace InterReact
     {
         private readonly IEnumerator<string> Enumerator;
         internal readonly Config Config;
-        internal readonly int ServerVersion;
+        internal readonly ServerVersion ServerVersion;
         internal readonly ResponseParser Parser;
 
         internal ResponseReader(Config config, ResponseParser responseParser, string[] strings)

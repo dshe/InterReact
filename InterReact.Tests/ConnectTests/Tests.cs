@@ -15,7 +15,7 @@ namespace InterReact.ConnectTests
         [Fact]
         public async Task Test()
         {
-            var client = await new InterReactClientBuilder(Logger).BuildAsync();
+            var client = await InterReactClientBuilder.Create().WithLogger(Logger).BuildAsync();
             await TestClient(client);
             await client.DisposeAsync();
         }
@@ -28,7 +28,7 @@ namespace InterReact.ConnectTests
         [Fact]
         public async Task Test()
         {
-            var client = await new InterReactClientBuilder(Logger).SetIpAddress(IPAddress.Loopback).BuildAsync();
+            var client = await InterReactClientBuilder.Create().WithLogger(Logger).WithIpAddress(IPAddress.Loopback).BuildAsync();
             await TestClient(client);
             await client.DisposeAsync();
         }
@@ -41,7 +41,7 @@ namespace InterReact.ConnectTests
         [Fact]
         public async Task Test()
         {
-            var client = await new InterReactClientBuilder(Logger).SetIpAddress(IPAddress.IPv6Loopback).BuildAsync();
+            var client = await InterReactClientBuilder.Create().WithLogger(Logger).WithIpAddress(IPAddress.IPv6Loopback).BuildAsync();
             await TestClient(client);
             await client.DisposeAsync();
         }
@@ -54,11 +54,11 @@ namespace InterReact.ConnectTests
         [Fact]
         public async Task Test()
         {
-            var client = await new InterReactClientBuilder(Logger)
-                .SetIpAddress(IPAddress.IPv6Loopback)
+            var client = await InterReactClientBuilder.Create().WithLogger(Logger)
+                .WithIpAddress(IPAddress.IPv6Loopback)
                 //.SetPort(7496) // default
-                .SetClientId(111)
-                .SetMaxRequestsPerSecond(123)
+                .WithClientId(111)
+                .WithMaxRequestsPerSecond(123)
                 .BuildAsync();
             await TestClient(client);
             Assert.Equal(IPAddress.IPv6Loopback, client.Request.Config.IPEndPoint.Address);
@@ -66,7 +66,7 @@ namespace InterReact.ConnectTests
             Assert.Equal(111, client.Request.Config.ClientId);
             //Assert.True(client.Config.IsDemoAccount);
             Assert.NotEmpty(client.Request.Config.Date);
-            Assert.True(client.Request.Config.ServerVersionCurrent >= Config.ServerVersionMin);
+            Assert.True(client.Request.Config.ServerVersionCurrent >= client.Request.Config.ServerVersionMin);
             await client.DisposeAsync();
         }
 
@@ -80,7 +80,7 @@ namespace InterReact.ConnectTests
         public async Task Test()
         {
             var count = 0;
-            var client = await new InterReactClientBuilder(Logger).BuildAsync();
+            var client = await InterReactClientBuilder.Create().WithLogger(Logger).BuildAsync();
             await Task.Delay(100); // warm up
             var start = Stopwatch.GetTimestamp();
             while (Stopwatch.GetTimestamp() - start < Stopwatch.Frequency)
@@ -104,7 +104,7 @@ namespace InterReact.ConnectTests
         public async Task Test()
         {
             var count = 0;
-            var client = await new InterReactClientBuilder(Logger).SetMaxRequestsPerSecond(100).BuildAsync();
+            var client = await InterReactClientBuilder.Create().WithLogger(Logger).WithMaxRequestsPerSecond(100).BuildAsync();
 
             await Task.Delay(100); // warm up
             var start = Stopwatch.GetTimestamp();
@@ -128,7 +128,7 @@ namespace InterReact.ConnectTests
         [Fact]
         public async Task Test()
         {
-            var client = await new InterReactClientBuilder(Logger).BuildAsync();
+            var client = await InterReactClientBuilder.Create().WithLogger(Logger).BuildAsync();
             await client.DisposeAsync();
             Assert.ThrowsAny<Exception>(() => client.Request.RequestCurrentTime());
             await Assert.ThrowsAnyAsync<Exception>(async () => await client.Services.CurrentTimeObservable);

@@ -35,8 +35,8 @@ namespace HelloWorld
             try
             {
                 // incoming message are sent to the Logger (which are sent to the console)
-                client = await new InterReactClientBuilder(Logger)
-                    .LogIncomingMessages() 
+                client = await InterReactClientBuilder.Create()
+                    .WithLogger(Logger, true)
                     .BuildAsync();
             }
             catch (Exception e)

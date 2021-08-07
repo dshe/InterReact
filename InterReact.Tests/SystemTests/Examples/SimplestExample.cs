@@ -14,7 +14,7 @@ namespace InterReactSamples
         public async Task Test()
         {
             // Create the InterReact client by connecting to TWS/Gateway on your local machine.
-            IInterReactClient interReact = await new InterReactClientBuilder().BuildAsync();
+            IInterReactClient interReact = await InterReactClientBuilder.Create().BuildAsync();
 
             var contract = new Contract
             {

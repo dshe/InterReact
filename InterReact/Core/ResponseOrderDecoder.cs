@@ -7,9 +7,9 @@
         private readonly Order Order;
         private readonly OrderState OrderState;
         private readonly int MessageVersion;
-        private readonly int ServerVersion;
+        private readonly ServerVersion ServerVersion;
 
-        internal OrderDecoder(ResponseReader reader, Contract contract, Order order, OrderState orderState, int msgVersion, int serverVersion)
+        internal OrderDecoder(ResponseReader reader, Contract contract, Order order, OrderState orderState, int msgVersion, ServerVersion serverVersion)
         {
             R = reader;
             Contract = contract;
@@ -151,7 +151,7 @@
             {
                 Order.ShortSaleSlot = R.ReadEnum<ShortSaleSlot>();
                 Order.DesignatedLocation = R.ReadString();
-                if (ServerVersion == 51)
+                if ((int)ServerVersion == 51)
                     R.ReadInt(); // exemptCode
                 else if (MessageVersion >= 23)
                     Order.ExemptCode = R.ReadInt();
@@ -289,7 +289,7 @@
                     }
                 }
                 Order.ContinuousUpdate = R.ReadInt();
-                if (ServerVersion == 26)
+                if ((int)ServerVersion == 26)
                 {
                     Order.StockRangeLower = R.ReadDouble();
                     Order.StockRangeUpper = R.ReadDouble();
@@ -450,7 +450,7 @@
             {
                 Order.WhatIf = R.ReadBool();
                 readOrderStatus();
-                if (ServerVersion >= InterReact.ServerVersion.WHAT_IF_EXT_FIELDS)
+                if (ServerVersion >= ServerVersion.WHAT_IF_EXT_FIELDS)
                 {
                     OrderState.InitialMarginBefore = R.ReadString();
                     OrderState.MaintenanceMarginBefore = R.ReadString();
@@ -484,7 +484,7 @@
 
         internal void readPegToBenchParams()
         {
-            if (ServerVersion >= InterReact.ServerVersion.PEGGED_TO_BENCHMARK)
+            if (ServerVersion >= ServerVersion.PEGGED_TO_BENCHMARK)
             {
                 var type = R.ReadStringEnum<OrderType>();
                 if (type == OrderType.PeggedToBenchmark)
@@ -500,7 +500,7 @@
 
         internal void readConditions()
         {
-            if (ServerVersion >= InterReact.ServerVersion.PEGGED_TO_BENCHMARK)
+            if (ServerVersion >= ServerVersion.PEGGED_TO_BENCHMARK)
             {
                 string s = R.ReadString();
                 int n = 0;
@@ -522,7 +522,7 @@
 
         internal void readAdjustedOrderParams()
         {
-            if (ServerVersion >= InterReact.ServerVersion.PEGGED_TO_BENCHMARK)
+            if (ServerVersion >= ServerVersion.PEGGED_TO_BENCHMARK)
             {
                 Order.AdjustedOrderType = R.ReadString();
                 Order.TriggerPrice = R.ReadDoubleNullable();
@@ -542,31 +542,31 @@
 
         internal void readSoftDollarTier()
         {
-            if (ServerVersion >= InterReact.ServerVersion.SOFT_DOLLAR_TIER)
+            if (ServerVersion >= ServerVersion.SOFT_DOLLAR_TIER)
                 Order.SoftDollarTier.Set(R);
         }
 
         internal void readCashQty()
         {
-            if (ServerVersion >= InterReact.ServerVersion.CASH_QTY)
+            if (ServerVersion >= ServerVersion.CASH_QTY)
                 Order.CashQty = R.ReadDoubleNullable();
         }
 
         internal void readDontUseAutoPriceForHedge()
         {
-            if (ServerVersion >= InterReact.ServerVersion.AUTO_PRICE_FOR_HEDGE)
+            if (ServerVersion >= ServerVersion.AUTO_PRICE_FOR_HEDGE)
                 Order.DontUseAutoPriceForHedge = R.ReadBool();
         }
 
         internal void readIsOmsContainer()
         {
-            if (ServerVersion >= InterReact.ServerVersion.ORDER_CONTAINER)
+            if (ServerVersion >= ServerVersion.ORDER_CONTAINER)
                 Order.IsOmsContainer = R.ReadBool();
         }
 
         internal void readDiscretionaryUpToLimitPrice()
         {
-            if (ServerVersion >= InterReact.ServerVersion.D_PEG_ORDERS)
+            if (ServerVersion >= ServerVersion.D_PEG_ORDERS)
                 Order.DiscretionaryUpToLimitPrice = R.ReadBool();
         }
 
@@ -583,19 +583,19 @@
 
         internal void readUsePriceMgmtAlgo()
         {
-            if (ServerVersion >= InterReact.ServerVersion.PRICE_MGMT_ALGO)
+            if (ServerVersion >= ServerVersion.PRICE_MGMT_ALGO)
                 Order.UsePriceMgmtAlgo = R.ReadBool();
         }
 
         internal void readDuration()
         {
-            if (ServerVersion >= InterReact.ServerVersion.DURATION)
+            if (ServerVersion >= ServerVersion.DURATION)
                 Order.Duration = R.ReadIntNullable();
         }
 
         internal void readPostToAts()
         {
-            if (ServerVersion >= InterReact.ServerVersion.POST_TO_ATS)
+            if (ServerVersion >= ServerVersion.POST_TO_ATS)
                 Order.PostToAts = R.ReadIntNullable();
         }
     }

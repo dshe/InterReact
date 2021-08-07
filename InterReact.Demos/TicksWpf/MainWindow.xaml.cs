@@ -107,7 +107,7 @@ namespace TicksWpf
         {
             try
             {
-                Client = await new InterReactClientBuilder().BuildAsync();
+                Client = await InterReactClientBuilder.Create().BuildAsync();
             }
             catch (Exception exception)
             {

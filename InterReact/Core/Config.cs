@@ -22,14 +22,14 @@ namespace InterReact
         /// <summary>
         /// The version of the currently connected server.
         /// </summary>
-        public int ServerVersionCurrent { get; internal set; }
-        public const int ServerVersionMin = ServerVersion.FRACTIONAL_POSITIONS;
-        public const int ServerVersionMax = ServerVersion.DURATION;
+        public ServerVersion ServerVersionCurrent { get; internal set; }
+        public ServerVersion ServerVersionMin { get; } = ServerVersion.FRACTIONAL_POSITIONS;
+        public ServerVersion ServerVersionMax { get; internal set; } = ServerVersion.FRACTIONAL_POSITIONS;
 
         public string Date { get; internal set; } = "";
 
-        internal bool SupportsServerVersion(int version) => version <= ServerVersionCurrent;
-        internal void RequireServerVersion(int version)
+        internal bool SupportsServerVersion(ServerVersion version) => version <= ServerVersionCurrent;
+        internal void RequireServerVersion(ServerVersion version)
         {
             if (!SupportsServerVersion(version))
                 throw new ArgumentException($"The server does not support version: '{version}'.");

@@ -20,7 +20,7 @@ namespace InterReact.SystemTests
 
         static TestBase()
         {
-            ClientTask = new InterReactClientBuilder().BuildAsync();
+            ClientTask = InterReactClientBuilder.Create().BuildAsync();
             AppDomain.CurrentDomain.DomainUnload += async (sender, e) =>
             {
                 if (!ClientTask.IsCompletedSuccessfully)

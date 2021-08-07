@@ -21,9 +21,9 @@ namespace InterReact.SystemTests
         public TestFixture() { }
         public async Task InitializeAsync()
         {
-            Client = await new InterReactClientBuilder(DynamicLogger)
+            Client = await InterReactClientBuilder.Create()
+                .WithLogger(DynamicLogger, true)
                 //.SetPort(7497)
-                .LogIncomingMessages()
                 .BuildAsync().ConfigureAwait(false);
         }
         public async Task DisposeAsync()

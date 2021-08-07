@@ -9,7 +9,7 @@
 
         internal OpenOrder(ResponseReader c)
         {
-            int messageVersion = c.ServerVersion >= ServerVersion.ORDER_CONTAINER ? c.ServerVersion : c.ReadInt();
+            int messageVersion = c.ServerVersion >= ServerVersion.ORDER_CONTAINER ? (int)c.ServerVersion : c.ReadInt();
             var decoder = new OrderDecoder(c, Contract, Order, OrderState, messageVersion, c.ServerVersion);
 
             decoder.readOrderId();
