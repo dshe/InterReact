@@ -8,7 +8,7 @@
 
         public CompletedOrder(ResponseReader reader)
         {
-            var decoder = new OrderDecoder(reader, Contract, Order, OrderState, int.MaxValue, reader.ServerVersion);
+            OrderDecoder decoder = new(reader, Contract, Order, OrderState, int.MaxValue);
 
             decoder.readContract();
             decoder.readAction();

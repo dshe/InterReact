@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using InterReact;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.Logging.Console;
 using Stringification;
 
 /*
@@ -27,7 +28,7 @@ namespace HelloWorld
 
             // Log messages to the console.
             ILogger Logger = LoggerFactory
-                .Create(builder => builder.AddConsole())
+                .Create(builder => builder.AddSimpleConsole(c => c.SingleLine = true))
                 .CreateLogger("Test");
 
             // Create the InterReact client by connecting to TWS/Gateway on your local machine.
@@ -61,7 +62,11 @@ namespace HelloWorld
 
             client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
-            var ticks = client.Services.CreateTickObservable(contract).Publish().AutoConnect();
+            var ticks = client
+                .Services
+                .CreateTickObservable(contract)
+                .Publish()
+                .AutoConnect();
 
             PriceTick priceTick = await ticks
                 .OfTickType(x => x.TickPrice)

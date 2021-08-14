@@ -16,10 +16,14 @@ namespace CoreClientServer
                 Console.SetBufferSize(100, 100);
             }
 
-            ConsoleLogger clientLogger = new("Client:    ", ConsoleColor.DarkYellow);
-            ConsoleLogger clientLibLogger = new("ClientLib: ", ConsoleColor.DarkGreen);
-            ConsoleLogger serverLogger = new("Server:    ", ConsoleColor.DarkMagenta);
-            ConsoleLogger serverLibLogger = new("ServerLib: ", ConsoleColor.DarkCyan);
+            ConsoleLogger clientLogger = 
+                new("Client:    ", ConsoleColor.DarkYellow);
+            ConsoleLogger clientLibLogger = 
+                new("ClientLib: ", ConsoleColor.DarkGreen);
+            ConsoleLogger serverLogger = 
+                new("Server:    ", ConsoleColor.DarkMagenta);
+            ConsoleLogger serverLibLogger = 
+                new("ServerLib: ", ConsoleColor.DarkCyan);
 
             Server server = new(serverLogger, serverLibLogger);
             int port = server.SocketServer.IPEndPoint.Port;

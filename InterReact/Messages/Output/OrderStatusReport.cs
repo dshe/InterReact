@@ -58,7 +58,7 @@
 
         internal OrderStatusReport(ResponseReader c)
         {
-            int version = c.ServerVersion >= ServerVersion.MARKET_CAP_PRICE ? int.MaxValue : c.ReadInt();
+            int version = c.Config.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE) ? int.MaxValue : c.ReadInt();
 
             OrderId = c.ReadInt();
             Status = c.ReadStringEnum<OrderStatus>();
@@ -76,7 +76,7 @@
                 ClientId = c.ReadInt();
             if (version >= 6)
                 WhyHeld = c.ReadString();
-            if (c.ServerVersion >= ServerVersion.MARKET_CAP_PRICE)
+            if (c.Config.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE))
                 MktCapPrice = c.ReadDouble();
         }
     }

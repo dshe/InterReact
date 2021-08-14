@@ -28,16 +28,4 @@ namespace CoreClientServer
         public IDisposable BeginScope<TState>(TState state) => Disposable.Empty;
     }
 
-    public class ConsoleLoggerFactory : ILoggerFactory
-    {
-        private readonly ConsoleColor Color;
-
-        public ConsoleLoggerFactory(ConsoleColor color = ConsoleColor.Gray) => Color = color;
-
-        public void AddProvider(ILoggerProvider provider) => throw new NotImplementedException();
-
-        public ILogger CreateLogger(string name) => new ConsoleLogger(name, Color);
-
-        public void Dispose() { }
-    }
 }

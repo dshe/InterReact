@@ -54,18 +54,15 @@ namespace InterReact.ConnectTests
         [Fact]
         public async Task Test()
         {
-            var client = await InterReactClientBuilder.Create().WithLogger(Logger)
+            var client = await InterReactClientBuilder.Create()
+                .WithLogger(Logger)
                 .WithIpAddress(IPAddress.IPv6Loopback)
-                //.SetPort(7496) // default
                 .WithClientId(111)
                 .WithMaxRequestsPerSecond(123)
                 .BuildAsync();
             await TestClient(client);
             Assert.Equal(IPAddress.IPv6Loopback, client.Request.Config.IPEndPoint.Address);
-            //Assert.Equal(7496, client.Config.IPEndPoint.Port);
             Assert.Equal(111, client.Request.Config.ClientId);
-            //Assert.True(client.Config.IsDemoAccount);
-            Assert.NotEmpty(client.Request.Config.Date);
             Assert.True(client.Request.Config.ServerVersionCurrent >= client.Request.Config.ServerVersionMin);
             await client.DisposeAsync();
         }

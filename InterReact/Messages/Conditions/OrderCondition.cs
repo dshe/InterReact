@@ -72,9 +72,7 @@ namespace InterReact
 
         public override bool Equals(object? obj)
         {
-            var other = obj as OrderCondition;
-
-            if (other == null)
+            if (obj is not OrderCondition other)
                 return false;
 
             return IsConjunctionConnection == other.IsConjunctionConnection && Type == other.Type;

@@ -7,16 +7,14 @@
         private readonly Order Order;
         private readonly OrderState OrderState;
         private readonly int MessageVersion;
-        private readonly ServerVersion ServerVersion;
 
-        internal OrderDecoder(ResponseReader reader, Contract contract, Order order, OrderState orderState, int msgVersion, ServerVersion serverVersion)
+        internal OrderDecoder(ResponseReader reader, Contract contract, Order order, OrderState orderState, int msgVersion)
         {
             R = reader;
             Contract = contract;
             Order = order;
             OrderState = orderState;
             MessageVersion = msgVersion;
-            ServerVersion = serverVersion;
         }
 
         internal void readOrderId() => Order.OrderId = R.ReadInt();
@@ -117,7 +115,7 @@
 
         internal void readModelCode()
         {
-            if (ServerVersion >= InterReact.ServerVersion.MODELS_SUPPORT)
+            if (R.Config.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
                 Order.ModelCode = R.ReadString();
         }
 
@@ -151,7 +149,7 @@
             {
                 Order.ShortSaleSlot = R.ReadEnum<ShortSaleSlot>();
                 Order.DesignatedLocation = R.ReadString();
-                if ((int)ServerVersion == 51)
+                if ((int)R.Config.ServerVersionCurrent == 51)
                     R.ReadInt(); // exemptCode
                 else if (MessageVersion >= 23)
                     Order.ExemptCode = R.ReadInt();
@@ -289,7 +287,7 @@
                     }
                 }
                 Order.ContinuousUpdate = R.ReadInt();
-                if ((int)ServerVersion == 26)
+                if ((int)R.Config.ServerVersionCurrent == 26)
                 {
                     Order.StockRangeLower = R.ReadDouble();
                     Order.StockRangeUpper = R.ReadDouble();
@@ -450,7 +448,7 @@
             {
                 Order.WhatIf = R.ReadBool();
                 readOrderStatus();
-                if (ServerVersion >= ServerVersion.WHAT_IF_EXT_FIELDS)
+                if (R.Config.SupportsServerVersion(ServerVersion.WHAT_IF_EXT_FIELDS))
                 {
                     OrderState.InitialMarginBefore = R.ReadString();
                     OrderState.MaintenanceMarginBefore = R.ReadString();
@@ -484,7 +482,7 @@
 
         internal void readPegToBenchParams()
         {
-            if (ServerVersion >= ServerVersion.PEGGED_TO_BENCHMARK)
+            if (R.Config.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
             {
                 var type = R.ReadStringEnum<OrderType>();
                 if (type == OrderType.PeggedToBenchmark)
@@ -500,10 +498,11 @@
 
         internal void readConditions()
         {
-            if (ServerVersion >= ServerVersion.PEGGED_TO_BENCHMARK)
+            if (R.Config.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
             {
-                string s = R.ReadString();
-                int n = 0;
+                //string s = R.ReadString();
+                int n = R.ReadInt();
+                //int n = 0;
                 if (n > 0)
                 {
                     for (int i = 0; i < n; i++)
@@ -522,7 +521,7 @@
 
         internal void readAdjustedOrderParams()
         {
-            if (ServerVersion >= ServerVersion.PEGGED_TO_BENCHMARK)
+            if (R.Config.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
             {
                 Order.AdjustedOrderType = R.ReadString();
                 Order.TriggerPrice = R.ReadDoubleNullable();
@@ -542,31 +541,31 @@
 
         internal void readSoftDollarTier()
         {
-            if (ServerVersion >= ServerVersion.SOFT_DOLLAR_TIER)
+            if (R.Config.SupportsServerVersion(ServerVersion.SOFT_DOLLAR_TIER))
                 Order.SoftDollarTier.Set(R);
         }
 
         internal void readCashQty()
         {
-            if (ServerVersion >= ServerVersion.CASH_QTY)
+            if (R.Config.SupportsServerVersion(ServerVersion.CASH_QTY))
                 Order.CashQty = R.ReadDoubleNullable();
         }
 
         internal void readDontUseAutoPriceForHedge()
         {
-            if (ServerVersion >= ServerVersion.AUTO_PRICE_FOR_HEDGE)
+            if (R.Config.SupportsServerVersion(ServerVersion.AUTO_PRICE_FOR_HEDGE))
                 Order.DontUseAutoPriceForHedge = R.ReadBool();
         }
 
         internal void readIsOmsContainer()
         {
-            if (ServerVersion >= ServerVersion.ORDER_CONTAINER)
+            if (R.Config.SupportsServerVersion(ServerVersion.ORDER_CONTAINER))
                 Order.IsOmsContainer = R.ReadBool();
         }
 
         internal void readDiscretionaryUpToLimitPrice()
         {
-            if (ServerVersion >= ServerVersion.D_PEG_ORDERS)
+            if (R.Config.SupportsServerVersion(ServerVersion.D_PEG_ORDERS))
                 Order.DiscretionaryUpToLimitPrice = R.ReadBool();
         }
 
@@ -583,19 +582,19 @@
 
         internal void readUsePriceMgmtAlgo()
         {
-            if (ServerVersion >= ServerVersion.PRICE_MGMT_ALGO)
+            if (R.Config.SupportsServerVersion(ServerVersion.PRICE_MGMT_ALGO))
                 Order.UsePriceMgmtAlgo = R.ReadBool();
         }
 
         internal void readDuration()
         {
-            if (ServerVersion >= ServerVersion.DURATION)
+            if (R.Config.SupportsServerVersion(ServerVersion.DURATION))
                 Order.Duration = R.ReadIntNullable();
         }
 
         internal void readPostToAts()
         {
-            if (ServerVersion >= ServerVersion.POST_TO_ATS)
+            if (R.Config.SupportsServerVersion(ServerVersion.POST_TO_ATS))
                 Order.PostToAts = R.ReadIntNullable();
         }
     }

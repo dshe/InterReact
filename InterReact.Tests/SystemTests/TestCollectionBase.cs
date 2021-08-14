@@ -1,11 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using Stringification;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Disposables;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -23,8 +17,8 @@ namespace InterReact.SystemTests
         {
             Client = await InterReactClientBuilder.Create()
                 .WithLogger(DynamicLogger, true)
-                //.SetPort(7497)
-                .BuildAsync().ConfigureAwait(false);
+                .BuildAsync()
+                .ConfigureAwait(false);
         }
         public async Task DisposeAsync()
         {
@@ -48,7 +42,6 @@ namespace InterReact.SystemTests
         protected readonly Action<string> Write;
         protected readonly ILogger Logger;
         protected readonly IInterReactClient Client;
-        protected int Id;
 
         public TestCollectionBase(ITestOutputHelper output, TestFixture fixture)
         {
@@ -56,19 +49,10 @@ namespace InterReact.SystemTests
             Logger = new LoggerFactory().AddMXLogger(Write, LogLevel.Debug).CreateLogger("Test");
             fixture.DynamicLogger.Add(Logger, true);
             Client = fixture.Client ?? throw new Exception("Client");
-            Client.Response.Subscribe(m =>
-            {
-                var s = new Stringifier(Logger).Stringify(m);
-                Write(s);
-            });
-            Id = Client.Request.GetNextId();
         }
 
         protected readonly Contract Stock1 =
             new() { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
-
-        protected readonly Contract Stock2 =
-            new() { SecurityType = SecurityType.Stock, Symbol = "AAPL", Currency = "USD", Exchange = "SMART" };
 
         protected readonly Contract Forex1 =
             new() { SecurityType = SecurityType.Cash, Symbol = "EUR", Currency = "USD", Exchange = "IDEALPRO" };

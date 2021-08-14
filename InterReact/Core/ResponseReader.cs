@@ -12,13 +12,11 @@ namespace InterReact
     {
         private readonly IEnumerator<string> Enumerator;
         internal readonly Config Config;
-        internal readonly ServerVersion ServerVersion;
         internal readonly ResponseParser Parser;
 
         internal ResponseReader(Config config, ResponseParser responseParser, string[] strings)
         {
             Config = config;
-            ServerVersion = Config.ServerVersionCurrent;
             Parser = responseParser;
             Enumerator = strings.AsEnumerable().GetEnumerator();
         }

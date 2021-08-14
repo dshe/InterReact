@@ -19,20 +19,22 @@ namespace InterReact.SystemTests.Orders
             if (!Client.Request.Config.IsDemoAccount)
                 throw new Exception("Cannot place order. Not the demo account");
 
+            var id = Client.Request.GetNextId();
+
             var task = Client.Response
                 .OfType<Execution>()
-                .Where(x => x.RequestId == Id)
+                .Where(x => x.RequestId == id)
                 .FirstAsync().Timeout(TimeSpan.FromSeconds(3)).ToTask();
 
             var order = new Order
             {
-                OrderId = Id,
+                OrderId = id,
                 OrderAction = OrderAction.Buy,
                 TotalQuantity = 100,
                 OrderType = OrderType.Market
             };
 
-            Client.Request.PlaceOrder(Id, order, Stock1);
+            Client.Request.PlaceOrder(id, order, Stock1);
 
             await task;
         }
@@ -43,52 +45,52 @@ namespace InterReact.SystemTests.Orders
             if (!Client.Request.Config.IsDemoAccount)
                 throw new Exception("Cannot place order. Not the demo account");
 
+            var id = Client.Request.GetNextId();
+
             // find the price
             var taskPrice = Client.Response
                 .OfType<PriceTick>()
-                .Where(x => x.RequestId == Id)
+                .Where(x => x.RequestId == id)
                 .Where(x => x.TickType == TickType.AskPrice)
                 .FirstAsync()
                 .Timeout(TimeSpan.FromSeconds(3))
                 .ToTask();
 
-            Client.Request.RequestMarketData(Id, Stock1, null, isSnapshot: true);
+            Client.Request.RequestMarketData(id, Stock1, null, isSnapshot: true);
 
             var priceTick = await taskPrice;
-
-            Id = Client.Request.GetNextId();
 
             // place the order
             var taskOpenOrder = Client.Response
                 .OfType<OpenOrder>()
-                .Where(x => x.OrderId == Id)
+                .Where(x => x.OrderId == id)
                 .FirstAsync()
                 .Timeout(TimeSpan.FromSeconds(3))
                 .ToTask();
 
             var order = new Order
             {
-                OrderId = Id,
+                OrderId = id,
                 OrderAction = OrderAction.Buy,
                 TotalQuantity = 100,
                 OrderType = OrderType.Limit,
                 LimitPrice = priceTick.Price - 1
             };
 
-            Client.Request.PlaceOrder(Id, order, Stock1);
+            Client.Request.PlaceOrder(id, order, Stock1);
 
             await taskOpenOrder;
 
             // cancel the order
             var taskCancelled = Client.Response
                 .OfType<OrderStatusReport>()
-                .Where(x => x.OrderId == Id)
+                .Where(x => x.OrderId == id)
                 .Where(x => x.Status == OrderStatus.Cancelled)
                 .FirstAsync()
                 .Timeout(TimeSpan.FromSeconds(3))
                 .ToTask();
 
-            Client.Request.CancelOrder(Id);
+            Client.Request.CancelOrder(id);
 
             await taskCancelled;
         }
@@ -110,14 +112,16 @@ namespace InterReact.SystemTests.Orders
         [Fact]
         public async Task TestRequestExecutions()
         {
+            var id = Client.Request.GetNextId();
+
             var task = Client.Response
                 .OfType<ExecutionEnd>()
-                .Where(x => x.RequestId == Id)
+                .Where(x => x.RequestId == id)
                 .FirstAsync()
                 .Timeout(TimeSpan.FromSeconds(3))
                 .ToTask();
 
-            Client.Request.RequestExecutions(Id);
+            Client.Request.RequestExecutions(id);
 
             await task;
         }

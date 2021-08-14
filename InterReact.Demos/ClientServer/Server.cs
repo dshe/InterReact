@@ -109,14 +109,14 @@ namespace CoreClientServer
             for (int i = 0; i < 100_000; i++)
             {
                 ms.Write(
-                new RequestMessage(accept, Limiter)
-                    .Write("2", "3", 1, TickType.LastSize, 300)
-                    .Get());
+                    new RequestMessage(accept, Limiter)
+                        .Write("2", "3", 1, TickType.LastSize, 300)
+                        .Get());
             }
             ms.Write(
-            new RequestMessage(accept, Limiter)
-                .Write("1", "3", 1, TickType.LastPrice, 100, 200, true)
-                .Get());
+                new RequestMessage(accept, Limiter)
+                    .Write("1", "3", 1, TickType.LastPrice, 100, 200, true)
+                    .Get());
 
             accept.Send(ms.ToArray());
 

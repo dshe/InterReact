@@ -28,8 +28,6 @@ namespace InterReact
         {
             Logger = logger;
             Config.LogIncomingMessages = logIncomingMessages;
-            AssemblyName name = GetType().Assembly.GetName();
-            Logger.LogInformation($"{name.Name} version {name.Version}.");
             return this;
         }
 
@@ -38,8 +36,6 @@ namespace InterReact
         /// </summary>
         public InterReactClientBuilder WithMaxServerVersion(ServerVersion maxServerVersion)
         {
-            if (maxServerVersion > ServerVersion.POST_TO_ATS)
-                throw new ArgumentException("ServerVersion");
             Config.ServerVersionMax = maxServerVersion;
             return this;
         }
@@ -98,11 +94,14 @@ namespace InterReact
 
         public async Task<IInterReactClient> BuildAsync(CancellationToken ct = default)
         {
-            IRxSocketClient rxSocket = await ConnectAsync(Config, Logger, ct).ConfigureAwait(false);
+            AssemblyName name = GetType().Assembly.GetName();
+            Logger.LogInformation($"{name.Name} version {name.Version}.");
+
+            IRxSocketClient rxSocket = await ConnectAsync(ct).ConfigureAwait(false);
 
             try
             {
-                await Login(rxSocket, Config, Logger, ct).ConfigureAwait(false);
+                await Login(rxSocket, ct).ConfigureAwait(false);
 
                 Stringifier stringifier = new(Logger);
 
@@ -126,7 +125,7 @@ namespace InterReact
                     .AddSingleton<Services>()
                     .AddSingleton<IInterReactClient, InterReactClient>()
                     .BuildServiceProvider()
-                    .GetService<IInterReactClient>() ?? throw new InvalidOperationException("service");
+                    .GetService<IInterReactClient>() ?? throw new InvalidOperationException("GetService<>.");
             }
             catch (Exception ex)
             {
@@ -136,49 +135,42 @@ namespace InterReact
             }
         }
 
-        private static async Task<IRxSocketClient> ConnectAsync(Config config, ILogger logger, CancellationToken ct)
+        private async Task<IRxSocketClient> ConnectAsync(CancellationToken ct)
         {
-            foreach (int port in config.Ports)
+            foreach (int port in Config.Ports)
             {
-                config.IPEndPoint.Port = port;
+                Config.IPEndPoint.Port = port;
                 try
                 {
-                    return await config.IPEndPoint.CreateRxSocketClientAsync(logger, ct).ConfigureAwait(false);
+                    return await Config.IPEndPoint.CreateRxSocketClientAsync(Logger, ct).ConfigureAwait(false);
                 }
                 catch (SocketException e) when (e.SocketErrorCode == SocketError.ConnectionRefused || e.SocketErrorCode == SocketError.TimedOut)
                 {
-                    ;
+                    Logger.LogTrace(e.Message);
                 }
             }
-            string ports = config.Ports.Select(p => p.ToString()).JoinStrings(", ");
-            string message = $"Could not connect to TWS/Gateway at [{config.IPEndPoint.Address}]:{ports}.";
+            string ports = Config.Ports.Select(p => p.ToString()).JoinStrings(", ");
+            string message = $"Could not connect to TWS/Gateway at [{Config.IPEndPoint.Address}]:{ports}.";
             throw new ArgumentException(message);
         }
 
-        private static async Task Login(IRxSocketClient rxsocket, Config config, ILogger logger, CancellationToken ct)
+        private async Task Login(IRxSocketClient rxsocket, CancellationToken ct)
         {
             Send("API");
 
             // Report a range of supported API versions to TWS.
-            SendWithPrefix($"v{config.ServerVersionMin}..{config.ServerVersionMax}");
+            SendWithPrefix($"v{(int)Config.ServerVersionMin}..{(int)Config.ServerVersionMax}");
             SendWithPrefix(((int)RequestCode.StartApi).ToString(),
-                "2", config.ClientId.ToString(), config.OptionalCapabilities);
+                "2", Config.ClientId.ToString(), Config.OptionalCapabilities);
 
             string[] message = await GetMessage().ConfigureAwait(false);
-            //if (!int.TryParse(message[0], out int version))
-            //    throw new InvalidDataException($"Could not parse server version '{message[0]}'.");
 
+            // ServerVersion is the highest supported API version within the range specified.
             if (!Enum.TryParse(message[0], out ServerVersion version))
                 throw new InvalidDataException($"Could not parse server version '{message[0]}'.");
-            config.ServerVersionCurrent = version;
-
-            logger.LogDebug($"Server Version: {config.ServerVersionCurrent}.");
-            // ServerVersion is the highest supported API version in the range specified.
-
-            config.Date = message[1];
-            logger.LogDebug($"Date: {config.Date}.");
-
-            logger.LogInformation($"Logged into Tws/Gateway using ClientId: {config.ClientId}, ServerVersion: {config.ServerVersionCurrent}.");
+            Config.ServerVersionCurrent = version;
+            Config.Date = message[1];
+            Logger.LogInformation($"Logged into Tws/Gateway on: {Config.Date} using clientId: {Config.ClientId} and serverVersion: {Config.ServerVersionCurrent}.");
 
             // local methods
             void Send(string str) => 
@@ -187,8 +179,7 @@ namespace InterReact
             
             void SendWithPrefix(params string[] strings) => 
                 rxsocket
-                .Send(strings.ToByteArray()
-                .ToByteArrayWithLengthPrefix());
+                .Send(strings.ToByteArray().ToByteArrayWithLengthPrefix());
             
             async Task<string[]> GetMessage() => 
                 await rxsocket

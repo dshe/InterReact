@@ -15,11 +15,20 @@ namespace InterReact.SystemTests.Service
         [Fact]
         public async Task T01_HistoricalBarData()
         {
-            HistoricalData data = await Client.Services.CreateHistoricalDataObservable(Stock1,
-                HistoricalBarSize.OneHour,
-                HistoricalDuration.OneDay)
-                .OfTypeUnionSource<HistoricalData>();
+            Union<HistoricalData, Alert> union = await Client
+                .Services
+                .CreateHistoricalDataObservable(Stock1, HistoricalBarSize.OneHour, HistoricalDuration.OneDay);
 
+            object source = union.Source;
+
+            if (source is Alert alert)
+            {
+                Write($"Alert: {alert.Message}.");
+                return;
+            }
+
+            HistoricalData data = (HistoricalData)source;
+            
             Write($"\n\nStart {data.Start}, End: {data.End}\n");
             foreach (var item in data.Bars)
                 Write(item.Stringify());

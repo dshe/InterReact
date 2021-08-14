@@ -1,6 +1,9 @@
 ﻿using InterReact;
 using InterReact.SystemTests;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
@@ -25,18 +28,28 @@ namespace InterReact.SystemTests.Service
         {
             var observable = Client.Services.CreatePositionsObservable();
 
-            var list = await observable.ToList();
-            // The demo account may or may not have positions.
-            Logger.LogInformation("resr");
+            IList<Position> list = await observable
+                .TakeWhile(x => x.Source is not PositionEnd)
+                .OfTypeUnionSource<Position>()
+                .ToList();
 
-            if (!Client.Request.Config.IsDemoAccount)
-                Assert.NotEmpty(list);
+            // The demo account may or may not have positions.
+            if (!list.Any())
+                Write("no positions!");
         }
 
         [Fact]
         public async Task T03_AccountSummary()
         {
             var observable = Client.Services.CreateAccountSummaryObservable();
+
+            IList<Position> list = await observable
+                .TakeWhile(x => x.Source is not AccountSummaryEnd)
+                .OfTypeUnionSource<Position>()
+                .ToList();
+
+
+
 
             var list = await observable.ToList(); 
             Assert.NotEmpty(list);

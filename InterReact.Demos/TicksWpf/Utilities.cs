@@ -9,12 +9,12 @@ namespace TicksWpf
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        protected virtual void NotifyPropertiesChanged()
-            => NotifyPropertyChanged("");
+        protected virtual void NotifyPropertiesChanged() =>
+            NotifyPropertyChanged("");
 
         // An Empty value or null for the propertyName parameter indicates that all of the properties have changed.
-        protected virtual void NotifyPropertyChanged(string name)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        protected virtual void NotifyPropertyChanged(string name) =>
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 
     public static class Utilities

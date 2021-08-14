@@ -18,7 +18,7 @@ namespace InterReact.ConnectTests
         public ConnectTestsBase(ITestOutputHelper output)
         {
             Write = output.WriteLine;
-            LoggerFactory = new LoggerFactory().AddMXLogger(Write);
+            LoggerFactory = new LoggerFactory().AddMXLogger(Write, LogLevel.Debug);
             Logger = LoggerFactory.CreateLogger("InterReact");
         }
 
@@ -26,7 +26,7 @@ namespace InterReact.ConnectTests
         {
             client.Response.Select(x => x.Stringify()).Subscribe(s => Write($"response: {s}"));
             var instant = await client.Services.CurrentTimeObservable;
-            Write($"Instant: {instant}");
+            Write($"Test calling CurrentTimeObservable: {instant}");
             await Task.Delay(500);
         }
     }
