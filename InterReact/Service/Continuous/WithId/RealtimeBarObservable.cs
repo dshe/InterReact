@@ -11,7 +11,7 @@ namespace InterReact
         /// Use CreateRealtimeBarsObservable().Publish()[.RefCount() | .AutoConnect()] to supoort multiple observers.
         /// </summary>
         public IObservable<Union<RealtimeBar, Alert>> CreateRealtimeBarsObservable(Contract contract,
-            RealtimeBarType? whatToShow = null, bool regularTradingHours = true, IList<Tag>? options = null)
+            RealtimeBarType? whatToShow = null, bool regularTradingHours = true, IEnumerable<Tag>? options = null)
         {
             whatToShow ??= RealtimeBarType.Trades;
 

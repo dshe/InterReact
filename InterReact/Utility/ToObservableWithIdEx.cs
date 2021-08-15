@@ -62,7 +62,7 @@ namespace InterReact
                         {
                             if (m is not TEnd)
                                 observer.OnNext(m);
-                            if (m is TEnd or Alert)
+                            if (m is TEnd or Alert) // IMPORTANT!
                                 observer.OnCompleted();
                         },
                         onError: observer.OnError,

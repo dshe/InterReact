@@ -1,36 +1,34 @@
-﻿using InterReact;
-using InterReact.SystemTests;
-using Microsoft.Extensions.Logging;
+﻿using Stringification;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace InterReact.SystemTests.Service
 {
-    public class SystemTest : TestCollectionBase //BaseTest
+    public class AccountTest : TestCollectionBase
     {
-        public SystemTest(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+        public AccountTest(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
         [Fact]
         public async Task T01_ManagedAccounts()
         {
-            var accounts = await Client.Services.ManagedAccountsObservable;
+            string accounts = await Client.Services.ManagedAccountsObservable;
             Assert.NotEmpty(accounts);
         }
 
         [Fact]
         public async Task T02_AccountPositions()
         {
-            var observable = Client.Services.CreatePositionsObservable();
+            IObservable<Union<Position, PositionEnd>> observable = Client.Services.CreatePositionsObservable();
 
             IList<Position> list = await observable
-                .TakeWhile(x => x.Source is not PositionEnd)
-                .OfTypeUnionSource<Position>()
+                .Select(u => u.Source)
+                .TakeWhile(o => o is not PositionEnd)
+                .OfType<Position>()
                 .ToList();
 
             // The demo account may or may not have positions.
@@ -41,32 +39,37 @@ namespace InterReact.SystemTests.Service
         [Fact]
         public async Task T03_AccountSummary()
         {
-            var observable = Client.Services.CreateAccountSummaryObservable();
+            IObservable<Union<AccountSummary, AccountSummaryEnd, Alert>> observable = Client
+                .Services
+                .CreateAccountSummaryObservable();
 
-            IList<Position> list = await observable
-                .TakeWhile(x => x.Source is not AccountSummaryEnd)
-                .OfTypeUnionSource<Position>()
+            IList<object> list = await observable
+                .Select(u => u.Source)
+                .TakeWhile(o => o is not AccountSummaryEnd)
                 .ToList();
 
+            foreach (Alert alert in list.OfType<Alert>())
+                Write(alert.ToString());
 
-
-
-            var list = await observable.ToList(); 
-            Assert.NotEmpty(list);
+            foreach (AccountSummary a in list.OfType<AccountSummary>())
+                Write(a.Stringify());
         }
 
         [Fact]
         public async Task T04_AccountUpdates()
         {
-            var observable = Client.Services.CreateAccountUpdatesObservable();
+            IObservable<Union<AccountValue, PortfolioValue, AccountUpdateTime, AccountUpdateEnd>> observable = Client
+                .Services
+                .CreateAccountUpdatesObservable();
 
-            //var connection = updates.Connect();
+            IList<object> list = await observable
+                .Select(u => u.Source)
+                .TakeWhile(o => o is not AccountUpdateEnd)
+                .ToList();
 
-            var list = observable.TakeWhile(x => !(x.Source is AccountUpdateEnd)).ToList().ToTask();
+            foreach (object o  in list)
+                Write(o.Stringify());
 
-            await list;
-
-            //connection.Dispose();
         }
     }
 }

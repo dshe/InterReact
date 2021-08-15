@@ -296,7 +296,7 @@ namespace InterReact
         /// <summary>
         /// Call this method to request market depth for the specified contract. 
         /// </summary>
-        public void RequestMarketDepth(int requestId, Contract contract, int numRows = 3, IList<Tag>? options = null)
+        public void RequestMarketDepth(int requestId, Contract contract, int numRows = 3, IEnumerable<Tag>? options = null)
         {
             Message()
                 .Write(RequestCode.RequestMarketDepth, "5", requestId,
@@ -351,7 +351,7 @@ namespace InterReact
             HistoricalBarSize? barSize = null,
             HistoricalDataType? dataType = null,
             bool regularTradingHoursOnly = false,
-            IList<Tag>? options = null)
+            IEnumerable<Tag>? options = null)
         {
             if (endDate == default)
                 endDate = Config.Clock.GetCurrentInstant();
@@ -378,8 +378,8 @@ namespace InterReact
             m.Write(Tag.Combine(options)).Send();
         }
 
-        public void ExerciseOptions(int requestId, Contract contract, OptionExerciseAction exerciseAction, int exerciseQuantity,
-            string account, bool overrideOrder)
+        public void ExerciseOptions(int requestId, Contract contract, OptionExerciseAction exerciseAction,
+            int exerciseQuantity, string account, bool overrideOrder)
         {
             Message()
                 .Write(RequestCode.ExerciseOptions, "2", requestId,
@@ -394,7 +394,7 @@ namespace InterReact
         /// <summary>
         /// Call this method to start receiving market scanner results.
         /// </summary>
-        public void RequestScannerSubscription(int requestId, ScannerSubscription subscription, IList<Tag>? subscriptionOptions = null)
+        public void RequestScannerSubscription(int requestId, ScannerSubscription subscription, IEnumerable<Tag>? subscriptionOptions = null)
         {
             Message()
                 .Write(RequestCode.RequestScannerSubscription,"4",
@@ -432,7 +432,7 @@ namespace InterReact
         /// Call this method to start receiving realtime bar data.
         /// </summary>
         public void RequestRealTimeBars(int requestId, Contract contract, RealtimeBarType? whatToShow = null,
-            bool regularTradingHoursOnly = false, IList<Tag>? options = null)
+            bool regularTradingHoursOnly = false, IEnumerable<Tag>? options = null)
         {
             Message()
                 .Write(RequestCode.RequestRealtimeBars, "3", requestId,
@@ -452,7 +452,7 @@ namespace InterReact
         /// There must be a subscription to Reuters Fundamental set up in Account Management before you can receive this data.
         /// IB: The method can handle conid specified in the Contract object, but not tradingClass or multiplier.
         /// </summary>
-        public void RequestFundamentalData(int requestId, Contract contract, FundamentalDataReportType? reportTypeN = null, IList<Tag>? options = null)
+        public void RequestFundamentalData(int requestId, Contract contract, FundamentalDataReportType? reportTypeN = null, IEnumerable<Tag>? options = null)
         {
             FundamentalDataReportType reportType = reportTypeN ?? FundamentalDataReportType.CompanyOverview;
             Message()
@@ -468,7 +468,7 @@ namespace InterReact
         /// <summary>
         /// Call this function to calculate volatility for a supplied option price and underlying price.
         /// </summary>
-        public void CalculateImpliedVolatility(int requestId, Contract contract, double optionPrice, double underlyingPrice, IList<Tag>? options = null)
+        public void CalculateImpliedVolatility(int requestId, Contract contract, double optionPrice, double underlyingPrice, IEnumerable<Tag>? options = null)
         {
             Message()
                 .Write(RequestCode.RequestCalculatedImpliedVolatility, "3", requestId,
@@ -482,7 +482,7 @@ namespace InterReact
         /// <summary>
         /// Call this function to calculate option price and greek Values for a supplied volatility and underlying price.
         /// </summary>
-        public void CalculateOptionPrice(int requestId, Contract contract, double volatility, double underlyingPrice, IList<Tag>? options = null)
+        public void CalculateOptionPrice(int requestId, Contract contract, double volatility, double underlyingPrice, IEnumerable<Tag>? options = null)
         {
             Message()
                 .Write(RequestCode.RequestCalculatedOptionPrice, "3", requestId,
@@ -522,7 +522,7 @@ namespace InterReact
         /// Subscribea to data that appears on the TWS Account Window Summary tab. 
         /// If no tags are specified, data for all tags will be requested.
         /// </summary>
-        public void RequestAccountSummary(int requestId, string group = "All", IList<AccountSummaryTag>? tags = null)
+        public void RequestAccountSummary(int requestId, string group = "All", IEnumerable<AccountSummaryTag>? tags = null)
         {
             List<string>? tagNames = tags?.Select(tag => tag.ToString()).ToList();
             if (tagNames == null || !tagNames.Any())

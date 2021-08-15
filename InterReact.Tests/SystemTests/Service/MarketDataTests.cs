@@ -1,5 +1,7 @@
 ﻿using InterReact;
 using InterReact.SystemTests;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -27,42 +29,36 @@ namespace InterReact.SystemTests.Service
         [Fact]
         public async Task T01_MarketDataTickSnapshot()
         {
-            var ticks = await Client.Services.CreateTickSnapshotObservable(Forex1).ToList();
+            IObservable<Union<Tick, Alert>> observable = Client
+                .Services
+                .CreateTickSnapshotObservable(ForexContract1);
+
+            IList<Union<Tick, Alert>> ticks = await observable.ToList();
+
             Assert.NotEmpty(ticks);
         }
 
-        /*
         [Fact]
         public async Task T02_MarketDataTicks()
         {
-            var ticks = Client.Services.CreateTickConnectableObservable(Stock1);
+            IObservable<Union<Tick, Alert>> observable = Client
+                .Services
+                .CreateTickObservable(StockContract1);
 
-            var task = ticks.OfType<TickPrice>().FirstAsync();
-
-            var connection = ticks.Connect();
-
-            var tick = await task;
-
-            connection.Dispose();
+            var tick = await observable.FirstAsync();
         }
-        */
 
-
-        /*
         [Fact]
         public async Task T03_MarketDataRealtimeVolume()
         {
-            var ticks = Client.Services.CreateTickConnectableObservable(Stock2, new[] { GenericTickType.RealtimeVolume }, true);
+            IObservable<Union<Tick, Alert>> observable = Client
+                .Services
+                .CreateTickObservable(StockContract1, new[] { GenericTickType.RealtimeVolume });
 
-            //var task = ticks.Where(t => t.TickType == TickType.RealtimeVolume).FirstAsync();
-            var task = ticks.Skip(1).FirstAsync().ToTask();
+            var task = observable.OfType<Tick>().Where(t => t.TickType == TickType.RealtimeVolume).FirstAsync();
 
-            var connection = ticks.Connect();
-
-            var tick = await task;
-            ;
-            connection.Dispose();
+            var tick = await observable.FirstAsync();
         }
-        */
+
     }
 }

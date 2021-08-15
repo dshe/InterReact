@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using Stringification;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -39,22 +41,24 @@ namespace InterReact.SystemTests
     [Trait("Category", "SystemTests")]
     public class TestCollectionBase
     {
-        protected readonly Action<string> Write;
+        protected readonly Action<string?> Write;
         protected readonly ILogger Logger;
         protected readonly IInterReactClient Client;
 
         public TestCollectionBase(ITestOutputHelper output, TestFixture fixture)
         {
             Write = output.WriteLine;
+
             Logger = new LoggerFactory().AddMXLogger(Write, LogLevel.Debug).CreateLogger("Test");
             fixture.DynamicLogger.Add(Logger, true);
+
             Client = fixture.Client ?? throw new Exception("Client");
         }
 
-        protected readonly Contract Stock1 =
-            new() { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
+        protected readonly Contract StockContract1 = new()
+            { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
 
-        protected readonly Contract Forex1 =
-            new() { SecurityType = SecurityType.Cash, Symbol = "EUR", Currency = "USD", Exchange = "IDEALPRO" };
+        protected readonly Contract ForexContract1 = new()
+            { SecurityType = SecurityType.Cash, Symbol = "EUR", Currency = "USD", Exchange = "IDEALPRO" };
     }
 }

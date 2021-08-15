@@ -17,7 +17,7 @@ namespace InterReact.SystemTests.Service
         {
             Union<HistoricalData, Alert> union = await Client
                 .Services
-                .CreateHistoricalDataObservable(Stock1, HistoricalBarSize.OneHour, HistoricalDuration.OneDay);
+                .CreateHistoricalDataObservable(StockContract1, HistoricalBarSize.OneHour, HistoricalDuration.OneDay);
 
             object source = union.Source;
 

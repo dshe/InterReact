@@ -40,7 +40,7 @@ namespace InterReact.SystemTests.Diagnostic
 
             var response = Client.Response;
 
-            Client.Request.RequestMarketData(requestId, Stock1);
+            Client.Request.RequestMarketData(requestId, StockContract1);
 
             await Assert.ThrowsAnyAsync<InvalidDataException>(async () => await response);
         }

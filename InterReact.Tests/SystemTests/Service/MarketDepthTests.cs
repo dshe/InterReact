@@ -17,14 +17,24 @@ namespace InterReact.SystemTests.Service
         [Fact]
         public async Task T01_MarketDepth()
         {
-            if (Client.Request.Config.IsDemoAccount)
-                return;
+            //if (Client.Request.Config.IsDemoAccount)
+            //    return;
 
-            var contract = new Contract { SecurityType = SecurityType.Cash, Symbol = "USD", Currency = "JPY", Exchange = "IDEALPRO" };
+            //Client.Request.RequestMarketDepth(7, ForexContract1);
+            Client.Request.RequestContractDetails(7, ForexContract1);
 
-            var depth = Client.Services.CreateMarketDepthObservable(contract).OfTypeUnionSource<MarketDepth>();
+            /*
+            IObservable<Union<MarketDepth, Alert>> observable = Client
+                .Services
+                .CreateMarketDepthObservable(ForexContract1);
 
-            await depth.Take(10);
+            observable.Subscribe();
+            */
+
+            await Task.Delay(3000);
+            //var depth = await observable.Take(TimeSpan.FromSeconds(10)).ToList();
+            ;
+
         }
 
         [Fact]
@@ -33,9 +43,7 @@ namespace InterReact.SystemTests.Service
             if (Client.Request.Config.IsDemoAccount)
                 return;
 
-            var contract = new Contract { SecurityType = SecurityType.Cash, Symbol = "EUR", Currency = "JPY", Exchange = "IDEALPRO" };
-
-            var depth = Client.Services.CreateMarketDepthObservable(contract);
+            var depth = Client.Services.CreateMarketDepthObservable(ForexContract1);
 
             //var (bidCollection, askCollection) = depth.ToMarketDepthObservableCollections();
 
@@ -52,6 +60,5 @@ namespace InterReact.SystemTests.Service
 
             subscription.Dispose();
         }
-
     }
 }

@@ -25,7 +25,7 @@ namespace InterReact.SystemTests.Contracts
                 .FirstOrDefaultAsync().Timeout(TimeSpan.FromSeconds(10)).ToTask(cts.Token);
 
             var id = Client.Request.GetNextId();
-            Client.Request.RequestContractDetails(id, Stock1);
+            Client.Request.RequestContractDetails(id, StockContract1);
 
             await task;
         }

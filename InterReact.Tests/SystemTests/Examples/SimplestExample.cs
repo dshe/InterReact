@@ -24,9 +24,11 @@ namespace InterReactSamples
                 Exchange = "SMART"
             };
 
-            IObservable<ITick> tickObservable = interReact.Services.CreateTickObservable(contract);
+            IObservable<Union<Tick, Alert>> observable = interReact
+                .Services
+                .CreateTickObservable(contract);
 
-            IDisposable subscription = tickObservable
+            IDisposable subscription = observable
                 .OfTickType(tickType => tickType.TickPrice)
                 .Subscribe(onNext: tickPrice =>
                 {

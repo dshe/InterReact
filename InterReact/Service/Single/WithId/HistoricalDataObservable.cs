@@ -20,7 +20,7 @@ namespace InterReact
             Instant end = default,
             HistoricalDataType? dataType = null,
             bool regularTradingHoursOnly = true,
-            IList<Tag>? options = null) =>
+            IEnumerable<Tag>? options = null) =>
                 Response
                     .ToObservableSingleWithId(
                         Request.GetNextId,

@@ -1,8 +1,7 @@
 ﻿namespace InterReact
 {
-    public sealed class TickReqParams : ITick
+    public sealed class TickReqParams : Tick
     {
-        public int RequestId { get; }
         public double MinTick { get; }
         public string BboExchange { get; }
         public int SnapshotPermissions { get; }

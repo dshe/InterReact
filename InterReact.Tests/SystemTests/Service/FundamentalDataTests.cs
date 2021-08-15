@@ -1,5 +1,4 @@
-using InterReact;
-using InterReact.SystemTests;
+using Stringification;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Xunit;
@@ -14,11 +13,17 @@ namespace InterReact.SystemTests.Service
         [Fact]
         public async Task TestFundamentalData()
         {
-            var contract = new Contract { SecurityType = SecurityType.Stock, Symbol = "F", Currency = "USD", Exchange = "NYSE" };
+            Union<FundamentalData, Alert> union = await Client
+                .Services
+                .CreateFundamentalDataObservable(StockContract1, FundamentalDataReportType.CompanyOverview);
 
-            var observable = Client.Services.CreateFundamentalDataObservable(contract, FundamentalDataReportType.CompanyOverview);
+            object source = union.Source;
 
-            var xml = await observable;
-        }
+            if (source is Alert alert)
+                Write(alert.Stringify());
+            else
+                Write(source.Stringify());
+
+         }
     }
 }

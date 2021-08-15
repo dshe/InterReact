@@ -34,7 +34,7 @@ namespace InterReact.SystemTests.Orders
                 OrderType = OrderType.Market
             };
 
-            Client.Request.PlaceOrder(id, order, Stock1);
+            Client.Request.PlaceOrder(id, order, StockContract1);
 
             await task;
         }
@@ -56,7 +56,7 @@ namespace InterReact.SystemTests.Orders
                 .Timeout(TimeSpan.FromSeconds(3))
                 .ToTask();
 
-            Client.Request.RequestMarketData(id, Stock1, null, isSnapshot: true);
+            Client.Request.RequestMarketData(id, StockContract1, null, isSnapshot: true);
 
             var priceTick = await taskPrice;
 
@@ -77,7 +77,7 @@ namespace InterReact.SystemTests.Orders
                 LimitPrice = priceTick.Price - 1
             };
 
-            Client.Request.PlaceOrder(id, order, Stock1);
+            Client.Request.PlaceOrder(id, order, StockContract1);
 
             await taskOpenOrder;
 

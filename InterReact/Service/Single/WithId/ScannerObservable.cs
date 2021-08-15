@@ -11,7 +11,7 @@ namespace InterReact
         /// Each subscription makes a separate request.
         /// </summary>
         public IObservable<Union<ScannerData, Alert>> CreateScannerObservable(
-            ScannerSubscription subscription, IList<Tag>? subscriptionOptions = null)
+            ScannerSubscription subscription, IEnumerable<Tag>? subscriptionOptions = null)
         {
             if (subscription == null)
                 throw new ArgumentNullException(nameof(subscription));

@@ -152,8 +152,9 @@ namespace TicksWpf
             };
 
             // Create the observable and capture the single contract details object to determine the full name of the contract.
-            IObservable<Union<ContractDetails, Alert>> response =
-                Client!.Services.CreateContractDetailsObservable(contract);
+            IObservable<Union<ContractDetails, Alert>> response = Client!
+                .Services
+                .CreateContractDetailsObservable(contract);
 
             response.OfTypeUnionSource<Alert>().Subscribe(alert =>
             {
@@ -176,7 +177,7 @@ namespace TicksWpf
         private void SubscribeToTicks(Contract contract)
         {
             // Create the observable which will emit realtime updates.
-            IConnectableObservable<ITick> ticks = Client!.Services
+            IConnectableObservable<Union<Tick,Alert>> ticks = Client!.Services
                 .CreateTickObservable(contract)
                 .UndelayTicks()
                 .ObserveOn(Application.Current.Dispatcher)
@@ -187,10 +188,10 @@ namespace TicksWpf
             TicksConnection = ticks.Connect();
         }
 
-        private void SubscribeToTicks(IObservable<ITick> ticks)
+        private void SubscribeToTicks(IObservable<Union<Tick, Alert>> ticks)
         {
             // Display warnings, if any.
-            ticks.OfTickType(t => t.Alert).Subscribe(m => MessageBox.Show(m.Message));
+            ticks.Select(u => u.Source).OfType<Alert>().Subscribe(m => MessageBox.Show(m.Message));
 
             IObservable<PriceTick> priceTicks = ticks.OfTickType(t => t.TickPrice);
 

@@ -48,7 +48,7 @@ namespace InterReact
                 string code = reader.ReadString(); // read the code (first string)
                 if (code == "1")
                 {
-                    object[] tickMessages = BaseTick.CreatePriceAndSizeTicks(reader);
+                    object[] tickMessages = Tick.CreatePriceAndSizeTicks(reader);
                     reader.VerifyMessageEnd();
                     return tickMessages;
                 }
