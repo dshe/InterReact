@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using InterReact;
+using Xunit;
 //using Stringification;
 /*
 * Be sure that Trader Workstation (TWS) is running on your machine and that the following is set:
@@ -9,8 +10,10 @@ using InterReact;
 */
 namespace InterReactSamples
 {
+    [Trait("Category", "Examples")]
     public class SimpleExample
     {
+        [Fact]
         public async Task Test()
         {
             // Create the InterReact client by connecting to TWS/Gateway on your local machine.

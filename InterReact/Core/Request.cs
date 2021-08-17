@@ -278,20 +278,21 @@ namespace InterReact
         /// </summary>
         public void RequestNextOrderId() => Message().Write(RequestCode.RequestIds, "1", "1").Send();
 
-        internal static object[] ContractObjects(Contract contract) =>
-            new object[] { 
-                    contract.ContractId, 
+        /// <summary>
+        /// Call this method to retrieve one or more ContractDetails objects for the specified selector contract.
+        /// </summary>
+        public void RequestContractDetails(int requestId, Contract contract)
+        {
+            Message()
+                .Write(RequestCode.RequestContractDetails, "8", requestId,
+                    contract.ContractId,
                     contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
                     contract.Strike, contract.Right, contract.Multiplier,
                     contract.Exchange, contract.PrimaryExchange,
                     contract.Currency, contract.LocalSymbol, contract.TradingClass,
-                    contract.IncludeExpired, contract.SecurityIdType, contract.SecurityId };
-
-        /// <summary>
-        /// Call this method to retrieve one or more ContractDetails objects for the specified selector contract.
-        /// </summary>
-        public void RequestContractDetails(int requestId, Contract contract) =>
-            Message().Write(RequestCode.RequestContractDetails, "8", requestId, ContractObjects(contract)).Send();
+                    contract.IncludeExpired, contract.SecurityIdType, contract.SecurityId)
+                .Send();
+        }
 
         /// <summary>
         /// Call this method to request market depth for the specified contract. 

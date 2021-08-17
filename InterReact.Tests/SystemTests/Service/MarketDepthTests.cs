@@ -1,6 +1,7 @@
 ﻿using InterReact;
 using InterReact.SystemTests;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -20,21 +21,13 @@ namespace InterReact.SystemTests.Service
             //if (Client.Request.Config.IsDemoAccount)
             //    return;
 
-            //Client.Request.RequestMarketDepth(7, ForexContract1);
-            Client.Request.RequestContractDetails(7, ForexContract1);
-
-            /*
             IObservable<Union<MarketDepth, Alert>> observable = Client
                 .Services
                 .CreateMarketDepthObservable(ForexContract1);
 
-            observable.Subscribe();
-            */
+            IList<Union<MarketDepth, Alert>>? depth = await observable.Take(TimeSpan.FromSeconds(1)).ToList();
 
-            await Task.Delay(3000);
-            //var depth = await observable.Take(TimeSpan.FromSeconds(10)).ToList();
-            ;
-
+            Assert.True(depth.All(x => x.Source is MarketDepth));
         }
 
         [Fact]
@@ -43,14 +36,16 @@ namespace InterReact.SystemTests.Service
             if (Client.Request.Config.IsDemoAccount)
                 return;
 
-            var depth = Client.Services.CreateMarketDepthObservable(ForexContract1);
+            var depth = Client
+                .Services
+                .CreateMarketDepthObservable(ForexContract1);
 
             //var (bidCollection, askCollection) = depth.ToMarketDepthObservableCollections();
 
             var subscription = depth.Subscribe(m => { }, e =>
-             {
+            {
                  // observe data and handle any errors
-             });
+            });
 
             //depth.Connect();
 

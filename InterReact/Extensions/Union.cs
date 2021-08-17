@@ -15,7 +15,7 @@ namespace InterReact
         public Union(object source) => Source = source;
     }
 
-    public class Union<T1, T2> : Union
+    public sealed class Union<T1, T2> : Union
         where T1 : notnull
         where T2 : notnull
     {
@@ -25,7 +25,7 @@ namespace InterReact
         }
     }
 
-    public class Union<T1, T2, T3> : Union
+    public sealed class Union<T1, T2, T3> : Union
         where T1 : notnull
         where T2 : notnull
         where T3 : notnull
@@ -36,7 +36,7 @@ namespace InterReact
         }
     }
 
-    public class Union<T1, T2, T3, T4> : Union
+    public sealed class Union<T1, T2, T3, T4> : Union
         where T1 : notnull
         where T2 : notnull
         where T3 : notnull
@@ -46,12 +46,6 @@ namespace InterReact
         {
             Debug.Assert(source is T1 or T2 or T3 or T4);
         }
-    }
-
-    public static partial class Extensions
-    {
-        public static IObservable<T> OfTypeUnionSource<T>(this IObservable<Union> source) =>
-            source.Select(x => x.Source).OfType<T>();
     }
 
 }

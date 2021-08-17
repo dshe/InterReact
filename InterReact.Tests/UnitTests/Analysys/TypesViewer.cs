@@ -84,7 +84,7 @@ namespace InterReact.UnitTests.Analysis
             Stringifier stringifier = new(Logger);
 
             foreach (var type in Types.Where(t =>
-                t.IsClass && t.IsPublic && t.IsSealed && !t.IsAbstract &&
+                t.IsClass && t.IsPublic && t.IsSealed && !t.IsAbstract && !t.ContainsGenericParameters &&
                 t.Namespace == "InterReact").ToList())
             {
                 try

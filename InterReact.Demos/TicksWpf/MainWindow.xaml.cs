@@ -156,12 +156,15 @@ namespace TicksWpf
                 .Services
                 .CreateContractDetailsObservable(contract);
 
-            response.OfTypeUnionSource<Alert>().Subscribe(alert =>
+            response.Select(u => u.Source).OfType<Alert>().Subscribe(alert =>
             {
                 MessageBox.Show($"ContractDetails:\n\n {alert.Message}");
             });
 
-            IList<ContractDetails> cds = await response.OfTypeUnionSource<ContractDetails>().ToList();
+            IList<ContractDetails> cds = await response
+                .Select(u => u.Source)
+                .OfType<ContractDetails>()
+                .ToList();
 
             // Multiple contracts may be returned. Take the first one.
             ContractDetails? cd = cds.FirstOrDefault();

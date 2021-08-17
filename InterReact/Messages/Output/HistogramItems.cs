@@ -4,9 +4,7 @@ using System.Reactive.Linq;
 
 namespace InterReact
 {
-    public interface IHistogramItems : IHasRequestId { }
-
-    public sealed class HistogramItems : IHistogramItems
+    public sealed class HistogramItems : IHasRequestId
     {
         public int RequestId { get; }
         public List<HistogramItem> Items { get; } = new List<HistogramItem>();
@@ -29,12 +27,6 @@ namespace InterReact
             Price = c.ReadDouble();
             Size = c.ReadLong();
         }
-    }
-
-    public static partial class Extensions
-    {
-        public static IObservable<HistogramItems> OfTypeHistogramItems(
-            this IObservable<IHistogramItems> source) => source.OfType<HistogramItems>();
     }
 
 }

@@ -1,6 +1,7 @@
 using InterReact;
 using InterReact.SystemTests;
 using Stringification;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -23,8 +24,9 @@ namespace InterReact.SystemTests.Contracts
                 Currency = "USD",
                 Exchange = "GLOBEX"
             };
-            var cds = await Client.Services.CreateContractDetailsObservable(contract)
-                .OfTypeUnionSource<ContractDetails>()
+            IList<ContractDetails> cds = await Client.Services.CreateContractDetailsObservable(contract)
+                .Select(u => u.Source)
+                .OfType<ContractDetails>()
                 .ToList();
             //var cd = cds.ContractDataExpiryFilter(0).Single();
 
@@ -49,9 +51,10 @@ namespace InterReact.SystemTests.Contracts
                 Multiplier = "100",
                 Strike = 200
             };
-            var cds = await Client.Services
+            IList<ContractDetails> cds = await Client.Services
                 .CreateContractDetailsObservable(contract)
-                .OfTypeUnionSource<ContractDetails>()
+                .Select(u => u.Source)
+                .OfType<ContractDetails>()
                 .ToList();
             foreach (var cd in cds.OrderBy(x => x.Contract.LastTradeDateOrContractMonth))
                 Write(cd.Contract.LastTradeDateOrContractMonth);

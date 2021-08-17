@@ -39,7 +39,6 @@ namespace InterReact
             if (objs.Length == 0)
                 throw new ArgumentException("invalid length", nameof(objs));
             return objs.Select(o => GetString(o));
-            //return objs.Select(o => GetString(o));
         }
 
         private static string GetString(object? o)

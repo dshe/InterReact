@@ -1,6 +1,7 @@
 ﻿using InterReact;
 using InterReact.SystemTests;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
@@ -16,11 +17,12 @@ namespace InterReact.SystemTests.Contracts
         [Fact]
         public async Task TestContractDataSingle()
         {
-            var c = new Contract { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
-            var item = await Client.Services
+            Contract c = new() { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
+            IList<ContractDetails>? item = await Client.Services
                 .CreateContractDetailsObservable(c)
                 .Timeout(TimeSpan.FromSeconds(10))
-                .OfTypeUnionSource<ContractDetails>()
+                .Select(u => u.Source)
+                .OfType<ContractDetails>()
                 .ToList();
             Assert.Equal(1, item.Count);
         }
@@ -39,7 +41,8 @@ namespace InterReact.SystemTests.Contracts
             var contract = new Contract { ContractId = 8314 };
             var cds = await Client.Services
                 .CreateContractDetailsObservable(contract)
-                .OfTypeUnionSource<ContractDetails>()
+                .Select(u => u.Source)
+                .OfType<ContractDetails>()
                 .ToList();
             Assert.Equal("IBM", cds.Single().Contract.Symbol);
         }

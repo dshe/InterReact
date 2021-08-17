@@ -35,7 +35,15 @@ namespace InterReact
             if ((contract.SecurityIdType == null || contract.SecurityIdType == SecurityIdType.Undefined) ^ string.IsNullOrEmpty(contract.SecurityId))
                 throw new ArgumentException("Invalid SecurityId/SecurityIdType combination.");
 
-            object[] objs = Request.ContractObjects(contract);
+            var objs = new object?[] {
+                    contract.ContractId,
+                    contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
+                    contract.Strike, contract.Right, contract.Multiplier,
+                    contract.Exchange, contract.PrimaryExchange,
+                    contract.Currency, contract.LocalSymbol, contract.TradingClass,
+                    contract.IncludeExpired, contract.SecurityIdType, contract.SecurityId };
+
+
             IEnumerable<string> strings = RequestMessage.GetStrings(objs);
             string key = string.Join(',', strings);
 
