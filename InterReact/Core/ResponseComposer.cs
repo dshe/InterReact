@@ -123,7 +123,7 @@ namespace InterReact
             "78" => new FamilyCodes(reader),
             "79" => new SymbolSamples(reader),
             "80" => new MarketDepthExchanges(reader),
-            "81" => new TickReqParams(reader),
+            "81" => new ReqParamsTick(reader),
             "82" => new SmartComponents(reader),
             "83" => new NewsArticle(reader),
             "84" => new TickNews(reader),

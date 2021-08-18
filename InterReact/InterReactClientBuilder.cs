@@ -13,6 +13,7 @@ using NodaTime;
 using Stringification;
 using RxSockets;
 using System.Reflection;
+using System.Reactive.Concurrency;
 
 namespace InterReact
 {
@@ -95,7 +96,7 @@ namespace InterReact
         public async Task<IInterReactClient> BuildAsync(CancellationToken ct = default)
         {
             AssemblyName name = GetType().Assembly.GetName();
-            Logger.LogInformation($"{name.Name} version {name.Version}.");
+            Logger.LogInformation($"{name.Name} v{name.Version}.");
 
             IRxSocketClient rxSocket = await ConnectAsync(ct).ConfigureAwait(false);
 
@@ -112,7 +113,7 @@ namespace InterReact
                     .ToObservableFromAsyncEnumerable()
                     .ToMessages(Config, stringifier, Logger)
                     .Publish()
-                    .AutoConnect(); // connect on first subscription
+                    .AutoConnect(); // connect on first observer
 
                 return new ServiceCollection()
                     .AddSingleton(stringifier)
@@ -170,7 +171,7 @@ namespace InterReact
                 throw new InvalidDataException($"Could not parse server version '{message[0]}'.");
             Config.ServerVersionCurrent = version;
             Config.Date = message[1];
-            Logger.LogInformation($"Logged into Tws/Gateway on: {Config.Date} using clientId: {Config.ClientId} and serverVersion: {Config.ServerVersionCurrent}.");
+            Logger.LogInformation($"Logged into Tws/Gateway using clientId: {Config.ClientId} and server version: {(int)Config.ServerVersionCurrent}.");
 
             // local methods
             void Send(string str) => 

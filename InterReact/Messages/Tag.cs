@@ -14,7 +14,7 @@ namespace InterReact
             Name = name;
             Value = value;
         }
-        public Tag(ResponseReader c) : this(c.ReadString(), c.ReadString())  {}
+        public Tag(ResponseReader r) : this(r.ReadString(), r.ReadString())  {}
 
         internal static string Combine(IEnumerable<Tag>? tags)
         {

@@ -5,11 +5,11 @@
         public int RequestId { get; }
         public int ArticleType { get; }
         public string ArticleText { get; }
-        internal NewsArticle(ResponseReader c)
+        internal NewsArticle(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            ArticleType = c.ReadInt();
-            ArticleText = c.ReadString();
+            RequestId = r.ReadInt();
+            ArticleType = r.ReadInt();
+            ArticleText = r.ReadString();
         }
     }
 }

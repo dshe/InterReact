@@ -19,15 +19,15 @@
         // Yet another date format: YYYYMMDD as integer.
         public int YieldRedemptionDate { get; }
 
-        internal CommissionReport(ResponseReader c)
+        internal CommissionReport(ResponseReader r)
         {
-            c.IgnoreVersion();
-            ExecutionId = c.ReadString();
-            Commission = c.ReadDouble();
-            Currency = c.ReadString();
-            RealizedPnl = c.ReadDouble();
-            Yield = c.ReadDouble();
-            YieldRedemptionDate = c.ReadInt();
+            r.IgnoreVersion();
+            ExecutionId = r.ReadString();
+            Commission = r.ReadDouble();
+            Currency = r.ReadString();
+            RealizedPnl = r.ReadDouble();
+            Yield = r.ReadDouble();
+            YieldRedemptionDate = r.ReadInt();
 
             if (Execution.Executions.TryGetValue(ExecutionId, out Execution? execution))
             {

@@ -4,11 +4,11 @@
     {
         public int RequestId { get; }
         public string ContractInfo { get; }
-        internal DisplayGroupUpdate(ResponseReader c)
+        internal DisplayGroupUpdate(ResponseReader r)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
-            ContractInfo = c.ReadString();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
+            ContractInfo = r.ReadString();
         }
     }
 
@@ -16,11 +16,11 @@
     {
         public int RequestId { get; }
         public string Groups { get; }
-        internal DisplayGroups(ResponseReader c)
+        internal DisplayGroups(ResponseReader r)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
-            Groups = c.ReadString();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
+            Groups = r.ReadString();
         }
     }
 

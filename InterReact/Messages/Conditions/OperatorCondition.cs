@@ -59,12 +59,13 @@ namespace InterReact
             return true;
         }
 
-        internal override void Deserialize(ResponseReader c)
+        internal override void Deserialize(ResponseReader r)
         {
-            base.Deserialize(c);
-            IsMore = c.ReadBool();
-            Value = c.ReadString();
+            base.Deserialize(r);
+            IsMore = r.ReadBool();
+            Value = r.ReadString();
         }
+
         internal override void Serialize(RequestMessage message)
         {
             base.Serialize(message);

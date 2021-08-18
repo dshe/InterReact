@@ -3,10 +3,10 @@
     public sealed class NextId
     {
         public int Id { get; }
-        internal NextId(ResponseReader c)
+        internal NextId(ResponseReader r)
         {
-            c.IgnoreVersion();
-            Id = c.ReadInt();
+            r.IgnoreVersion();
+            Id = r.ReadInt();
         }
     }
 }

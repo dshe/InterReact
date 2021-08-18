@@ -196,7 +196,7 @@ namespace TicksWpf
             // Display warnings, if any.
             ticks.Select(u => u.Source).OfType<Alert>().Subscribe(m => MessageBox.Show(m.Message));
 
-            IObservable<PriceTick> priceTicks = ticks.OfTickType(t => t.TickPrice);
+            IObservable<PriceTick> priceTicks = ticks.OfTickType(t => t.PriceTick);
 
             IObservable<double> bidPrices = priceTicks.Where(t => t.TickType == TickType.BidPrice).Select(t => t.Price);
             IObservable<double> askPrices = priceTicks.Where(t => t.TickType == TickType.AskPrice).Select(t => t.Price);

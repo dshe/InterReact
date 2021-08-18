@@ -6,17 +6,17 @@ namespace InterReact
     {
         public Contract Contract { get; }
         public List<string> DerivativeSecTypes { get; } = new List<string>();
-        internal ContractDescription(ResponseReader c)
+        internal ContractDescription(ResponseReader r)
         {
             Contract = new Contract
             {
-                ContractId = c.ReadInt(),
-                Symbol = c.ReadString(),
-                SecurityType = c.ReadStringEnum<SecurityType>(),
-                PrimaryExchange = c.ReadString(),
-                Currency = c.ReadString()
+                ContractId = r.ReadInt(),
+                Symbol = r.ReadString(),
+                SecurityType = r.ReadStringEnum<SecurityType>(),
+                PrimaryExchange = r.ReadString(),
+                Currency = r.ReadString()
             };
-            c.AddStringsToList(DerivativeSecTypes);
+            r.AddStringsToList(DerivativeSecTypes);
         }
     }
     

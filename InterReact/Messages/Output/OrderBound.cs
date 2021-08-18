@@ -7,11 +7,11 @@
         public long OrderBoundId { get; } // was OrderId
         public int ClientId { get; } // was ApiClientId
         public int OrderId { get; } // was ApiIOrderId
-        internal OrderBound(ResponseReader c)
+        internal OrderBound(ResponseReader r)
         {
-            OrderBoundId = c.ReadLong();
-            ClientId = c.ReadInt();
-            OrderId = c.ReadInt();
+            OrderBoundId = r.ReadLong();
+            ClientId = r.ReadInt();
+            OrderId = r.ReadInt();
         }
     }
 }

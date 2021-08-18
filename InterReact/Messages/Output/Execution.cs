@@ -6,7 +6,7 @@ namespace InterReact
     {
         // Store executions by executionId so that they can be associated with CommissionReport (above).
         // This assumes that CommissionReport always follows Execution.
-        internal static Dictionary<string, Execution> Executions = new Dictionary<string, Execution>();
+        internal static Dictionary<string, Execution> Executions = new();
 
         /// <summary>
         /// RequestId will be -1 if this object sent due to an execution rather than a request for executions.
@@ -82,44 +82,44 @@ namespace InterReact
 
         public Contract Contract { get; }
 
-        internal Execution(ResponseReader c)
+        internal Execution(ResponseReader r)
         {
-            c.RequireVersion(10);
-            int requestId = c.ReadInt();
-            int orderId = c.ReadInt();
+            r.RequireVersion(10);
+            int requestId = r.ReadInt();
+            int orderId = r.ReadInt();
             Contract = new Contract
             {
-                ContractId = c.ReadInt(),
-                Symbol = c.ReadString(),
-                SecurityType = c.ReadStringEnum<SecurityType>(),
-                LastTradeDateOrContractMonth = c.ReadString(),
-                Strike = c.ReadDouble(),
-                Right = c.ReadStringEnum<OptionRightType>(),
-                Multiplier = c.ReadString(),
-                Exchange = c.ReadString(),
-                Currency = c.ReadString(),
-                LocalSymbol = c.ReadString(),
-                TradingClass = c.ReadString()
+                ContractId = r.ReadInt(),
+                Symbol = r.ReadString(),
+                SecurityType = r.ReadStringEnum<SecurityType>(),
+                LastTradeDateOrContractMonth = r.ReadString(),
+                Strike = r.ReadDouble(),
+                Right = r.ReadStringEnum<OptionRightType>(),
+                Multiplier = r.ReadString(),
+                Exchange = r.ReadString(),
+                Currency = r.ReadString(),
+                LocalSymbol = r.ReadString(),
+                TradingClass = r.ReadString()
             };
             RequestId = requestId;
             OrderId = orderId;
-            ExecutionId = c.ReadString();
-            Time = c.ReadString();
-            Account = c.ReadString();
-            Exchange = c.ReadString();
-            Side = c.ReadStringEnum<ExecutionSide>();
-            Shares = c.ReadDouble();
-            Price = c.ReadDouble();
-            PermanentId = c.ReadInt();
-            ClientId = c.ReadInt();
-            Liquidation = c.ReadInt();
-            CumulativeQuantity = c.ReadDouble();
-            AveragePrice = c.ReadDouble();
-            OrderReference = c.ReadString();
-            EconomicValueRule = c.ReadString();
-            EconomicValueMultiplier = c.ReadDouble();
-            if (c.Config.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
-                ModelCode = c.ReadString();
+            ExecutionId = r.ReadString();
+            Time = r.ReadString();
+            Account = r.ReadString();
+            Exchange = r.ReadString();
+            Side = r.ReadStringEnum<ExecutionSide>();
+            Shares = r.ReadDouble();
+            Price = r.ReadDouble();
+            PermanentId = r.ReadInt();
+            ClientId = r.ReadInt();
+            Liquidation = r.ReadInt();
+            CumulativeQuantity = r.ReadDouble();
+            AveragePrice = r.ReadDouble();
+            OrderReference = r.ReadString();
+            EconomicValueRule = r.ReadString();
+            EconomicValueMultiplier = r.ReadDouble();
+            if (r.Config.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
+                ModelCode = r.ReadString();
             Executions[ExecutionId] = this;
         }
     }
@@ -127,10 +127,10 @@ namespace InterReact
     public sealed class ExecutionEnd : IHasRequestId
     {
         public int RequestId { get; }
-        internal ExecutionEnd(ResponseReader c)
+        internal ExecutionEnd(ResponseReader r)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
         }
     }
 }

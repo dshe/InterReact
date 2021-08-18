@@ -6,13 +6,13 @@ namespace InterReact
     {
         public int RequestId { get; }
         public List<SoftDollarTier> Tiers { get; } = new List<SoftDollarTier>();
-        internal SoftDollarTiers(ResponseReader c)
+        internal SoftDollarTiers(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            int n = c.ReadInt();
+            RequestId = r.ReadInt();
+            int n = r.ReadInt();
             for (int i = 0; i < n; i++)
             {
-                Tiers.Add(new SoftDollarTier(c));
+                Tiers.Add(new SoftDollarTier(r));
             }
         }
     }
@@ -23,15 +23,15 @@ namespace InterReact
         public string Value { get; set; } = "";
         public string DisplayName { get; set; } = "";
         internal SoftDollarTier() { }
-        internal SoftDollarTier(ResponseReader c) 
+        internal SoftDollarTier(ResponseReader r) 
         {
-            Set(c);
+            Set(r);
         }
-        internal void Set(ResponseReader c)
+        internal void Set(ResponseReader r)
         {
-            Name = c.ReadString();
-            Value = c.ReadString();
-            DisplayName = c.ReadString();
+            Name = r.ReadString();
+            Value = r.ReadString();
+            DisplayName = r.ReadString();
         }
     }
 }

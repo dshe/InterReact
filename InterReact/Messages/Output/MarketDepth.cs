@@ -18,16 +18,16 @@
 
         public bool IsSmartDepth { get; }
 
-        internal MarketDepth(ResponseReader c, bool isLevel2)
+        internal MarketDepth(ResponseReader r, bool isLevel2)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
-            Position = c.ReadInt();
-            MarketMaker = isLevel2 ? c.ReadString() : string.Empty;
-            Operation = c.ReadEnum<MarketDepthOperation>();
-            Side = c.ReadEnum<MarketDepthSide>();
-            Price = c.ReadDouble();
-            Size = c.ReadInt();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
+            Position = r.ReadInt();
+            MarketMaker = isLevel2 ? r.ReadString() : string.Empty;
+            Operation = r.ReadEnum<MarketDepthOperation>();
+            Side = r.ReadEnum<MarketDepthSide>();
+            Price = r.ReadDouble();
+            Size = r.ReadInt();
         }
     }
 }

@@ -6,10 +6,10 @@ namespace InterReact
     public sealed class CurrentTime
     {
         public Instant Time { get; }
-        internal CurrentTime(ResponseReader c)
+        internal CurrentTime(ResponseReader r)
         {
-            c.IgnoreVersion();
-            Time = Instant.FromUnixTimeSeconds(long.Parse(c.ReadString(), NumberFormatInfo.InvariantInfo));
+            r.IgnoreVersion();
+            Time = Instant.FromUnixTimeSeconds(long.Parse(r.ReadString(), NumberFormatInfo.InvariantInfo));
         }
     }
 }

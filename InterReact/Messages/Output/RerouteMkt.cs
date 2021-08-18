@@ -4,10 +4,10 @@
     {
         public int RequestId { get; }
         public int ContractId { get; }
-        internal RerouteMktData(ResponseReader c)
+        internal RerouteMktData(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            ContractId = c.ReadInt();
+            RequestId = r.ReadInt();
+            ContractId = r.ReadInt();
         }
     }
 
@@ -16,11 +16,11 @@
         public int RequestId { get; }
         public int ContractId { get; }
         public string Exchange { get; }
-        internal RerouteMktDepth(ResponseReader c)
+        internal RerouteMktDepth(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            ContractId = c.ReadInt();
-            Exchange = c.ReadString();
+            RequestId = r.ReadInt();
+            ContractId = r.ReadInt();
+            Exchange = r.ReadString();
         }
     }
 }

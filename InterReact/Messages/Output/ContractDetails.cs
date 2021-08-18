@@ -132,122 +132,122 @@ namespace InterReact
 
         internal ContractDetails() { } // ctor for testing
 
-        internal ContractDetails(ResponseReader c, ContractDetailsType type)
+        internal ContractDetails(ResponseReader r, ContractDetailsType type)
         {
             switch (type)
             {
                 case ContractDetailsType.ContractData:
-                    c.RequireVersion(8);
-                    RequestId = c.ReadInt();
+                    r.RequireVersion(8);
+                    RequestId = r.ReadInt();
 
-                    Contract.Symbol = c.ReadString();
-                    Contract.SecurityType = c.ReadStringEnum<SecurityType>();
+                    Contract.Symbol = r.ReadString();
+                    Contract.SecurityType = r.ReadStringEnum<SecurityType>();
 
-                    ReadLastTradeDate(c.ReadString(), false);
+                    ReadLastTradeDate(r.ReadString(), false);
 
-                    Contract.Strike = c.ReadDouble();
-                    Contract.Right = c.ReadStringEnum<OptionRightType>();
-                    Contract.Exchange = c.ReadString();
-                    Contract.Currency = c.ReadString();
-                    Contract.LocalSymbol = c.ReadString();
+                    Contract.Strike = r.ReadDouble();
+                    Contract.Right = r.ReadStringEnum<OptionRightType>();
+                    Contract.Exchange = r.ReadString();
+                    Contract.Currency = r.ReadString();
+                    Contract.LocalSymbol = r.ReadString();
 
-                    MarketName = c.ReadString();
+                    MarketName = r.ReadString();
 
-                    Contract.TradingClass = c.ReadString();
-                    Contract.ContractId = c.ReadInt();
+                    Contract.TradingClass = r.ReadString();
+                    Contract.ContractId = r.ReadInt();
 
-                    MinimumTick = c.ReadDouble();
-                    if (c.Config.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER))
-                        MdSizeMultiplier = c.ReadInt();
+                    MinimumTick = r.ReadDouble();
+                    if (r.Config.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER))
+                        MdSizeMultiplier = r.ReadInt();
 
-                    Contract.Multiplier = c.ReadString();
+                    Contract.Multiplier = r.ReadString();
 
-                    OrderTypes = c.ReadString();
-                    ValidExchanges = c.ReadString();
-                    PriceMagnifier = c.ReadInt();
-                    UnderlyingContractId = c.ReadInt();
-                    LongName = c.ReadString();
+                    OrderTypes = r.ReadString();
+                    ValidExchanges = r.ReadString();
+                    PriceMagnifier = r.ReadInt();
+                    UnderlyingContractId = r.ReadInt();
+                    LongName = r.ReadString();
 
-                    Contract.PrimaryExchange = c.ReadString();
+                    Contract.PrimaryExchange = r.ReadString();
 
-                    ContractMonth = c.ReadString();
-                    Industry = c.ReadString();
-                    Category = c.ReadString();
-                    Subcategory = c.ReadString();
-                    TimeZoneId = c.ReadString();
-                    TradingHours = c.ReadString();
-                    LiquidHours = c.ReadString();
-                    EconomicValueRule = c.ReadString();
-                    EconomicValueMultiplier = c.ReadDouble();
-                    c.AddTagsToList(SecurityIds);
-                    if (c.Config.SupportsServerVersion(ServerVersion.AGG_GROUP))
-                        AggGroup = c.ReadInt();
-                    if (c.Config.SupportsServerVersion(ServerVersion.UNDERLYING_INFO))
+                    ContractMonth = r.ReadString();
+                    Industry = r.ReadString();
+                    Category = r.ReadString();
+                    Subcategory = r.ReadString();
+                    TimeZoneId = r.ReadString();
+                    TradingHours = r.ReadString();
+                    LiquidHours = r.ReadString();
+                    EconomicValueRule = r.ReadString();
+                    EconomicValueMultiplier = r.ReadDouble();
+                    r.AddTagsToList(SecurityIds);
+                    if (r.Config.SupportsServerVersion(ServerVersion.AGG_GROUP))
+                        AggGroup = r.ReadInt();
+                    if (r.Config.SupportsServerVersion(ServerVersion.UNDERLYING_INFO))
                     {
-                        UnderSymbol = c.ReadString();
-                        UnderSecType = c.ReadString();
+                        UnderSymbol = r.ReadString();
+                        UnderSecType = r.ReadString();
                     }
                     break;
 
                 case ContractDetailsType.BondContractData:
-                    int version = c.RequireVersion(6);
-                    RequestId = c.ReadInt();
+                    int version = r.RequireVersion(6);
+                    RequestId = r.ReadInt();
 
-                    Contract.Symbol = c.ReadString();
-                    Contract.SecurityType = c.ReadStringEnum<SecurityType>();
+                    Contract.Symbol = r.ReadString();
+                    Contract.SecurityType = r.ReadStringEnum<SecurityType>();
 
-                    Cusip = c.ReadString();
-                    Coupon = c.ReadDouble();
+                    Cusip = r.ReadString();
+                    Coupon = r.ReadDouble();
 
-                    ReadLastTradeDate(c.ReadString(), true);
+                    ReadLastTradeDate(r.ReadString(), true);
 
-                    IssueDate = c.ReadString();
-                    CreditRatings = c.ReadString();
-                    BondType = c.ReadString();
-                    CouponType = c.ReadString();
-                    Convertible = c.ReadBool();
-                    Callable = c.ReadBool();
-                    Putable = c.ReadBool();
-                    DescriptionAppend = c.ReadString();
+                    IssueDate = r.ReadString();
+                    CreditRatings = r.ReadString();
+                    BondType = r.ReadString();
+                    CouponType = r.ReadString();
+                    Convertible = r.ReadBool();
+                    Callable = r.ReadBool();
+                    Putable = r.ReadBool();
+                    DescriptionAppend = r.ReadString();
 
-                    Contract.Exchange = c.ReadString();
-                    Contract.Currency = c.ReadString();
-                    MarketName = c.ReadString();
-                    Contract.TradingClass = c.ReadString();
-                    Contract.ContractId = c.ReadInt();
-                    MinimumTick = c.ReadDouble();
-                    if (c.Config.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER))
-                        MdSizeMultiplier = c.ReadInt();
-                    OrderTypes = c.ReadString();
-                    ValidExchanges = c.ReadString();
-                    NextOptionDate = c.ReadString();
-                    NextOptionType = c.ReadString();
-                    NextOptionPartial = c.ReadBool();
-                    Notes = c.ReadString();
-                    LongName = c.ReadString();
+                    Contract.Exchange = r.ReadString();
+                    Contract.Currency = r.ReadString();
+                    MarketName = r.ReadString();
+                    Contract.TradingClass = r.ReadString();
+                    Contract.ContractId = r.ReadInt();
+                    MinimumTick = r.ReadDouble();
+                    if (r.Config.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER))
+                        MdSizeMultiplier = r.ReadInt();
+                    OrderTypes = r.ReadString();
+                    ValidExchanges = r.ReadString();
+                    NextOptionDate = r.ReadString();
+                    NextOptionType = r.ReadString();
+                    NextOptionPartial = r.ReadBool();
+                    Notes = r.ReadString();
+                    LongName = r.ReadString();
                     if (version >= 6)
                     {
-                        EconomicValueRule = c.ReadString();
-                        EconomicValueMultiplier = c.ReadDouble();
+                        EconomicValueRule = r.ReadString();
+                        EconomicValueMultiplier = r.ReadDouble();
                     }
                     if (version >= 5)
-                        c.AddTagsToList(SecurityIds);
-                    if (c.Config.SupportsServerVersion(ServerVersion.AGG_GROUP))
-                        AggGroup = c.ReadInt();
+                        r.AddTagsToList(SecurityIds);
+                    if (r.Config.SupportsServerVersion(ServerVersion.AGG_GROUP))
+                        AggGroup = r.ReadInt();
                     break;
 
                 case ContractDetailsType.ScannerContractData:
-                    Contract.ContractId = c.ReadInt();
-                    Contract.Symbol = c.ReadString();
-                    Contract.SecurityType = c.ReadStringEnum<SecurityType>();
-                    Contract.LastTradeDateOrContractMonth = c.ReadString();
-                    Contract.Strike = c.ReadDouble();
-                    Contract.Right = c.ReadStringEnum<OptionRightType>();
-                    Contract.Exchange = c.ReadString();
-                    Contract.Currency = c.ReadString();
-                    Contract.LocalSymbol = c.ReadString();
-                    MarketName = c.ReadString();
-                    Contract.TradingClass = c.ReadString();
+                    Contract.ContractId = r.ReadInt();
+                    Contract.Symbol = r.ReadString();
+                    Contract.SecurityType = r.ReadStringEnum<SecurityType>();
+                    Contract.LastTradeDateOrContractMonth = r.ReadString();
+                    Contract.Strike = r.ReadDouble();
+                    Contract.Right = r.ReadStringEnum<OptionRightType>();
+                    Contract.Exchange = r.ReadString();
+                    Contract.Currency = r.ReadString();
+                    Contract.LocalSymbol = r.ReadString();
+                    MarketName = r.ReadString();
+                    Contract.TradingClass = r.ReadString();
                     break;
             }
         }
@@ -274,10 +274,10 @@ namespace InterReact
     public sealed class ContractDetailsEnd : IHasRequestId
     {
         public int RequestId { get; }
-        internal ContractDetailsEnd(ResponseReader c)
+        internal ContractDetailsEnd(ResponseReader r)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
         }
     }
 }

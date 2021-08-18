@@ -8,25 +8,25 @@
         public string Key { get; }
         public string Value { get; }
         public string Currency { get; }
-        internal AccountUpdateMulti(ResponseReader c)
+        internal AccountUpdateMulti(ResponseReader r)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
-            Account = c.ReadString();
-            ModelCode = c.ReadString();
-            Key = c.ReadString();
-            Value = c.ReadString();
-            Currency = c.ReadString();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
+            Account = r.ReadString();
+            ModelCode = r.ReadString();
+            Key = r.ReadString();
+            Value = r.ReadString();
+            Currency = r.ReadString();
         }
     }
 
     public sealed class AccountUpdateMultiEnd : IHasRequestId
     {
         public int RequestId { get; internal set; }
-        internal AccountUpdateMultiEnd(ResponseReader c)
+        internal AccountUpdateMultiEnd(ResponseReader r)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
         }
     }
 }

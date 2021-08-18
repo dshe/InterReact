@@ -17,10 +17,10 @@
             MessageVersion = msgVersion;
         }
 
-        internal void readOrderId() => Order.OrderId = R.ReadInt();
-        internal void readAction() => Order.OrderAction = R.ReadStringEnum<OrderAction>();
+        internal void ReadOrderId() => Order.OrderId = R.ReadInt();
+        internal void ReadAction() => Order.OrderAction = R.ReadStringEnum<OrderAction>();
 
-        public void readContract()
+        public void ReadContract()
         {
             if (MessageVersion >= 17)
                 Contract.ContractId = R.ReadInt();
@@ -44,30 +44,30 @@
                 Contract.TradingClass = R.ReadString();
         }
 
-        internal void readTotalQuantity() => Order.TotalQuantity = R.ReadDouble();
-        internal void readOrderType() => Order.OrderType = R.ReadStringEnum<OrderType>();
-        internal void readLmtPrice() => Order.LimitPrice = (MessageVersion < 29) ? R.ReadDouble() : R.ReadDoubleNullable();
-        internal void readAuxPrice() => Order.AuxPrice = (MessageVersion < 30) ? R.ReadDouble() : R.ReadDoubleNullable();
-        internal void readTIF() => Order.TimeInForce = R.ReadStringEnum<TimeInForce>();
-        internal void readOcaGroup() => Order.OcaGroup = R.ReadString();
-        internal void readAccount() => Order.Account = R.ReadString();
-        internal void readOpenClose() => Order.OpenClose = R.ReadStringEnum<OrderOpenClose>();
-        internal void readOrigin() => Order.Origin = R.ReadEnum<OrderOrigin>();
-        internal void readOrderRef() => Order.OrderRef = R.ReadString();
+        internal void ReadTotalQuantity() => Order.TotalQuantity = R.ReadDouble();
+        internal void ReadOrderType() => Order.OrderType = R.ReadStringEnum<OrderType>();
+        internal void ReadLmtPrice() => Order.LimitPrice = (MessageVersion < 29) ? R.ReadDouble() : R.ReadDoubleNullable();
+        internal void ReadAuxPrice() => Order.AuxPrice = (MessageVersion < 30) ? R.ReadDouble() : R.ReadDoubleNullable();
+        internal void ReadTIF() => Order.TimeInForce = R.ReadStringEnum<TimeInForce>();
+        internal void ReadOcaGroup() => Order.OcaGroup = R.ReadString();
+        internal void ReadAccount() => Order.Account = R.ReadString();
+        internal void ReadOpenClose() => Order.OpenClose = R.ReadStringEnum<OrderOpenClose>();
+        internal void ReadOrigin() => Order.Origin = R.ReadEnum<OrderOrigin>();
+        internal void ReadOrderRef() => Order.OrderRef = R.ReadString();
 
-        internal void readClientId()
+        internal void ReadClientId()
         {
             if (MessageVersion >= 3)
                 Order.ClientId = R.ReadInt();
         }
 
-        internal void readPermId()
+        internal void ReadPermId()
         {
             if (MessageVersion >= 4)
                 Order.PermanentId = R.ReadInt();
         }
 
-        internal void readOutsideRth()
+        internal void ReadOutsideRth()
         {
             if (MessageVersion >= 4)
             {
@@ -78,19 +78,19 @@
             }
         }
 
-        internal void readHidden()
+        internal void ReadHidden()
         {
             if (MessageVersion >= 4)
                 Order.Hidden = R.ReadInt() == 1;
         }
 
-        internal void readDiscretionaryAmount()
+        internal void ReadDiscretionaryAmount()
         {
             if (MessageVersion >= 4)
                 Order.DiscretionaryAmount = R.ReadDouble();
         }
 
-        internal void readGoodAfterTime()
+        internal void ReadGoodAfterTime()
         {
             if (MessageVersion >= 5)
                 Order.GoodAfterTime = R.ReadString();
@@ -102,7 +102,7 @@
                 R.ReadString(); // skip deprecated sharesAllocation field
         }
 
-        internal void readFAParams()
+        internal void ReadFAParams()
         {
             if (MessageVersion >= 7)
             {
@@ -113,37 +113,37 @@
             }
         }
 
-        internal void readModelCode()
+        internal void ReadModelCode()
         {
             if (R.Config.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
                 Order.ModelCode = R.ReadString();
         }
 
-        internal void readGoodTillDate()
+        internal void ReadGoodTillDate()
         {
             if (MessageVersion >= 8)
                 Order.GoodUntilDate = R.ReadString();
         }
 
-        internal void readRule80A()
+        internal void ReadRule80A()
         {
             if (MessageVersion >= 9)
                 Order.Rule80A = R.ReadStringEnum<AgentDescription>();
         }
 
-        internal void readPercentOffset()
+        internal void ReadPercentOffset()
         {
             if (MessageVersion >= 9)
                 Order.PercentOffset = R.ReadDoubleNullable();
         }
 
-        internal void readSettlingFirm()
+        internal void ReadSettlingFirm()
         {
             if (MessageVersion >= 9)
                 Order.SettlingFirm = R.ReadString();
         }
 
-        internal void readShortSaleParams()
+        internal void ReadShortSaleParams()
         {
             if (MessageVersion >= 9)
             {
@@ -156,13 +156,13 @@
             }
         }
 
-        internal void readAuctionStrategy()
+        internal void ReadAuctionStrategy()
         {
             if (MessageVersion >= 9)
                 Order.AuctionStrategy = R.ReadEnum<AuctionStrategy>();
         }
 
-        internal void readBoxOrderParams()
+        internal void ReadBoxOrderParams()
         {
             if (MessageVersion >= 9)
             {
@@ -172,7 +172,7 @@
             }
         }
 
-        internal void readPegToStkOrVolOrderParams()
+        internal void ReadPegToStkOrVolOrderParams()
         {
             if (MessageVersion >= 9)
             {
@@ -181,43 +181,43 @@
             }
         }
 
-        internal void readDisplaySize()
+        internal void ReadDisplaySize()
         {
             if (MessageVersion >= 9)
                 Order.DisplaySize = R.ReadIntNullable();
         }
 
-        internal void readOldStyleOutsideRth()
+        internal void ReadOldStyleOutsideRth()
         {
             if (MessageVersion >= 9 && MessageVersion < 18)
                 R.ReadBool(); // will never happen order.rthOnly
         }
 
-        internal void readBlockOrder()
+        internal void ReadBlockOrder()
         {
             if (MessageVersion >= 9)
                 Order.BlockOrder = R.ReadBool();
         }
 
-        internal void readSweepToFill()
+        internal void ReadSweepToFill()
         {
             if (MessageVersion >= 9)
                 Order.SweepToFill = R.ReadBool();
         }
 
-        internal void readAllOrNone()
+        internal void ReadAllOrNone()
         {
             if (MessageVersion >= 9)
                 Order.AllOrNone = R.ReadBool();
         }
 
-        internal void readMinQty()
+        internal void ReadMinQty()
         {
             if (MessageVersion >= 9)
                 Order.MinimumQuantity = R.ReadIntNullable();
         }
 
-        internal void readOcaType()
+        internal void ReadOcaType()
         {
             if (MessageVersion >= 9)
                 Order.OcaType = R.ReadEnum<OcaType>();
@@ -241,19 +241,19 @@
                 R.ReadDoubleNullable();
         }
 
-        internal void readParentId()
+        internal void ReadParentId()
         {
             if (MessageVersion >= 10)
                 Order.ParentId = R.ReadInt();
         }
 
-        internal void readTriggerMethod()
+        internal void ReadTriggerMethod()
         {
             if (MessageVersion >= 10)
                 Order.TriggerMethod = R.ReadEnum<TriggerMethod>();
         }
 
-        internal void readVolOrderParams(bool readOpenOrderAttribs)
+        internal void ReadVolOrderParams(bool readOpenOrderAttribs)
         {
             if (MessageVersion >= 11)
             {
@@ -296,7 +296,7 @@
             }
         }
 
-        internal void readTrailParams()
+        internal void ReadTrailParams()
         {
             if (MessageVersion >= 13)
                 Order.TrailingStopPrice = R.ReadDoubleNullable();
@@ -304,7 +304,7 @@
                 Order.TrailingStopPercent = R.ReadDoubleNullable();
         }
 
-        internal void readBasisPoints()
+        internal void ReadBasisPoints()
         {
             if (MessageVersion >= 14)
             {
@@ -313,7 +313,7 @@
             }
         }
 
-        internal void readComboLegs()
+        internal void ReadComboLegs()
         {
             if (MessageVersion >= 14)
                 Contract.ComboLegsDescription = R.ReadString();
@@ -336,7 +336,7 @@
             }
         }
 
-        internal void readSmartComboRoutingParams()
+        internal void ReadSmartComboRoutingParams()
         {
             if (MessageVersion >= 26)
             {
@@ -349,7 +349,7 @@
             }
         }
 
-        internal void readScaleOrderParams()
+        internal void ReadScaleOrderParams()
         {
             if (MessageVersion >= 15)
             {
@@ -379,7 +379,7 @@
             }
         }
 
-        internal void readHedgeParams()
+        internal void ReadHedgeParams()
         {
             if (MessageVersion >= 24)
             {
@@ -389,13 +389,13 @@
             }
         }
 
-        internal void readOptOutSmartRouting()
+        internal void ReadOptOutSmartRouting()
         {
             if (MessageVersion >= 25)
                 Order.OptOutSmartRouting = R.ReadBool();
         }
 
-        internal void readClearingParams()
+        internal void ReadClearingParams()
         {
             if (MessageVersion >= 19)
             {
@@ -404,13 +404,13 @@
             }
         }
 
-        internal void readNotHeld()
+        internal void ReadNotHeld()
         {
             if (MessageVersion >= 22)
                 Order.NotHeld = R.ReadBool();
         }
 
-        internal void readDeltaNeutral()
+        internal void ReadDeltaNeutral()
         {
             if (MessageVersion >= 20)
             {
@@ -419,7 +419,7 @@
             }
         }
 
-        internal void readAlgoParams()
+        internal void ReadAlgoParams()
         {
             if (MessageVersion >= 21)
             {
@@ -436,18 +436,18 @@
             }
         }
 
-        internal void readSolicited()
+        internal void ReadSolicited()
         {
             if (MessageVersion >= 33)
                 Order.Solicited = R.ReadBool();
         }
 
-        internal void readWhatIfInfoAndCommission()
+        internal void ReadWhatIfInfoAndCommission()
         {
             if (MessageVersion >= 16)
             {
                 Order.WhatIf = R.ReadBool();
-                readOrderStatus();
+                ReadOrderStatus();
                 if (R.Config.SupportsServerVersion(ServerVersion.WHAT_IF_EXT_FIELDS))
                 {
                     OrderState.InitialMarginBefore = R.ReadString();
@@ -469,9 +469,9 @@
 
         }
 
-        internal void readOrderStatus() => OrderState.Status = R.ReadStringEnum<OrderStatus>();
+        internal void ReadOrderStatus() => OrderState.Status = R.ReadStringEnum<OrderStatus>();
 
-        internal void readVolRandomizeFlags()
+        internal void ReadVolRandomizeFlags()
         {
             if (MessageVersion >= 34)
             {
@@ -480,7 +480,7 @@
             }
         }
 
-        internal void readPegToBenchParams()
+        internal void ReadPegToBenchParams()
         {
             if (R.Config.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
             {
@@ -496,13 +496,13 @@
             }
         }
 
-        internal void readConditions()
+        internal void ReadConditions()
         {
             if (R.Config.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
             {
-                //string s = R.ReadString();
-                int n = R.ReadInt();
-                //int n = 0;
+                string s = R.ReadString();
+                int n = (s == "None") ? 0 : ResponseParser.ParseInt(s);
+                //int n = R.ReadInt();
                 if (n > 0)
                 {
                     for (int i = 0; i < n; i++)
@@ -519,13 +519,13 @@
 
         }
 
-        internal void readAdjustedOrderParams()
+        internal void ReadAdjustedOrderParams()
         {
             if (R.Config.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
             {
                 Order.AdjustedOrderType = R.ReadString();
                 Order.TriggerPrice = R.ReadDoubleNullable();
-                readStopPriceAndLmtPriceOffset();
+                ReadStopPriceAndLmtPriceOffset();
                 Order.AdjustedStopPrice = R.ReadDoubleNullable();
                 Order.AdjustedStopLimitPrice = R.ReadDoubleNullable();
                 Order.AdjustedTrailingAmount = R.ReadDoubleNullable();
@@ -533,69 +533,71 @@
             }
         }
 
-        internal void readStopPriceAndLmtPriceOffset()
+        internal void ReadStopPriceAndLmtPriceOffset()
         {
             Order.TrailingStopPrice = R.ReadDoubleNullable();
             Order.LmtPriceOffset = R.ReadDoubleNullable();
         }
 
-        internal void readSoftDollarTier()
+        internal void ReadSoftDollarTier()
         {
             if (R.Config.SupportsServerVersion(ServerVersion.SOFT_DOLLAR_TIER))
                 Order.SoftDollarTier.Set(R);
         }
 
-        internal void readCashQty()
+        internal void ReadCashQty()
         {
             if (R.Config.SupportsServerVersion(ServerVersion.CASH_QTY))
                 Order.CashQty = R.ReadDoubleNullable();
         }
 
-        internal void readDontUseAutoPriceForHedge()
+        internal void ReadDontUseAutoPriceForHedge()
         {
             if (R.Config.SupportsServerVersion(ServerVersion.AUTO_PRICE_FOR_HEDGE))
                 Order.DontUseAutoPriceForHedge = R.ReadBool();
         }
 
-        internal void readIsOmsContainer()
+        internal void ReadIsOmsContainer()
         {
             if (R.Config.SupportsServerVersion(ServerVersion.ORDER_CONTAINER))
                 Order.IsOmsContainer = R.ReadBool();
         }
 
-        internal void readDiscretionaryUpToLimitPrice()
+        internal void ReadDiscretionaryUpToLimitPrice()
         {
             if (R.Config.SupportsServerVersion(ServerVersion.D_PEG_ORDERS))
                 Order.DiscretionaryUpToLimitPrice = R.ReadBool();
         }
 
-        internal void readAutoCancelDate() => Order.AutoCancelDate = R.ReadString();
-        internal void readFilledQuantity() => Order.FilledQuantity = R.ReadDoubleNullable();
-        internal void readRefFuturesConId() => Order.RefFuturesConId = R.ReadInt();
-        internal void readAutoCancelParent() => Order.AutoCancelParent = R.ReadBool();
-        internal void readShareholder() => Order.Shareholder = R.ReadString();
-        internal void readImbalanceOnly() => Order.ImbalanceOnly = R.ReadBool();
-        internal void readRouteMarketableToBbo() => Order.RouteMarketableToBbo = R.ReadBool();
-        internal void readParentPermId() => Order.ParentPermId = R.ReadLong();
-        internal void readCompletedTime() => OrderState.CompletedTime = R.ReadString();
-        internal void readCompletedStatus() => OrderState.CompletedStatus = R.ReadString();
+        internal void ReadAutoCancelDate() => Order.AutoCancelDate = R.ReadString();
+        internal void ReadFilledQuantity() => Order.FilledQuantity = R.ReadDoubleNullable();
+        internal void ReadRefFuturesConId() => Order.RefFuturesConId = R.ReadInt();
+        internal void ReadAutoCancelParent() => Order.AutoCancelParent = R.ReadBool();
+        internal void ReadShareholder() => Order.Shareholder = R.ReadString();
+        internal void ReadImbalanceOnly() => Order.ImbalanceOnly = R.ReadBool();
+        internal void ReadRouteMarketableToBbo() => Order.RouteMarketableToBbo = R.ReadBool();
+        internal void ReadParentPermId() => Order.ParentPermId = R.ReadLong();
+        internal void ReadCompletedTime() => OrderState.CompletedTime = R.ReadString();
+        internal void ReadCompletedStatus() => OrderState.CompletedStatus = R.ReadString();
 
-        internal void readUsePriceMgmtAlgo()
+        internal void ReadUsePriceMgmtAlgo()
         {
             if (R.Config.SupportsServerVersion(ServerVersion.PRICE_MGMT_ALGO))
                 Order.UsePriceMgmtAlgo = R.ReadBool();
         }
 
-        internal void readDuration()
+        internal void ReadDuration()
         {
             if (R.Config.SupportsServerVersion(ServerVersion.DURATION))
                 Order.Duration = R.ReadIntNullable();
         }
 
-        internal void readPostToAts()
+        internal void ReadPostToAts()
         {
             if (R.Config.SupportsServerVersion(ServerVersion.POST_TO_ATS))
-                Order.PostToAts = R.ReadIntNullable();
+                //Order.PostToAts = R.ReadIntNullable();
+                //Order.PostToAts = R.ReadInt();
+                Order.PostToAts = 0;
         }
     }
 }

@@ -7,13 +7,13 @@
         public string ProviderCode { get; }
         public string ArticleId { get; }
         public string Headline { get; }
-        internal HistoricalNews(ResponseReader c)
+        internal HistoricalNews(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            Time = c.ReadString();
-            ProviderCode = c.ReadString();
-            ArticleId = c.ReadString();
-            Headline = c.ReadString();
+            RequestId = r.ReadInt();
+            Time = r.ReadString();
+            ProviderCode = r.ReadString();
+            ArticleId = r.ReadString();
+            Headline = r.ReadString();
         }
     }
 
@@ -21,10 +21,10 @@
     {
         public int RequestId { get; }
         public bool HasMore { get; }
-        internal HistoricalNewsEnd(ResponseReader c)
+        internal HistoricalNewsEnd(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            HasMore = c.ReadBool();
+            RequestId = r.ReadInt();
+            HasMore = r.ReadBool();
         }
     }
 

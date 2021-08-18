@@ -8,13 +8,13 @@ namespace InterReact
         public int RequestId { get; }
         public List<HistoricalTick> Ticks { get; } = new List<HistoricalTick>();
         public bool Done { get; }
-        public HistoricalTicks(ResponseReader c)
+        public HistoricalTicks(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            int n = c.ReadInt();
+            RequestId = r.ReadInt();
+            int n = r.ReadInt();
             for (int i = 0; i < n; i++)
-                Ticks.Add(new HistoricalTick(c));
-            Done = c.ReadBool();
+                Ticks.Add(new HistoricalTick(r));
+            Done = r.ReadBool();
         }
 
     }
@@ -24,12 +24,12 @@ namespace InterReact
         public long Time { get; }
         public double Price { get; }
         public long Size { get; }
-        internal HistoricalTick(ResponseReader c)
+        internal HistoricalTick(ResponseReader r)
         {
-            Time = c.ReadLong();
-            c.ReadInt(); // ?
-            Price = c.ReadDouble();
-            Size = c.ReadLong();
+            Time = r.ReadLong();
+            r.ReadInt(); // ?
+            Price = r.ReadDouble();
+            Size = r.ReadLong();
         }
     }
 
@@ -38,13 +38,13 @@ namespace InterReact
         public int RequestId { get; }
         public List<HistoricalLastTick> Ticks { get; } = new List<HistoricalLastTick>();
         public bool Done { get; }
-        public HistoricalLastTicks(ResponseReader c)
+        public HistoricalLastTicks(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            int n = c.ReadInt();
+            RequestId = r.ReadInt();
+            int n = r.ReadInt();
 
-            Ticks = Enumerable.Repeat(new HistoricalLastTick(c), n).ToList();
-            Done = c.ReadBool();
+            Ticks = Enumerable.Repeat(new HistoricalLastTick(r), n).ToList();
+            Done = r.ReadBool();
         }
 
     }
@@ -57,14 +57,14 @@ namespace InterReact
         public long Size { get; }
         public string Exchange { get; }
         public string SpecialConditions { get; }
-        internal HistoricalLastTick(ResponseReader c)
+        internal HistoricalLastTick(ResponseReader r)
         {
-            Time = c.ReadLong();
-            TickAttribLast = new TickAttribLast(c.ReadInt());
-            Price = c.ReadDouble();
-            Size = c.ReadLong();
-            Exchange = c.ReadString();
-            SpecialConditions = c.ReadString();
+            Time = r.ReadLong();
+            TickAttribLast = new TickAttribLast(r.ReadInt());
+            Price = r.ReadDouble();
+            Size = r.ReadLong();
+            Exchange = r.ReadString();
+            SpecialConditions = r.ReadString();
         }
     }
 
@@ -73,13 +73,13 @@ namespace InterReact
         public int RequestId { get; }
         public List<HistoricalTick> Ticks { get; } = new List<HistoricalTick>();
         public bool Done { get; }
-        public HistoricalBidAskTicks(ResponseReader c)
+        public HistoricalBidAskTicks(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            int n = c.ReadInt();
+            RequestId = r.ReadInt();
+            int n = r.ReadInt();
             for (int i = 0; i < n; i++)
-                Ticks.Add(new HistoricalTick(c));
-            Done = c.ReadBool();
+                Ticks.Add(new HistoricalTick(r));
+            Done = r.ReadBool();
         }
 
     }
@@ -92,14 +92,14 @@ namespace InterReact
         public double PriceAsk { get; }
         public long SizeBid { get; }
         public long SizeAsk { get; }
-        internal HistoricalBidAskTick(ResponseReader c)
+        internal HistoricalBidAskTick(ResponseReader r)
         {
-            Time = c.ReadLong();
-            TickAttribBidAsk = new TickAttribBidAsk(c.ReadInt());
-            PriceBid = c.ReadDouble();
-            PriceAsk = c.ReadDouble();
-            SizeBid = c.ReadLong();
-            SizeAsk = c.ReadLong();
+            Time = r.ReadLong();
+            TickAttribBidAsk = new TickAttribBidAsk(r.ReadInt());
+            PriceBid = r.ReadDouble();
+            PriceAsk = r.ReadDouble();
+            SizeBid = r.ReadLong();
+            SizeAsk = r.ReadLong();
         }
     }
 

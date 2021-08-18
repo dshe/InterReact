@@ -6,11 +6,11 @@ namespace InterReact
     {
         public List<MarketDepthExchange> Exchanges { get; } = new();
 
-        internal MarketDepthExchanges(ResponseReader c)
+        internal MarketDepthExchanges(ResponseReader r)
         {
-            int n = c.ReadInt();
+            int n = r.ReadInt();
             for (int i = 0; i < n; i++)
-                Exchanges.Add(new MarketDepthExchange(c));
+                Exchanges.Add(new MarketDepthExchange(r));
         }
     }
 
@@ -21,20 +21,20 @@ namespace InterReact
         public string ListingExch { get; }
         public string ServiceDataTyp { get; }
         public int? AggGroup { get; } // The aggregated group
-        internal MarketDepthExchange(ResponseReader c)
+        internal MarketDepthExchange(ResponseReader r)
         {
-            Exchange = c.ReadString();
-            SecType = c.ReadString();
-            if (c.Config.SupportsServerVersion(ServerVersion.SERVICE_DATA_TYPE))
+            Exchange = r.ReadString();
+            SecType = r.ReadString();
+            if (r.Config.SupportsServerVersion(ServerVersion.SERVICE_DATA_TYPE))
             {
-                ListingExch = c.ReadString();
-                ServiceDataTyp = c.ReadString();
-                AggGroup = c.ReadIntNullable();
+                ListingExch = r.ReadString();
+                ServiceDataTyp = r.ReadString();
+                AggGroup = r.ReadIntNullable();
             }
             else
             {
                 ListingExch = "";
-                ServiceDataTyp = c.ReadBool() ? "Deep2" : "Deep";
+                ServiceDataTyp = r.ReadBool() ? "Deep2" : "Deep";
             }
         }
     }

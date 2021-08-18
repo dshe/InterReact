@@ -3,10 +3,10 @@
     public sealed class ScannerParameters
     {
         public string Parameters { get; }
-        internal ScannerParameters(ResponseReader c)
+        internal ScannerParameters(ResponseReader r)
         {
-            c.IgnoreVersion();
-            Parameters = c.ReadString();
+            r.IgnoreVersion();
+            Parameters = r.ReadString();
         }
     }
 }

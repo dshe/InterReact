@@ -39,6 +39,7 @@ namespace InterReact.SystemTests.Contracts
         public async Task TestContractDataContractId()
         {
             var contract = new Contract { ContractId = 8314 };
+
             var cds = await Client.Services
                 .CreateContractDetailsObservable(contract)
                 .Select(u => u.Source)

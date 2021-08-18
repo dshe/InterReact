@@ -8,12 +8,12 @@ namespace InterReact
     {
         public int RequestId { get; }
         public List<HistogramItem> Items { get; } = new List<HistogramItem>();
-        internal HistogramItems(ResponseReader c)
+        internal HistogramItems(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            int n = c.ReadInt();
+            RequestId = r.ReadInt();
+            int n = r.ReadInt();
             for (int i = 0; i < n; i++)
-                Items.Add(new HistogramItem(c));
+                Items.Add(new HistogramItem(r));
         }
     }
 
@@ -22,10 +22,10 @@ namespace InterReact
         public double Price { get; }
         public long Size { get; }
 
-        internal HistogramItem(ResponseReader c)
+        internal HistogramItem(ResponseReader r)
         {
-            Price = c.ReadDouble();
-            Size = c.ReadLong();
+            Price = r.ReadDouble();
+            Size = r.ReadLong();
         }
     }
 

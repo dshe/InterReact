@@ -122,14 +122,14 @@ namespace InterReact
             Value = value;
         }
 
-        internal static Tick Create(ResponseReader c)
+        internal static Tick Create(ResponseReader r)
         {
-            c.IgnoreVersion();
-            int requestId = c.ReadInt();
-            TickType tickType = c.ReadEnum<TickType>();
-            string str = c.ReadString();
+            r.IgnoreVersion();
+            int requestId = r.ReadInt();
+            TickType tickType = r.ReadEnum<TickType>();
+            string str = r.ReadString();
             if (tickType == TickType.RealtimeVolume)
-                return new RealtimeVolumeTick(requestId, str, c.Parser);
+                return new RealtimeVolumeTick(requestId, str);
             if (tickType == TickType.LastTimeStamp)
                 return new TimeTick(requestId, str);
             return new StringTick(requestId, tickType, str);
@@ -170,7 +170,7 @@ namespace InterReact
         /// Milliseconds precision.
         /// </summary>
         public Instant Instant { get; }
-        internal RealtimeVolumeTick(int requestId, string str, ResponseParser c)
+        internal RealtimeVolumeTick(int requestId, string str)
         {
             RequestId = requestId;
             TickType = TickType.RealtimeVolume;
@@ -193,12 +193,12 @@ namespace InterReact
             TickType = tickType;
             Value = value;
         }
-        internal static Tick Create(ResponseReader c)
+        internal static Tick Create(ResponseReader r)
         {
-            c.IgnoreVersion();
-            int requestId = c.ReadInt();
-            TickType tickType = c.ReadEnum<TickType>();
-            double value = c.ReadDouble();
+            r.IgnoreVersion();
+            int requestId = r.ReadInt();
+            TickType tickType = r.ReadEnum<TickType>();
+            double value = r.ReadDouble();
             if (tickType == TickType.Halted)
                 return new HaltedTick(requestId, tickType, value == 0 ? HaltType.NotHalted : HaltType.GeneralHalt);
             return new GenericTick(requestId, tickType, value);
@@ -214,18 +214,18 @@ namespace InterReact
         public string FutureExpiry { get; }
         public double DividendImpact { get; }
         public double DividendsToLastTradeDate { get; }
-        internal ExchangeForPhysicalTick(ResponseReader c)
+        internal ExchangeForPhysicalTick(ResponseReader r)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
-            TickType = c.ReadEnum<TickType>();
-            BasisPoints = c.ReadDouble();
-            FormattedBasisPoints = c.ReadString();
-            ImpliedFuturesPrice = c.ReadDouble();
-            HoldDays = c.ReadInt();
-            FutureExpiry = c.ReadString();
-            DividendImpact = c.ReadDouble();
-            DividendsToLastTradeDate = c.ReadDouble();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
+            TickType = r.ReadEnum<TickType>();
+            BasisPoints = r.ReadDouble();
+            FormattedBasisPoints = r.ReadString();
+            ImpliedFuturesPrice = r.ReadDouble();
+            HoldDays = r.ReadInt();
+            FutureExpiry = r.ReadString();
+            DividendImpact = r.ReadDouble();
+            DividendsToLastTradeDate = r.ReadDouble();
         }
     }
 
@@ -243,40 +243,40 @@ namespace InterReact
         public double? Vega { get; }
         public double? Theta { get; }
         public double? UndPrice { get; }
-        internal OptionComputationTick(ResponseReader c)
+        internal OptionComputationTick(ResponseReader r)
         {
-            int version = c.GetVersion();
-            RequestId = c.ReadInt();
-            TickType = c.ReadEnum<TickType>();
-            ImpliedVolatility = c.ReadDoubleNullable();
+            int version = r.GetVersion();
+            RequestId = r.ReadInt();
+            TickType = r.ReadEnum<TickType>();
+            ImpliedVolatility = r.ReadDoubleNullable();
             if (ImpliedVolatility == -1)
                 ImpliedVolatility = null;
 
-            Delta = c.ReadDoubleNullable();
+            Delta = r.ReadDoubleNullable();
             if (Delta == -2)
                 Delta = null;
 
             if (version >= 6 || TickType == TickType.ModelOptionComputation || TickType == TickType.DelayedModelOptionComputation)
             {
-                OptPrice = c.ReadDoubleNullable();
+                OptPrice = r.ReadDoubleNullable();
                 if (OptPrice == -1)
                     OptPrice = null;
-                PvDividend = c.ReadDoubleNullable();
+                PvDividend = r.ReadDoubleNullable();
                 if (PvDividend == -1)
                     PvDividend = null;
             }
             if (version >= 6)
             {
-                Gamma = c.ReadDoubleNullable();
+                Gamma = r.ReadDoubleNullable();
                 if (Gamma == -2)
                     Gamma = null;
-                Vega = c.ReadDoubleNullable();
+                Vega = r.ReadDoubleNullable();
                 if (Vega == -2)
                     Vega = null;
-                Theta = c.ReadDoubleNullable();
+                Theta = r.ReadDoubleNullable();
                 if (Theta == -2)
                     Theta = null;
-                UndPrice = c.ReadDoubleNullable();
+                UndPrice = r.ReadDoubleNullable();
                 if (UndPrice == -1)
                     UndPrice = null;
             }
@@ -305,22 +305,22 @@ namespace InterReact
     public sealed class MarketDataTypeTick : Tick
     {
         public MarketDataType MarketDataType { get; }
-        internal MarketDataTypeTick(ResponseReader c)
+        internal MarketDataTypeTick(ResponseReader r)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
             TickType = TickType.MarketDataType;
-            MarketDataType = c.ReadEnum<MarketDataType>();
+            MarketDataType = r.ReadEnum<MarketDataType>();
         }
     }
 
     public sealed class SnapshotEndTick : IHasRequestId
     {
         public int RequestId { get; }
-        internal SnapshotEndTick(ResponseReader c)
+        internal SnapshotEndTick(ResponseReader r)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
         }
     };
 }

@@ -56,28 +56,28 @@
 
         public double? MktCapPrice { get; }
 
-        internal OrderStatusReport(ResponseReader c)
+        internal OrderStatusReport(ResponseReader r)
         {
-            int version = c.Config.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE) ? int.MaxValue : c.ReadInt();
+            int version = r.Config.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE) ? int.MaxValue : r.ReadInt();
 
-            OrderId = c.ReadInt();
-            Status = c.ReadStringEnum<OrderStatus>();
-            Filled = c.ReadDouble();
-            Remaining = c.ReadDouble();
-            AverageFillPrice = c.ReadDouble();
+            OrderId = r.ReadInt();
+            Status = r.ReadStringEnum<OrderStatus>();
+            Filled = r.ReadDouble();
+            Remaining = r.ReadDouble();
+            AverageFillPrice = r.ReadDouble();
 
             if (version >= 2)
-                PermanentId = c.ReadInt();
+                PermanentId = r.ReadInt();
             if (version >= 3)
-                ParentId = c.ReadInt();
+                ParentId = r.ReadInt();
             if (version >= 4)
-                LastFillPrice = c.ReadDouble();
+                LastFillPrice = r.ReadDouble();
             if (version >= 5)
-                ClientId = c.ReadInt();
+                ClientId = r.ReadInt();
             if (version >= 6)
-                WhyHeld = c.ReadString();
-            if (c.Config.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE))
-                MktCapPrice = c.ReadDouble();
+                WhyHeld = r.ReadString();
+            if (r.Config.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE))
+                MktCapPrice = r.ReadDouble();
         }
     }
 }

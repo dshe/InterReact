@@ -11,18 +11,21 @@ namespace InterReact
     public sealed class RequestMessage
     {
         private readonly List<string> Strings = new();
-        private readonly IRxSocketClient RxSocket;
+        private readonly Action<byte[]> SendAction;
         private readonly Limiter Limiter;
 
-        internal RequestMessage(IRxSocketClient rxSocket, Limiter limiter)
+        internal RequestMessage(Action<byte[]> sendAction, Limiter limiter)
         {
-            RxSocket = rxSocket;
+            SendAction = sendAction;
             Limiter = limiter;
         }
 
         // V100Plus format: 4 byte message length prefix plus payload of null-terminated strings.
-        internal byte[] Get() => Strings.ToByteArray().ToByteArrayWithLengthPrefix();
-        internal void Send() => Limiter.Limit(() => RxSocket.Send(Get()));
+        internal void Send()
+        {
+            byte[] bytes = Strings.ToByteArray().ToByteArrayWithLengthPrefix();
+            Limiter.Limit(() => SendAction(bytes));
+        }
 
         /////////////////////////////////////////////////////
 

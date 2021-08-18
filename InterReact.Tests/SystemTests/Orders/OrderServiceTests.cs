@@ -27,7 +27,7 @@ namespace InterReact.SystemTests.Orders
 
             var ticks = Client.Services.CreateTickObservable(contract).Publish();
             ticks.Connect();
-            var priceTick = await ticks.OfTickType(x => x.TickPrice).Where(x => x.TickType == TickType.BidPrice).FirstAsync();
+            var priceTick = await ticks.OfTickType(x => x.PriceTick).Where(x => x.TickType == TickType.BidPrice).FirstAsync();
 
             Order order = new()
             {

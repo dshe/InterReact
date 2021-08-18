@@ -13,15 +13,15 @@ namespace InterReact
         public int RequestId { get; }
         public Dictionary<int, KeyValuePair<string, char>> Map { get; } = new Dictionary<int, KeyValuePair<string, char>>();
 
-        internal SmartComponents(ResponseReader c)
+        internal SmartComponents(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            int n = c.ReadInt();
+            RequestId = r.ReadInt();
+            int n = r.ReadInt();
             for (int i = 0; i < n; i++)
             {
-                int bitNumber = c.ReadInt();
-                string exchange = c.ReadString();
-                char exchangeLetter = c.ReadChar();
+                int bitNumber = r.ReadInt();
+                string exchange = r.ReadString();
+                char exchangeLetter = r.ReadChar();
                 Map.Add(bitNumber, new KeyValuePair<string, char>(exchange, exchangeLetter));
             }
         }

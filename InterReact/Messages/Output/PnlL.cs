@@ -5,10 +5,10 @@
         public int RequestId { get; }
         public double DailyPnL { get; }
         public double? RealizedPnL { get; }
-        public PnL(ResponseReader c)
+        public PnL(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            DailyPnL = c.ReadDouble();
+            RequestId = r.ReadInt();
+            DailyPnL = r.ReadDouble();
         }
     }
 
@@ -19,12 +19,12 @@
         public double DailyPnL { get; }
         public double? RealizedPnL { get; }
         public double Value { get; }
-        public PnLSingle(ResponseReader c)
+        public PnLSingle(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            Pos = c.ReadInt();
-            DailyPnL = c.ReadDouble();
-            Value = c.ReadDouble();
+            RequestId = r.ReadInt();
+            Pos = r.ReadInt();
+            DailyPnL = r.ReadDouble();
+            Value = r.ReadDouble();
         }
     }
 

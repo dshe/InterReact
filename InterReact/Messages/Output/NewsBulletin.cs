@@ -12,13 +12,13 @@
         /// The exchange from which this message originated.
         /// </summary>
         public string Origin { get; }
-        internal NewsBulletin(ResponseReader c)
+        internal NewsBulletin(ResponseReader r)
         {
-            c.IgnoreVersion();
-            MessageId = c.ReadInt();
-            Type = c.ReadEnum<NewsBulletinType>();
-            Message = c.ReadString();
-            Origin = c.ReadString();
+            r.IgnoreVersion();
+            MessageId = r.ReadInt();
+            Type = r.ReadEnum<NewsBulletinType>();
+            Message = r.ReadString();
+            Origin = r.ReadString();
         }
     }
 }

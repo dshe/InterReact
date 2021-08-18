@@ -60,21 +60,23 @@ namespace CoreClientServer
                 throw new InvalidDataException("StartApi message not received.");
             Logger.LogInformation("Received StartApi message.");
 
+            Action<byte[]> send = x => accept.Send(x);
+
             // Send server version.
-            new RequestMessage(accept, Limiter)
+            new RequestMessage(send, Limiter)
                 .Write(157) 
                 .Write(DateTime.Now.ToString("yyyyMMdd HH:mm:ss XXX"))
                 .Send();
 
             // Send managed accounts
-            new RequestMessage(accept, Limiter)
+            new RequestMessage(send, Limiter)
                 .Write("15")
                 .Write("1")
                 .Write("123,456,789")
                 .Send();
 
             // Send NextId = 1
-            new RequestMessage(accept, Limiter)
+            new RequestMessage(send, Limiter)
                 .Write("9")
                 .Write("1")
                 .Write("10")
@@ -106,17 +108,14 @@ namespace CoreClientServer
             Logger.LogInformation($"Received {frequency:N0} messages/second.");
 
             MemoryStream ms = new();
+
             for (int i = 0; i < 100_000; i++)
             {
-                ms.Write(
-                    new RequestMessage(accept, Limiter)
-                        .Write("2", "3", 1, TickType.LastSize, 300)
-                        .Get());
+                var message = new RequestMessage(x => ms.Write(x), Limiter);
+                message.Write("2", "3", 1, TickType.LastSize, 300).Send();
             }
-            ms.Write(
-                new RequestMessage(accept, Limiter)
-                    .Write("1", "3", 1, TickType.LastPrice, 100, 200, true)
-                    .Get());
+            var message2 = new RequestMessage(x => ms.Write(x), Limiter);
+            message2.Write("1", "3", 1, TickType.LastPrice, 100, 200, true).Send();
 
             accept.Send(ms.ToArray());
 

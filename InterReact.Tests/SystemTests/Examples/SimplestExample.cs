@@ -32,15 +32,15 @@ namespace InterReactSamples
                 .CreateTickObservable(contract);
 
             IDisposable subscription = observable
-                .OfTickType(tickType => tickType.TickPrice)
+                .OfTickType(tickType => tickType.PriceTick)
                 .Subscribe(onNext: tickPrice =>
                 {
                     Console.WriteLine($"{Enum.GetName(tickPrice.TickType)} = {tickPrice.Price}");
                 });
 
-            Console.WriteLine(Environment.NewLine + "press a key to exit...");
-            Console.ReadKey();
-            Console.Clear();
+            //Console.WriteLine(Environment.NewLine + "press a key to exit...");
+            //Console.ReadKey();
+            //Console.Clear();
 
             subscription.Dispose();
             await interReact.DisposeAsync();

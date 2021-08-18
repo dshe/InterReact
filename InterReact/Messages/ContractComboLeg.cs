@@ -40,16 +40,16 @@
 
         public ContractComboLeg() { }
 
-        internal ContractComboLeg(ResponseReader c)
+        internal ContractComboLeg(ResponseReader r)
         {
-            ContractId = c.ReadInt();
-            Ratio = c.ReadInt();
-            TradeAction = c.ReadStringEnum<OrderAction>();
-            Exchange = c.ReadString();
-            OpenClose = c.ReadEnum<ComboOpenClose>();
-            ComboShortSaleSlot = c.ReadEnum<ComboShortSaleSlot>();
-            DesignatedLocation = c.ReadString();
-            ExemptCode = c.ReadInt();
+            ContractId = r.ReadInt();
+            Ratio = r.ReadInt();
+            TradeAction = r.ReadStringEnum<OrderAction>();
+            Exchange = r.ReadString();
+            OpenClose = r.ReadEnum<ComboOpenClose>();
+            ComboShortSaleSlot = r.ReadEnum<ComboShortSaleSlot>();
+            DesignatedLocation = r.ReadString();
+            ExemptCode = r.ReadInt();
         }
     }
 }

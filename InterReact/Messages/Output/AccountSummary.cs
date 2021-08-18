@@ -8,24 +8,24 @@
         public string Currency { get; }
         public string Value { get; }
 
-        internal AccountSummary(ResponseReader c)
+        internal AccountSummary(ResponseReader r)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
-            Account = c.ReadString();
-            Tag = c.ReadString();
-            Value = c.ReadString();
-            Currency = c.ReadString();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
+            Account = r.ReadString();
+            Tag = r.ReadString();
+            Value = r.ReadString();
+            Currency = r.ReadString();
         }
     }
 
     public sealed class AccountSummaryEnd : IHasRequestId
     {
         public int RequestId { get; }
-        internal AccountSummaryEnd(ResponseReader c)
+        internal AccountSummaryEnd(ResponseReader r)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
         }
     }
 }

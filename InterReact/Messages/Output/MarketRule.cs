@@ -6,12 +6,12 @@ namespace InterReact
     {
         public int MarketRuleId { get; }
         public List<PriceIncrement> PriceIncrements { get; } = new List<PriceIncrement>();
-        internal MarketRule(ResponseReader c)
+        internal MarketRule(ResponseReader r)
         {
-            MarketRuleId = c.ReadInt();
-            int n = c.ReadInt();
+            MarketRuleId = r.ReadInt();
+            int n = r.ReadInt();
             for (int i = 0; i < n; i++)
-                PriceIncrements.Add(new PriceIncrement(c));
+                PriceIncrements.Add(new PriceIncrement(r));
         }
     }
 
@@ -19,10 +19,10 @@ namespace InterReact
     {
         public double LowEdge { get; }
         public double Increment { get; }
-        public PriceIncrement(ResponseReader c)
+        public PriceIncrement(ResponseReader r)
         {
-            LowEdge = c.ReadDouble();
-            Increment = c.ReadDouble();
+            LowEdge = r.ReadDouble();
+            Increment = r.ReadDouble();
         }
     }
 

@@ -3,90 +3,90 @@
     public sealed class OpenOrder : IHasOrderId
     {
         public int OrderId { get; }
-        public Order Order { get; } = new Order();
-        public Contract Contract { get; } = new Contract();
-        public OrderState OrderState { get; } = new OrderState();
+        public Order Order { get; } = new();
+        public Contract Contract { get; } = new();
+        public OrderState OrderState { get; } = new();
 
-        internal OpenOrder(ResponseReader c)
+        internal OpenOrder(ResponseReader r)
         {
-            int messageVersion = c.Config.SupportsServerVersion(ServerVersion.ORDER_CONTAINER) ? (int)c.Config.ServerVersionCurrent : c.ReadInt();
-            OrderDecoder decoder = new(c, Contract, Order, OrderState, messageVersion);
+            int messageVersion = r.Config.SupportsServerVersion(ServerVersion.ORDER_CONTAINER) ? (int)r.Config.ServerVersionCurrent : r.ReadInt();
+            OrderDecoder decoder = new(r, Contract, Order, OrderState, messageVersion);
 
-            decoder.readOrderId();
+            decoder.ReadOrderId();
             OrderId = Order.OrderId;
-            decoder.readContract();
-            decoder.readAction();
-            decoder.readTotalQuantity();
-            decoder.readOrderType();
-            decoder.readLmtPrice();
-            decoder.readAuxPrice();
-            decoder.readTIF();
-            decoder.readOcaGroup();
-            decoder.readAccount();
-            decoder.readOpenClose();
-            decoder.readOrigin();
-            decoder.readOrderRef();
-            decoder.readClientId();
-            decoder.readPermId();
-            decoder.readOutsideRth();
-            decoder.readHidden();
-            decoder.readDiscretionaryAmount();
-            decoder.readGoodAfterTime();
+            decoder.ReadContract();
+            decoder.ReadAction();
+            decoder.ReadTotalQuantity();
+            decoder.ReadOrderType();
+            decoder.ReadLmtPrice();
+            decoder.ReadAuxPrice();
+            decoder.ReadTIF();
+            decoder.ReadOcaGroup();
+            decoder.ReadAccount();
+            decoder.ReadOpenClose();
+            decoder.ReadOrigin();
+            decoder.ReadOrderRef();
+            decoder.ReadClientId();
+            decoder.ReadPermId();
+            decoder.ReadOutsideRth();
+            decoder.ReadHidden();
+            decoder.ReadDiscretionaryAmount();
+            decoder.ReadGoodAfterTime();
             decoder.skipSharesAllocation();
-            decoder.readFAParams();
-            decoder.readModelCode();
-            decoder.readGoodTillDate();
-            decoder.readRule80A();
-            decoder.readPercentOffset();
-            decoder.readSettlingFirm();
-            decoder.readShortSaleParams();
-            decoder.readAuctionStrategy();
-            decoder.readBoxOrderParams();
-            decoder.readPegToStkOrVolOrderParams();
-            decoder.readDisplaySize();
-            decoder.readOldStyleOutsideRth();
-            decoder.readBlockOrder();
-            decoder.readSweepToFill();
-            decoder.readAllOrNone();
-            decoder.readMinQty();
-            decoder.readOcaType();
+            decoder.ReadFAParams();
+            decoder.ReadModelCode();
+            decoder.ReadGoodTillDate();
+            decoder.ReadRule80A();
+            decoder.ReadPercentOffset();
+            decoder.ReadSettlingFirm();
+            decoder.ReadShortSaleParams();
+            decoder.ReadAuctionStrategy();
+            decoder.ReadBoxOrderParams();
+            decoder.ReadPegToStkOrVolOrderParams();
+            decoder.ReadDisplaySize();
+            decoder.ReadOldStyleOutsideRth();
+            decoder.ReadBlockOrder();
+            decoder.ReadSweepToFill();
+            decoder.ReadAllOrNone();
+            decoder.ReadMinQty();
+            decoder.ReadOcaType();
             decoder.skipETradeOnly();
             decoder.skipFirmQuoteOnly();
             decoder.skipNbboPriceCap();
-            decoder.readParentId();
-            decoder.readTriggerMethod();
-            decoder.readVolOrderParams(true);
-            decoder.readTrailParams();
-            decoder.readBasisPoints();
-            decoder.readComboLegs();
-            decoder.readSmartComboRoutingParams();
-            decoder.readScaleOrderParams();
-            decoder.readHedgeParams();
-            decoder.readOptOutSmartRouting();
-            decoder.readClearingParams();
-            decoder.readNotHeld();
-            decoder.readDeltaNeutral();
-            decoder.readAlgoParams();
-            decoder.readSolicited();
-            decoder.readWhatIfInfoAndCommission();
-            decoder.readVolRandomizeFlags();
-            decoder.readPegToBenchParams();
-                decoder.readConditions();
-            decoder.readAdjustedOrderParams();
-            decoder.readSoftDollarTier();
-            decoder.readCashQty();
-            decoder.readDontUseAutoPriceForHedge();
-            decoder.readIsOmsContainer();
-            decoder.readDiscretionaryUpToLimitPrice();
-            decoder.readUsePriceMgmtAlgo();
-            decoder.readDuration();
-            decoder.readPostToAts();
+            decoder.ReadParentId();
+            decoder.ReadTriggerMethod();
+            decoder.ReadVolOrderParams(true);
+            decoder.ReadTrailParams();
+            decoder.ReadBasisPoints();
+            decoder.ReadComboLegs();
+            decoder.ReadSmartComboRoutingParams();
+            decoder.ReadScaleOrderParams();
+            decoder.ReadHedgeParams();
+            decoder.ReadOptOutSmartRouting();
+            decoder.ReadClearingParams();
+            decoder.ReadNotHeld();
+            decoder.ReadDeltaNeutral();
+            decoder.ReadAlgoParams();
+            decoder.ReadSolicited();
+            decoder.ReadWhatIfInfoAndCommission();
+            decoder.ReadVolRandomizeFlags();
+            decoder.ReadPegToBenchParams();
+            decoder.ReadConditions();
+            decoder.ReadAdjustedOrderParams();
+            decoder.ReadSoftDollarTier();
+            decoder.ReadCashQty();
+            decoder.ReadDontUseAutoPriceForHedge();
+            decoder.ReadIsOmsContainer();
+            decoder.ReadDiscretionaryUpToLimitPrice();
+            decoder.ReadUsePriceMgmtAlgo();
+            decoder.ReadDuration();
+            decoder.ReadPostToAts();
         }
     }
 
     public sealed class OpenOrderEnd
     {
-        internal OpenOrderEnd(ResponseReader c) => c.IgnoreVersion();
+        internal OpenOrderEnd(ResponseReader r) => r.IgnoreVersion();
     }
 
 }

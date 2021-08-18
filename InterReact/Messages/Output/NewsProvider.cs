@@ -5,11 +5,11 @@ namespace InterReact
     public sealed class NewsProviders
     {
         public List<NewsProvider> Providors = new();
-        internal NewsProviders(ResponseReader c)
+        internal NewsProviders(ResponseReader r)
         {
-            int n = c.ReadInt();
+            int n = r.ReadInt();
             for (int i = 0; i < n; i++)
-                Providors.Add(new NewsProvider(c));
+                Providors.Add(new NewsProvider(r));
         }
     }
 
@@ -17,10 +17,10 @@ namespace InterReact
     {
         public string Code { get; }
         public string Name { get; }
-        internal NewsProvider(ResponseReader c)
+        internal NewsProvider(ResponseReader r)
         {
-            Code = c.ReadString();
-            Name = c.ReadString();
+            Code = r.ReadString();
+            Name = r.ReadString();
         }
     }
 

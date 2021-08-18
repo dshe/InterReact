@@ -6,11 +6,11 @@
 
         public string Data { get; }
 
-        internal FundamentalData(ResponseReader c)
+        internal FundamentalData(ResponseReader r)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
-            Data = c.ReadString();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
+            Data = r.ReadString();
         }
     }
 }

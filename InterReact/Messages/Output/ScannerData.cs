@@ -6,13 +6,13 @@ namespace InterReact
     {
         public int RequestId { get; }
         public List<ScannerDataItem> Items { get; } = new List<ScannerDataItem>();
-        internal ScannerData(ResponseReader c)
+        internal ScannerData(ResponseReader r)
         {
-            c.RequireVersion(3);
-            RequestId = c.ReadInt();
-            int n = c.ReadInt();
+            r.RequireVersion(3);
+            RequestId = r.ReadInt();
+            int n = r.ReadInt();
             for (int i = 0; i < n; i++)
-                Items.Add(new ScannerDataItem(c));
+                Items.Add(new ScannerDataItem(r));
         }
     }
 
@@ -24,14 +24,14 @@ namespace InterReact
         public string Benchmark { get; }
         public string Projection { get; }
         public string ComboLegs { get; }
-        internal ScannerDataItem(ResponseReader c)
+        internal ScannerDataItem(ResponseReader r)
         {
-            Rank = c.ReadInt();
-            ContractData = new ContractDetails(c, ContractDetailsType.ScannerContractData);
-            Distance = c.ReadString();
-            Benchmark = c.ReadString();
-            Projection = c.ReadString();
-            ComboLegs = c.ReadString();
+            Rank = r.ReadInt();
+            ContractData = new ContractDetails(r, ContractDetailsType.ScannerContractData);
+            Distance = r.ReadString();
+            Benchmark = r.ReadString();
+            Projection = r.ReadString();
+            ComboLegs = r.ReadString();
         }
     }
 

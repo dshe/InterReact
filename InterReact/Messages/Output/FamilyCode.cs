@@ -5,11 +5,11 @@ namespace InterReact
     public sealed class FamilyCodes // output
     {
         public List<FamilyCode> Codes { get; } = new List<FamilyCode>();
-        internal FamilyCodes(ResponseReader c)
+        internal FamilyCodes(ResponseReader r)
         {
-            int n = c.ReadInt();
+            int n = r.ReadInt();
             for (int i = 0; i < n; i++)
-                Codes.Add(new FamilyCode(c));
+                Codes.Add(new FamilyCode(r));
         }
     }
 
@@ -17,10 +17,10 @@ namespace InterReact
     {
         public string AccountId { get; }
         public string FamilyCodeStr { get; }
-        internal FamilyCode(ResponseReader c)
+        internal FamilyCode(ResponseReader r)
         {
-            AccountId = c.ReadString();
-            FamilyCodeStr = c.ReadString();
+            AccountId = r.ReadString();
+            FamilyCodeStr = r.ReadString();
         }
     }
 }

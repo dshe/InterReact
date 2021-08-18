@@ -16,19 +16,19 @@ namespace InterReact
             Time = time;
         }
 
-        internal static TickByTick Create(ResponseReader c)
+        internal static TickByTick Create(ResponseReader r)
         {
-            int requestId = c.ReadInt();
-            TickByTickType tickType = c.ReadEnum<TickByTickType>();
-            long time = c.ReadLong();
+            int requestId = r.ReadInt();
+            TickByTickType tickType = r.ReadEnum<TickByTickType>();
+            long time = r.ReadLong();
             return tickType switch
             {
                 //TickByTickType.None => new TickByTickNone(),
                 TickByTickType.None => None,
-                TickByTickType.Last => new TickByTickAllLast(requestId, tickType, time, c),
-                TickByTickType.AllLast => new TickByTickAllLast(requestId, tickType, time, c),
-                TickByTickType.BidAsk => new TickByTickBidAsk(requestId, tickType, time, c),
-                TickByTickType.MidPoint => new TickByTickMidpoint(requestId, tickType, time, c),
+                TickByTickType.Last => new TickByTickAllLast(requestId, tickType, time, r),
+                TickByTickType.AllLast => new TickByTickAllLast(requestId, tickType, time, r),
+                TickByTickType.BidAsk => new TickByTickBidAsk(requestId, tickType, time, r),
+                TickByTickType.MidPoint => new TickByTickMidpoint(requestId, tickType, time, r),
                 _ => throw new ArgumentException("Invalid TickByTick type.")
             };
         }
@@ -46,14 +46,14 @@ namespace InterReact
         public TickAttribLast TickAttribLast { get; }
         public string Exchange { get; }
         public string SpecialConditions { get; }
-        public TickByTickAllLast(int requestId, TickByTickType tickType, long time, ResponseReader c)
+        public TickByTickAllLast(int requestId, TickByTickType tickType, long time, ResponseReader r)
             : base(requestId, tickType, time)
         {
-            Price = c.ReadDouble();
-            Size = c.ReadInt();
-            TickAttribLast = new TickAttribLast(c.ReadInt());
-            Exchange = c.ReadString();
-            SpecialConditions = c.ReadString();
+            Price = r.ReadDouble();
+            Size = r.ReadInt();
+            TickAttribLast = new TickAttribLast(r.ReadInt());
+            Exchange = r.ReadString();
+            SpecialConditions = r.ReadString();
         }
     }
 
@@ -64,24 +64,24 @@ namespace InterReact
         public int BidSize { get; }
         public int AskSize { get; }
         public TickAttribBidAsk TickAttribBidAsk { get; }
-        public TickByTickBidAsk(int requestId, TickByTickType tickType, long time, ResponseReader c)
+        public TickByTickBidAsk(int requestId, TickByTickType tickType, long time, ResponseReader r)
             : base(requestId, tickType, time)
         {
-            BidPrice = c.ReadDouble();
-            AskPrice = c.ReadDouble();
-            BidSize = c.ReadInt();
-            AskSize = c.ReadInt();
-            TickAttribBidAsk = new TickAttribBidAsk(c.ReadInt());
+            BidPrice = r.ReadDouble();
+            AskPrice = r.ReadDouble();
+            BidSize = r.ReadInt();
+            AskSize = r.ReadInt();
+            TickAttribBidAsk = new TickAttribBidAsk(r.ReadInt());
         }
     }
 
     public sealed class TickByTickMidpoint : TickByTick
     {
         public double Midpoint { get; }
-        public TickByTickMidpoint(int requestId, TickByTickType tickType, long time, ResponseReader c)
+        public TickByTickMidpoint(int requestId, TickByTickType tickType, long time, ResponseReader r)
             : base(requestId, tickType, time)
         {
-            Midpoint = c.ReadDouble();
+            Midpoint = r.ReadDouble();
         }
     }
 

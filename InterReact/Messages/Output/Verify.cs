@@ -3,10 +3,10 @@
     public sealed class VerifyMessageApi
     {
         public string Data { get; }
-        internal VerifyMessageApi(ResponseReader c)
+        internal VerifyMessageApi(ResponseReader r)
         {
-            c.IgnoreVersion();
-            Data = c.ReadString();
+            r.IgnoreVersion();
+            Data = r.ReadString();
         }
     }
 
@@ -14,11 +14,11 @@
     {
         public bool IsSuccessful { get; }
         public string ErrorText { get; }
-        internal VerifyCompleted(ResponseReader c)
+        internal VerifyCompleted(ResponseReader r)
         {
-            c.IgnoreVersion();
-            IsSuccessful = c.ReadBool();
-            ErrorText = c.ReadString();
+            r.IgnoreVersion();
+            IsSuccessful = r.ReadBool();
+            ErrorText = r.ReadString();
         }
     }
 
@@ -26,11 +26,11 @@
     {
         public string ApiData { get; }
         public string XyzChallenge { get; }
-        internal VerifyAndAuthorizeMessageApi(ResponseReader c)
+        internal VerifyAndAuthorizeMessageApi(ResponseReader r)
         {
-            c.IgnoreVersion();
-            ApiData = c.ReadString();
-            XyzChallenge = c.ReadString();
+            r.IgnoreVersion();
+            ApiData = r.ReadString();
+            XyzChallenge = r.ReadString();
         }
     }
 
@@ -38,11 +38,11 @@
     {
         public bool IsSuccessful { get; }
         public string ErrorText { get; }
-        internal VerifyAndAuthorizeCompleted(ResponseReader c)
+        internal VerifyAndAuthorizeCompleted(ResponseReader r)
         {
-            c.IgnoreVersion();
-            IsSuccessful = c.ReadBool();
-            ErrorText = c.ReadString();
+            r.IgnoreVersion();
+            IsSuccessful = r.ReadBool();
+            ErrorText = r.ReadString();
         }
     }
 }

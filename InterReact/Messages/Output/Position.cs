@@ -11,33 +11,33 @@
             Account = "";
             Contract = new Contract();
         }
-        internal Position(ResponseReader c)
+        internal Position(ResponseReader r)
         {
-            c.RequireVersion(3);
-            Account = c.ReadString();
+            r.RequireVersion(3);
+            Account = r.ReadString();
             Contract = GetContract();
-            Quantity = c.ReadDouble();
-            AverageCost = c.ReadDouble();
+            Quantity = r.ReadDouble();
+            AverageCost = r.ReadDouble();
 
             Contract GetContract() => new()
             {
-                ContractId = c.ReadInt(),
-                Symbol = c.ReadString(),
-                SecurityType = c.ReadStringEnum<SecurityType>(),
-                LastTradeDateOrContractMonth = c.ReadString(),
-                Strike = c.ReadDouble(),
-                Right = c.ReadStringEnum<OptionRightType>(),
-                Multiplier = c.ReadString(),
-                Exchange = c.ReadString(),
-                Currency = c.ReadString(),
-                LocalSymbol = c.ReadString(),
-                TradingClass = c.ReadString()
+                ContractId = r.ReadInt(),
+                Symbol = r.ReadString(),
+                SecurityType = r.ReadStringEnum<SecurityType>(),
+                LastTradeDateOrContractMonth = r.ReadString(),
+                Strike = r.ReadDouble(),
+                Right = r.ReadStringEnum<OptionRightType>(),
+                Multiplier = r.ReadString(),
+                Exchange = r.ReadString(),
+                Currency = r.ReadString(),
+                LocalSymbol = r.ReadString(),
+                TradingClass = r.ReadString()
             };
         }
     }
 
     public sealed class PositionEnd
     {
-        internal PositionEnd(ResponseReader c) => c.IgnoreVersion();
+        internal PositionEnd(ResponseReader r) => r.IgnoreVersion();
     }
 }

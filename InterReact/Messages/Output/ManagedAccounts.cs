@@ -3,10 +3,10 @@
     public sealed class ManagedAccounts
     {
         public string Accounts { get; }
-        internal ManagedAccounts(ResponseReader c)
+        internal ManagedAccounts(ResponseReader r)
         {
-            c.IgnoreVersion();
-            Accounts = c.ReadString();
+            r.IgnoreVersion();
+            Accounts = r.ReadString();
         }
     }
 }

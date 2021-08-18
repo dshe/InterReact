@@ -8,14 +8,14 @@
         public string ArticleId { get; }
         public string Headline { get; }
         public string ExtraData { get; }
-        internal TickNews(ResponseReader c)
+        internal TickNews(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            TimeStamp = c.ReadLong();
-            ProviderCode = c.ReadString();
-            ArticleId = c.ReadString();
-            Headline = c.ReadString();
-            ExtraData = c.ReadString();
+            RequestId = r.ReadInt();
+            TimeStamp = r.ReadLong();
+            ProviderCode = r.ReadString();
+            ArticleId = r.ReadString();
+            Headline = r.ReadString();
+            ExtraData = r.ReadString();
         }
     }
 }

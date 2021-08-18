@@ -4,11 +4,11 @@
     {
         public FinancialAdvisorDataType DataType { get; }
         public string XmlData { get; }
-        internal FinancialAdvisor(ResponseReader c)
+        internal FinancialAdvisor(ResponseReader r)
         {
-            c.IgnoreVersion();
-            DataType = c.ReadEnum<FinancialAdvisorDataType>();
-            XmlData = c.ReadString();
+            r.IgnoreVersion();
+            DataType = r.ReadEnum<FinancialAdvisorDataType>();
+            XmlData = r.ReadString();
         }
     }
 }

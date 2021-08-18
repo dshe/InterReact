@@ -67,11 +67,11 @@ namespace InterReact
             }
         }
 
-        internal override void Deserialize(ResponseReader c)
+        internal override void Deserialize(ResponseReader r)
         {
-            base.Deserialize(c);
-            ConId = c.ReadInt();
-            Exchange = c.ReadString();
+            base.Deserialize(r);
+            ConId = r.ReadInt();
+            Exchange = r.ReadString();
         }
 
         internal override void Serialize(RequestMessage message)

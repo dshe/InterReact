@@ -14,18 +14,18 @@ namespace InterReact
         public long Volume { get; }
         public double Wap { get; }
         public int Count { get; }
-        internal RealtimeBar(ResponseReader c)
+        internal RealtimeBar(ResponseReader r)
         {
-            c.IgnoreVersion();
-            RequestId = c.ReadInt();
-            Time = Instant.FromUnixTimeSeconds(long.Parse(c.ReadString(), NumberFormatInfo.InvariantInfo));
-            Open = c.ReadDouble();
-            High = c.ReadDouble();
-            Low = c.ReadDouble();
-            Close = c.ReadDouble();
-            Volume = c.ReadLong();
-            Wap = c.ReadDouble();
-            Count = c.ReadInt();
+            r.IgnoreVersion();
+            RequestId = r.ReadInt();
+            Time = Instant.FromUnixTimeSeconds(long.Parse(r.ReadString(), NumberFormatInfo.InvariantInfo));
+            Open = r.ReadDouble();
+            High = r.ReadDouble();
+            Low = r.ReadDouble();
+            Close = r.ReadDouble();
+            Volume = r.ReadLong();
+            Wap = r.ReadDouble();
+            Count = r.ReadInt();
         }
     }
 }

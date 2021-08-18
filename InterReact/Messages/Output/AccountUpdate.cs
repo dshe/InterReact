@@ -10,13 +10,13 @@ namespace InterReact
         public string Currency { get; init; }
         public string Value { get; init; }
         public AccountValue() => Account = Key = Currency = Value = "";
-        internal AccountValue(ResponseReader c)
+        internal AccountValue(ResponseReader r)
         {
-            c.RequireVersion(2);
-            Key = c.ReadString();
-            Value = c.ReadString();
-            Currency = c.ReadString();
-            Account = c.ReadString();
+            r.RequireVersion(2);
+            Key = r.ReadString();
+            Value = r.ReadString();
+            Currency = r.ReadString();
+            Account = r.ReadString();
         }
     }
 
@@ -35,30 +35,30 @@ namespace InterReact
             Account = "";
             Contract = new Contract();
         }
-        internal PortfolioValue(ResponseReader c)
+        internal PortfolioValue(ResponseReader r)
         {
-            c.RequireVersion(8);
+            r.RequireVersion(8);
             Contract = new Contract
             {
-                ContractId = c.ReadInt(),
-                Symbol = c.ReadString(),
-                SecurityType = c.ReadStringEnum<SecurityType>(),
-                LastTradeDateOrContractMonth = c.ReadString(),
-                Strike = c.ReadDouble(),
-                Right = c.ReadStringEnum<OptionRightType>(),
-                Multiplier = c.ReadString(),
-                PrimaryExchange = c.ReadString(),
-                Currency = c.ReadString(),
-                LocalSymbol = c.ReadString(),
-                TradingClass = c.ReadString()
+                ContractId = r.ReadInt(),
+                Symbol = r.ReadString(),
+                SecurityType = r.ReadStringEnum<SecurityType>(),
+                LastTradeDateOrContractMonth = r.ReadString(),
+                Strike = r.ReadDouble(),
+                Right = r.ReadStringEnum<OptionRightType>(),
+                Multiplier = r.ReadString(),
+                PrimaryExchange = r.ReadString(),
+                Currency = r.ReadString(),
+                LocalSymbol = r.ReadString(),
+                TradingClass = r.ReadString()
             };
-            Position = c.ReadDouble();
-            MarketPrice = c.ReadDouble();
-            MarketValue = c.ReadDouble();
-            AverageCost = c.ReadDouble();
-            UnrealizedPnl = c.ReadDouble();
-            RealizedPnl = c.ReadDouble();
-            Account = c.ReadString();
+            Position = r.ReadDouble();
+            MarketPrice = r.ReadDouble();
+            MarketValue = r.ReadDouble();
+            AverageCost = r.ReadDouble();
+            UnrealizedPnl = r.ReadDouble();
+            RealizedPnl = r.ReadDouble();
+            Account = r.ReadString();
         }
     }
 
@@ -67,10 +67,10 @@ namespace InterReact
         private static readonly LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HH:mm");
         public LocalTime Time { get; init; }
         public AccountUpdateTime(LocalTime time) => Time = time;
-        internal AccountUpdateTime(ResponseReader c)
+        internal AccountUpdateTime(ResponseReader r)
         {
-            c.IgnoreVersion();
-            Time = c.ReadLocalTime(TimePattern);
+            r.IgnoreVersion();
+            Time = r.ReadLocalTime(TimePattern);
         }
     }
 
@@ -81,10 +81,10 @@ namespace InterReact
     {
         public string Account { get; init; }
         public AccountUpdateEnd(string account = "") => Account = account;
-        internal AccountUpdateEnd(ResponseReader c)
+        internal AccountUpdateEnd(ResponseReader r)
         {
-            c.IgnoreVersion();
-            Account = c.ReadString();
+            r.IgnoreVersion();
+            Account = r.ReadString();
         }
     }
 }

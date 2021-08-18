@@ -10,7 +10,7 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Extensions
 {
-    public class ToObservableWithIdTest : UnitTestsBase
+    public class ToObservableSingleWithIdTest : UnitTestsBase
     {
         private const int Id = 42;
         private int subscribeCalls, unsubscribeCalls;
@@ -27,7 +27,7 @@ namespace InterReact.UnitTests.Extensions
             public int RequestId { get; } = Id;
         }
 
-        public ToObservableWithIdTest(ITestOutputHelper output) : base(output) { }
+        public ToObservableSingleWithIdTest(ITestOutputHelper output) : base(output) { }
 
         [Fact]
         public async Task Test_Ok()
@@ -63,25 +63,6 @@ namespace InterReact.UnitTests.Extensions
         }
 
         [Fact]
-        public async Task Test_Multi_Ok()
-        {
-            var observable = subject.ToObservableMultipleWithId<SomeClassEnd>(
-                () => Id,
-                requestId =>
-                {
-                    Assert.Equal(Id, requestId);
-                    Interlocked.Increment(ref subscribeCalls);
-                    subject.OnNext(new SomeClass());
-                    subject.OnNext(new SomeClass());
-                    subject.OnNext(new SomeClassEnd());
-                });
-            var list = await observable.ToList();
-            Assert.Equal(2, list.Count);
-            Assert.Equal(1, subscribeCalls);
-            Assert.Equal(0, unsubscribeCalls);
-        }
-
-        [Fact]
         public async Task Test_Alert()
         {
             var observable = subject.ToObservableSingleWithId(
@@ -98,24 +79,6 @@ namespace InterReact.UnitTests.Extensions
                     Interlocked.Increment(ref unsubscribeCalls);
                 });
 
-            var alert = await observable;
-            Assert.IsType<Alert>(alert);
-            Assert.Equal(Id, alert.RequestId);
-            Assert.Equal(1, subscribeCalls);
-            Assert.Equal(0, unsubscribeCalls);
-        }
-
-        [Fact]
-        public async Task Test_Alert_multi()
-        {
-            var observable = subject.ToObservableMultipleWithId<SomeClassEnd>(
-                () => Id,
-                requestId =>
-                {
-                    Assert.Equal(Id, requestId);
-                    Interlocked.Increment(ref subscribeCalls);
-                    subject.OnNext(new Alert(requestId, 1, "some error"));
-                });
             var alert = await observable;
             Assert.IsType<Alert>(alert);
             Assert.Equal(Id, alert.RequestId);

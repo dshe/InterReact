@@ -66,10 +66,10 @@ namespace InterReact
         public double Price { get; set; }
         public TriggerMethod TriggerMethod { get; set; }
 
-        internal override void Deserialize(ResponseReader c)
+        internal override void Deserialize(ResponseReader r)
         {
-            base.Deserialize(c);
-            TriggerMethod = c.ReadEnum<TriggerMethod>();
+            base.Deserialize(r);
+            TriggerMethod = r.ReadEnum<TriggerMethod>();
         }
 
         internal override void Serialize(RequestMessage message)

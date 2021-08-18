@@ -16,17 +16,17 @@ namespace InterReact
     public class Request : IEditorBrowsableNever
     {
         public Config Config { get; }
-        private readonly IRxSocketClient RxSocket;
+        private readonly Action<byte[]> SendAction;
         private readonly Limiter Limiter;
 
         public Request(Config config, IRxSocketClient rxSocket, Limiter limiter)
         {
             Config = config;
-            RxSocket = rxSocket;
+            SendAction = (x) => rxSocket.Send(x);
             Limiter = limiter;
         }
 
-        private RequestMessage Message() => new(RxSocket, Limiter);
+        private RequestMessage Message() => new(SendAction, Limiter);
 
         /// <summary>
         /// Returns successive unique ids which are used to uniquely identify requests and orders.

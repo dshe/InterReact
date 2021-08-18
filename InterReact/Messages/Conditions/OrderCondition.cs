@@ -53,8 +53,8 @@ namespace InterReact
         internal virtual void Serialize(RequestMessage message) =>
             message.Write(IsConjunctionConnection ? "a" : "o");
 
-        internal virtual void Deserialize(ResponseReader c) =>
-            IsConjunctionConnection = c.ReadString() == "a";
+        internal virtual void Deserialize(ResponseReader r) =>
+            IsConjunctionConnection = r.ReadString() == "a";
 
         virtual protected bool TryParse(string cond)
         {

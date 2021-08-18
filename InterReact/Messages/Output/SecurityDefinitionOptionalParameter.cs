@@ -12,24 +12,24 @@ namespace InterReact
         public string Multiplier { get; }
         public List<string> Expirations { get; } = new List<string>();
         public List<string> Strikes { get; } = new List<string>();
-        internal SecurityDefinitionOptionParameter(ResponseReader c)
+        internal SecurityDefinitionOptionParameter(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            Exchange = c.ReadString();
-            UnderlyingContractId = c.ReadInt();
-            TradingClass = c.ReadString();
-            Multiplier = c.ReadString();
-            c.AddStringsToList(Expirations);
-            c.AddStringsToList(Strikes);
+            RequestId = r.ReadInt();
+            Exchange = r.ReadString();
+            UnderlyingContractId = r.ReadInt();
+            TradingClass = r.ReadString();
+            Multiplier = r.ReadString();
+            r.AddStringsToList(Expirations);
+            r.AddStringsToList(Strikes);
         }
     }
 
     public sealed class SecurityDefinitionOptionParameterEnd : IHasRequestId
     {
         public int RequestId { get; }
-        internal SecurityDefinitionOptionParameterEnd(ResponseReader c)
+        internal SecurityDefinitionOptionParameterEnd(ResponseReader r)
         {
-            RequestId = c.ReadInt();
+            RequestId = r.ReadInt();
         }
     }
 }

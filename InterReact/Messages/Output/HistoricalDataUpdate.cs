@@ -14,17 +14,17 @@ namespace InterReact
         public double Low { get; }
         public double WAP { get; }
         public long Volume { get; }
-        internal HistoricalDataUpdate(ResponseReader c)
+        internal HistoricalDataUpdate(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            BarCount = c.ReadInt();
-            Date = c.ReadString();
-            Open = c.ReadDouble();
-            Close = c.ReadDouble();
-            High = c.ReadDouble();
-            Low = c.ReadDouble();
-            WAP = c.ReadDouble();
-            Volume = c.ReadLong();
+            RequestId = r.ReadInt();
+            BarCount = r.ReadInt();
+            Date = r.ReadString();
+            Open = r.ReadDouble();
+            Close = r.ReadDouble();
+            High = r.ReadDouble();
+            Low = r.ReadDouble();
+            WAP = r.ReadDouble();
+            Volume = r.ReadLong();
         }
     }
 

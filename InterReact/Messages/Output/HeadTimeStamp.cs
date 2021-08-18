@@ -5,10 +5,10 @@
         public int RequestId { get; }
         public string HeadTimeStamp { get; }
 
-        internal HeadTimestamp(ResponseReader c)
+        internal HeadTimestamp(ResponseReader r)
         {
-            RequestId = c.ReadInt();
-            HeadTimeStamp = c.ReadString();
+            RequestId = r.ReadInt();
+            HeadTimeStamp = r.ReadString();
         }
     }
 }

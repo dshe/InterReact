@@ -61,12 +61,12 @@ namespace InterReact
             return true;
         }
 
-        internal override void Deserialize(ResponseReader c)
+        internal override void Deserialize(ResponseReader r)
         {
-            base.Deserialize(c);
-            SecType = c.ReadString();
-            Exchange = c.ReadString();
-            Symbol = c.ReadString();
+            base.Deserialize(r);
+            SecType = r.ReadString();
+            Exchange = r.ReadString();
+            Symbol = r.ReadString();
         }
 
         internal override void Serialize(RequestMessage message)
