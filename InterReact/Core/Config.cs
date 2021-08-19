@@ -24,7 +24,8 @@ namespace InterReact
         /// </summary>
         public ServerVersion ServerVersionCurrent { get; internal set; }
         public ServerVersion ServerVersionMin { get; } = ServerVersion.FRACTIONAL_POSITIONS;
-        public ServerVersion ServerVersionMax { get; internal set; } = ServerVersion.FRACTIONAL_POSITIONS;
+        public ServerVersion ServerVersionMax { get; internal set; } = ServerVersion.MARKET_DATA_IN_SHARES;
+        // ServerVersion.POST_TO_ATS causes an error on PlaceOrder()
 
         public string Date { get; internal set; } = "";
 

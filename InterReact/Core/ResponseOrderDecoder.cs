@@ -484,8 +484,7 @@
         {
             if (R.Config.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
             {
-                var type = R.ReadStringEnum<OrderType>();
-                if (type == OrderType.PeggedToBenchmark)
+                if (Order.OrderType == OrderType.PeggedToBenchmark)
                 {
                     Order.ReferenceContractId = R.ReadInt();
                     Order.IsPeggedChangeAmountDecrease = R.ReadBool();
@@ -500,9 +499,7 @@
         {
             if (R.Config.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
             {
-                string s = R.ReadString();
-                int n = (s == "None") ? 0 : ResponseParser.ParseInt(s);
-                //int n = R.ReadInt();
+                int n = R.ReadInt();
                 if (n > 0)
                 {
                     for (int i = 0; i < n; i++)
@@ -595,9 +592,7 @@
         internal void ReadPostToAts()
         {
             if (R.Config.SupportsServerVersion(ServerVersion.POST_TO_ATS))
-                //Order.PostToAts = R.ReadIntNullable();
-                //Order.PostToAts = R.ReadInt();
-                Order.PostToAts = 0;
+                Order.PostToAts = R.ReadIntNullable();
         }
     }
 }

@@ -239,7 +239,7 @@ namespace InterReact
                 m.Write(order.Duration);
 
             if (Config.SupportsServerVersion(ServerVersion.POST_TO_ATS))
-                m.Write(order.PostToAts);
+                m.Write(order.PostToAts.EncodeNullable());
 
             m.Send();
         }

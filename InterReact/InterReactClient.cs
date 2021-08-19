@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using RxSockets;
 
@@ -15,7 +13,7 @@ namespace InterReact
 
     public class InterReactClient : IInterReactClient
     {
-        private readonly IRxSocketClient RxSocket;
+        private readonly Func<ValueTask> Dispose;
         public Request Request { get; }
         public IObservable<object> Response { get; }
         public Services Services { get; }
@@ -24,12 +22,12 @@ namespace InterReact
         public InterReactClient(IRxSocketClient rxsocket, Request request, 
             IObservable<object> response, Services services)
         {
-            RxSocket = rxsocket;
+            Dispose = rxsocket.DisposeAsync;
             Request = request;
             Response = response;
             Services = services;
         }
 
-        public async ValueTask DisposeAsync() => await RxSocket.DisposeAsync();
+        public async ValueTask DisposeAsync() => await Dispose().ConfigureAwait(false);
     }
 }

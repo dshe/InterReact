@@ -72,7 +72,9 @@
             decoder.ReadVolRandomizeFlags();
             decoder.ReadPegToBenchParams();
             decoder.ReadConditions();
+
             decoder.ReadAdjustedOrderParams();
+
             decoder.ReadSoftDollarTier();
             decoder.ReadCashQty();
             decoder.ReadDontUseAutoPriceForHedge();

@@ -84,7 +84,10 @@ namespace InterReact
 
         internal Execution(ResponseReader r)
         {
-            r.RequireVersion(10);
+            int version = (int)r.Config.ServerVersionCurrent;
+            if (r.Config.ServerVersionCurrent < ServerVersion.LAST_LIQUIDITY)
+                version = r.ReadInt();
+
             int requestId = r.ReadInt();
             int orderId = r.ReadInt();
             Contract = new Contract
@@ -120,6 +123,8 @@ namespace InterReact
             EconomicValueMultiplier = r.ReadDouble();
             if (r.Config.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
                 ModelCode = r.ReadString();
+            if (r.Config.SupportsServerVersion(ServerVersion.LAST_LIQUIDITY))
+                LastLiquidity = r.ReadEnum<Liquidity>();
             Executions[ExecutionId] = this;
         }
     }

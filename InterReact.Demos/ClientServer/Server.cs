@@ -60,11 +60,11 @@ namespace CoreClientServer
                 throw new InvalidDataException("StartApi message not received.");
             Logger.LogInformation("Received StartApi message.");
 
-            Action<byte[]> send = x => accept.Send(x);
+            void send(byte[] x) => accept.Send(x);
 
             // Send server version.
             new RequestMessage(send, Limiter)
-                .Write(157) 
+                .Write((int)ServerVersion.FRACTIONAL_POSITIONS) 
                 .Write(DateTime.Now.ToString("yyyyMMdd HH:mm:ss XXX"))
                 .Send();
 

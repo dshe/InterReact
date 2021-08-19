@@ -9,7 +9,7 @@ using Xunit.Abstractions;
 
 namespace InterReact.SystemTests
 {
-    public abstract class TestBase : IAsyncLifetime, IDisposable
+    public abstract class SystemTestsBase : IAsyncLifetime, IDisposable
     {
         internal static readonly DynamicLogger DynamicLogger = new();
         private static readonly Task<IInterReactClient> ClientTask;
@@ -18,7 +18,7 @@ namespace InterReact.SystemTests
         protected readonly ILogger Logger;
         protected int Id;
 
-        static TestBase()
+        static SystemTestsBase()
         {
             ClientTask = InterReactClientBuilder.Create().BuildAsync();
             AppDomain.CurrentDomain.DomainUnload += async (sender, e) =>
@@ -29,7 +29,7 @@ namespace InterReact.SystemTests
             };
         }
 
-        protected TestBase(ITestOutputHelper output)
+        protected SystemTestsBase(ITestOutputHelper output)
         {
             Write = output.WriteLine;
             Logger = new LoggerFactory().AddMXLogger(Write).CreateLogger("Test");
