@@ -2,6 +2,7 @@
 {
     public enum ServerVersion
     {
+        NONE = 0,
         FRACTIONAL_POSITIONS = 101,
         PEGGED_TO_BENCHMARK = 102,
         MODELS_SUPPORT = 103,

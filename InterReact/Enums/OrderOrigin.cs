@@ -2,8 +2,6 @@
 {
     public enum OrderOrigin
     {
-        Undefined = -1,
-
         /// <summary>
         /// Order originated from the customer.
         /// </summary>

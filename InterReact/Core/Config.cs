@@ -15,18 +15,13 @@ namespace InterReact
         public IPEndPoint IPEndPoint { get; internal set; } = new(IPAddress.IPv6Loopback, 0);
         public int[] Ports { get; internal set; } = { (int)DefaultPort.TwsRegularAccount, (int)DefaultPort.TwsDemoAccount, (int)DefaultPort.GatewayRegularAccount, (int)DefaultPort.GatewayDemoAccount };
         public bool IsDemoAccount => IPEndPoint.Port == (int)DefaultPort.TwsDemoAccount || IPEndPoint.Port == (int)DefaultPort.GatewayDemoAccount;
-        public int ClientId { get; internal set; } = Random.Next(1000, 1000000);
-        public int MaxRequestsPerSecond { get; set; } = 50;
+        public int ClientId { get; internal set; } = Random.Next(100000, 999999);
+        public int MaxRequestsPerSecond { get; internal set; } = 50;
         public string OptionalCapabilities { get; internal set; } = "";
 
-        /// <summary>
-        /// The version of the currently connected server.
-        /// </summary>
-        public ServerVersion ServerVersionCurrent { get; internal set; }
+        public ServerVersion ServerVersionCurrent { get; internal set; } = ServerVersion.NONE;
         public ServerVersion ServerVersionMin { get; } = ServerVersion.FRACTIONAL_POSITIONS;
-        public ServerVersion ServerVersionMax { get; internal set; } = ServerVersion.MARKET_RULES;
-        //ServerVersion.MARKET_DATA_IN_SHARES;
-        // ServerVersion.POST_TO_ATS causes an error on PlaceOrder()
+        public ServerVersion ServerVersionMax { get; internal set; } = ServerVersion.WSHE_CALENDAR;
 
         public string Date { get; internal set; } = "";
 

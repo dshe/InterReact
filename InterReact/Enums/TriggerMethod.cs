@@ -2,8 +2,6 @@
 {
     public enum TriggerMethod
     {
-        Undefined = -1,
-
         /// <summary>
         /// Default. The double bid/ask method will be used for orders for OTC stocks and US options. 
         /// All Status orders will used the "last" method.

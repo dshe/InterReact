@@ -56,7 +56,7 @@ PriceTick priceTick = await client
 
 if (priceTick.Price <= 0)
 {
-    WriteLine($"Invalid price: {priceTick.Price}.\nPerhaps the market is closed.", ConsoleColor.Red);
+    Console.WriteLine($"Invalid price: {priceTick.Price}.\nPerhaps the market is closed.");
     return;
 }
 
@@ -81,7 +81,7 @@ Task<OrderStatusReport> orderTask = client
     .Timeout(TimeSpan.FromSeconds(10))
     .ToTask();
 
-WriteLine($"Placing a buy order at limit price: {order.LimitPrice}.", ConsoleColor.Yellow);
+Console.WriteLine($"Placing a buy order at limit price: {order.LimitPrice}.");
 client.Request.PlaceOrder(orderId, order, contract);
 
 try
@@ -89,24 +89,16 @@ try
     // Wait for order completion, or until timeout
     OrderStatusReport orderStatusReport = await orderTask;
     if (orderStatusReport.Status == OrderStatus.Filled)
-        WriteLine($"Order was filled at price: {orderStatusReport.AverageFillPrice}.", ConsoleColor.Green);
+        Console.WriteLine($"Order was filled at price: {orderStatusReport.AverageFillPrice}.");
     else if (orderStatusReport.Status == OrderStatus.Cancelled || orderStatusReport.Status == OrderStatus.ApiCancelled)
-        WriteLine("Order was cancelled.", ConsoleColor.Red);
+        Console.WriteLine("Order was cancelled.");
 }
 catch (TimeoutException)
 {
     client.Request.CancelOrder(orderId);
-    WriteLine("Timeout! Order cancelled.\nPerhaps try again.", ConsoleColor.Red);
+    Console.WriteLine("Timeout! Order cancelled.\nPerhaps try again.");
 }
 
 client.Request.CancelMarketData(tickRequestId);
 await Task.Delay(1000);
 await client.DisposeAsync();
-
-static void WriteLine(string message, ConsoleColor color)
-{
-    ConsoleColor oldcolor = Console.ForegroundColor;
-    Console.ForegroundColor = color;
-    Console.WriteLine(message);
-    Console.ForegroundColor = oldcolor;
-}

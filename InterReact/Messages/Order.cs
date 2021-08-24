@@ -90,7 +90,7 @@ namespace InterReact
         /// </summary>
         public int? DisplaySize { get; set; }
 
-        public TriggerMethod TriggerMethod { get; set; } = TriggerMethod.Undefined;
+        public TriggerMethod TriggerMethod { get; set; } = TriggerMethod.Default;
 
         /// <summary>
         /// Allows orders to be filled outside of regular trading hours.
@@ -154,13 +154,13 @@ namespace InterReact
         public string FinancialAdvisorPercentage { get; set; } = "";
 
         public OrderOpenClose OpenClose { get; set; } = OrderOpenClose.Undefined;
-        public OrderOrigin Origin { get; set; } = OrderOrigin.Undefined;
+        public OrderOrigin Origin { get; set; } = OrderOrigin.Customer;
 
         /// <summary>
         /// 1 if you hold the shares, 2 if they will be delivered from elsewhere.
         /// Only for TradeAction="SSHORT".
         /// </summary>
-        public ShortSaleSlot ShortSaleSlot { get; set; } = ShortSaleSlot.Undefined;
+        public ShortSaleSlot ShortSaleSlot { get; set; } = ShortSaleSlot.Inapplicable;
 
         public string DesignatedLocation { get; set; } = "";
         public int ExemptCode { get; set; } = -1;

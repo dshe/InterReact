@@ -177,7 +177,7 @@ namespace TicksWpf
             // Display the stock name in the title bar.
             Description = cd.LongName;
 
-            //SubscribeToTicks(contract);
+            SubscribeToTicks(contract);
         }
 
         private void SubscribeToTicks(Contract contract)
@@ -219,8 +219,8 @@ namespace TicksWpf
 
         private async void MainWindow_OnClosing(object sender, CancelEventArgs e)
         {
-            if (Client != null)
-                await Client.DisposeAsync();
+            //if (Client != null)
+            //    await Client.DisposeAsync();
         }
     }
 
