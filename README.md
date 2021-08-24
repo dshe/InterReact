@@ -1,7 +1,7 @@
 # InterReact&nbsp;&nbsp; [![License](https://img.shields.io/badge/Version-0.0.2-blue)]() [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ***Reactive C# API to Interactive Brokers***
-- compatible with Interactive Brokers TWS/Gateway API 9.73
+- compatible with Interactive Brokers TWS/Gateway API 9.85
 - supports **.NET 5**
 - dependencies: RxSockets, StringEnums, Stringification, Reactive Extensions, NodaTime.
 - demo applications: Console, WPF.
