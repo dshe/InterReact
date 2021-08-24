@@ -2,9 +2,10 @@
 
 namespace InterReact
 {
-    public sealed class FamilyCodes // output
+    public sealed class FamilyCodes
     {
-        public List<FamilyCode> Codes { get; } = new List<FamilyCode>();
+        public List<FamilyCode> Codes { get; } = new();
+        internal FamilyCodes() { }
         internal FamilyCodes(ResponseReader r)
         {
             int n = r.ReadInt();
@@ -13,10 +14,11 @@ namespace InterReact
         }
     }
 
-    public sealed class FamilyCode // output
+    public sealed class FamilyCode
     {
-        public string AccountId { get; }
-        public string FamilyCodeStr { get; }
+        public string AccountId { get; } = "";
+        public string FamilyCodeStr { get; } = "";
+        internal FamilyCode() { }
         internal FamilyCode(ResponseReader r)
         {
             AccountId = r.ReadString();

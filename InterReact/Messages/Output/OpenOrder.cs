@@ -7,6 +7,8 @@
         public Contract Contract { get; } = new();
         public OrderState OrderState { get; } = new();
 
+        internal OpenOrder() { }
+
         internal OpenOrder(ResponseReader r)
         {
             int messageVersion = r.Config.SupportsServerVersion(ServerVersion.ORDER_CONTAINER) ? (int)r.Config.ServerVersionCurrent : r.ReadInt();
@@ -72,9 +74,7 @@
             decoder.ReadVolRandomizeFlags();
             decoder.ReadPegToBenchParams();
             decoder.ReadConditions();
-
             decoder.ReadAdjustedOrderParams();
-
             decoder.ReadSoftDollarTier();
             decoder.ReadCashQty();
             decoder.ReadDontUseAutoPriceForHedge();

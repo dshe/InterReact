@@ -6,9 +6,9 @@ namespace InterReact
 {
     public sealed class Tag // input + output
     {
-        public string Name { get; }
-        public string Value { get; }
-
+        public string Name { get; } = "";
+        public string Value { get; } = "";
+        internal Tag() { }
         public Tag(string name, string value)
         {
             Name = name;

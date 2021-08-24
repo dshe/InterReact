@@ -9,6 +9,8 @@
         public bool BidPastLow { get; }
         public bool AskPastHigh { get; }
 
+        internal TickAttrib() { }
+
         internal TickAttrib(ResponseReader? r = null)
         {
             if (r == null)
@@ -27,10 +29,12 @@
 
     public sealed class TickAttribBidAsk
     {
-        public bool BidPastLow { get; }
-        public bool AskPastHigh { get; }
+        public bool BidPastLow { get; internal set; }
+        public bool AskPastHigh { get; internal set; }
 
-        public TickAttribBidAsk(int value)
+        internal TickAttribBidAsk() { }
+
+        internal void Set(int value)
         {
             BitMask mask = new(value);
             BidPastLow = mask[0];
@@ -40,10 +44,12 @@
 
     public sealed class TickAttribLast
     {
-        public bool PastLimit { get; }
-        public bool Unreported { get; }
+        public bool PastLimit { get; internal set; }
+        public bool Unreported { get; internal set; }
 
-        public TickAttribLast(int value)
+        internal TickAttribLast() { }
+
+        internal void Set(int value)
         {
             BitMask mask = new(value);
             PastLimit = mask[0];

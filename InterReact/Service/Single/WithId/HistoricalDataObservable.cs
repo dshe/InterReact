@@ -20,6 +20,7 @@ namespace InterReact
             Instant end = default,
             HistoricalDataType? dataType = null,
             bool regularTradingHoursOnly = true,
+            bool keepUpToDate = false,
             IEnumerable<Tag>? options = null) =>
                 Response
                     .ToObservableSingleWithId(
@@ -32,6 +33,7 @@ namespace InterReact
                             barSize,
                             dataType,
                             regularTradingHoursOnly,
+                            keepUpToDate,
                             options),
                         Request.CancelHistoricalData)
                     .Select(x => new Union<HistoricalData, Alert>(x));

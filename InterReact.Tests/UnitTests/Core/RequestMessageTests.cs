@@ -103,7 +103,7 @@ namespace InterReact.UnitTests.Core
         {
             int? nint = null;
             requestMessage.Write(nint.EncodeNullable()).Send();
-            AssertResult("");
+            AssertResult(int.MaxValue.ToString());
         }
     }
 }

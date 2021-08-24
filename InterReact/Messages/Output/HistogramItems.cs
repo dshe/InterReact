@@ -7,7 +7,9 @@ namespace InterReact
     public sealed class HistogramItems : IHasRequestId
     {
         public int RequestId { get; }
-        public List<HistogramItem> Items { get; } = new List<HistogramItem>();
+        public List<HistogramItem> Items { get; } = new();
+
+        internal HistogramItems() { }
         internal HistogramItems(ResponseReader r)
         {
             RequestId = r.ReadInt();
@@ -22,6 +24,7 @@ namespace InterReact
         public double Price { get; }
         public long Size { get; }
 
+        internal HistogramItem() { }
         internal HistogramItem(ResponseReader r)
         {
             Price = r.ReadDouble();

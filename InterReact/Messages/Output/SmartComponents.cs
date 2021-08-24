@@ -11,7 +11,9 @@ namespace InterReact
     public sealed class SmartComponents : IHasRequestId
     {
         public int RequestId { get; }
-        public Dictionary<int, KeyValuePair<string, char>> Map { get; } = new Dictionary<int, KeyValuePair<string, char>>();
+        public Dictionary<int, KeyValuePair<string, char>> Map { get; } = new();
+
+        internal SmartComponents() { }
 
         internal SmartComponents(ResponseReader r)
         {

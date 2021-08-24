@@ -6,6 +6,9 @@ namespace InterReact
     {
         public int RequestId { get; }
         public List<ScannerDataItem> Items { get; } = new List<ScannerDataItem>();
+
+        internal ScannerData() { }
+
         internal ScannerData(ResponseReader r)
         {
             r.RequireVersion(3);
@@ -20,10 +23,13 @@ namespace InterReact
     {
         public int Rank { get; }
         public ContractDetails ContractData { get; }
-        public string Distance { get; }
-        public string Benchmark { get; }
-        public string Projection { get; }
-        public string ComboLegs { get; }
+        public string Distance { get; } = "";
+        public string Benchmark { get; } = "";
+        public string Projection { get; } = "";
+        public string ComboLegs { get; } = "";
+
+        internal ScannerDataItem() { ContractData = new(); }
+
         internal ScannerDataItem(ResponseReader r)
         {
             Rank = r.ReadInt();

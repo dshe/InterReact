@@ -24,7 +24,7 @@ namespace InterReact.UnitTests.Core
             var e = Assert.Throws<InvalidDataException>(() => Composer.Compose(new string[] { }));
             Assert.IsType<IndexOutOfRangeException>(e.InnerException);
 
-            e = Assert.Throws<InvalidDataException>(() => Composer.Compose(new[] { "1", "2" })); // short
+            e = Assert.Throws<InvalidDataException>(() => Composer.Compose(new[] { "2", "2" })); // short
             Assert.IsType<IndexOutOfRangeException>(e.InnerException);
         }
 
@@ -66,15 +66,13 @@ namespace InterReact.UnitTests.Core
         public void T03_Ok()
         {
             var messages = Composer.Compose(new[] {
-                "1",  // code = price
+                "2",  // code = size
                 "99", // version
                 "2",  // requestId
-                "5",  // tickType = LastSize
-                "9.9", // price
-                "100", // size
-                "0" // AutoExec, true
+                "5",  // tickType
+                "100" // size
             });
-            Assert.IsType<PriceTick>(messages.Single());
+            Assert.IsType<SizeTick>(messages.Single());
         }
     }
 

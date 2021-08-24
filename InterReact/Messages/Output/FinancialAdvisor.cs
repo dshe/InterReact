@@ -2,13 +2,14 @@
 {
     public sealed class FinancialAdvisor // output
     {
-        public FinancialAdvisorDataType DataType { get; }
-        public string XmlData { get; }
+        public FinancialAdvisorDataType DataType { get; } = FinancialAdvisorDataType.Undefined;
+        public string Data { get; } = "";
+        internal FinancialAdvisor() { }
         internal FinancialAdvisor(ResponseReader r)
         {
             r.IgnoreVersion();
             DataType = r.ReadEnum<FinancialAdvisorDataType>();
-            XmlData = r.ReadString();
+            Data = r.ReadString();
         }
     }
 }

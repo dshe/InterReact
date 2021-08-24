@@ -2,10 +2,13 @@
 
 namespace InterReact
 {
-    public sealed class SymbolSamples : IHasRequestId // output
+    public sealed class SymbolSamples : IHasRequestId
     {
         public int RequestId { get; }
-        public List<ContractDescription> Descriptions { get; } = new List<ContractDescription>();
+        public List<ContractDescription> Descriptions { get; } = new();
+
+        internal SymbolSamples() { }
+
         internal SymbolSamples(ResponseReader r)
         {
             RequestId = r.ReadInt();

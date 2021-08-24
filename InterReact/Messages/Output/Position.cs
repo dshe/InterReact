@@ -2,37 +2,30 @@
 {
     public sealed class Position
     {
-        public string Account { get; init; }
-        public Contract Contract { get; init; }
-        public double Quantity { get; init; }
-        public double AverageCost { get; init; }
-        public Position()
-        {
-            Account = "";
-            Contract = new Contract();
-        }
+        public string Account { get; } = "";
+        public Contract Contract { get; } = new();
+        public double Quantity { get; }
+        public double AverageCost { get; }
+
+        internal Position() {}
+
         internal Position(ResponseReader r)
         {
             r.RequireVersion(3);
             Account = r.ReadString();
-            Contract = GetContract();
+            Contract.ContractId = r.ReadInt();
+            Contract.Symbol = r.ReadString();
+            Contract.SecurityType = r.ReadStringEnum<SecurityType>();
+            Contract.LastTradeDateOrContractMonth = r.ReadString();
+            Contract.Strike = r.ReadDouble();
+            Contract.Right = r.ReadStringEnum<OptionRightType>();
+            Contract.Multiplier = r.ReadString();
+            Contract.Exchange = r.ReadString();
+            Contract.Currency = r.ReadString();
+            Contract.LocalSymbol = r.ReadString();
+            Contract.TradingClass = r.ReadString();
             Quantity = r.ReadDouble();
             AverageCost = r.ReadDouble();
-
-            Contract GetContract() => new()
-            {
-                ContractId = r.ReadInt(),
-                Symbol = r.ReadString(),
-                SecurityType = r.ReadStringEnum<SecurityType>(),
-                LastTradeDateOrContractMonth = r.ReadString(),
-                Strike = r.ReadDouble(),
-                Right = r.ReadStringEnum<OptionRightType>(),
-                Multiplier = r.ReadString(),
-                Exchange = r.ReadString(),
-                Currency = r.ReadString(),
-                LocalSymbol = r.ReadString(),
-                TradingClass = r.ReadString()
-            };
         }
     }
 

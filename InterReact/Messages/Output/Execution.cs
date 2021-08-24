@@ -18,7 +18,7 @@ namespace InterReact
         /// <summary>
         /// Unique order execution id.
         /// </summary>
-        public string ExecutionId { get; }
+        public string ExecutionId { get; } = "";
 
         /// <summary>
         /// The Id of the client which placed the order.
@@ -29,15 +29,15 @@ namespace InterReact
         /// <summary>
         /// The order execution time.
         /// </summary>
-        public string Time { get; }
+        public string Time { get; } = "";
 
         /// <summary>
         /// Cusomer account number.
         /// </summary>
-        public string Account { get; }
+        public string Account { get; } = "";
 
-        public string Exchange { get; }
-        public ExecutionSide Side { get; }
+        public string Exchange { get; } = "";
+        public ExecutionSide Side { get; } = ExecutionSide.Undefined;
 
         /// <summary>
         /// The number of shares filled.
@@ -64,12 +64,12 @@ namespace InterReact
         /// The average price, which includes commissions.
         /// </summary>
         public double AveragePrice { get; }
-        public string OrderReference { get; }
+        public string OrderReference { get; } = "";
 
         /// <summary>
         /// IncludeAll the Economic Value Rule name and the respective optional argument. The two Values should be separated by a colon. For example, aussieBond:YearsToExpiration=3. When the optional argument is not present, the first value will be followed by a colon.
         /// </summary>
-        public string EconomicValueRule { get; }
+        public string EconomicValueRule { get; } = "";
 
         /// <summary>
         /// Tells you approximately how much the market value of a contract would change if the price were to change by 1. It cannot be used to get market value by multiplying the price by the approximate multiplier.
@@ -78,34 +78,29 @@ namespace InterReact
 
         public string ModelCode { get; } = "";
 
-        public Liquidity LastLiquidity { get; }
+        public Liquidity LastLiquidity { get; } = Liquidity.None;
 
-        public Contract Contract { get; }
+        public Contract Contract { get; } = new();
+
+        internal Execution() { }
 
         internal Execution(ResponseReader r)
         {
-            int version = (int)r.Config.ServerVersionCurrent;
             if (r.Config.ServerVersionCurrent < ServerVersion.LAST_LIQUIDITY)
-                version = r.ReadInt();
-
-            int requestId = r.ReadInt();
-            int orderId = r.ReadInt();
-            Contract = new Contract
-            {
-                ContractId = r.ReadInt(),
-                Symbol = r.ReadString(),
-                SecurityType = r.ReadStringEnum<SecurityType>(),
-                LastTradeDateOrContractMonth = r.ReadString(),
-                Strike = r.ReadDouble(),
-                Right = r.ReadStringEnum<OptionRightType>(),
-                Multiplier = r.ReadString(),
-                Exchange = r.ReadString(),
-                Currency = r.ReadString(),
-                LocalSymbol = r.ReadString(),
-                TradingClass = r.ReadString()
-            };
-            RequestId = requestId;
-            OrderId = orderId;
+                r.RequireVersion(10);
+            RequestId = r.ReadInt();
+            OrderId = r.ReadInt();
+            Contract.ContractId = r.ReadInt();
+            Contract.Symbol = r.ReadString();
+            Contract.SecurityType = r.ReadStringEnum<SecurityType>();
+            Contract.LastTradeDateOrContractMonth = r.ReadString();
+            Contract.Strike = r.ReadDouble();
+            Contract.Right = r.ReadStringEnum<OptionRightType>();
+            Contract.Multiplier = r.ReadString();
+            Contract.Exchange = r.ReadString();
+            Contract.Currency = r.ReadString();
+            Contract.LocalSymbol = r.ReadString();
+            Contract.TradingClass = r.ReadString();
             ExecutionId = r.ReadString();
             Time = r.ReadString();
             Account = r.ReadString();

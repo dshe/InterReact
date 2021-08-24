@@ -13,7 +13,6 @@ using NodaTime;
 using Stringification;
 using RxSockets;
 using System.Reflection;
-using System.Reactive.Concurrency;
 
 namespace InterReact
 {
@@ -161,6 +160,7 @@ namespace InterReact
 
             // Report a range of supported API versions to TWS.
             SendWithPrefix($"v{(int)Config.ServerVersionMin}..{(int)Config.ServerVersionMax}");
+
             SendWithPrefix(((int)RequestCode.StartApi).ToString(),
                 "2", Config.ClientId.ToString(), Config.OptionalCapabilities);
 
@@ -174,16 +174,13 @@ namespace InterReact
             Logger.LogInformation($"Logged into Tws/Gateway using clientId: {Config.ClientId} and server version: {(int)Config.ServerVersionCurrent}.");
 
             // local methods
-            void Send(string str) => 
-                rxsocket
+            void Send(string str) => rxsocket
                 .Send(str.ToByteArray());
             
-            void SendWithPrefix(params string[] strings) => 
-                rxsocket
+            void SendWithPrefix(params string[] strings) => rxsocket
                 .Send(strings.ToByteArray().ToByteArrayWithLengthPrefix());
             
-            async Task<string[]> GetMessage() => 
-                await rxsocket
+            async Task<string[]> GetMessage() => await rxsocket
                 .ReceiveAllAsync()
                 .ToArraysFromBytesWithLengthPrefix()
                 .ToStringArrays()

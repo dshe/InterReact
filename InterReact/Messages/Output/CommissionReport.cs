@@ -11,13 +11,15 @@
         // Execution is set IF an Execution was received with the same ExecutionId.
         public Execution? Execution { get; } // (not part of IB Api)
 
-        public string ExecutionId { get; }
+        public string ExecutionId { get; } = "";
         public double Commission { get; }
-        public string Currency { get; }
+        public string Currency { get; } = "";
         public double RealizedPnl { get; }
         public double Yield { get; }
         // Yet another date format: YYYYMMDD as integer.
         public int YieldRedemptionDate { get; }
+
+        internal CommissionReport() { }
 
         internal CommissionReport(ResponseReader r)
         {

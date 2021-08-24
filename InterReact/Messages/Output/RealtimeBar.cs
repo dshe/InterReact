@@ -14,6 +14,9 @@ namespace InterReact
         public long Volume { get; }
         public double Wap { get; }
         public int Count { get; }
+
+        internal RealtimeBar() { }
+
         internal RealtimeBar(ResponseReader r)
         {
             r.IgnoreVersion();

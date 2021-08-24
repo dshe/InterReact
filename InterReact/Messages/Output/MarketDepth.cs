@@ -6,7 +6,7 @@
 
         public int Position { get; } = -1; // stringify always
 
-        public string MarketMaker { get; }
+        public string MarketMaker { get; } = "";
 
         public MarketDepthOperation Operation { get; } = MarketDepthOperation.Undefined;
 
@@ -14,9 +14,11 @@
 
         public double Price { get; }
 
-        public int Size { get; }
+        public long Size { get; }
 
         public bool IsSmartDepth { get; }
+
+        internal MarketDepth() { }
 
         internal MarketDepth(ResponseReader r, bool isLevel2)
         {
@@ -27,7 +29,9 @@
             Operation = r.ReadEnum<MarketDepthOperation>();
             Side = r.ReadEnum<MarketDepthSide>();
             Price = r.ReadDouble();
-            Size = r.ReadInt();
+            Size = r.ReadLong();
+            if (isLevel2 && r.Config.SupportsServerVersion(ServerVersion.SMART_DEPTH))
+                IsSmartDepth = r.ReadBool();
         }
     }
 }

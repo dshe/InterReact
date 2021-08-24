@@ -109,13 +109,10 @@ namespace CoreClientServer
 
             MemoryStream ms = new();
 
+            var message = new RequestMessage(x => ms.Write(x), Limiter);
             for (int i = 0; i < 100_000; i++)
-            {
-                var message = new RequestMessage(x => ms.Write(x), Limiter);
                 message.Write("2", "3", 1, TickType.LastSize, 300).Send();
-            }
-            var message2 = new RequestMessage(x => ms.Write(x), Limiter);
-            message2.Write("1", "3", 1, TickType.LastPrice, 100, 200, true).Send();
+            message.Write("1", "3", 1, TickType.LastPrice, 100, 200, true).Send();
 
             accept.Send(ms.ToArray());
 

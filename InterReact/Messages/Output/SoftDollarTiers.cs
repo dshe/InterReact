@@ -5,28 +5,32 @@ namespace InterReact
     public sealed class SoftDollarTiers : IHasRequestId
     {
         public int RequestId { get; }
-        public List<SoftDollarTier> Tiers { get; } = new List<SoftDollarTier>();
+        public List<SoftDollarTier> Tiers { get; } = new();
+
+        internal SoftDollarTiers() { }
+
         internal SoftDollarTiers(ResponseReader r)
         {
             RequestId = r.ReadInt();
             int n = r.ReadInt();
             for (int i = 0; i < n; i++)
-            {
                 Tiers.Add(new SoftDollarTier(r));
-            }
         }
     }
 
     public sealed class SoftDollarTier
     {
-        public string Name { get; set; } = "";
-        public string Value { get; set; } = "";
-        public string DisplayName { get; set; } = "";
+        public string Name { get; internal set; } = "";
+        public string Value { get; internal set; } = "";
+        public string DisplayName { get; internal set; } = "";
+
         internal SoftDollarTier() { }
+
         internal SoftDollarTier(ResponseReader r) 
         {
             Set(r);
         }
+
         internal void Set(ResponseReader r)
         {
             Name = r.ReadString();

@@ -18,8 +18,8 @@ namespace InterReact
             return Response
                 .Where(x => x is AccountValue || x is PortfolioValue || x is AccountUpdateTime || x is AccountUpdateEnd)
                 .ToObservableContinuous(
-                () => Request.RequestAccountUpdates(start: true),
-                () => Request.RequestAccountUpdates(start: false))
+                () => Request.RequestAccountUpdates(subscribe: true),
+                () => Request.RequestAccountUpdates(subscribe: false))
             .Select(x => new Union<AccountValue, PortfolioValue, AccountUpdateTime, AccountUpdateEnd>(x));
         }
 
@@ -28,7 +28,7 @@ namespace InterReact
             return union.Source switch
             {
                 AccountValue av => $"{av.Account}+{av.Key}:{av.Currency}",
-                PortfolioValue pv => $"{pv.Account}+{(pv.Contract == null ? "" : pv.Contract.Stringify(includeTypeName: false))}",
+                PortfolioValue pv => $"{pv.AccountName}+{(pv.Contract == null ? "" : pv.Contract.Stringify(includeTypeName: false))}",
                 AccountUpdateTime => "AccountUpdateTime",
                 AccountUpdateEnd end => $"AccountSummaryEnd:{end.Account}",
                 Alert alert => $"{alert.Code}+{alert.Message}",

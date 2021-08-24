@@ -12,6 +12,9 @@ namespace InterReact
         public LocalDateTime Start { get; }
         public LocalDateTime End { get; }
         public List<HistoricalDataBar> Bars { get; } = new List<HistoricalDataBar>();
+
+        internal HistoricalData() { }
+
         internal HistoricalData(ResponseReader r) // a one-shot deal
         {
             if (!r.Config.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
@@ -36,6 +39,8 @@ namespace InterReact
         public long Volume { get; }
         public double WeightedAveragePrice { get; }
         public int Count { get; }
+
+        internal HistoricalDataBar() { }
 
         internal HistoricalDataBar(ResponseReader r)
         {

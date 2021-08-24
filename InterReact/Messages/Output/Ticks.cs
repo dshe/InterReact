@@ -5,30 +5,21 @@ namespace InterReact
 {
     public abstract class Tick : IHasRequestId
     {
-        public int RequestId { get; protected set; }
+        public int RequestId { get; protected set; } = -1;
         public TickType TickType { get; protected set; } = TickType.Undefined;
 
         internal static object[] CreatePriceAndSizeTicks(ResponseReader r)
         {
-            int version = r.GetVersion();
+            r.RequireVersion(3);
             int requestId = r.ReadInt();
             TickType priceTickType = r.ReadEnum<TickType>();
             double price = r.ReadDouble();
-            int size = version >= 2 ? r.ReadInt() : 0;
-
-            TickAttrib attr = new(version >= 3 ? r : null);
+            long size = r.ReadLong();
+            TickAttrib attr = new(r);
             PriceTick tickPrice = new(requestId, priceTickType, price, attr);
-
-            if (version >= 2)
-            {
-                TickType tickTypeSize = GetTickTypeSize(priceTickType);
-                if (tickTypeSize != TickType.Undefined)
-                {
-                    SizeTick tickSize = new(requestId, tickTypeSize, size);
-                    return new object[] { tickPrice, tickSize };
-                }
-            }
-            return new[] { tickPrice };
+            TickType tickTypeSize = GetTickTypeSize(priceTickType);
+            SizeTick tickSize = new(requestId, tickTypeSize, size);
+            return new object[] { tickPrice, tickSize };
         }
 
         private static TickType GetTickTypeSize(TickType tickType) => tickType switch
@@ -76,19 +67,23 @@ namespace InterReact
     /// </summary>
     public sealed class SizeTick : Tick
     {
-        public int Size { get; }
-        internal SizeTick(int requestId, TickType tickType, int size)
+        public long Size { get; }
+
+        internal SizeTick() { }
+
+        internal SizeTick(int requestId, TickType tickType, long size)
         {
             RequestId = requestId;
             TickType = tickType;
             Size = size;
         }
+
         internal SizeTick(ResponseReader r)
         {
             r.IgnoreVersion();
             RequestId = r.ReadInt();
             TickType = r.ReadEnum<TickType>();
-            Size = r.ReadInt();
+            Size = r.ReadLong();
         }
     }
 
@@ -102,7 +97,11 @@ namespace InterReact
     public sealed class PriceTick : Tick
     {
         public double Price { get; }
+        public long Size { get; }
         public TickAttrib TickAttrib { get; }
+
+        internal PriceTick() { TickAttrib = new TickAttrib(); }
+
         internal PriceTick(int requestId, TickType tickType, double price, TickAttrib attrib)
         {
             RequestId = requestId;
@@ -114,7 +113,10 @@ namespace InterReact
 
     public sealed class StringTick : Tick
     {
-        public string Value { get; }
+        public string Value { get; } = "";
+
+        internal StringTick() { }
+
         internal StringTick(int requestId, TickType tickType, string value)
         {
             RequestId = requestId;
@@ -142,6 +144,9 @@ namespace InterReact
         /// Seconds precision.
         /// </summary>
         public Instant Time { get; }
+
+        internal TimeTick() { }
+
         internal TimeTick(int requestId, string str)
         {
             RequestId = requestId;
@@ -159,8 +164,8 @@ namespace InterReact
     public sealed class RealtimeVolumeTick : Tick // from TickString
     {
         public double Price { get; }
-        public int Size { get; }
-        public int Volume { get; }
+        public long Size { get; }
+        public long Volume { get; }
         public double Vwap { get; }
         /// <summary>
         /// Indicates whether the trade was filled by a single market-maker.
@@ -170,15 +175,18 @@ namespace InterReact
         /// Milliseconds precision.
         /// </summary>
         public Instant Instant { get; }
+
+        internal RealtimeVolumeTick() { }
+
         internal RealtimeVolumeTick(int requestId, string str)
         {
             RequestId = requestId;
             TickType = TickType.RealtimeVolume;
             string[] parts = str.Split(';');
             Price = ResponseParser.ParseDouble(parts[0]);
-            Size = ResponseParser.ParseInt(parts[1]);
+            Size = ResponseParser.ParseLong(parts[1]);
             Instant = Instant.FromUnixTimeMilliseconds(long.Parse(parts[2], NumberFormatInfo.InvariantInfo));
-            Volume = ResponseParser.ParseInt(parts[3]);
+            Volume = ResponseParser.ParseLong(parts[3]);
             Vwap = ResponseParser.ParseDouble(parts[4]);
             SingleTrade = ResponseParser.ParseBool(parts[5]);
         }
@@ -187,6 +195,9 @@ namespace InterReact
     public sealed class GenericTick : Tick
     {
         public double Value { get; }
+
+        internal GenericTick() { }
+
         internal GenericTick(int requestId, TickType tickType, double value)
         {
             RequestId = requestId;
@@ -208,12 +219,15 @@ namespace InterReact
     public sealed class ExchangeForPhysicalTick : Tick
     {
         public double BasisPoints { get; }
-        public string FormattedBasisPoints { get; }
+        public string FormattedBasisPoints { get; } = "";
         public double ImpliedFuturesPrice { get; }
         public int HoldDays { get; }
-        public string FutureExpiry { get; }
+        public string FutureLastTradeDate { get; } = "";
         public double DividendImpact { get; }
         public double DividendsToLastTradeDate { get; }
+
+        internal ExchangeForPhysicalTick() { }
+
         internal ExchangeForPhysicalTick(ResponseReader r)
         {
             r.IgnoreVersion();
@@ -223,7 +237,7 @@ namespace InterReact
             FormattedBasisPoints = r.ReadString();
             ImpliedFuturesPrice = r.ReadDouble();
             HoldDays = r.ReadInt();
-            FutureExpiry = r.ReadString();
+            FutureLastTradeDate = r.ReadString();
             DividendImpact = r.ReadDouble();
             DividendsToLastTradeDate = r.ReadDouble();
         }
@@ -235,6 +249,7 @@ namespace InterReact
     /// </summary>
     public sealed class OptionComputationTick : Tick
     {
+        public int? TickAttrib { get; }
         public double? ImpliedVolatility { get; }
         public double? Delta { get; }
         public double? OptPrice { get; }
@@ -243,11 +258,19 @@ namespace InterReact
         public double? Vega { get; }
         public double? Theta { get; }
         public double? UndPrice { get; }
+
+        internal OptionComputationTick() { }
+
         internal OptionComputationTick(ResponseReader r)
         {
-            int version = r.GetVersion();
+            if (!r.Config.SupportsServerVersion(ServerVersion.PRICE_BASED_VOLATILITY))
+                r.RequireVersion(6);
+
             RequestId = r.ReadInt();
             TickType = r.ReadEnum<TickType>();
+            if (r.Config.SupportsServerVersion(ServerVersion.PRICE_BASED_VOLATILITY))
+                TickAttrib = r.ReadInt();
+
             ImpliedVolatility = r.ReadDoubleNullable();
             if (ImpliedVolatility == -1)
                 ImpliedVolatility = null;
@@ -256,30 +279,29 @@ namespace InterReact
             if (Delta == -2)
                 Delta = null;
 
-            if (version >= 6 || TickType == TickType.ModelOptionComputation || TickType == TickType.DelayedModelOptionComputation)
-            {
-                OptPrice = r.ReadDoubleNullable();
-                if (OptPrice == -1)
-                    OptPrice = null;
-                PvDividend = r.ReadDoubleNullable();
-                if (PvDividend == -1)
-                    PvDividend = null;
-            }
-            if (version >= 6)
-            {
-                Gamma = r.ReadDoubleNullable();
-                if (Gamma == -2)
-                    Gamma = null;
-                Vega = r.ReadDoubleNullable();
-                if (Vega == -2)
-                    Vega = null;
-                Theta = r.ReadDoubleNullable();
-                if (Theta == -2)
-                    Theta = null;
-                UndPrice = r.ReadDoubleNullable();
-                if (UndPrice == -1)
-                    UndPrice = null;
-            }
+            OptPrice = r.ReadDoubleNullable();
+            if (OptPrice == -1)
+                OptPrice = null;
+
+            PvDividend = r.ReadDoubleNullable();
+            if (PvDividend == -1)
+                PvDividend = null;
+
+            Gamma = r.ReadDoubleNullable();
+            if (Gamma == -2)
+                Gamma = null;
+
+            Vega = r.ReadDoubleNullable();
+            if (Vega == -2)
+                Vega = null;
+
+            Theta = r.ReadDoubleNullable();
+            if (Theta == -2)
+                Theta = null;
+
+            UndPrice = r.ReadDoubleNullable();
+            if (UndPrice == -1)
+                UndPrice = null;
         }
     }
 
@@ -288,7 +310,10 @@ namespace InterReact
     /// </summary>
     public sealed class HaltedTick : Tick
     {
-        public HaltType HaltType { get; }
+        public HaltType HaltType { get; } = HaltType.Undefined;
+
+        internal HaltedTick() { }
+
         internal HaltedTick(int requestId, TickType tickType, HaltType haltType)
         {
             RequestId = requestId;
@@ -304,7 +329,10 @@ namespace InterReact
     /// </summary>
     public sealed class MarketDataTypeTick : Tick
     {
-        public MarketDataType MarketDataType { get; }
+        public MarketDataType MarketDataType { get; } = MarketDataType.Undefined;
+
+        internal MarketDataTypeTick() { }
+
         internal MarketDataTypeTick(ResponseReader r)
         {
             r.IgnoreVersion();

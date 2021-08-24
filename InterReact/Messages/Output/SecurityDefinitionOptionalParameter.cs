@@ -2,16 +2,18 @@
 
 namespace InterReact
 {
-    // output
     public sealed class SecurityDefinitionOptionParameter : IHasRequestId
     {
         public int RequestId { get; }
-        public string Exchange { get; }
+        public string Exchange { get; } = "";
         public int UnderlyingContractId { get; }
-        public string TradingClass { get; }
-        public string Multiplier { get; }
-        public List<string> Expirations { get; } = new List<string>();
-        public List<string> Strikes { get; } = new List<string>();
+        public string TradingClass { get; } = "";
+        public string Multiplier { get; } = "";
+        public List<string> Expirations { get; } = new();
+        public List<double> Strikes { get; } = new();
+
+        internal SecurityDefinitionOptionParameter() { }
+
         internal SecurityDefinitionOptionParameter(ResponseReader r)
         {
             RequestId = r.ReadInt();
@@ -19,8 +21,12 @@ namespace InterReact
             UnderlyingContractId = r.ReadInt();
             TradingClass = r.ReadString();
             Multiplier = r.ReadString();
-            r.AddStringsToList(Expirations);
-            r.AddStringsToList(Strikes);
+            int n = r.ReadInt();
+            for (int i = 0; i < n; i++)
+                Expirations.Add(r.ReadString());
+            n = r.ReadInt();
+            for (int i = 0; i < n; i++)
+                Strikes.Add(r.ReadDouble());
         }
     }
 

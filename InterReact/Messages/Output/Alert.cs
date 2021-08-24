@@ -1,4 +1,6 @@
 ﻿
+using System.Text.RegularExpressions;
+
 namespace InterReact
 {
     /// <summary>
@@ -9,12 +11,12 @@ namespace InterReact
     /// </summary>
     public sealed class Alert : IHasRequestId, IHasOrderId
     {
-        public int RequestId { get; }
-        public int OrderId { get; }
+        public int RequestId { get; } = -1;
+        public int OrderId { get; } = -1;
         public int Code { get; }
-        public string Message { get; }
-        public AlertType AlertType { get; }
-
+        public string Message { get; } = "";
+        public AlertType AlertType { get; } = AlertType.Undefined;
+        internal Alert() { }
         internal Alert(int id, int code, string message)
         {
             RequestId = OrderId = id;
@@ -26,7 +28,12 @@ namespace InterReact
         internal static Alert Create(ResponseReader r)
         {
             r.RequireVersion(2);
-            return new Alert(r.ReadInt(), r.ReadInt(), r.ReadString());
+            int id = r.ReadInt();
+            int code = r.ReadInt();
+            string msg = r.ReadString();
+            if (r.Config.SupportsServerVersion(ServerVersion.ENCODE_MSG_ASCII7))
+                msg = Regex.Unescape(msg);
+            return new Alert(id, code, msg);
         }
 
         private static AlertType GetAlertTypeFromCode(int code, int id)

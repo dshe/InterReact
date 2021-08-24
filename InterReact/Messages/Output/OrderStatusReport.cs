@@ -7,7 +7,7 @@
         /// </summary>
         public int OrderId { get; }
 
-        public OrderStatus Status { get; }
+        public OrderStatus Status { get; } = OrderStatus.Unknown;
 
         /// <summary>
         /// Specifies the number of shares that have been executed.
@@ -56,6 +56,8 @@
 
         public double? MktCapPrice { get; }
 
+        internal OrderStatusReport() { }
+
         internal OrderStatusReport(ResponseReader r)
         {
             int version = r.Config.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE) ? int.MaxValue : r.ReadInt();
@@ -65,17 +67,11 @@
             Filled = r.ReadDouble();
             Remaining = r.ReadDouble();
             AverageFillPrice = r.ReadDouble();
-
-            if (version >= 2)
-                PermanentId = r.ReadInt();
-            if (version >= 3)
-                ParentId = r.ReadInt();
-            if (version >= 4)
-                LastFillPrice = r.ReadDouble();
-            if (version >= 5)
-                ClientId = r.ReadInt();
-            if (version >= 6)
-                WhyHeld = r.ReadString();
+            PermanentId = r.ReadInt();
+            ParentId = r.ReadInt();
+            LastFillPrice = r.ReadDouble();
+            ClientId = r.ReadInt();
+            WhyHeld = r.ReadString();
             if (r.Config.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE))
                 MktCapPrice = r.ReadDouble();
         }

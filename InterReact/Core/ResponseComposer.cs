@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Reactive;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Stringification;
 
 namespace InterReact
@@ -146,6 +142,8 @@ namespace InterReact
             "101" => new CompletedOrder(reader),
             "102" => new CompletedOrdersEnd(),
             "103" => new ReplaceFAEnd(reader),
+            "104" => new WshMetaData(reader),
+            "105" => new WshEventData(reader),
             _ => throw new InvalidDataException($"Undefined code '{code}'.")
         };
     }

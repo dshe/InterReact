@@ -5,7 +5,10 @@ namespace InterReact
     public sealed class MarketRule
     {
         public int MarketRuleId { get; }
-        public List<PriceIncrement> PriceIncrements { get; } = new List<PriceIncrement>();
+        public List<PriceIncrement> PriceIncrements { get; } = new();
+
+        internal MarketRule() { }
+
         internal MarketRule(ResponseReader r)
         {
             MarketRuleId = r.ReadInt();
@@ -19,11 +22,13 @@ namespace InterReact
     {
         public double LowEdge { get; }
         public double Increment { get; }
+
+        public PriceIncrement() { }
+
         public PriceIncrement(ResponseReader r)
         {
             LowEdge = r.ReadDouble();
             Increment = r.ReadDouble();
         }
     }
-
 }

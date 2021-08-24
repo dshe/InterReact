@@ -23,7 +23,7 @@
         REQ_HISTOGRAM_DATA = 119,
         SERVICE_DATA_TYPE = 120,
         AGG_GROUP = 121,
-        UNDERLYING_INFO = 122, // max support?
+        UNDERLYING_INFO = 122,
         CANCEL_HEADTIMESTAMP = 123,
         SYNT_REALTIME_BARS = 124,
         CFD_REROUTE = 125,
@@ -61,5 +61,6 @@
         DURATION = 158,
         MARKET_DATA_IN_SHARES = 159,
         POST_TO_ATS = 160,
+        WSHE_CALENDAR = 161,
     }
 }

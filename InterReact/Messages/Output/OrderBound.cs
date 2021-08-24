@@ -1,17 +1,18 @@
 ﻿namespace InterReact
 {
-    // Orderid is a long here, rather than an int like the other OrderId????
-    // MODIFIED!
     public sealed class OrderBound : IHasOrderId
     {
-        public long OrderBoundId { get; } // was OrderId
-        public int ClientId { get; } // was ApiClientId
-        public int OrderId { get; } // was ApiIOrderId
+        public long OrderBoundId { get; }
+        public int ClientId { get; }
+        public int OrderId { get; }
+
+        internal OrderBound() { }
+
         internal OrderBound(ResponseReader r)
         {
-            OrderBoundId = r.ReadLong();
-            ClientId = r.ReadInt();
-            OrderId = r.ReadInt();
+            OrderBoundId = r.ReadLong(); // was OrderId, but is a long here! ???
+            ClientId = r.ReadInt(); // was ApiClientId
+            OrderId = r.ReadInt(); // was ApiIOrderId
         }
     }
 }

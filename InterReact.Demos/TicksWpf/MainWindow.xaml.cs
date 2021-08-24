@@ -10,6 +10,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Collections.Generic;
+using System.Windows.Threading;
+using System.Reactive.Concurrency;
 
 //d:DataContext="{d:DesignInstance TicksWpf:MainViewModel, IsDesignTimeCreatable=False}"
 
@@ -124,10 +126,11 @@ namespace TicksWpf
 
             Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
-            SymbolSubject
-                .DistinctUntilChanged()
-                .ObserveOn(Application.Current.Dispatcher)
-                .Subscribe(UpdateSymbol);
+            //SymbolSubject
+            //    .DistinctUntilChanged()
+            //    .ObserveOn(Application.Current.Dispatcher)
+            //    .Subscribe(UpdateSymbol);
+            UpdateSymbol("SPY"); // tmp
         }
 
         private async void UpdateSymbol(string symbol)

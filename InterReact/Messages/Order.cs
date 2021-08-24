@@ -59,7 +59,7 @@ namespace InterReact
         /// <summary>
         /// The One-Cancels-All type.
         /// </summary>
-        public OcaType OcaType { get; set; }
+        public OcaType OcaType { get; set; } = OcaType.Undefined;
 
         /// <summary>
         /// The order reference. 
@@ -90,7 +90,7 @@ namespace InterReact
         /// </summary>
         public int? DisplaySize { get; set; }
 
-        public TriggerMethod TriggerMethod { get; set; }
+        public TriggerMethod TriggerMethod { get; set; } = TriggerMethod.Undefined;
 
         /// <summary>
         /// Allows orders to be filled outside of regular trading hours.
@@ -160,7 +160,7 @@ namespace InterReact
         /// 1 if you hold the shares, 2 if they will be delivered from elsewhere.
         /// Only for TradeAction="SSHORT".
         /// </summary>
-        public ShortSaleSlot ShortSaleSlot { get; set; }
+        public ShortSaleSlot ShortSaleSlot { get; set; } = ShortSaleSlot.Undefined;
 
         public string DesignatedLocation { get; set; } = "";
         public int ExemptCode { get; set; } = -1;
@@ -178,7 +178,7 @@ namespace InterReact
         /// </summary>
         public bool OptOutSmartRouting { get; set; }
 
-        public AuctionStrategy AuctionStrategy { get; set; }
+        public AuctionStrategy AuctionStrategy { get; set; } = AuctionStrategy.Undefined;
 
         /// <summary>
         /// The auction's starting price.
@@ -208,13 +208,13 @@ namespace InterReact
         /// Enter percentage not decimal, e.g. 2 not .02
         /// </summary>
         public double? Volatility { get; set; }
-        public VolatilityType VolatilityType { get; set; }
+        public VolatilityType VolatilityType { get; set; } = VolatilityType.Undefined;
         public int ContinuousUpdate { get; set; }
 
         /// <summary>
         /// 1=Bid/Ask midpoint, 2 = BidOrAsk.
         /// </summary>
-        public ReferencePriceType ReferencePriceType { get; set; }
+        public ReferencePriceType ReferencePriceType { get; set; } = ReferencePriceType.Undefined;
 
         public string DeltaNeutralOrderType { get; set; } = "";
 

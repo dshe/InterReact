@@ -16,10 +16,10 @@ namespace InterReact
             }
             set
             {
-                Volume = int.Parse(value);
+                Volume = long.Parse(value);
             }
         }
 
-        public int Volume { get; set; }
+        public long Volume { get; set; }
     }
 }

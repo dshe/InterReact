@@ -6,7 +6,8 @@
         public Order Order { get; } = new Order();
         public OrderState OrderState { get; } = new OrderState();
 
-        public CompletedOrder(ResponseReader reader)
+        internal CompletedOrder() { }
+        internal CompletedOrder(ResponseReader reader)
         {
             OrderDecoder decoder = new(reader, Contract, Order, OrderState, int.MaxValue);
 

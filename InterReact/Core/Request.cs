@@ -22,7 +22,7 @@ namespace InterReact
         public Request(Config config, IRxSocketClient rxSocket, Limiter limiter)
         {
             Config = config;
-            SendAction = (x) => rxSocket.Send(x);
+            SendAction = x => rxSocket.Send(x);
             Limiter = limiter;
         }
 
@@ -37,11 +37,11 @@ namespace InterReact
         //////////////////////////////////////////////////////////////////////////////////////////////
 
         /// <summary>
-        /// Call this method to request market data. The market data will be returned as Tick* objects.
+        /// Call this method to request market data, streaming or snapshot.
+        /// Returns market data for an instrument either in real time or 10-15 minutes delayed (depending on the market data type specified)
         /// Include the generic Tick RealtimeVolume to receive TickRealTimeVolume ticks.
         /// </summary>
-        public void RequestMarketData(int requestId, Contract contract,
-            IEnumerable<GenericTickType>? genericTickTypes = null,
+        public void RequestMarketData(int requestId, Contract contract, IEnumerable<GenericTickType>? genericTickTypes = null,
             bool isSnapshot = false, bool isRegulatorySnapshot = false, IEnumerable<Tag>? options = null)
         {
             RequestMessage m = Message();
@@ -62,8 +62,10 @@ namespace InterReact
             m.Write(dnc != null);
             if (dnc != null)
                 m.Write(dnc.ContractId, dnc.Delta, dnc.Price);
+
             m.Write(MakeGenericTicksList(genericTickTypes));
             m.Write(isSnapshot);
+
             if (Config.SupportsServerVersion(ServerVersion.SMART_COMPONENTS))
                 m.Write(isRegulatorySnapshot); // $.01
             m.Write(Tag.Combine(options)).Send();
@@ -81,15 +83,11 @@ namespace InterReact
             }
         }
 
-        public void CancelMarketData(int requestId) =>
-            Message().Write(RequestCode.CancelMarketData, "1", requestId).Send();
+        public void CancelMarketData(int requestId) => Message().Write(RequestCode.CancelMarketData, "1", requestId).Send();
 
         public void PlaceOrder(int id, Order order, Contract contract) // the monster
         {
-            if (!string.IsNullOrEmpty(order.ExtOperator))
-                Config.RequireServerVersion(ServerVersion.EXT_OPERATOR);
-            if (order.CashQty != null)
-                Config.RequireServerVersion(ServerVersion.CASH_QTY);
+            VerifyOrder(order);
 
             RequestMessage m = Message();
 
@@ -146,19 +144,23 @@ namespace InterReact
                 order.DeltaNeutralOrderType, order.DeltaNeutralAuxPrice);
 
             if (!string.IsNullOrEmpty(order.DeltaNeutralOrderType))
+            {
                 m.Write(order.DeltaNeutralContractId, order.DeltaNeutralSettlingFirm,
                     order.DeltaNeutralClearingAccount, order.DeltaNeutralClearingIntent,
                     order.DeltaNeutralOpenClose, order.DeltaNeutralShortSale, order.DeltaNeutralShortSaleSlot,
                     order.DeltaNeutralDesignatedLocation);
+            }
 
             m.Write(order.ContinuousUpdate, order.ReferencePriceType,
                 order.TrailingStopPrice, order.TrailingStopPercent,
                 order.ScaleInitLevelSize, order.ScaleSubsLevelSize, order.ScalePriceIncrement);
 
-            if (order.ScalePriceIncrement != null)
+            if (order.ScalePriceIncrement > 0 && order.ScalePriceIncrement != double.MaxValue)
+            {
                 m.Write(order.ScalePriceAdjustValue, order.ScalePriceAdjustInterval,
                     order.ScaleProfitOffset, order.ScaleAutoReset, order.ScaleInitPosition,
                     order.ScaleInitFillQty, order.ScaleRandomPercent);
+            }
 
             m.Write(order.ScaleTable, order.ActiveStartTime, order.ActiveStopTime, order.HedgeType);
 
@@ -169,8 +171,10 @@ namespace InterReact
 
             m.Write(contract.DeltaNeutralContract != null);
             if (contract.DeltaNeutralContract != null)
+            {
                 m.Write(contract.DeltaNeutralContract.ContractId, contract.DeltaNeutralContract.Delta,
                     contract.DeltaNeutralContract.Price);
+            }
 
             m.Write(order.AlgoStrategy);
             if (!string.IsNullOrEmpty(order.AlgoStrategy))
@@ -186,8 +190,10 @@ namespace InterReact
             if (Config.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
             {
                 if (order.OrderType == OrderType.PeggedToBenchmark)
+                {
                     m.Write(order.ReferenceContractId, order.IsPeggedChangeAmountDecrease,
                         order.PeggedChangeAmount, order.ReferenceChangeAmount, order.ReferenceExchange);
+                }
                 m.Write(order.Conditions.Count);
                 if (order.Conditions.Count > 0)
                 {
@@ -198,15 +204,6 @@ namespace InterReact
                 m.Write(order.AdjustedOrderType, order.TriggerPrice, order.LmtPriceOffset, order.AdjustedStopPrice,
                     order.AdjustedStopLimitPrice, order.AdjustedTrailingAmount, order.AdjustableTrailingUnit);
             }
-
-            if (Config.SupportsServerVersion(ServerVersion.EXT_OPERATOR))
-                m.Write(order.ExtOperator);
-
-            if (Config.SupportsServerVersion(ServerVersion.SOFT_DOLLAR_TIER))
-                m.Write(order.SoftDollarTier.Name, order.SoftDollarTier.Value);
-
-            if (Config.SupportsServerVersion(ServerVersion.CASH_QTY))
-                m.Write(order.CashQty);
 
             if (Config.SupportsServerVersion(ServerVersion.EXT_OPERATOR))
                 m.Write(order.ExtOperator);
@@ -244,6 +241,39 @@ namespace InterReact
             m.Send();
         }
 
+        private void VerifyOrder(Order order)
+        {
+            if (!string.IsNullOrEmpty(order.ExtOperator))
+                Config.RequireServerVersion(ServerVersion.EXT_OPERATOR);
+
+            if (order.CashQty != null && order.CashQty != double.MaxValue)
+                Config.RequireServerVersion(ServerVersion.CASH_QTY);
+
+            if (!string.IsNullOrEmpty(order.Mifid2DecisionMaker) || !string.IsNullOrEmpty(order.Mifid2DecisionAlgo))
+                Config.RequireServerVersion(ServerVersion.DECISION_MAKER);
+
+            if (!string.IsNullOrEmpty(order.Mifid2ExecutionTrader) || !string.IsNullOrEmpty(order.Mifid2ExecutionAlgo))
+                Config.RequireServerVersion(ServerVersion.DECISION_MAKER);
+
+            if (order.DontUseAutoPriceForHedge)
+                Config.RequireServerVersion(ServerVersion.AUTO_PRICE_FOR_HEDGE);
+
+            if (order.IsOmsContainer)
+                Config.RequireServerVersion(ServerVersion.ORDER_CONTAINER);
+
+            if (order.DiscretionaryUpToLimitPrice)
+                Config.RequireServerVersion(ServerVersion.D_PEG_ORDERS);
+
+            if (order.UsePriceMgmtAlgo.HasValue)
+                Config.RequireServerVersion(ServerVersion.PRICE_MGMT_ALGO);
+
+            if (order.Duration != int.MaxValue && order.Duration != null)
+                Config.RequireServerVersion(ServerVersion.DURATION);
+
+            if (order.PostToAts != int.MaxValue && order.PostToAts != null)
+                Config.RequireServerVersion(ServerVersion.POST_TO_ATS);
+        }
+
         public void CancelOrder(int orderId) => Message().Write(RequestCode.CancelOrder, "1", orderId).Send();
 
         public void RequestOpenOrders() => Message().Write(RequestCode.RequestOpenOrders, "1").Send();
@@ -254,8 +284,8 @@ namespace InterReact
         /// Updates for all accounts are returned when accountCode is null(?).
         /// This information is updated every three minutes.
         /// </summary>
-        public void RequestAccountUpdates(bool start, string? accountCode = null) =>
-            Message().Write(RequestCode.RequestAccountData, "2", start, accountCode).Send();
+        public void RequestAccountUpdates(bool subscribe, string? accountCode = null) => // ???
+            Message().Write(RequestCode.RequestAccountData, "2", subscribe, accountCode).Send();
 
         /// <summary>
         /// When this method is called, execution reports from the last 24 hours that meet the filter criteria are retrieved.
@@ -276,7 +306,7 @@ namespace InterReact
         /// In case there are multiple API clients attached to TWS, the OrderId may not be unique among the clients.
         /// Call this function to request an OrderId that can be used with multiple clients.
         /// </summary>
-        public void RequestNextOrderId() => Message().Write(RequestCode.RequestIds, "1", "1").Send();
+        public void RequestIds(int number) => Message().Write(RequestCode.RequestIds, "1", number).Send();
 
         /// <summary>
         /// Call this method to retrieve one or more ContractDetails objects for the specified selector contract.
@@ -297,19 +327,45 @@ namespace InterReact
         /// <summary>
         /// Call this method to request market depth for the specified contract. 
         /// </summary>
-        public void RequestMarketDepth(int requestId, Contract contract, int numRows = 3, IEnumerable<Tag>? options = null)
+        public void RequestMarketDepth(int requestId, Contract contract, int numRows = 3, bool isSmartDepth = false, IEnumerable<Tag>? options = null)
         {
-            Message()
-                .Write(RequestCode.RequestMarketDepth, "5", requestId,
+            if (isSmartDepth)
+                Config.RequireServerVersion(ServerVersion.SMART_DEPTH);
+
+            if (!string.IsNullOrEmpty(contract.PrimaryExchange))
+                Config.RequireServerVersion(ServerVersion.MKT_DEPTH_PRIM_EXCHANGE);
+
+            RequestMessage m = Message();
+
+            m.Write(RequestCode.RequestMarketDepth, "5", requestId,
                     contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
-                    contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
-                    contract.Currency, contract.LocalSymbol, contract.TradingClass, numRows,
-                    Tag.Combine(options))
-                .Send();
+                    contract.Strike, contract.Right, contract.Multiplier, contract.Exchange);
+
+            if (Config.SupportsServerVersion(ServerVersion.MKT_DEPTH_PRIM_EXCHANGE))
+                m.Write(contract.PrimaryExchange);
+
+            m.Write(contract.Currency, contract.LocalSymbol, contract.TradingClass, numRows);
+
+            if (Config.SupportsServerVersion(ServerVersion.SMART_DEPTH))
+                m.Write(isSmartDepth);
+
+            m.Write(Tag.Combine(options));
+
+            m.Send();
         }
 
-        public void CancelMarketDepth(int requestId) => 
-            Message().Write(RequestCode.CancelMarketDepth, "1", requestId).Send();
+        public void CancelMarketDepth(int requestId, bool isSmartDepth = false)
+        {
+            if (isSmartDepth)
+                Config.RequireServerVersion(ServerVersion.SMART_DEPTH);
+
+            RequestMessage m = Message().Write(RequestCode.CancelMarketDepth, "1", requestId);
+
+            if (Config.SupportsServerVersion(ServerVersion.SMART_DEPTH))
+                m.Write(isSmartDepth);
+         
+            m.Send();
+        }
 
         /// <summary>
         /// Call this method to start receiving news bulletins, such as information about exchange status.
@@ -334,8 +390,15 @@ namespace InterReact
         public void RequestFinancialAdvisorConfiguration(FinancialAdvisorDataType dataType) =>
             Message().Write(RequestCode.RequestFinancialAdvisorConfiguration, "1", dataType).Send();
 
-        public void ReplaceFinancialAdvisorConfiguration(FinancialAdvisorDataType dataType, string xml) =>
-            Message().Write(RequestCode.ReplaceFinancialAdvisorConfiguration, "1", dataType, xml).Send();
+        public void ReplaceFinancialAdvisorConfiguration(int requestId, FinancialAdvisorDataType dataType, string xml)
+        {
+            RequestMessage m = Message().Write(RequestCode.ReplaceFinancialAdvisorConfiguration, "1", dataType, xml);
+
+            if (Config.SupportsServerVersion(ServerVersion.REPLACE_FA_END))
+                m.Write(requestId); // ???
+
+            m.Send();
+        }
 
         /// <summary>
         /// Call this method to receive historical data.
@@ -352,14 +415,18 @@ namespace InterReact
             HistoricalBarSize? barSize = null,
             HistoricalDataType? dataType = null,
             bool regularTradingHoursOnly = false,
+            bool keepUpToDate = false,
             IEnumerable<Tag>? options = null)
         {
-            if (endDate == default)
+            if (endDate == default && !keepUpToDate)
                 endDate = Config.Clock.GetCurrentInstant();
 
-            RequestMessage m = Message()
-                .Write(RequestCode.RequestHistoricalData, "6",
-                    requestId, contract.ContractId, contract.Symbol, contract.SecurityType,
+            RequestMessage m = Message().Write(RequestCode.RequestHistoricalData);
+
+            if (!Config.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
+                m.Write("6");
+
+            m.Write(requestId, contract.ContractId, contract.Symbol, contract.SecurityType,
                     contract.LastTradeDateOrContractMonth, contract.Strike, contract.Right,
                     contract.Multiplier, contract.Exchange, contract.PrimaryExchange,
                     contract.Currency, contract.LocalSymbol, contract.TradingClass, contract.IncludeExpired,
@@ -376,6 +443,10 @@ namespace InterReact
                 foreach (ContractComboLeg leg in contract.ComboLegs)
                     m.Write(leg.ContractId, leg.Ratio, leg.TradeAction, leg.Exchange);
             }
+
+            if (Config.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
+                m.Write(keepUpToDate);
+
             m.Write(Tag.Combine(options)).Send();
         }
 
@@ -395,22 +466,28 @@ namespace InterReact
         /// <summary>
         /// Call this method to start receiving market scanner results.
         /// </summary>
-        public void RequestScannerSubscription(int requestId, ScannerSubscription subscription, IEnumerable<Tag>? subscriptionOptions = null)
+        public void RequestScannerSubscription(int requestId, ScannerSubscription subscription, IEnumerable<Tag>? subscriptionOptions = null, IEnumerable<Tag>? subscriptionFilterOptions = null)
         {
-            Message()
-                .Write(RequestCode.RequestScannerSubscription,"4",
-                    requestId, subscription.NumberOfRows, subscription.Instrument,
-                    subscription.LocationCode, subscription.ScanCode,
-                    subscription.AbovePrice, subscription.BelowPrice, subscription.AboveVolume,
-                    subscription.MarketCapAbove, subscription.MarketCapBelow,
-                    subscription.MoodyRatingAbove, subscription.MoodyRatingBelow,
-                    subscription.SpRatingAbove, subscription.SpRatingBelow,
-                    subscription.MaturityDateAbove, subscription.MaturityDateBelow,
-                    subscription.CouponRateAbove, subscription.CouponRateBelow,
-                    subscription.ExcludeConvertible, subscription.AverageOptionVolumeAbove,
-                    subscription.ScannerSettingPairs, subscription.StockType,
-                    Tag.Combine(subscriptionOptions))
-                .Send();
+            RequestMessage m = Message().Write(RequestCode.RequestScannerSubscription);
+            if (!Config.SupportsServerVersion(ServerVersion.SCANNER_GENERIC_OPTS))
+                m.Write("4");
+
+            m.Write(requestId, subscription.NumberOfRows, subscription.Instrument,
+               subscription.LocationCode, subscription.ScanCode,
+               subscription.AbovePrice, subscription.BelowPrice, subscription.AboveVolume,
+               subscription.MarketCapAbove, subscription.MarketCapBelow,
+               subscription.MoodyRatingAbove, subscription.MoodyRatingBelow,
+               subscription.SpRatingAbove, subscription.SpRatingBelow,
+               subscription.MaturityDateAbove, subscription.MaturityDateBelow,
+               subscription.CouponRateAbove, subscription.CouponRateBelow,
+               subscription.ExcludeConvertible, subscription.AverageOptionVolumeAbove,
+               subscription.ScannerSettingPairs, subscription.StockType);
+
+            if (Config.SupportsServerVersion(ServerVersion.SCANNER_GENERIC_OPTS))
+                m.Write(Tag.Combine(subscriptionFilterOptions));
+
+            m.Write(Tag.Combine(subscriptionOptions));
+            m.Send();
         }
 
         public void CancelScannerSubscription(int requestId) =>
@@ -538,14 +615,6 @@ namespace InterReact
 
         public void CancelPositions() => Message().Write(RequestCode.CancelPositions, "1").Send();
 
-        // For IB's internal purpose. Allows to provide means of verification between the TWS and third party programs.
-        public void VerifyRequest(string apiName, string apiVersion) =>
-            Message().Write(RequestCode.VerifyRequest, "1", apiName, apiVersion).Send();
-
-        //  For IB's internal purpose.Allows to provide means of verification between the TWS and third party programs.
-        public void VerifyMessage(string apiData) =>
-            Message().Write(RequestCode.VerifyMessage, "1", apiData).Send();
-
         public void QueryDisplayGroups(int requestId) =>
             Message().Write(RequestCode.QueryDisplayGroups, "1", requestId).Send();
 
@@ -557,14 +626,6 @@ namespace InterReact
 
         public void UnsubscribeFromGroupEvents(int requestId) =>
             Message().Write(RequestCode.UnsubscribeFromGroupEvents, "1", requestId).Send();
-
-        // For IB's internal purpose. Allows to provide means of verification between the TWS and third party programs.
-        public void VerifyAndAuthorizeRequest(string apiName, string apiVersion, string opaqueIsvKey) =>
-            Message().Write(RequestCode.VerifyAndAuthorizeRequest, "1", apiName, apiVersion, opaqueIsvKey).Send();
-
-        // For IB's internal purpose. Allows to provide means of verification between the TWS and third party programs.
-        public void VerifyAndAuthorizeMessage(string apiData, string xyzResponse) =>
-            Message().Write(RequestCode.VerifyAndAuthorizeMessage, "1", apiData, xyzResponse).Send();
 
         /**
         * Requests position subscription for account and/or model
@@ -640,10 +701,14 @@ namespace InterReact
             Message().Write(RequestCode.RequestSmartComponents, requestId, bboExchange).Send();
         }
 
-        public void RequestNewsArticle(int requestId, string providerCode, string articleId)
+        public void RequestNewsArticle(int requestId, string providerCode, string articleId, IEnumerable<Tag>? options = null)
         {
             Config.RequireServerVersion(ServerVersion.REQ_NEWS_ARTICLE);
-            Message().Write(RequestCode.RequestNewsArticle, requestId, providerCode, articleId).Send();
+
+            RequestMessage m = Message().Write(RequestCode.RequestNewsArticle, requestId, providerCode, articleId);
+            if (Config.SupportsServerVersion(ServerVersion.NEWS_QUERY_ORIGINS))
+                m.Write(Tag.Combine(options));
+            m.Send();
         }
 
         public void RequestNewsProviders()
@@ -652,12 +717,13 @@ namespace InterReact
             Message().Write(RequestCode.RequestNewsProviders).Send();
         }
 
-        public void RequestHistoricalNews(int requestId, int conId, string providerCodes, string startTime, string endTime, int totalResults)
+        public void RequestHistoricalNews(int requestId, int conId, string providerCodes, string startTime, string endTime, int totalResults, IEnumerable<Tag>? options = null)
         {
             Config.RequireServerVersion(ServerVersion.REQ_HISTORICAL_NEWS);
-            Message()
-                .Write(RequestCode.RequestHistoricalNews, requestId, conId, providerCodes, startTime, endTime, totalResults)
-                .Send();
+            RequestMessage m = Message().Write(RequestCode.RequestHistoricalNews, requestId, conId, providerCodes, startTime, endTime, totalResults);
+            if (Config.SupportsServerVersion(ServerVersion.NEWS_QUERY_ORIGINS))
+                m.Write(Tag.Combine(options));
+            m.Send();
         }
 
         // Returns the timestamp of earliest available historical data for a contract and data type
@@ -689,6 +755,114 @@ namespace InterReact
         {
             Config.RequireServerVersion(ServerVersion.REQ_HISTOGRAM_DATA);
             Message().Write(RequestCode.CancelHistogramData, requestId).Send();
+        }
+
+        public void CancelHeadTimestamp(int requestId)
+        {
+            Config.RequireServerVersion(ServerVersion.CANCEL_HEADTIMESTAMP);
+            Message().Write(RequestCode.CancelHeadTimestamp, requestId).Send();
+        }
+
+        public void RequestMarketRule(int requestId)
+        {
+            Config.RequireServerVersion(ServerVersion.MARKET_RULES);
+            Message().Write(RequestCode.RequestMarketRule, requestId).Send();
+        }
+
+        public void ReuestPnL(int requestId, string account, string modelCode)
+        {
+            Config.RequireServerVersion(ServerVersion.PNL);
+            Message().Write(RequestCode.ReqPnL, requestId, account, modelCode).Send();
+        }
+
+        public void CancelPnL(int requestId)
+        {
+            Config.RequireServerVersion(ServerVersion.PNL);
+            Message().Write(RequestCode.CancelPnL, requestId).Send();
+        }
+
+        public void RequestPnLSingle(int requestId, string account, string modelCode, int contractId)
+        {
+            Config.RequireServerVersion(ServerVersion.PNL);
+            Message().Write(RequestCode.ReqPnLSingle, requestId, account, modelCode, contractId).Send();
+        }
+
+        public void CancelPnLSingle(int requestId)
+        {
+            Config.RequireServerVersion(ServerVersion.PNL);
+            Message().Write(RequestCode.CancelPnLSingle, requestId).Send();
+        }
+
+        public void RequestHistoricalTicks(int requestId, Contract contract, string startDateTime, string endDateTime,
+            int numberOfTicks, string whatToShow, int useRth, bool ignoreSize, List<Tag> miscOptions)
+        {
+            Config.RequireServerVersion(ServerVersion.HISTORICAL_TICKS);
+            Message().Write(RequestCode.ReqHistoricalTicks, requestId, contract, 
+                startDateTime, endDateTime, numberOfTicks, whatToShow, useRth, ignoreSize, miscOptions).Send();
+        }
+
+        public void RequestTickByTickData(int requestId, Contract contract, string tickType, int numberOfTicks, bool ignoreSize)
+        {
+            Config.RequireServerVersion(ServerVersion.TICK_BY_TICK);
+            if (numberOfTicks != 0 || ignoreSize)
+                Config.RequireServerVersion(ServerVersion.TICK_BY_TICK_IGNORE_SIZE);
+
+            RequestMessage m = Message().Write(RequestCode.ReqTickByTickData, requestId, 
+                contract.ContractId,
+                contract.Symbol,
+                contract.SecurityType,
+                contract.LastTradeDateOrContractMonth,
+                contract.Strike,
+                contract.Right,
+                contract.Multiplier,
+                contract.Exchange,
+                contract.PrimaryExchange,
+                contract.Currency,
+                contract.LocalSymbol,
+                contract.TradingClass,
+                tickType);
+
+            if (Config.SupportsServerVersion(ServerVersion.TICK_BY_TICK_IGNORE_SIZE))
+                m.Write(numberOfTicks, ignoreSize);
+
+            m.Send();
+        }
+
+        public void CancelTickByTickData(int requestId)
+        {
+            Config.RequireServerVersion(ServerVersion.TICK_BY_TICK);
+            Message().Write(RequestCode.CancelTickByTickData, requestId).Send();
+        }
+
+        public void RequestCompletedOrders(bool apiOnly)
+        {
+            Config.RequireServerVersion(ServerVersion.COMPLETED_ORDERS);
+            Message().Write(RequestCode.ReqCompletedOrders, apiOnly).Send();
+        }
+
+        public void RequestWshMetaData(int requestId)
+        {
+            Config.RequireServerVersion(ServerVersion.WSHE_CALENDAR);
+            Message().Write(RequestCode.ReqWshMetaData, requestId).Send();
+        }
+
+        public void CancelWshMetaData(int requestId)
+        {
+
+            Config.RequireServerVersion(ServerVersion.WSHE_CALENDAR);
+            Message().Write(RequestCode.CancelWshMetaData, requestId).Send();
+        }
+
+        public void RequestWshEventData(int requestId, int contractId)
+        {
+            Config.RequireServerVersion(ServerVersion.WSHE_CALENDAR);
+            Message().Write(RequestCode.ReqWshEventData, requestId, contractId).Send();
+        }
+
+        public void CancelWshEventData(int requestId)
+        {
+            Config.RequireServerVersion(ServerVersion.WSHE_CALENDAR);
+            Message().Write(RequestCode.CancelWshEventData, requestId).Send();
         }
     }
 }

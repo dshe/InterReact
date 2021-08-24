@@ -1,19 +1,19 @@
-﻿using System;
-using System.Reactive.Linq;
-
-namespace InterReact
+﻿namespace InterReact
 {
     public sealed class HistoricalDataUpdate : IHasRequestId
     {
         public int RequestId { get; }
         public int BarCount { get; }
-        public string Date { get; }
+        public string Date { get; } = "";
         public double Open { get; }
         public double Close { get; }
         public double High { get; }
         public double Low { get; }
         public double WAP { get; }
         public long Volume { get; }
+
+        internal HistoricalDataUpdate() { }
+
         internal HistoricalDataUpdate(ResponseReader r)
         {
             RequestId = r.ReadInt();
@@ -27,6 +27,4 @@ namespace InterReact
             Volume = r.ReadLong();
         }
     }
-
-
 }

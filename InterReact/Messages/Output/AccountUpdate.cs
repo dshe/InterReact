@@ -5,68 +5,62 @@ namespace InterReact
 {
     public sealed class AccountValue
     {
-        public string Account { get; init; }
-        public string Key { get; init; }
-        public string Currency { get; init; }
-        public string Value { get; init; }
-        public AccountValue() => Account = Key = Currency = Value = "";
+        public string Key { get; init; } = "";
+        public string Value { get; init; } = "";
+        public string Currency { get; init; } = "";
+        public string Account { get; init; } = "";
+
+        internal AccountValue() { }
         internal AccountValue(ResponseReader r)
         {
-            r.RequireVersion(2);
+            int version = r.GetVersion();
             Key = r.ReadString();
             Value = r.ReadString();
             Currency = r.ReadString();
-            Account = r.ReadString();
+            Account = version >= 2 ? r.ReadString() : "";
         }
     }
 
     public sealed class PortfolioValue
     {
-        public string Account { get; init; }
-        public Contract Contract { get; init; }
-        public double Position { get; init; }
-        public double MarketPrice { get; init; }
-        public double MarketValue { get; init; }
-        public double AverageCost { get; init; }
-        public double UnrealizedPnl { get; init; }
-        public double RealizedPnl { get; init; }
-        public PortfolioValue() 
-        {
-            Account = "";
-            Contract = new Contract();
-        }
+        public string AccountName { get; } = "";
+        public Contract Contract { get; } = new();
+        public double Position { get; }
+        public double MarketPrice { get; }
+        public double MarketValue { get; }
+        public double AverageCost { get; }
+        public double UnrealizedPnl { get; }
+        public double RealizedPnl { get; }
+        internal PortfolioValue() {}
         internal PortfolioValue(ResponseReader r)
         {
             r.RequireVersion(8);
-            Contract = new Contract
-            {
-                ContractId = r.ReadInt(),
-                Symbol = r.ReadString(),
-                SecurityType = r.ReadStringEnum<SecurityType>(),
-                LastTradeDateOrContractMonth = r.ReadString(),
-                Strike = r.ReadDouble(),
-                Right = r.ReadStringEnum<OptionRightType>(),
-                Multiplier = r.ReadString(),
-                PrimaryExchange = r.ReadString(),
-                Currency = r.ReadString(),
-                LocalSymbol = r.ReadString(),
-                TradingClass = r.ReadString()
-            };
+            Contract.ContractId = r.ReadInt();
+            Contract.Symbol = r.ReadString();
+            Contract.SecurityType = r.ReadStringEnum<SecurityType>();
+            Contract.LastTradeDateOrContractMonth = r.ReadString();
+            Contract.Strike = r.ReadDouble();
+            Contract.Right = r.ReadStringEnum<OptionRightType>();
+            Contract.Multiplier = r.ReadString();
+            Contract.PrimaryExchange = r.ReadString();
+            Contract.Currency = r.ReadString();
+            Contract.LocalSymbol = r.ReadString();
+            Contract.TradingClass = r.ReadString();
             Position = r.ReadDouble();
             MarketPrice = r.ReadDouble();
             MarketValue = r.ReadDouble();
             AverageCost = r.ReadDouble();
             UnrealizedPnl = r.ReadDouble();
             RealizedPnl = r.ReadDouble();
-            Account = r.ReadString();
+            AccountName = r.ReadString();
         }
     }
 
     public sealed class AccountUpdateTime
     {
         private static readonly LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HH:mm");
-        public LocalTime Time { get; init; }
-        public AccountUpdateTime(LocalTime time) => Time = time;
+        public LocalTime Time { get; }
+        internal AccountUpdateTime() { }
         internal AccountUpdateTime(ResponseReader r)
         {
             r.IgnoreVersion();
@@ -79,7 +73,7 @@ namespace InterReact
     /// </summary>
     public sealed class AccountUpdateEnd
     {
-        public string Account { get; init; }
+        public string Account { get; }
         public AccountUpdateEnd(string account = "") => Account = account;
         internal AccountUpdateEnd(ResponseReader r)
         {

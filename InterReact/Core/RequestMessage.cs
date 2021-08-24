@@ -25,6 +25,7 @@ namespace InterReact
         {
             byte[] bytes = Strings.ToByteArray().ToByteArrayWithLengthPrefix();
             Limiter.Limit(() => SendAction(bytes));
+            Strings.Clear();
         }
 
         /////////////////////////////////////////////////////

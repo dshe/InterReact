@@ -6,6 +6,8 @@ namespace InterReact
     {
         public List<MarketDepthExchange> Exchanges { get; } = new();
 
+        internal MarketDepthExchanges() { }
+
         internal MarketDepthExchanges(ResponseReader r)
         {
             int n = r.ReadInt();
@@ -16,11 +18,14 @@ namespace InterReact
 
     public sealed class MarketDepthExchange
     {
-        public string Exchange { get; }
-        public string SecType { get; }
-        public string ListingExch { get; }
-        public string ServiceDataTyp { get; }
+        public string Exchange { get; } = "";
+        public string SecType { get; } = "";
+        public string ListingExch { get; } = "";
+        public string ServiceDataTyp { get; } = "";
         public int? AggGroup { get; } // The aggregated group
+
+        internal MarketDepthExchange() { }
+
         internal MarketDepthExchange(ResponseReader r)
         {
             Exchange = r.ReadString();

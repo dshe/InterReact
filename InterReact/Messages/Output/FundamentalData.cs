@@ -4,7 +4,9 @@
     {
         public int RequestId { get; }
 
-        public string Data { get; }
+        public string Data { get; } = "";
+        
+        internal FundamentalData() { }
 
         internal FundamentalData(ResponseReader r)
         {

@@ -80,7 +80,7 @@ namespace InterReact
         public static IObservable<T> OfTickType<T>(this IObservable<Tick> source, Func<TickSelector, IObservable<T>> selector) =>
             selector(new TickSelector(source));
         public static IObservable<T> OfTickType<T>(this IObservable<Union<Tick, Alert>> source, Func<TickSelector, IObservable<T>> selector) =>
-            selector(new TickSelector(source.Select(u => u.Source) .OfType<Tick>()));
+            selector(new TickSelector(source.Select(u => u.Source).OfType<Tick>()));
 
         public static IObservable<Tick> UndelayTicks(this IObservable<Tick> source) =>
             source.Do(x =>

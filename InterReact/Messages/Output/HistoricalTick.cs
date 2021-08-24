@@ -6,9 +6,12 @@ namespace InterReact
     public sealed class HistoricalTicks : IHasRequestId
     {
         public int RequestId { get; }
-        public List<HistoricalTick> Ticks { get; } = new List<HistoricalTick>();
+        public List<HistoricalTick> Ticks { get; } = new();
         public bool Done { get; }
-        public HistoricalTicks(ResponseReader r)
+
+        internal HistoricalTicks() { }
+
+        internal HistoricalTicks(ResponseReader r)
         {
             RequestId = r.ReadInt();
             int n = r.ReadInt();
@@ -24,6 +27,9 @@ namespace InterReact
         public long Time { get; }
         public double Price { get; }
         public long Size { get; }
+
+        internal HistoricalTick() { }
+
         internal HistoricalTick(ResponseReader r)
         {
             Time = r.ReadLong();
@@ -36,9 +42,11 @@ namespace InterReact
     public sealed class HistoricalLastTicks : IHasRequestId
     {
         public int RequestId { get; }
-        public List<HistoricalLastTick> Ticks { get; } = new List<HistoricalLastTick>();
+        public List<HistoricalLastTick> Ticks { get; } = new();
         public bool Done { get; }
-        public HistoricalLastTicks(ResponseReader r)
+
+        internal HistoricalLastTicks() { }
+        internal HistoricalLastTicks(ResponseReader r)
         {
             RequestId = r.ReadInt();
             int n = r.ReadInt();
@@ -52,15 +60,18 @@ namespace InterReact
     public sealed class HistoricalLastTick
     {
         public long Time { get; }
-        public TickAttribLast TickAttribLast { get; }
+        public TickAttribLast TickAttribLast { get; } = new();
         public double Price { get; }
         public long Size { get; }
-        public string Exchange { get; }
-        public string SpecialConditions { get; }
+        public string Exchange { get; } = "";
+        public string SpecialConditions { get; } = "";
+
+        internal HistoricalLastTick() { }
+
         internal HistoricalLastTick(ResponseReader r)
         {
             Time = r.ReadLong();
-            TickAttribLast = new TickAttribLast(r.ReadInt());
+            TickAttribLast.Set(r.ReadInt());
             Price = r.ReadDouble();
             Size = r.ReadLong();
             Exchange = r.ReadString();
@@ -71,14 +82,17 @@ namespace InterReact
     public sealed class HistoricalBidAskTicks : IHasRequestId
     {
         public int RequestId { get; }
-        public List<HistoricalTick> Ticks { get; } = new List<HistoricalTick>();
+        public List<HistoricalBidAskTick> Ticks { get; } = new();
         public bool Done { get; }
-        public HistoricalBidAskTicks(ResponseReader r)
+
+        internal HistoricalBidAskTicks() { }
+
+        internal HistoricalBidAskTicks(ResponseReader r)
         {
             RequestId = r.ReadInt();
             int n = r.ReadInt();
             for (int i = 0; i < n; i++)
-                Ticks.Add(new HistoricalTick(r));
+                Ticks.Add(new HistoricalBidAskTick(r));
             Done = r.ReadBool();
         }
 
@@ -87,20 +101,22 @@ namespace InterReact
     public sealed class HistoricalBidAskTick
     {
         public long Time { get; }
-        public TickAttribBidAsk TickAttribBidAsk { get; }
+        public TickAttribBidAsk TickAttribBidAsk { get; } = new TickAttribBidAsk();
         public double PriceBid { get; }
         public double PriceAsk { get; }
         public long SizeBid { get; }
         public long SizeAsk { get; }
+
+        internal HistoricalBidAskTick() { }
+
         internal HistoricalBidAskTick(ResponseReader r)
         {
             Time = r.ReadLong();
-            TickAttribBidAsk = new TickAttribBidAsk(r.ReadInt());
+            TickAttribBidAsk.Set(r.ReadInt());
             PriceBid = r.ReadDouble();
             PriceAsk = r.ReadDouble();
             SizeBid = r.ReadLong();
             SizeAsk = r.ReadLong();
         }
     }
-
 }

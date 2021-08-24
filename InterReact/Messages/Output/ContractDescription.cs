@@ -4,18 +4,16 @@ namespace InterReact
 {
     public sealed class ContractDescription // output
     {
-        public Contract Contract { get; }
-        public List<string> DerivativeSecTypes { get; } = new List<string>();
+        public Contract Contract { get; } = new();
+        public List<string> DerivativeSecTypes { get; } = new();
+        internal ContractDescription() { }
         internal ContractDescription(ResponseReader r)
         {
-            Contract = new Contract
-            {
-                ContractId = r.ReadInt(),
-                Symbol = r.ReadString(),
-                SecurityType = r.ReadStringEnum<SecurityType>(),
-                PrimaryExchange = r.ReadString(),
-                Currency = r.ReadString()
-            };
+            Contract.ContractId = r.ReadInt();
+            Contract.Symbol = r.ReadString();
+            Contract.SecurityType = r.ReadStringEnum<SecurityType>();
+            Contract.PrimaryExchange = r.ReadString();
+            Contract.Currency = r.ReadString();
             r.AddStringsToList(DerivativeSecTypes);
         }
     }

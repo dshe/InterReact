@@ -2,6 +2,8 @@
 {
     public enum MarketDataType
     {
+        Undefined = 0,
+
         // Live data is streamed back in real time. Market data subscriptions are required to receive live market data.
         // Default
         Realtime = 1,
