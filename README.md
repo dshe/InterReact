@@ -1,7 +1,7 @@
 # InterReact&nbsp;&nbsp; [![License](https://img.shields.io/badge/Version-0.0.2-blue)]() [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ***Reactive C# API to Interactive Brokers***
-- compatible with Interactive Brokers TWS/Gateway API 9.85.02 (Aug 05 2021).
+- compatible with Interactive Brokers API 9.85.02 (Aug 05 2021).
 - supports **.NET 5**.
 - dependencies: RxSockets, StringEnums, Stringification, Reactive Extensions, NodaTime.
 - demo applications: Console, WPF.
@@ -58,4 +58,4 @@ interReact.DisposeAsync();
 ```
 ### Notes ###
 
-TWS or Gateway must be running with API access enabled. In TWS, navigate to Edit / Global Configuration / API / Settings and ensure the option "Enable ActiveX and Socket Clients" is selected.
+Interactive Brokers Trader Workstation (TWS) or Gateway must be running with API access enabled. In TWS, navigate to Edit / Global Configuration / API / Settings and ensure the option "Enable ActiveX and Socket Clients" is selected.
