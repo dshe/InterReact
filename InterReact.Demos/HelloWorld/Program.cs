@@ -26,7 +26,7 @@ ILogger Logger = LoggerFactory
 // WithLogger(Logger, true) will also send all incoming messages to the Logger. Try it.
 IInterReactClient client = await InterReactClientBuilder
     .Create()
-    .WithLogger(Logger, true)
+    .WithLogger(Logger, false)
     .BuildAsync();
 
 if (!client.Request.Config.IsDemoAccount)
@@ -56,7 +56,7 @@ PriceTick priceTick = await client
 
 if (priceTick.Price <= 0)
 {
-    Console.WriteLine($"Invalid price: {priceTick.Price}.\nPerhaps the market is closed.");
+    Console.WriteLine($"\nInvalid price: {priceTick.Price}. Perhaps the market is closed.\n");
     return;
 }
 
@@ -81,7 +81,7 @@ Task<OrderStatusReport> orderTask = client
     .Timeout(TimeSpan.FromSeconds(10))
     .ToTask();
 
-Console.WriteLine($"Placing a buy order at limit price: {order.LimitPrice}.");
+Console.WriteLine($"\nPlacing a buy order at limit price: {order.LimitPrice}.\n");
 client.Request.PlaceOrder(orderId, order, contract);
 
 try
@@ -89,14 +89,14 @@ try
     // Wait for order completion, or until timeout
     OrderStatusReport orderStatusReport = await orderTask;
     if (orderStatusReport.Status == OrderStatus.Filled)
-        Console.WriteLine($"Order was filled at price: {orderStatusReport.AverageFillPrice}.");
+        Console.WriteLine($"\nOrder was filled at price: {orderStatusReport.AverageFillPrice}.\n");
     else if (orderStatusReport.Status == OrderStatus.Cancelled || orderStatusReport.Status == OrderStatus.ApiCancelled)
-        Console.WriteLine("Order was cancelled.");
+        Console.WriteLine("\nOrder was cancelled.\n");
 }
 catch (TimeoutException)
 {
     client.Request.CancelOrder(orderId);
-    Console.WriteLine("Timeout! Order cancelled.\nPerhaps try again.");
+    Console.WriteLine("\nTimeout! Order cancelled. Perhaps try again.\n");
 }
 
 client.Request.CancelMarketData(tickRequestId);

@@ -6,19 +6,17 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Collections.Generic;
-using System.Windows.Threading;
-using System.Reactive.Concurrency;
-
-//d:DataContext="{d:DesignInstance TicksWpf:MainViewModel, IsDesignTimeCreatable=False}"
+using System.Reactive.Disposables;
+using System.Windows.Media;
 
 namespace TicksWpf
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         public string Symbol
         {
             set => SymbolSubject.OnNext(value);
@@ -37,7 +35,6 @@ namespace TicksWpf
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Description)));
             }
         }
-
 
         private double bidPrice;
         public double BidPrice
@@ -78,31 +75,41 @@ namespace TicksWpf
             }
         }
 
-        private double priceChange;
-        public double PriceChange
+        private double changePrice;
+        public double ChangePrice
         {
-            get => priceChange;
+            get => changePrice;
             private set
             {
-                if (value == priceChange)
+                if (value == changePrice)
                     return;
-                priceChange = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PriceChange)));
+                changePrice = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ChangePrice)));
             }
         }
 
+        private SolidColorBrush changeColor = Brushes.Transparent;
+        public SolidColorBrush ChangeColor
+        {
+            get => changeColor;
+            private set
+            {
+                if (value == changeColor)
+                    return;
+                changeColor = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ChangeColor)));
+            }
+        }
+
+        ////////////////////////////////////////////////////////////////////
+
         private IInterReactClient? Client;
-        private IDisposable? TicksConnection;
+        private IDisposable TicksConnection = Disposable.Empty;
 
         public MainWindow()
         {
             InitializeComponent();
-
             DataContext = this;
-
-            var t0 = Thread.CurrentThread.ManagedThreadId;
-            var t1 = Application.Current.Dispatcher.Thread.ManagedThreadId;
-            ;
         }
 
         private async void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
@@ -126,55 +133,50 @@ namespace TicksWpf
 
             Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
-            //SymbolSubject
-            //    .DistinctUntilChanged()
-            //    .ObserveOn(Application.Current.Dispatcher)
-            //    .Subscribe(UpdateSymbol);
-            UpdateSymbol("SPY"); // tmp
+            SymbolSubject
+                .DistinctUntilChanged()
+                .ObserveOn(Application.Current.Dispatcher)
+                .Subscribe(UpdateSymbol);
         }
 
         private async void UpdateSymbol(string symbol)
         {
-            Debug.WriteLine($"Symbol: {symbol}");
-
             Description = "";
-            BidPrice = AskPrice = LastPrice = 0;
+            BidPrice = AskPrice = LastPrice = ChangePrice = 0;
 
             // Disposing the connection cancels the IB data subscription and conveniently disposes all subscriptions to the observable.
-            TicksConnection?.Dispose();
+            TicksConnection.Dispose();
 
             if (string.IsNullOrWhiteSpace(symbol))
                 return;
 
             Contract contract = new()
             {
-                SecurityType = SecurityType.Stock,//SecurityType.Cash,
+                SecurityType = SecurityType.Stock,
                 Symbol = symbol,
                 Currency = "USD",
-                Exchange = "SMART"    //"IDEAL" //"IDEALPRO" //"SMART"
+                Exchange = "SMART"
             };
 
-            // Create the observable and capture the single contract details object to determine the full name of the contract.
-            IObservable<Union<ContractDetails, Alert>> response = Client!
+
+            // Cache the contracts
+
+            // Obtain the contract details to determine the full name of the contract.
+            IList<Union<ContractDetails, Alert>> cds = await Client!
                 .Services
-                .CreateContractDetailsObservable(contract);
-
-            response.Select(u => u.Source).OfType<Alert>().Subscribe(alert =>
-            {
-                MessageBox.Show($"ContractDetails:\n\n {alert.Message}");
-            });
-
-            IList<ContractDetails> cds = await response
-                .Select(u => u.Source)
-                .OfType<ContractDetails>()
+                .CreateContractDetailsObservable(contract)
                 .ToList();
 
-            // Multiple contracts may be returned. Take the first one.
-            ContractDetails? cd = cds.FirstOrDefault();
+            // Display alerts, if any.
+            foreach (Alert alert in cds.Select(u => u.Source).OfType<Alert>())
+                MessageBox.Show($"ContractDetails:\n\n {alert.Message}");
+
+            // Multiple ContractDetails (contracts) may be returned. Take the first one.
+            ContractDetails? cd = cds.Select(u => u.Source).OfType<ContractDetails>().FirstOrDefault();
             if (cd == null)
                 return;
 
-            // Display the stock name in the title bar.
+            // Display the stock name.
             Description = cd.LongName;
 
             SubscribeToTicks(contract);
@@ -183,7 +185,8 @@ namespace TicksWpf
         private void SubscribeToTicks(Contract contract)
         {
             // Create the observable which will emit realtime updates.
-            IConnectableObservable<Union<Tick,Alert>> ticks = Client!.Services
+            IConnectableObservable<Union<Tick, Alert>> ticks = Client!
+                .Services
                 .CreateTickObservable(contract)
                 .UndelayTicks()
                 .ObserveOn(Application.Current.Dispatcher)
@@ -200,27 +203,21 @@ namespace TicksWpf
             ticks.Select(u => u.Source).OfType<Alert>().Subscribe(m => MessageBox.Show(m.Message));
 
             IObservable<PriceTick> priceTicks = ticks.OfTickType(t => t.PriceTick);
-
-            IObservable<double> bidPrices = priceTicks.Where(t => t.TickType == TickType.BidPrice).Select(t => t.Price);
-            IObservable<double> askPrices = priceTicks.Where(t => t.TickType == TickType.AskPrice).Select(t => t.Price);
+            priceTicks.Where(t => t.TickType == TickType.BidPrice).Select(t => t.Price).Subscribe(p => BidPrice = p);
+            priceTicks.Where(t => t.TickType == TickType.AskPrice).Select(t => t.Price).Subscribe(p => AskPrice = p);
+            
             IObservable<double> lastPrices = priceTicks.Where(t => t.TickType == TickType.LastPrice).Select(t => t.Price);
-            IObservable<double> lastPriceChanges = lastPrices
-                .Buffer(2, 1)
-                .Where(x => x.Count == 2)
-                .Select(x => x[1] - x[0]);
-
-            bidPrices.Subscribe(p => BidPrice = p);
-            askPrices.Subscribe(p => AskPrice = p);
             lastPrices.Subscribe(p => LastPrice = p);
-            lastPriceChanges.Subscribe(p => PriceChange = p);
-        }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+            IObservable<double> changes = lastPrices.Changes();
+            changes.Subscribe(p => ChangePrice = p);
+            changes.ToColor().Subscribe(color => ChangeColor = color);
+        }
 
         private async void MainWindow_OnClosing(object sender, CancelEventArgs e)
         {
-            //if (Client != null)
-            //    await Client.DisposeAsync();
+            if (Client != null)
+                await Client.DisposeAsync();
         }
     }
 

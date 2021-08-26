@@ -34,7 +34,7 @@
             decoder.ReadHidden();
             decoder.ReadDiscretionaryAmount();
             decoder.ReadGoodAfterTime();
-            decoder.skipSharesAllocation();
+            decoder.SkipSharesAllocation();
             decoder.ReadFAParams();
             decoder.ReadModelCode();
             decoder.ReadGoodTillDate();
@@ -52,9 +52,9 @@
             decoder.ReadAllOrNone();
             decoder.ReadMinQty();
             decoder.ReadOcaType();
-            decoder.skipETradeOnly();
-            decoder.skipFirmQuoteOnly();
-            decoder.skipNbboPriceCap();
+            decoder.SkipETradeOnly();
+            decoder.SkipFirmQuoteOnly();
+            decoder.SkipNbboPriceCap();
             decoder.ReadParentId();
             decoder.ReadTriggerMethod();
             decoder.ReadVolOrderParams(true);

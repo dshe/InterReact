@@ -96,7 +96,7 @@
                 Order.GoodAfterTime = R.ReadString();
         }
 
-        internal void skipSharesAllocation()
+        internal void SkipSharesAllocation()
         {
             if (MessageVersion >= 6)
                 R.ReadString(); // skip deprecated sharesAllocation field
@@ -223,19 +223,19 @@
                 Order.OcaType = R.ReadEnum<OcaType>();
         }
 
-        internal void skipETradeOnly()
+        internal void SkipETradeOnly()
         {
             if (MessageVersion >= 9)
                 R.ReadBool();
         }
 
-        internal void skipFirmQuoteOnly()
+        internal void SkipFirmQuoteOnly()
         {
             if (MessageVersion >= 9)
                 R.ReadBool();
         }
 
-        internal void skipNbboPriceCap()
+        internal void SkipNbboPriceCap()
         {
             if (MessageVersion >= 9)
                 R.ReadDoubleNullable();

@@ -4,7 +4,7 @@ using RxSockets;
 
 namespace InterReact
 {
-    public interface IInterReactClient: IAsyncDisposable, IEditorBrowsableNever
+    public interface IInterReactClient : IAsyncDisposable, IEditorBrowsableNever
     {
         Request Request { get; }
         IObservable<object> Response { get; }
@@ -18,7 +18,7 @@ namespace InterReact
         public IObservable<object> Response { get; }
         public Services Services { get; }
 
-        // must be public because it is constructed by the container
+        // This constructor must be public since it is constructed by the container.
         public InterReactClient(IRxSocketClient rxsocket, Request request, 
             IObservable<object> response, Services services)
         {
@@ -30,4 +30,5 @@ namespace InterReact
 
         public async ValueTask DisposeAsync() => await Dispose().ConfigureAwait(false);
     }
+
 }

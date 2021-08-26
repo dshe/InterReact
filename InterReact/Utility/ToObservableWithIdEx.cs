@@ -20,16 +20,23 @@ namespace InterReact
                 IDisposable subscription = source
                     .OfType<IHasRequestId>() // IMPORTANT!
                     .Where(m => m.RequestId == id)
-                    .Finally(() => cancelable = false)
                     .SubscribeSafe(Observer.Create<IHasRequestId>(
                         onNext: m =>
                         {
-                            observer.OnNext(m); // could be Alert
                             cancelable = false;
+                            observer.OnNext(m); // could be Alert
                             observer.OnCompleted();
                         },
-                        onError: observer.OnError,
-                        onCompleted: observer.OnCompleted));
+                        onError: e =>
+                        {
+                            cancelable = false;
+                            observer.OnError(e);
+                        },
+                        onCompleted: () =>
+                        {
+                            cancelable = false;
+                            observer.OnCompleted();
+                        }));
 
                 if (cancelable == null)
                     startRequest(id);
@@ -38,8 +45,8 @@ namespace InterReact
 
                 return Disposable.Create(() =>
                 {
-                    if (cancelable == true)
-                        stopRequest?.Invoke(id);
+                    if (stopRequest != null && cancelable == true)
+                        stopRequest(id);
                     subscription.Dispose();
                 });
             });
@@ -86,8 +93,18 @@ namespace InterReact
                 IDisposable subscription = source
                     .OfType<IHasRequestId>() // IMPORTANT!
                     .Where(m => m.RequestId == id)
-                    .Finally(() => cancelable = false)
-                    .SubscribeSafe(observer);
+                    .SubscribeSafe(Observer.Create<IHasRequestId>(
+                        onNext: m => observer.OnNext(m),
+                        onError: e =>
+                        {
+                            cancelable = false;
+                            observer.OnError(e);
+                        },
+                        onCompleted: () =>
+                        {
+                            cancelable = false;
+                            observer.OnCompleted();
+                        }));
 
                 if (cancelable == null)
                     startRequest(id);
@@ -97,7 +114,7 @@ namespace InterReact
                 return Disposable.Create(() =>
                 {
                     if (cancelable == true)
-                        stopRequest.Invoke(id);
+                        stopRequest(id);
                     subscription.Dispose();
                 });
             });

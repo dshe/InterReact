@@ -7,6 +7,7 @@ using InterReact;
 using RxSockets;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 namespace CoreClientServer
 {
@@ -14,7 +15,6 @@ namespace CoreClientServer
     {
         public IRxSocketServer SocketServer { get; }
         private readonly ILogger Logger;
-        private readonly Limiter Limiter = new();
 
         internal Server(ILogger logger, ILogger libLogger)
         {
@@ -60,23 +60,23 @@ namespace CoreClientServer
                 throw new InvalidDataException("StartApi message not received.");
             Logger.LogInformation("Received StartApi message.");
 
-            void send(byte[] x) => accept.Send(x);
+            void send(List<string> strings) => accept.Send(strings.ToByteArray().ToByteArrayWithLengthPrefix());
 
             // Send server version.
-            new RequestMessage(send, Limiter)
+            new RequestMessage(send)
                 .Write((int)ServerVersion.FRACTIONAL_POSITIONS) 
                 .Write(DateTime.Now.ToString("yyyyMMdd HH:mm:ss XXX"))
                 .Send();
 
             // Send managed accounts
-            new RequestMessage(send, Limiter)
+            new RequestMessage(send)
                 .Write("15")
                 .Write("1")
                 .Write("123,456,789")
                 .Send();
 
             // Send NextId = 1
-            new RequestMessage(send, Limiter)
+            new RequestMessage(send)
                 .Write("9")
                 .Write("1")
                 .Write("10")
@@ -107,14 +107,10 @@ namespace CoreClientServer
             long frequency = Stopwatch.Frequency * (count + 1) / watch.ElapsedTicks;
             Logger.LogInformation($"Received {frequency:N0} messages/second.");
 
-            MemoryStream ms = new();
-
-            var message = new RequestMessage(x => ms.Write(x), Limiter);
-            for (int i = 0; i < 100_000; i++)
+            var message = new RequestMessage(x => send(x));
+            for (int i = 0; i < 10_000; i++)
                 message.Write("2", "3", 1, TickType.LastSize, 300).Send();
             message.Write("1", "3", 1, TickType.LastPrice, 100, 200, true).Send();
-
-            accept.Send(ms.ToArray());
 
             Logger.LogInformation("Sending some messages...");
 

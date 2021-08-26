@@ -21,39 +21,19 @@ namespace InterReact.UnitTests.Core
     public class Request_Message_Tests : UnitTestsBase
     {
         private readonly RequestMessage requestMessage;
-        private readonly Limiter limiter = new();
-        private string[] Strings = Array.Empty<string>();
-        internal byte[] Bytes = Array.Empty<byte>();
-
-        private void Send(byte[] bytes)
-        {
-            Bytes = bytes;
-            var list = bytes
-                .ToArraysFromBytesWithLengthPrefix()
-                .ToStringArrays().ToList();
-            Assert.Equal(1, list.Count);
-            Strings = list[0];
-        }
+        private readonly List<string> Strings = new();
 
         public Request_Message_Tests(ITestOutputHelper output) : base(output)
         {
-            requestMessage = new RequestMessage(Send, limiter);
+            requestMessage = new RequestMessage(s => Strings.AddRange(s));
         }
 
-        private void AssertResult(params string?[]? strings)
+        private void AssertResult(params string[] strings)
         {
-            var list = Strings;
-            if (strings == null)
-            {
-                Assert.Equal(list.Length, 1);
-                Assert.Equal(list[0], null);
-            }
-            else
-            {
-                Assert.Equal(list.Length, strings.Length);
-                for (var i = 0; i < list.Length; i++)
-                    Assert.Equal(list[i], strings[i]);
-            }
+            Assert.Equal(Strings.Count, strings.Length);
+            for (var i = 0; i < Strings.Count; i++)
+                Assert.Equal(Strings[i], strings[i]);
+            Strings.Clear();
         }
 
         [Fact]

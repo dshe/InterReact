@@ -1,22 +1,9 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Windows;
 using System.Windows.Threading;
 
 namespace TicksWpf
 {
-    public abstract class NotifyPropertyChangedBase : INotifyPropertyChanged
-    {
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void NotifyPropertiesChanged() =>
-            NotifyPropertyChanged("");
-
-        // An Empty value or null for the propertyName parameter indicates that all of the properties have changed.
-        protected virtual void NotifyPropertyChanged(string name) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-    }
-
     public static class Utilities
     {
         public static void MessageBoxShow(string message, string caption, bool terminate = false)

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using StringEnums;
-using RxSockets;
 using System.Linq;
 
 namespace InterReact
@@ -11,20 +10,13 @@ namespace InterReact
     public sealed class RequestMessage
     {
         private readonly List<string> Strings = new();
-        private readonly Action<byte[]> SendAction;
-        private readonly Limiter Limiter;
-
-        internal RequestMessage(Action<byte[]> sendAction, Limiter limiter)
-        {
-            SendAction = sendAction;
-            Limiter = limiter;
-        }
+        private readonly Action<List<string>> SendAction;
+        internal RequestMessage(Action<List<string>> sendAction) => SendAction = sendAction;
 
         // V100Plus format: 4 byte message length prefix plus payload of null-terminated strings.
         internal void Send()
         {
-            byte[] bytes = Strings.ToByteArray().ToByteArrayWithLengthPrefix();
-            Limiter.Limit(() => SendAction(bytes));
+            SendAction(Strings);
             Strings.Clear();
         }
 

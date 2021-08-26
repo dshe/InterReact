@@ -67,8 +67,18 @@ namespace InterReact
                 bool? cancelable = null;
 
                 IDisposable subscription = filteredSource
-                    .Finally(() => cancelable = false)
-                    .SubscribeSafe(observer); // IMPORTANT!
+                    .SubscribeSafe(Observer.Create<T>(
+                        onNext: m => observer.OnNext(m),
+                        onError: e =>
+                        {
+                            cancelable = false;
+                            observer.OnError(e);
+                        },
+                        onCompleted: () =>
+                        {
+                            cancelable = false;
+                            observer.OnCompleted();
+                        }));
 
                 if (cancelable == null)
                     startRequest();
@@ -78,7 +88,7 @@ namespace InterReact
                 return Disposable.Create(() =>
                 {
                     if (cancelable == true)
-                        stopRequest.Invoke();
+                        stopRequest();
                     subscription.Dispose();
                 });
             });

@@ -3,6 +3,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net5.0-windows10.0.19041</TargetFramework>
+    <!-- IMPORTAMT: <TargetFramework>net5.0-windows10.0.19041</TargetFramework>-->
     <UseWPF>true</UseWPF>
     <Nullable>enable</Nullable>
   </PropertyGroup>
