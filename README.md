@@ -38,7 +38,7 @@ Contract contract = new Contract
 IObservable<ITick> tickObservable = interReact.Services.CreateTickObservable(contract);
 
 // Subscribe to the observable to start observing ticks.
-IDisposable subscription = tickObservable
+tickObservable
     .OfType(selector => selector.TickPrice)
     .Subscribe(onNext: tickPrice =>
     {
@@ -49,9 +49,6 @@ IDisposable subscription = tickObservable
 Console.WriteLine(Environment.NewLine + "press a key to exit...");
 Console.ReadKey();
 Console.Clear();
-
-// Dispose the subscription to stop observing ticks.
-subscription.Dispose();
 
 // Disconnect from TWS/Gateway.
 interReact.DisposeAsync();
