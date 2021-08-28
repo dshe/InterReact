@@ -9,31 +9,20 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-/*
-new TickPrice();
-new TickSize();
-new TickString();
-new TickRealtimeVolume(); // from TickString
-new TickTime(); // from TickString
-new TickGeneric();
-new TickHalted(); // from TickGeneric
-new TickExchangeForPhysical(); // not tested
-*/
-
-namespace InterReact.SystemTests.Service
+namespace InterReact.SystemTests.MarketData
 {
-    public class MarketDataTests : TestCollectionBase
+    public class MarketDataServiceTests : TestCollectionBase
     {
-        public MarketDataTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+        public MarketDataServiceTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
         [Fact]
         public async Task T01_MarketDataTickSnapshot()
         {
-            IObservable<Union<Tick, Alert>> observable = Client
+            IObservable<ITick> observable = Client
                 .Services
                 .CreateTickSnapshotObservable(ForexContract1);
 
-            IList<Union<Tick, Alert>> ticks = await observable.ToList();
+            IList<ITick> ticks = await observable.ToList();
 
             Assert.NotEmpty(ticks);
         }
@@ -41,7 +30,7 @@ namespace InterReact.SystemTests.Service
         [Fact]
         public async Task T02_MarketDataTicks()
         {
-            IObservable<Union<Tick, Alert>> observable = Client
+            IObservable<ITick> observable = Client
                 .Services
                 .CreateTickObservable(StockContract1);
 
@@ -51,11 +40,11 @@ namespace InterReact.SystemTests.Service
         [Fact]
         public async Task T03_MarketDataRealtimeVolume()
         {
-            IObservable<Union<Tick, Alert>> observable = Client
+            IObservable<ITick> observable = Client
                 .Services
                 .CreateTickObservable(StockContract1, new[] { GenericTickType.RealtimeVolume });
 
-            var task = observable.OfType<Tick>().Where(t => t.TickType == TickType.RealtimeVolume).FirstAsync();
+            var task = observable.OfTickType(t => t.RealtimeVolumeTick).FirstAsync();
 
             var tick = await observable.FirstAsync();
         }

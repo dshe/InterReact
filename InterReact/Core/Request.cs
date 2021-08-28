@@ -635,9 +635,7 @@ namespace InterReact
         /**
         * Requests position subscription for account and/or model
         * Initially all positions are returned, and then updates are returned for any position changes in real time.
-        * @param account - If an account Id is provided, only the account's positions belonging to the specified model will be delivered
-        * @param modelCode - The code of the model's positions we are interested in.
-        * @sa cancelPositionsMulti, EWrapper::positionMulti, EWrapper::positionMultiEnd
+        * If an account Id is provided, only the account's positions belonging to the specified model will be delivered
         */
         public void RequestPositionsMulti(int requestId, string account, string modelCode)
         {
@@ -692,7 +690,7 @@ namespace InterReact
             Message().Write(RequestCode.RequestMatchingSymbols, requestId, pattern).Send();
         }
 
-        // venues for which market data is returned to updateMktDepthL2(those with market makers)
+        // Discover exchhanges for which market data is returned to updateMktDepthL2(those with market makers)
         public void RequestMarketDepthExchanges()
         {
             Config.RequireServerVersion(ServerVersion.REQ_MKT_DEPTH_EXCHANGES);
@@ -706,6 +704,7 @@ namespace InterReact
             Message().Write(RequestCode.RequestSmartComponents, requestId, bboExchange).Send();
         }
 
+        // retrieve the body of a news article
         public void RequestNewsArticle(int requestId, string providerCode, string articleId, IEnumerable<Tag>? options = null)
         {
             Config.RequireServerVersion(ServerVersion.REQ_NEWS_ARTICLE);
@@ -732,9 +731,9 @@ namespace InterReact
         }
 
         // Returns the timestamp of earliest available historical data for a contract and data type
-        //* @param whatToShow - type of data for head timestamp - "BID", "ASK", "TRADES", etc
-        //* @param useRTH - use regular trading hours only, 1 for yes or 0 for no
-        //* @param formatDate - @param formatDate set to 1 to obtain the bars' time as yyyyMMdd HH:mm:ss, set to 2 to obtain it like system time format in seconds
+        // whatToShow - type of data for head timestamp - "BID", "ASK", "TRADES", etc
+        // useRTH - use regular trading hours only, 1 for yes or 0 for no
+        // formatDate - @param formatDate set to 1 to obtain the bars' time as yyyyMMdd HH:mm:ss, set to 2 to obtain it like system time format in seconds
         public void RequestHeadTimestamp(int requestId, Contract contract, string whatToShow, int useRth, int formatDate)
         {
             Config.RequireServerVersion(ServerVersion.REQ_HEAD_TIMESTAMP);
@@ -768,13 +767,14 @@ namespace InterReact
             Message().Write(RequestCode.CancelHeadTimestamp, requestId).Send();
         }
 
+        // Find market rule (minimum price increment) from codes indicated in ContractDetails.
         public void RequestMarketRule(int requestId)
         {
             Config.RequireServerVersion(ServerVersion.MARKET_RULES);
             Message().Write(RequestCode.RequestMarketRule, requestId).Send();
         }
 
-        public void ReuestPnL(int requestId, string account, string modelCode)
+        public void RequestPnL(int requestId, string account, string modelCode)
         {
             Config.RequireServerVersion(ServerVersion.PNL);
             Message().Write(RequestCode.ReqPnL, requestId, account, modelCode).Send();
@@ -806,6 +806,7 @@ namespace InterReact
                 startDateTime, endDateTime, numberOfTicks, whatToShow, useRth, ignoreSize, miscOptions).Send();
         }
 
+        // Request high Resolution Historical Data
         public void RequestTickByTickData(int requestId, Contract contract, string tickType, int numberOfTicks, bool ignoreSize)
         {
             Config.RequireServerVersion(ServerVersion.TICK_BY_TICK);
@@ -845,6 +846,7 @@ namespace InterReact
             Message().Write(RequestCode.ReqCompletedOrders, apiOnly).Send();
         }
 
+        // Request fundamental data from the Wall Street Events Horizon Calendar
         public void RequestWshMetaData(int requestId)
         {
             Config.RequireServerVersion(ServerVersion.WSHE_CALENDAR);

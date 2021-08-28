@@ -14,7 +14,7 @@ namespace InterReact.UnitTests.Extensions
     {
         private const int Id = 42;
         private int subscribeCalls, unsubscribeCalls;
-        private readonly Subject<object> subject = new Subject<object>();
+        private readonly Subject<object> subject = new ();
 
         public interface ISomeClass : IHasRequestId { }
         public class SomeClass : ISomeClass

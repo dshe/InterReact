@@ -22,18 +22,18 @@ namespace InterReact
     public sealed class ScannerDataItem
     {
         public int Rank { get; }
-        public ContractDetails ContractData { get; }
+        public ContractDetails ContractDetails { get; }
         public string Distance { get; } = "";
         public string Benchmark { get; } = "";
         public string Projection { get; } = "";
         public string ComboLegs { get; } = "";
 
-        internal ScannerDataItem() { ContractData = new(); }
+        internal ScannerDataItem() { ContractDetails = new(); }
 
         internal ScannerDataItem(ResponseReader r)
         {
             Rank = r.ReadInt();
-            ContractData = new ContractDetails(r, ContractDetailsType.ScannerContractData);
+            ContractDetails = new ContractDetails(r, ContractDetailsType.ScannerContractType);
             Distance = r.ReadString();
             Benchmark = r.ReadString();
             Projection = r.ReadString();

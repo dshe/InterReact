@@ -27,7 +27,7 @@ namespace InterReactSamples
                 Exchange = "SMART"
             };
 
-            IObservable<Union<Tick, Alert>> observable = interReact
+            IObservable<ITick> observable = interReact
                 .Services
                 .CreateTickObservable(contract);
 

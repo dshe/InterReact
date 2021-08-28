@@ -10,6 +10,8 @@ using System.Windows;
 using System.Collections.Generic;
 using System.Reactive.Disposables;
 using System.Windows.Media;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace TicksWpf
 {
@@ -126,10 +128,7 @@ namespace TicksWpf
 
             Client.Response.Subscribe(x => Debug.WriteLine(x.Stringify()));
 
-            Client.Request.RequestPositions();
             int requestId = Client.Request.GetNextId();
-            Client.Request.RequestAccountSummary(requestId);
-            Client.Request.RequestAccountUpdates(true);
 
             Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
@@ -158,34 +157,36 @@ namespace TicksWpf
                 Exchange = "SMART"
             };
 
+            try
+            {
+                ContractDetails cd = await Client!
+                    .Services
+                    .CreateContractDetailsObservable(contract)
+                    .FirstAsync() // Multiple may be returned. Take the first one.
+                    .Timeout(TimeSpan.FromSeconds(2));
 
-            // Cache the contracts
-
-            // Obtain the contract details to determine the full name of the contract.
-            IList<Union<ContractDetails, Alert>> cds = await Client!
-                .Services
-                .CreateContractDetailsObservable(contract)
-                .ToList();
-
-            // Display alerts, if any.
-            foreach (Alert alert in cds.Select(u => u.Source).OfType<Alert>())
-                MessageBox.Show($"ContractDetails:\n\n {alert.Message}");
-
-            // Multiple ContractDetails (contracts) may be returned. Take the first one.
-            ContractDetails? cd = cds.Select(u => u.Source).OfType<ContractDetails>().FirstOrDefault();
-            if (cd == null)
+                // Display the stock name.
+                Description = cd.LongName; 
+            }
+            catch (AlertException alertException)
+            {
+                MessageBox.Show($"ContractDetails: {alertException.Message}");
                 return;
-
-            // Display the stock name.
-            Description = cd.LongName;
+            }
+            catch (TimeoutException)
+            {
+                MessageBox.Show("ContractDetails: Timeout Exception");
+                return;
+            }
 
             SubscribeToTicks(contract);
         }
 
         private void SubscribeToTicks(Contract contract)
         {
+
             // Create the observable which will emit realtime updates.
-            IConnectableObservable<Union<Tick, Alert>> ticks = Client!
+            IConnectableObservable<ITick> ticks = Client!
                 .Services
                 .CreateTickObservable(contract)
                 .UndelayTicks()
@@ -197,10 +198,9 @@ namespace TicksWpf
             TicksConnection = ticks.Connect();
         }
 
-        private void SubscribeToTicks(IObservable<Union<Tick, Alert>> ticks)
+        private void SubscribeToTicks(IObservable<ITick> ticks)
         {
-            // Display warnings, if any.
-            ticks.Select(u => u.Source).OfType<Alert>().Subscribe(m => MessageBox.Show(m.Message));
+            ticks.OfTickType(t => t.Alert).Subscribe(alert => MessageBox.Show($"Ticks: {alert.Message}")) ;
 
             IObservable<PriceTick> priceTicks = ticks.OfTickType(t => t.PriceTick);
             priceTicks.Where(t => t.TickType == TickType.BidPrice).Select(t => t.Price).Subscribe(p => BidPrice = p);
@@ -220,5 +220,4 @@ namespace TicksWpf
                 await Client.DisposeAsync();
         }
     }
-
 }

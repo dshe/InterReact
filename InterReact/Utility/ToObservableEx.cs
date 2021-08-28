@@ -9,13 +9,13 @@ namespace InterReact
     // For requests that do not use requestId. 
     public static partial class Extensions
     {
-        // Returns a single result: CurrentTime, FinancialAdvisor, ManagedAccounts, ScannerParameters.
+        // Returns a single result: CurrentTime.
         internal static IObservable<T> ToObservableSingle<T>
-            (this IObservable<object> source, Action startRequest)
+            (this IObservable<object> unfilteredSource, Action startRequest)
         {
             return Observable.Create<T>(observer =>
             {
-                IDisposable subscription = source
+                IDisposable subscription = unfilteredSource
                     .OfType<T>() // IMPORTANT!
                     .SubscribeSafe(Observer.Create<T>(
                         onNext: t =>
@@ -34,13 +34,13 @@ namespace InterReact
 
 
         // Multiple results: OpenOrders.
-        internal static IObservable<object> ToObservableMultiple<TEnd>(
-            this IObservable<object> filteredSource, Action startRequest)
+        internal static IObservable<T> ToObservableMultiple<T, TEnd>(
+            this IObservable<T> filteredSource, Action startRequest)
         {
-            return Observable.Create<object>(observer =>
+            return Observable.Create<T>(observer =>
             {
                 IDisposable subscription = filteredSource
-                    .SubscribeSafe(Observer.Create<object>(
+                    .SubscribeSafe(Observer.Create<T>(
                         onNext: o =>
                         {
                             if (o is TEnd)
@@ -58,7 +58,7 @@ namespace InterReact
         }
 
 
-        // Continuous results: AccountUpdates, NewsBulletins, Positions.
+        // Continuous results: AccountUpdates, Positions.
         internal static IObservable<T> ToObservableContinuous<T>(this IObservable<T> filteredSource,
             Action startRequest, Action stopRequest)
         {

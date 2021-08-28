@@ -18,36 +18,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Extensions\CollectionBinarySearcherExtensions.cs" />
-    <Compile Remove="Utility\TryConstructSubclassTaking.cs" />
-    <Compile Remove="~\AccountObservableCollections.cs" />
-    <Compile Remove="~\CancelWhenEx.cs" />
-    <Compile Remove="~\ChangeEx.cs" />
-    <Compile Remove="~\ContractDetailsExpiryEx.cs" />
-    <Compile Remove="~\ContractDetailsExpiryTest.cs" />
-    <Compile Remove="~\ContractDetailsSingleEx.cs" />
-    <Compile Remove="~\ContractDetailsSingleTest.cs" />
-    <Compile Remove="~\ContractDetailsSmartEx.cs" />
-    <Compile Remove="~\ContractDetailsSmartTest.cs" />
-    <Compile Remove="~\ContractDetailsStrikeEx.cs" />
-    <Compile Remove="~\ContractDetailsStrikeTest.cs" />
-    <Compile Remove="~\ContractTimeTests.cs" />
-    <Compile Remove="~\DistinctByExtension.cs" />
-    <Compile Remove="~\MarketDepthObservableCollections.cs" />
-    <Compile Remove="~\NotifyPropertyChanged.cs" />
-    <Compile Remove="~\OrderMonitor.cs" />
-    <Compile Remove="~\ReadOnlyObservableList.cs" />
-    <Compile Remove="~\ThrowIfEmptyEx.cs" />
-    <Compile Remove="~\TickBidAskEx.cs" />
-    <Compile Remove="~\TickOhlcEx.cs" />
-    <Compile Remove="~\TimeoutXEx.cs" />
-    <Compile Remove="~\ToCacheSourceEx.cs" />
-    <Compile Remove="~\ToObservableCollectionEx.cs" />
-    <Compile Remove="~\ToObservableCollectionExTest.cs" />
-    <Compile Remove="~\WhereNotNullEx.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="NodaTime" Version="3.0.5" />
     <PackageReference Include="RxSockets" Version="3.0.1" />
@@ -56,34 +26,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="~\CancelWhenEx.cs" />
-    <None Include="~\ChangeEx.cs" />
-    <None Include="~\ContractDetailsExpiryEx.cs" />
-    <None Include="~\ContractDetailsExpiryTest.cs" />
-    <None Include="~\ContractDetailsSingleEx.cs" />
-    <None Include="~\ContractDetailsSingleTest.cs" />
-    <None Include="~\ContractDetailsSmartEx.cs" />
-    <None Include="~\ContractDetailsSmartTest.cs" />
-    <None Include="~\ContractDetailsStrikeEx.cs" />
-    <None Include="~\ContractDetailsStrikeTest.cs" />
-    <None Include="~\ContractTimeTests.cs" />
-    <None Include="~\ThrowIfEmptyEx.cs" />
-    <None Include="~\TickBidAskEx.cs" />
-    <None Include="~\TickOhlcEx.cs" />
-    <None Include="~\TimeoutXEx.cs" />
-    <None Include="~\ToCacheSourceEx.cs" />
-    <None Include="~\ToObservableCollectionExTest.cs" />
-    <None Include="~\TryConstructSubclassTaking.cs" />
-    <None Include="~\CollectionBinarySearcherExtensions.cs" />
     <None Include="worm64.png" Pack="true" PackagePath="\" />
-    <None Include="~\AccountObservableCollections.cs" />
-    <None Include="~\DistinctByExtension.cs" />
-    <None Include="~\MarketDepthObservableCollections.cs" />
-    <None Include="~\NotifyPropertyChanged.cs" />
-    <None Include="~\OrderMonitor.cs" />
-    <None Include="~\ReadOnlyObservableList.cs" />
-    <None Include="~\ToObservableCollectionEx.cs" />
-    <None Include="~\WhereNotNullEx.cs" />
   </ItemGroup>
+
 
 </Project>

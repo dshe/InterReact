@@ -18,6 +18,8 @@ namespace InterReact
             TickAttrib attr = new(r);
             PriceTick tickPrice = new(requestId, priceTickType, price, attr);
             TickType tickTypeSize = GetTickTypeSize(priceTickType);
+            if (tickTypeSize == TickType.Undefined)
+                return new object[] { tickPrice };
             SizeTick tickSize = new(requestId, tickTypeSize, size);
             return new object[] { tickPrice, tickSize };
         }
@@ -33,27 +35,29 @@ namespace InterReact
             _ => TickType.Undefined
         };
 
-        internal void Undelay() => TickType = GetTickTypeUndelayed(TickType);
-        private static TickType GetTickTypeUndelayed(TickType tickType) => tickType switch
+        internal void Undelay()
         {
-            TickType.DelayedBidPrice => TickType.BidPrice,
-            TickType.DelayedAskPrice => TickType.AskPrice,
-            TickType.DelayedLastPrice => TickType.LastPrice,
-            TickType.DelayedBidSize => TickType.BidSize,
-            TickType.DelayedAskSize => TickType.AskSize,
-            TickType.DelayedLastSize => TickType.LastSize,
-            TickType.DelayedHighPrice => TickType.HighPrice,
-            TickType.DelayedLowPrice => TickType.LowPrice,
-            TickType.DelayedVolume => TickType.Volume,
-            TickType.DelayedClosePrice => TickType.ClosePrice,
-            TickType.DelayedOpenPrice => TickType.OpenPrice,
-            TickType.DelayedBidOptionComputation => TickType.BidOptionComputation,
-            TickType.DelayedAskOptionComputation => TickType.AskOptionComputation,
-            TickType.DelayedLastOptionComputation => TickType.LastOptionComputation,
-            TickType.DelayedModelOptionComputation => TickType.ModelOptionComputation,
-            TickType.DelayedLastTimeStamp => TickType.LastTimeStamp,
-            _ => tickType
-        };
+            TickType = TickType switch
+            {
+                TickType.DelayedBidPrice => TickType.BidPrice,
+                TickType.DelayedAskPrice => TickType.AskPrice,
+                TickType.DelayedLastPrice => TickType.LastPrice,
+                TickType.DelayedBidSize => TickType.BidSize,
+                TickType.DelayedAskSize => TickType.AskSize,
+                TickType.DelayedLastSize => TickType.LastSize,
+                TickType.DelayedHighPrice => TickType.HighPrice,
+                TickType.DelayedLowPrice => TickType.LowPrice,
+                TickType.DelayedVolume => TickType.Volume,
+                TickType.DelayedClosePrice => TickType.ClosePrice,
+                TickType.DelayedOpenPrice => TickType.OpenPrice,
+                TickType.DelayedBidOptionComputation => TickType.BidOptionComputation,
+                TickType.DelayedAskOptionComputation => TickType.AskOptionComputation,
+                TickType.DelayedLastOptionComputation => TickType.LastOptionComputation,
+                TickType.DelayedModelOptionComputation => TickType.ModelOptionComputation,
+                TickType.DelayedLastTimeStamp => TickType.LastTimeStamp,
+                _ => TickType
+            };
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////

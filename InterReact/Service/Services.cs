@@ -11,13 +11,7 @@ namespace InterReact
         {
             Request = request;
             Response = response;
-
             CurrentTimeObservable = CreateCurrentTimeObservable();
-            ManagedAccountsObservable = CreateManagedAccountsObservable();
-            ScannerParametersObservable = CreateScannerParametersObservable();
-
-            ExecutionAndCommissionsObservable = CreateExecutionAndCommissionsObservable();
-            NewsBulletinsObservable = CreateNewsBulletinsObservable();
         }
     }
 }

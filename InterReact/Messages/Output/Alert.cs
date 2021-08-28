@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Text.RegularExpressions;
 
 namespace InterReact
@@ -9,20 +10,23 @@ namespace InterReact
     /// For messages which are not associated with a particular request or order, the Id is -1.
     /// In order to be compatible with the IHasRequestId and IHasOrderId interfaces, both requestId and orderId properties are included in Alert.
     /// </summary>
-    public sealed class Alert : IHasRequestId, IHasOrderId
+    public sealed class Alert : IHasRequestId, IHasOrderId, ITick
     {
         public int RequestId { get; } = -1;
         public int OrderId { get; } = -1;
-        public int Code { get; }
         public string Message { get; } = "";
-        public AlertType AlertType { get; } = AlertType.Undefined;
+        public int Code { get; }
+        public bool IsFatal { get; }
+        //public AlertType AlertType { get; } = AlertType.Undefined;
+
         internal Alert() { }
         internal Alert(int id, int code, string message)
         {
             RequestId = OrderId = id;
             Code = code;
             Message = message;
-            AlertType = GetAlertTypeFromCode(code, id);
+            IsFatal = code != 10167; // "Requested market data is not subscribed. Displaying delayed market data."
+            //AlertType = GetAlertTypeFromCode(code, id);
         }
 
         internal static Alert Create(ResponseReader r)
@@ -48,5 +52,13 @@ namespace InterReact
                 return AlertType.HasId;
             return AlertType.Undefined;
         }
+
+        internal AlertException ToException() => new(this);
+    }
+
+    public sealed class AlertException : Exception
+    {
+        public Alert Alert { get; }
+        public AlertException(Alert alert) : base(alert.Message) => Alert = alert;
     }
 }

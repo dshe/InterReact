@@ -1,0 +1,73 @@
+﻿using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using Xunit;
+using Xunit.Abstractions;
+
+namespace InterReact.UnitTests.Experimental
+{
+    public static class ExtensionxXX
+    {
+        // This is inadequate because after timeout the task keeps running!
+        // Need to pass a cancellation token to the task.
+        public static async Task<TResult> TimeoutAfter<TResult>(this Task<TResult> task, TimeSpan timeout)
+        {
+
+            using (var timeoutCancellationTokenSource = new CancellationTokenSource())
+            {
+
+                var completedTask = await Task.WhenAny(task, Task.Delay(timeout, timeoutCancellationTokenSource.Token));
+                if (completedTask == task)
+                {
+                    timeoutCancellationTokenSource.Cancel();
+                    return await task;  // Very important in order to propagate exceptions
+                }
+                else
+                {
+                    throw new TimeoutException("The operation has timed out.");
+                }
+            }
+        }
+
+        public class Test_AsyncX : UnitTestsBase
+        {
+            public Test_AsyncX(ITestOutputHelper output) : base(output) { }
+
+            public async Task<string> GetString()
+            {
+                for (int i = 0; i < 20; i++)
+                {
+                    Logger.LogInformation("wait " + i);
+                    await Task.Delay(500);
+                }
+                return "finished";
+            }
+
+            [Fact]
+            public async Task AsyncTest()
+            {
+                try
+                {
+                    await GetString().TimeoutAfter(TimeSpan.FromMilliseconds(1000));
+                    Logger.LogInformation("complete");
+                }
+                catch (Exception e)
+                {
+                    Logger.LogInformation(e.Message);
+                }
+
+                await Task.Delay(4000);
+                ;
+
+            }
+
+        }
+
+    }
+}

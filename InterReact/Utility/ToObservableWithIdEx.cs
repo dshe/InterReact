@@ -8,7 +8,8 @@ namespace InterReact
     // For requests that use RequestId.
     public static partial class Extensions
     {
-        // Single result: HistoricalData, FundamentalData, ScannerData, SymbolSamples.
+        // Single result: FundamentalData, SymbolSamples.
+        // but may also return alers(s)
         internal static IObservable<IHasRequestId> ToObservableSingleWithId(this IObservable<object> source,
             Func<int> getNextId, Action<int> startRequest, Action<int>? stopRequest = null)
         {
@@ -24,7 +25,15 @@ namespace InterReact
                         onNext: m =>
                         {
                             cancelable = false;
-                            observer.OnNext(m); // could be Alert
+                            if (m is Alert alert)
+                            {
+                                if (alert.IsFatal)
+                                    observer.OnError(alert.ToException()); // IMPORTANT!
+                                else
+                                    observer.OnNext(m);
+                                return;
+                            }
+                            observer.OnNext(m);
                             observer.OnCompleted();
                         },
                         onError: e =>
@@ -52,7 +61,8 @@ namespace InterReact
             });
         }
 
-        // Multiple results: TickSnapshot, ContractDetails, Executions.
+
+        // Multiple results: TickSnapshot, Executions.
         internal static IObservable<IHasRequestId> ToObservableMultipleWithId<TEnd>(
             this IObservable<object> source, Func<int> getNextId, Action<int> startRequest)
                 where TEnd: IHasRequestId
@@ -67,10 +77,12 @@ namespace InterReact
                     .SubscribeSafe(Observer.Create<IHasRequestId>(
                         onNext: m =>
                         {
-                            if (m is not TEnd)
-                                observer.OnNext(m);
-                            if (m is TEnd or Alert) // IMPORTANT!
+                            if (m is TEnd)
                                 observer.OnCompleted();
+                            else if (m is Alert alert && alert.IsFatal) // IMPORTANT!
+                                observer.OnError(alert.ToException());
+                            else
+                                observer.OnNext(m);
                         },
                         onError: observer.OnError,
                         onCompleted: observer.OnCompleted));
@@ -81,7 +93,8 @@ namespace InterReact
             });
         }
 
-        // Continuous results: AccountSummary, Tick, MarketDepth, RealtimeBar.
+
+        // Continuous results: AccountSummary, Tick, MarketDepth.
         internal static IObservable<IHasRequestId> ToObservableContinuousWithId(this IObservable<object> source,
             Func<int> getNextId, Action<int> startRequest, Action<int> stopRequest)
         {
@@ -94,7 +107,13 @@ namespace InterReact
                     .OfType<IHasRequestId>() // IMPORTANT!
                     .Where(m => m.RequestId == id)
                     .SubscribeSafe(Observer.Create<IHasRequestId>(
-                        onNext: m => observer.OnNext(m),
+                        onNext: m =>
+                        {
+                            if (m is Alert alert && alert.IsFatal)
+                                observer.OnError(alert.ToException());
+                            else
+                                observer.OnNext(m);
+                        },
                         onError: e =>
                         {
                             cancelable = false;

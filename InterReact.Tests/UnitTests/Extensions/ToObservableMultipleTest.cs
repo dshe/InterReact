@@ -28,7 +28,7 @@ namespace InterReact.UnitTests.Extensions
         [Fact]
         public async Task Test_Multi_Ok()
         {
-            var observable = subject.ToObservableMultiple<SomeClassEnd>(
+            var observable = subject.ToObservableMultiple<object, SomeClassEnd>(
                 () =>
                 {
                     Interlocked.Increment(ref subscribeCalls);

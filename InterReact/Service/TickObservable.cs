@@ -5,24 +5,21 @@ using System.Reactive.Linq;
 
 namespace InterReact
 {
-    //public void RequestMarketData(Contract contract,
-    //IEnumerable<GenericTickType>? genericTickTypes = null
-    //bool isSnapshot = false, IList<Tag>? options = null)
-
     public partial class Services
     {
+
         /// <summary>
-        /// Creates an observable which emits a snapshot of market ticks, then completes.
+        /// Creates an observable which emits a snapshot of market data ticks, then completes.
         /// Tick types may be selected by using the OfTickType extension method.
         /// </summary>
-        public IObservable<Union<Tick, Alert>> CreateTickSnapshotObservable(
+        public IObservable<ITick> CreateTickSnapshotObservable(
             Contract contract, IEnumerable<GenericTickType>? genericTickTypes = null, bool isRegulatorySnapshot = false, IEnumerable<Tag>? options = null)
         {
             return Response
                 .ToObservableMultipleWithId<SnapshotEndTick>(
                     Request.GetNextId,
                     id => Request.RequestMarketData(id, contract, genericTickTypes, true, isRegulatorySnapshot, options))
-                .Select(x => new Union<Tick, Alert>(x))
+                .Cast<ITick>()
                 .ShareSource();
         }
 
@@ -33,7 +30,7 @@ namespace InterReact
         /// to cache the latest values for replay to new subscribers.
         /// Tick types may be selected by using the OfTickType extension method.
         /// </summary>
-        public IObservable<Union<Tick, Alert>> CreateTickObservable(Contract contract,
+        public IObservable<ITick> CreateTickObservable(Contract contract,
             IEnumerable<GenericTickType>? genericTickTypes = null, IEnumerable<Tag>? options = null)
         {
             return Response
@@ -41,7 +38,7 @@ namespace InterReact
                     Request.GetNextId,
                     id => Request.RequestMarketData(id, contract, genericTickTypes, false, false, options),
                     id => Request.CancelMarketData(id))
-                .Select(x => new Union<Tick, Alert>(x));
+                .Cast<ITick>();
         }
 
         /*
@@ -60,8 +57,8 @@ namespace InterReact
 
     public class TickSelector
     {
-        private readonly IObservable<Tick> Source;
-        public TickSelector(IObservable<Tick> source) => Source = source;
+        private readonly IObservable<ITick> Source;
+        public TickSelector(IObservable<ITick> source) => Source = source;
         public IObservable<PriceTick> PriceTick => Source.OfType<PriceTick>();
         public IObservable<SizeTick> SizeTick => Source.OfType<SizeTick>();
         public IObservable<StringTick> StringTick => Source.OfType<StringTick>();
@@ -73,26 +70,18 @@ namespace InterReact
         public IObservable<HaltedTick> HaltedTick => Source.OfType<HaltedTick>();
         public IObservable<MarketDataTypeTick> MarketDataTypeTick => Source.OfType<MarketDataTypeTick>();
         public IObservable<ReqParamsTick> ReqParamsTick => Source.OfType<ReqParamsTick>();
+        public IObservable<Alert> Alert => Source.OfType<Alert>();
     }
 
     public static partial class Extensions
     {
-        public static IObservable<T> OfTickType<T>(this IObservable<Tick> source, Func<TickSelector, IObservable<T>> selector) =>
+        public static IObservable<T> OfTickType<T>(this IObservable<ITick> source, Func<TickSelector, IObservable<T>> selector) =>
             selector(new TickSelector(source));
-        public static IObservable<T> OfTickType<T>(this IObservable<Union<Tick, Alert>> source, Func<TickSelector, IObservable<T>> selector) =>
-            selector(new TickSelector(source.Select(u => u.Source).OfType<Tick>()));
 
-        public static IObservable<Tick> UndelayTicks(this IObservable<Tick> source) =>
+        public static IObservable<ITick> UndelayTicks(this IObservable<ITick> source) =>
             source.Do(x =>
             {
                 if (x is Tick tick)
-                    tick.Undelay();
-            });
-
-        public static IObservable<Union<Tick, Alert>> UndelayTicks(this IObservable<Union<Tick, Alert>> source) =>
-            source.Do(u =>
-            {
-                if (u.Source is Tick tick)
                     tick.Undelay();
             });
     }

@@ -3,12 +3,12 @@ using System.Text.RegularExpressions;
 
 namespace InterReact
 {
-    internal enum ContractDetailsType { ContractData, BondContractData, ScannerContractData }
+    internal enum ContractDetailsType { GeneralContractType, BondContractType, ScannerContractType }
 
     public sealed class ContractDetails : IHasRequestId // output
     {
         /// <summary>
-        /// The Id that was used to make the request to receive this ContractData.
+        /// The Id that was used to make the request to receive this ContractDetails.
         /// </summary>
         public int RequestId { get; }
 
@@ -136,7 +136,7 @@ namespace InterReact
         {
             switch (type)
             {
-                case ContractDetailsType.ContractData:
+                case ContractDetailsType.GeneralContractType:
                     r.RequireVersion(8);
                     RequestId = r.ReadInt();
                     Contract.Symbol = r.ReadString();
@@ -185,7 +185,7 @@ namespace InterReact
                         StockType = r.ReadString();
                     break;
 
-                case ContractDetailsType.BondContractData:
+                case ContractDetailsType.BondContractType:
                     r.RequireVersion(6);
                     RequestId = r.ReadInt();
                     Contract.Symbol = r.ReadString();
@@ -227,7 +227,7 @@ namespace InterReact
                         MarketRuleIds = r.ReadString();
                     break;
 
-                case ContractDetailsType.ScannerContractData:
+                case ContractDetailsType.ScannerContractType:
                     Contract.ContractId = r.ReadInt();
                     Contract.Symbol = r.ReadString();
                     Contract.SecurityType = r.ReadStringEnum<SecurityType>();
