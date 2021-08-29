@@ -23,7 +23,7 @@ using InterReact;
 ```
 ```csharp
 // Create the InterReact client by first connecting to TWS/Gateway on the local host.
-IInterReact interReact = await InterReactBuilder
+IInterReactClient interReact = await InterReactClientBuilder
     .Create()
     .BuildAsync();
 
@@ -51,7 +51,7 @@ Console.Clear();
 subscription.Dispose();
 
 // Disconnect from TWS/Gateway.
-interReact.DisposeAsync();
+await interReact.DisposeAsync();
 ```
 ### Notes ###
 
