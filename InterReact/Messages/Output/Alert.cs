@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Text.RegularExpressions;
 
 namespace InterReact
@@ -17,16 +16,13 @@ namespace InterReact
         public string Message { get; } = "";
         public int Code { get; }
         public bool IsFatal { get; }
-        //public AlertType AlertType { get; } = AlertType.Undefined;
-
         internal Alert() { }
-        internal Alert(int id, int code, string message)
+        internal Alert(int id, int code, string message, bool isFatal)
         {
             RequestId = OrderId = id;
             Code = code;
             Message = message;
-            IsFatal = code != 10167; // "Requested market data is not subscribed. Displaying delayed market data."
-            //AlertType = GetAlertTypeFromCode(code, id);
+            IsFatal = isFatal;
         }
 
         internal static Alert Create(ResponseReader r)
@@ -37,20 +33,15 @@ namespace InterReact
             string msg = r.ReadString();
             if (r.Config.SupportsServerVersion(ServerVersion.ENCODE_MSG_ASCII7))
                 msg = Regex.Unescape(msg);
-            return new Alert(id, code, msg);
+            return new Alert(id, code, msg, IsFatalCode(code));
         }
 
-        private static AlertType GetAlertTypeFromCode(int code, int id)
+        private static bool IsFatalCode(int code)
         {
-            if (code is 1100 or 2110)
-                return AlertType.ConnectionLost;
-            if (code is 1101 or 1102)
-                return AlertType.ConnectionRestored;
-            if (code is >= 2103 and <= 2108)
-                return AlertType.DataFarm;
-            if (id >= 0)
-                return AlertType.HasId;
-            return AlertType.Undefined;
+            // "Requested market data is not subscribed. Displaying delayed market data."
+            if (code == 10167)             
+                return false;
+            return true;
         }
 
         internal AlertException ToException() => new(this);

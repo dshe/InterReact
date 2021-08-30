@@ -14,7 +14,7 @@ namespace InterReact
     public sealed record ContractDetailsTimeEvent(ZonedDateTime Time, ContractTimeStatus Status);
     public sealed record ContractDetailsTimePeriod(ContractDetailsTimeEvent? Previous, ContractDetailsTimeEvent? Next);
 
-    public class ContractDetailsTime
+    public sealed class ContractDetailsTime
     {
         private static readonly LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HHmm");
         private static readonly LocalDatePattern DatePattern = LocalDatePattern.CreateWithInvariantCulture("yyyyMMdd");

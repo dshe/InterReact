@@ -75,5 +75,5 @@
         }
     }
 
-    public class CompletedOrdersEnd { }
+    public sealed class CompletedOrdersEnd { }
 }

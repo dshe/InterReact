@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace InterReact.UnitTests.Extensions
+namespace InterReact.UnitTests.Utility
 {
     public class ToObservableMultipleWithIdTest : UnitTestsBase
     {
@@ -49,7 +49,7 @@ namespace InterReact.UnitTests.Extensions
         }
 
         [Fact]
-        public async Task Test_Alert_multi()
+        public async Task Test_NonFatal_Alert_Multi()
         {
             var observable = subject.ToObservableMultipleWithId<SomeClassEnd>(
                 () => Id,
@@ -57,11 +57,30 @@ namespace InterReact.UnitTests.Extensions
                 {
                     Assert.Equal(Id, requestId);
                     Interlocked.Increment(ref subscribeCalls);
-                    subject.OnNext(new Alert(requestId, 1, "some error"));
+                    subject.OnNext(new Alert(requestId, 1, "some error", false));
+                    subject.OnNext(new SomeClass());
+                    subject.OnNext(new SomeClass());
+                    subject.OnNext(new SomeClassEnd());
                 });
-            var alert = await observable;
-            Assert.IsType<Alert>(alert);
-            Assert.Equal(Id, alert.RequestId);
+            var list = await observable.ToList();
+            Assert.Equal(3, list.Count);
+            Assert.Equal(1, subscribeCalls);
+        }
+
+        [Fact]
+        public async Task Test_Fatal_Alert_Multi()
+        {
+            var observable = subject.ToObservableMultipleWithId<SomeClassEnd>(
+                () => Id,
+                requestId =>
+                {
+                    Assert.Equal(Id, requestId);
+                    Interlocked.Increment(ref subscribeCalls);
+                    subject.OnNext(new SomeClass());
+                    subject.OnError(new Alert(requestId, 1, "some error", true).ToException());
+                });
+
+            var alertException = await Assert.ThrowsAsync<AlertException>(async () => await observable);
             Assert.Equal(1, subscribeCalls);
         }
 

@@ -8,7 +8,7 @@ namespace InterReact.UnitTests.Core
 {
     public class ResponseComposerTests : UnitTestsBase
     {
-        public ResponseComposer Composer;
+        internal ResponseComposer Composer;
         public ResponseComposerTests(ITestOutputHelper output) : base(output) =>
             Composer = new ResponseComposer(new Config(), Logger);
 

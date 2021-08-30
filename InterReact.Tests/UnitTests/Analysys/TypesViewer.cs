@@ -96,7 +96,6 @@ namespace InterReact.UnitTests.Analysis
                 }
                 catch (Exception e)
                 {
-                    //Write($"Type: {type.Name} EXCEPTION: {e.Message}");
                     Write($"Type: {type.Name} EXCEPTION: {e.Message}");
                     throw;
                 }

@@ -2,7 +2,7 @@
 
 namespace InterReact
 {
-    public partial class Services : EditorBrowsableNever
+    public sealed partial class Services : EditorBrowsableNever
     {
         private readonly Request Request;
         private readonly IObservable<object> Response;

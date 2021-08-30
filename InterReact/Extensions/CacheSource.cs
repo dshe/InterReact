@@ -16,12 +16,11 @@ namespace InterReact
         /// Messages are cached for replay to new subscribers.
         /// Caching begins with the first observer and ends when there are no observers.
         /// </summary>
-        internal static IObservable<T> CacheSource<T, TKey>
-            (this IObservable<T> source, Func<T, TKey> keySelector)
-                where TKey : notnull
+        internal static IObservable<T> CacheSource<T>
+            (this IObservable<T> source, Func<T, string> keySelector)
         {
             long index = 0;
-            Dictionary<TKey, (T Item, long Index)> cache = new();
+            Dictionary<string, (T Item, long Index)> cache = new();
 
             Subject<T> subject = new();
             IDisposable sourceSubscription = Disposable.Empty;
@@ -43,8 +42,8 @@ namespace InterReact
                             {
                                 if (sourceSubscription == Disposable.Empty)
                                     return;
-                                TKey? key = keySelector(x);
-                                if (key != null)
+                                string key = keySelector(x);
+                                if (key != "")
                                 {
                                     if (cache.TryGetValue(key, out var item))
                                         item.Item = x;

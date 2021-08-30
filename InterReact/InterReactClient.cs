@@ -11,7 +11,7 @@ namespace InterReact
         Services Services { get; }
     }
 
-    public class InterReactClient : IInterReactClient
+    public sealed class InterReactClient : IInterReactClient
     {
         private readonly Func<ValueTask> Dispose;
         public Request Request { get; }

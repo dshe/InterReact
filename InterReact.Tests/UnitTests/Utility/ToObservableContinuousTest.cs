@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace InterReact.UnitTests.Extensions
+namespace InterReact.UnitTests.Utility
 {
     public class ToObservableContinuousTest : UnitTestsBase
     {

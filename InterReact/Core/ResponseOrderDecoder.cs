@@ -1,6 +1,6 @@
 ﻿namespace InterReact
 {
-    internal class OrderDecoder
+    internal sealed class OrderDecoder
     {
         private readonly ResponseReader R;
         private readonly Contract Contract;

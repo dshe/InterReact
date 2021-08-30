@@ -8,7 +8,7 @@ using NodaTime.Text;
 
 namespace InterReact
 {
-    public class ResponseReader
+    public sealed class ResponseReader
     {
         private readonly IEnumerator<string> Enumerator;
         internal readonly Config Config;

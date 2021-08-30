@@ -12,9 +12,9 @@ using Xunit.Abstractions;
 
 namespace InterReact.SystemTests.Contracts
 {
-    public class ContractDetailsRequestTests : TestCollectionBase
+    public class ContractDetailsTests : TestCollectionBase
     {
-        public ContractDetailsRequestTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+        public ContractDetailsTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
         private async Task<IList<IHasRequestId>> MakeRequest(Contract contract)
         {
@@ -33,11 +33,15 @@ namespace InterReact.SystemTests.Contracts
 
             IList<IHasRequestId> messages = await task;
 
+            Alert? alert = messages.OfType<Alert>().Where(alert => alert.IsFatal).FirstOrDefault();
+            if (alert != null)
+                throw new AlertException(alert);
+
             return messages;
         }
 
         [Fact]
-        public async Task TestRequestSingleContractDetails()
+        public async Task TestSingle()
         {
             Contract contract = new()
                 { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
@@ -49,7 +53,7 @@ namespace InterReact.SystemTests.Contracts
         }
 
         [Fact]
-        public async Task TestRequestMultiContractDetails()
+        public async Task TestMulti()
         {
             Contract contract = new()
                 { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD" };
@@ -61,16 +65,14 @@ namespace InterReact.SystemTests.Contracts
         }
 
         [Fact]
-        public async Task TestRequestBadContractDetails()
+        public async Task TestInvalid()
         {
             Contract contract = new()
                 { SecurityType = SecurityType.Stock, Symbol = "ThisIsAnInvalidSymbol", Currency = "SMART", Exchange = "SMART" };
 
-            IList<IHasRequestId> messages = await MakeRequest(contract);
+            var alertException = await Assert.ThrowsAsync<AlertException>(async () => await MakeRequest(contract));
 
-            IHasRequestId message = messages.Single();
-            Alert alert = (Alert)message;
-            Write(alert.Message);
+            Write(alertException.Message);
         }
     }
 }

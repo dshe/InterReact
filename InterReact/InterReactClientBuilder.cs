@@ -120,7 +120,7 @@ namespace InterReact
                     .AddSingleton(Config)   // Config has no dependencies
                     .AddSingleton(rxSocket) // rxSocket is an instance of RxSocketClient
                     .AddSingleton(response) // response is IObservable<object>
-                    .AddSingleton(new Limiter(Config.MaxRequestsPerSecond)) // configured instance
+                    .AddSingleton(new RingLimiter(Config.MaxRequestsPerSecond)) // configured instance
                     .AddSingleton<Request>()
                     .AddSingleton<Services>()
                     .AddSingleton<IInterReactClient, InterReactClient>()

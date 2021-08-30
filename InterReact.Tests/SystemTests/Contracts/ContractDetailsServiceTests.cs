@@ -15,7 +15,7 @@ namespace InterReact.SystemTests.Contracts
     {
         public ContractDetailsServiceTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
         [Fact]
-        public async Task TestContractDetailsSingle()
+        public async Task TestSingle()
         {
             Contract contract = new() { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
 
@@ -28,7 +28,7 @@ namespace InterReact.SystemTests.Contracts
         }
 
         [Fact]
-        public async Task TestContractDetailsMultiple()
+        public async Task TestMulti()
         {
             Contract contract = new() { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD" };
 
@@ -41,7 +41,7 @@ namespace InterReact.SystemTests.Contracts
         }
 
         [Fact]
-        public async Task TestContractDetailsRequestNotFound()
+        public async Task TestInvalid()
         {
             var contract = new Contract { ContractId = 99999 };
 
@@ -53,7 +53,7 @@ namespace InterReact.SystemTests.Contracts
         }
 
         [Fact]
-        public async Task TestContractDetailsTimeout()
+        public async Task TestTimeout()
         {
             var contract = new Contract { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "EUR" };
 

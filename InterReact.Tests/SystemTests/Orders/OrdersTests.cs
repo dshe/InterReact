@@ -9,9 +9,9 @@ using Xunit.Abstractions;
 
 namespace InterReact.SystemTests.Orders
 {
-    public class OrderRequestTests : TestCollectionBase
+    public class OrdersTests : TestCollectionBase
     {
-        public OrderRequestTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+        public OrdersTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
         [Fact]
         public async Task TestMarketPlaceOrder()
@@ -24,7 +24,9 @@ namespace InterReact.SystemTests.Orders
             var task = Client.Response
                 .OfType<Execution>()
                 .Where(x => x.RequestId == id)
-                .FirstAsync().Timeout(TimeSpan.FromSeconds(3)).ToTask();
+                .FirstAsync()
+                .Timeout(TimeSpan.FromSeconds(5))
+                .ToTask();
 
             var order = new Order
             {

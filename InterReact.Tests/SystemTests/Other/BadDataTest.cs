@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace InterReact.SystemTests.Diagnostic
+namespace InterReact.SystemTests.Other
 {
     public class BadDataTest : TestCollectionBase
     {
@@ -18,16 +18,16 @@ namespace InterReact.SystemTests.Diagnostic
         [Fact]
         public async Task TestBadRequest()
         {
-            var requestId = Client.Request.GetNextId();
+            var id = Client.Request.GetNextId();
 
             var alert = Client.Response
                 .OfType<IHasRequestId>()
-                .Where(r => r.RequestId == requestId)
+                .Where(r => r.RequestId == id)
                 .FirstAsync()
                 .Timeout(TimeSpan.FromSeconds(5))
                 .ToTask();
 
-            Client.Request.RequestMarketData(requestId, new Contract());
+            Client.Request.RequestMarketData(id, new Contract());
 
             var x = await alert;
             Assert.IsType<Alert>(x);

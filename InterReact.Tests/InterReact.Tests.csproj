@@ -26,4 +26,8 @@
     <ProjectReference Include="..\InterReact\InterReact.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="UnitTests\Extensions\" />
+  </ItemGroup>
+
 </Project>

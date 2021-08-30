@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace InterReact.UnitTests.Extensions
+namespace InterReact.UnitTests.Utility
 {
     public class ToObservableSingleWithIdTest : UnitTestsBase
     {
@@ -63,7 +63,7 @@ namespace InterReact.UnitTests.Extensions
         }
 
         [Fact]
-        public async Task Test_Alert()
+        public async Task Test_Fatal_Alert()
         {
             var observable = subject.ToObservableSingleWithId(
                 () => Id,
@@ -71,7 +71,7 @@ namespace InterReact.UnitTests.Extensions
                 {
                     Assert.Equal(Id, requestId);
                     Interlocked.Increment(ref subscribeCalls);
-                    subject.OnNext(new Alert(requestId, 1, "some error"));
+                    subject.OnError(new Alert(requestId, 1, "some error", true).ToException());
                 },
                 requestId =>
                 {
@@ -79,9 +79,39 @@ namespace InterReact.UnitTests.Extensions
                     Interlocked.Increment(ref unsubscribeCalls);
                 });
 
-            var alert = await observable;
-            Assert.IsType<Alert>(alert);
-            Assert.Equal(Id, alert.RequestId);
+            var alertException = await Assert.ThrowsAsync<AlertException>(async () => await observable);
+
+            Assert.IsType<Alert>(alertException.Alert);
+            Assert.Equal(Id, alertException.Alert.RequestId);
+
+            Assert.Equal(1, subscribeCalls);
+            Assert.Equal(0, unsubscribeCalls);
+        }
+
+        [Fact]
+        public async Task Test_NonFatal_Alert()
+        {
+            var observable = subject.ToObservableSingleWithId(
+                () => Id,
+                requestId =>
+                {
+                    Assert.Equal(Id, requestId);
+                    Interlocked.Increment(ref subscribeCalls);
+                    subject.OnNext(new Alert(requestId, 1, "some warning", false));
+                    subject.OnNext(new SomeClass());
+                },
+                requestId =>
+                {
+                    Assert.Equal(Id, requestId);
+                    Interlocked.Increment(ref unsubscribeCalls);
+                });
+
+            var n1 = await observable.Materialize().ToList();
+            Assert.Equal(3, n1.Count);
+            Assert.Equal(NotificationKind.OnNext, n1[0].Kind);
+            Assert.Equal(NotificationKind.OnNext, n1[1].Kind);
+            Assert.Equal(NotificationKind.OnCompleted, n1[2].Kind);
+
             Assert.Equal(1, subscribeCalls);
             Assert.Equal(0, unsubscribeCalls);
         }

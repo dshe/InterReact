@@ -1,44 +1,47 @@
-﻿using System.Diagnostics;
+﻿using Microsoft.Extensions.Logging;
+using System.Diagnostics;
 using System.Threading;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Utility
 {
-    public sealed class LimiterTest
+    public sealed class LimiterTest : UnitTestsBase
     {
+        public LimiterTest(ITestOutputHelper output) : base(output) { }
+
         public double Limit(int rate, double duration)
         {
-            var limiter = new Limiter(rate);
+            var limiter = new RingLimiter(rate, Logger);
             var count = 0;
             var start = Stopwatch.GetTimestamp();
-            while ((Stopwatch.GetTimestamp() - start) / (double)Stopwatch.Frequency < duration)
+            while (((Stopwatch.GetTimestamp() - start) / (double)Stopwatch.Frequency) < duration)
             {
                 limiter.Limit(() => Thread.Sleep(1));
                 count++;
             }
             var time = (Stopwatch.GetTimestamp() - start) / (double)Stopwatch.Frequency;
             var freq = count / time;
-            //Logger.LogDebug($"{count} / {time} => {freq} ({rate})");
+            Logger.LogInformation($"{count} / {time} => {freq} ({rate})");
             return freq;
         }
 
-        //[Fact]
+        [Fact]
         public void Test()
         {
-            var rate = Limit(50, 1);
+            double rate;
+
+            //rate = Limit(5, 2);
+            //Assert.InRange(rate, 4, 6);
+
+            rate = Limit(50, 2);
             Assert.InRange(rate, 47, 51);
 
-            rate = Limit(50, 1.5);
-            Assert.InRange(rate, 45, 51);
+            //rate = Limit(100, 2);
+            //Assert.InRange(rate, 98, 101);
 
-            rate = Limit(100, .5);
-            Assert.InRange(rate, 98, 101);
-
-            rate = Limit(100, 1.5);
-            Assert.InRange(rate, 98, 101);
-
-            rate = Limit(50, 4);
-            Assert.InRange(rate, 37, 51);
+            //rate = Limit(200, 2);
+            //Assert.InRange(rate, 198, 201);
         }
     }
 }

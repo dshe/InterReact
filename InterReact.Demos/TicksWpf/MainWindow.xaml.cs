@@ -200,9 +200,10 @@ namespace TicksWpf
 
         private void SubscribeToTicks(IObservable<ITick> ticks)
         {
-            ticks.OfTickType(t => t.Alert).Subscribe(alert => MessageBox.Show($"Ticks: {alert.Message}")) ;
+            ticks.Subscribe(onNext: _ => { }, onError: exception => MessageBox.Show($"Fatal: {exception.Message}"));
+            ticks.OfITickClass(t => t.Alert).Subscribe(alert => MessageBox.Show($"{alert.Message}")) ;
 
-            IObservable<PriceTick> priceTicks = ticks.OfTickType(t => t.PriceTick);
+            IObservable<PriceTick> priceTicks = ticks.OfITickClass(t => t.PriceTick);
             priceTicks.Where(t => t.TickType == TickType.BidPrice).Select(t => t.Price).Subscribe(p => BidPrice = p);
             priceTicks.Where(t => t.TickType == TickType.AskPrice).Select(t => t.Price).Subscribe(p => AskPrice = p);
             

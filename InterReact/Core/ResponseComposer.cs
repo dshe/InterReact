@@ -23,7 +23,7 @@ namespace InterReact
         }
     }
 
-    public sealed class ResponseComposer
+    internal sealed class ResponseComposer
     {
         private readonly ILogger Logger;
         private readonly Config Config;

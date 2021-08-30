@@ -13,13 +13,13 @@ namespace InterReact
     /// Methods which send request messages to TWS/Gateway.
     /// Request methods are serialized, thread-safe and limited to a specified number of messages per second.
     /// </summary>
-    public class Request : IEditorBrowsableNever
+    public sealed class Request : IEditorBrowsableNever
     {
         public Config Config { get; }
         private readonly IRxSocketClient RxSocket;
-        private readonly Limiter Limiter;
+        private readonly RingLimiter Limiter;
 
-        public Request(Config config, IRxSocketClient rxSocket, Limiter limiter)
+        public Request(Config config, IRxSocketClient rxSocket, RingLimiter limiter)
         {
             Config = config;
             RxSocket = rxSocket;

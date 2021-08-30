@@ -3,7 +3,7 @@ using NodaTime;
 
 namespace InterReact
 {
-    public abstract class Tick : IHasRequestId
+    public abstract class Tick : ITick
     {
         public int RequestId { get; protected set; } = -1;
         public TickType TickType { get; protected set; } = TickType.Undefined;

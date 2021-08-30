@@ -8,9 +8,9 @@ using Xunit.Abstractions;
 
 namespace InterReact.SystemTests.MarketData
 {
-    public class MarketDataRequestTests : TestCollectionBase
+    public class MarketDataSnapshotTests : TestCollectionBase
     {
-        public MarketDataRequestTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+        public MarketDataSnapshotTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
         private async Task<IList<IHasRequestId>> MakeRequest(Contract contract)
         {
@@ -31,11 +31,15 @@ namespace InterReact.SystemTests.MarketData
 
             IList<IHasRequestId> messages = await task;
 
+            Alert? alert = messages.OfType<Alert>().Where(alert => alert.IsFatal).FirstOrDefault();
+            if (alert != null)
+                throw new AlertException(alert);
+
             return messages;
         }
 
         [Fact]
-        public async Task MarketDataTickSnapshot()
+        public async Task TestTickSnapshot()
         {
              Contract contract = new()
                { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
@@ -43,21 +47,17 @@ namespace InterReact.SystemTests.MarketData
             IList<IHasRequestId> messages = await MakeRequest(contract);
 
             Assert.True(messages.Count > 1);
-
-            Assert.Equal(1, messages.OfType<Alert>().Count());
-            Assert.Equal(messages.Count() - 1, messages.OfType<Tick>().Count());
         }
 
         [Fact]
-        public async Task MarketDataTickInvalidSnapshot()
+        public async Task TestTickSnapshotInvalid()
         {
             Contract contract = new()
                 { SecurityType = SecurityType.Stock, Symbol = "InvalidSymbol", Currency = "USD", Exchange = "SMART" };
 
-            IList<IHasRequestId> messages = await MakeRequest(contract);
+            var alertException = await Assert.ThrowsAsync<AlertException>(async () => await MakeRequest(contract));
 
-            var message = messages.Single();
-            Assert.IsType<Alert>(message);
+            Write(alertException.Message);
         }
     }
 }

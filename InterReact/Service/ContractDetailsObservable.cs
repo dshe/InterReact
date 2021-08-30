@@ -15,13 +15,12 @@ namespace InterReact
         /// <summary>
         /// Returns an observable which emits a list of ContractDetails objects.
         /// using the supplied contract as selector, then completes. Results are cached. 
-        /// Alerts are sent to OnError.
+        /// Fatal alerts are sent to OnError.
         /// If expiry is not specified, ContractDetails objects are retrieved for all expiries.
         /// If strike is not specified, ContractDetails objects are retrieved for all strikes.
         /// And so on. So beware that calling this method may result in attempting to retrieve a large number of contracts.
         /// This operation may take a long time and is subject to usage limiting, 
         /// so the Timeout() operator may be useful.
-        /// Each subscription makes a separate request.
         /// </summary>
         public IObservable<ContractDetails> CreateContractDetailsObservable(Contract contract)
         {

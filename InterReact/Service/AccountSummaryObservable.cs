@@ -10,7 +10,7 @@ namespace InterReact
         /// Creates an observable which continually emits account summary items.
         /// All items are sent initially, and then only any changes.
         /// AccountSummaryEnd is emitted after the initial values for each account have been emitted.
-        /// Use CreateAccountSummaryObservable().Publish()[.RefCount() | .AutoConnect()] to supoort multiple observers.
+        /// Use CreateAccountSummaryObservable().Publish()[.RefCount() | .AutoConnect()] to support multiple observers.
         /// Use CreateAccountSummaryObservable().CacheSource(Services.GetAccountSummaryCacheKey)
         /// to cache the latest values for replay to new subscribers.
         /// </summary>

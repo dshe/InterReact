@@ -12,7 +12,7 @@ using Xunit.Abstractions;
 
 namespace InterReact.UnitTests.Experimental
 {
-    public static class ExtensionxXX
+    public static class ExtensionX
     {
         // This is inadequate because after timeout the task keeps running!
         // Need to pass a cancellation token to the task.
@@ -34,40 +34,37 @@ namespace InterReact.UnitTests.Experimental
                 }
             }
         }
+    }
 
-        public class Test_AsyncX : UnitTestsBase
+    public class AsyncTimeout : UnitTestsBase
+    {
+        public AsyncTimeout(ITestOutputHelper output) : base(output) { }
+
+        public async Task<string> GetString()
         {
-            public Test_AsyncX(ITestOutputHelper output) : base(output) { }
-
-            public async Task<string> GetString()
+            for (int i = 0; i < 20; i++)
             {
-                for (int i = 0; i < 20; i++)
-                {
-                    Logger.LogInformation("wait " + i);
-                    await Task.Delay(500);
-                }
-                return "finished";
+                Logger.LogInformation("wait " + i);
+                await Task.Delay(500);
             }
-
-            [Fact]
-            public async Task AsyncTest()
-            {
-                try
-                {
-                    await GetString().TimeoutAfter(TimeSpan.FromMilliseconds(1000));
-                    Logger.LogInformation("complete");
-                }
-                catch (Exception e)
-                {
-                    Logger.LogInformation(e.Message);
-                }
-
-                await Task.Delay(4000);
-                ;
-
-            }
-
+            return "finished";
         }
 
+        [Fact]
+        public async Task Test_Async_Timeout()
+        {
+            try
+            {
+                await GetString().TimeoutAfter(TimeSpan.FromMilliseconds(1000));
+                Logger.LogInformation("complete");
+            }
+            catch (Exception e)
+            {
+                Logger.LogInformation(e.Message);
+            }
+
+            await Task.Delay(4000);
+            ;
+        }
     }
 }

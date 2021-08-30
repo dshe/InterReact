@@ -10,7 +10,7 @@ namespace InterReact
         /// Creates an observable which continually emits account update objects for all accounts.
         /// AccountUpdateEnd is emitted after the initial values for each account have been emitted.
         /// Use CreateAccountUpdatesObservable().Publish()[.RefCount() | .AutoConnect()] to support multiple observers.
-        /// Use CreateAccountUpdatesObservable().CacheSource(Services.GetAccountUpdatesCacheKey)
+        /// Use CreateAccountUpdatesObservable().CacheSource(InterReact.Services.GetAccountUpdatesCacheKey)
         /// to cache the latest values for replay to new subscribers.
         /// </summary>
         public IObservable<Union<AccountValue, PortfolioValue, AccountUpdateTime, AccountUpdateEnd>> CreateAccountUpdatesObservable()

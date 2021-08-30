@@ -54,6 +54,7 @@ namespace InterReact.UnitTests.Analysis
             foreach (var type in Assembly.ExportedTypes.OrderBy(type => type.Name))
             {
                 type.GetTypeInfo().DeclaredMethods
+                    //.Where(method => method.IsPublic)
                     .Where(m =>
                         !(m.Name.StartsWith("<") || m.Name.StartsWith("get_") || m.Name.StartsWith("set_") ||
                           objectMethodNames.Contains(m.Name)))
