@@ -23,7 +23,9 @@ using InterReact;
 ```
 ```csharp
 // Create the InterReact client by first connecting to TWS/Gateway on the local host.
-IInterReact interReact = await InterReactBuilder.Create().BuildAsync();
+IInterReactClient interReact = await InterReactClientBuilder
+    .Create()
+    .BuildAsync();
 
 // Create a contract object.
 Contract contract = new Contract
@@ -34,24 +36,22 @@ Contract contract = new Contract
    Exchange     = "SMART"
 };
 
-// Create an observable which can observe ticks for the contract.
-IObservable<ITick> tickObservable = interReact.Services.CreateTickObservable(contract);
-
-// Subscribe to the observable to start observing ticks.
-tickObservable
-    .OfType(selector => selector.TickPrice)
-    .Subscribe(onNext: tickPrice =>
-    {
-        // Write price ticks to the console.
-        Console.WriteLine($"{Enum.GetName(tickPrice.TickType)} = {tickPrice.Price}");
-    });
-
+// Create and then subscribe to the observable which can observe ticks for the contract.
+IDisposable subscription = interReact
+    .Services
+    .CreateTickObservable(contract)
+    .OfTickType(tickType => tickType.PriceTick)
+    .Subscribe(onNext: tickPrice => Console.WriteLine($"Price = {tickPrice.Price}"));
+    
 Console.WriteLine(Environment.NewLine + "press a key to exit...");
 Console.ReadKey();
 Console.Clear();
 
+// Dispose the subscription to stop receiving ticks.
+subscription.Dispose();
+
 // Disconnect from TWS/Gateway.
-interReact.DisposeAsync();
+await interReact.DisposeAsync();
 ```
 ### Notes ###
 
