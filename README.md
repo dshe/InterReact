@@ -28,7 +28,7 @@ IInterReactClient interReact = await InterReactClientBuilder
     .BuildAsync();
 
 // Create a contract object.
-Contract contract = new Contract
+Contract contract = new()
 {
    SecurityType = SecurityType.Stock,
    Symbol       = "SPY",
@@ -41,7 +41,8 @@ IDisposable subscription = interReact
     .Services
     .CreateTickObservable(contract)
     .OfTickClass(selector => selector.PriceTick)
-    .Subscribe(onNext: tickPrice => Console.WriteLine($"Price = {tickPrice.Price}"));
+    .Subscribe(onNext: tickPrice => 
+        Console.WriteLine($"Price = {tickPrice.Price}"));
     
 Console.WriteLine(Environment.NewLine + "press a key to exit...");
 Console.ReadKey();
