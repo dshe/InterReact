@@ -22,7 +22,7 @@ namespace InterReact.UnitTests.Experimental
     {
         public Observable_Error(ITestOutputHelper output) : base(output) { }
 
-        private IObservable<string> myObservable = Observable.Create<string>(observer =>
+        private readonly IObservable<string> myObservable = Observable.Create<string>(observer =>
         {
             observer.OnNext("1");
             observer.OnError(new Exception("ex!"));

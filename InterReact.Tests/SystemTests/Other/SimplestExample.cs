@@ -33,7 +33,7 @@ namespace InterReact.SystemTests.Other
             IDisposable subscription = interReact
                 .Services
                 .CreateTickObservable(contract)
-                .OfITickClass(tickType => tickType.PriceTick)
+                .OfTickClass(tickType => tickType.PriceTick)
                 .Subscribe(onNext: tickPrice => Console.WriteLine($"Price = {tickPrice.Price}"));
 
             Console.WriteLine(Environment.NewLine + "press a key to exit...");

@@ -57,7 +57,7 @@ namespace InterReact
                         {
                             if (m is Alert alert)
                             {
-                                observer.OnError(alert.ToException()); // IMPORTANT!
+                                observer.OnError(alert.ToException()); // IMPORTANT: all alerts to OnError!
                             }
                             else if (m is ContractDetails cd)
                             {

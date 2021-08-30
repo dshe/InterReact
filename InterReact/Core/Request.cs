@@ -609,7 +609,7 @@ namespace InterReact
         {
             List<string>? tagNames = tags?.Select(tag => tag.ToString()).ToList();
             if (tagNames == null || !tagNames.Any())
-                tagNames = Enum.GetNames(typeof(AccountSummaryTag)).ToList();
+                tagNames = Enum.GetNames<AccountSummaryTag>().ToList();
             Message()
                 .Write(RequestCode.RequestAccountSummary, "1", requestId, group, string.Join(",", tagNames))
                 .Send();

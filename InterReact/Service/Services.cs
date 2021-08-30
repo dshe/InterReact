@@ -12,6 +12,9 @@ namespace InterReact
             Request = request;
             Response = response;
             CurrentTimeObservable = CreateCurrentTimeObservable();
+            AccountUpdatesObservable = CreateAccountUpdatesObservable();
+            PositionsObservable = CreatePositionsObservable();
+            AccountSummaryObservable = CreateAccountSummaryObservable();
         }
     }
 }

@@ -93,7 +93,7 @@ namespace InterReact
 
         string SkipSuffix(string perfix)
         {
-            return Rest.Substring(Rest.IndexOf(perfix) + perfix.Length);
+            return Rest[(Rest.IndexOf(perfix) + perfix.Length)..];
         }
 
         public string GetNextSuffixedValue(string perfix)

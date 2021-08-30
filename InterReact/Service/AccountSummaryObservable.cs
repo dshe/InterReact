@@ -7,30 +7,31 @@ namespace InterReact
     public partial class Services
     {
         /// <summary>
-        /// Creates an observable which continually emits account summary items.
-        /// All items are sent initially, and then only any changes.
+        /// Creates an observable which continually emits AccountSummary objects.
+        /// The complete account summary is sent initially, and then only any changes.
         /// AccountSummaryEnd is emitted after the initial values for each account have been emitted.
-        /// Use CreateAccountSummaryObservable().Publish()[.RefCount() | .AutoConnect()] to support multiple observers.
-        /// Use CreateAccountSummaryObservable().CacheSource(Services.GetAccountSummaryCacheKey)
-        /// to cache the latest values for replay to new subscribers.
+        /// Multiple subscribers are supported. The latest values are cached for replay to new subscribers.
         /// </summary>
-        public IObservable<IHasRequestId> CreateAccountSummaryObservable()
+        public IObservable<IHasRequestId> AccountSummaryObservable { get; }
+
+        private IObservable<IHasRequestId> CreateAccountSummaryObservable()
         {
             return Response
                 .ToObservableContinuousWithId(
-                    Request.GetNextId, id => Request.RequestAccountSummary(id), Request.CancelAccountSummary);
+                    Request.GetNextId, 
+                    id => Request.RequestAccountSummary(id), Request.CancelAccountSummary)
+                .CacheSource(GetAccountSummaryCacheKey);
         }
 
-        public static string GetAccountSummaryCacheKey(Union<AccountSummary, AccountSummaryEnd, Alert> union)
+        private static string GetAccountSummaryCacheKey(IHasRequestId o)
         {
-            return union.Source switch
+            return o switch
             {
                 AccountSummary a => $"{a.Account}+{a.Currency}+{a.Tag}",
                 AccountSummaryEnd => "AccountSummaryEnd",
-                Alert alert => $"{alert.Code}+{alert.Message}",
-                _ => throw new ArgumentException($"Unhandled type: {union.Source.GetType()}.")
+                Alert _ => "",
+                _ => throw new ArgumentException($"Unhandled type: {o.GetType()}.")
             };
         }
-
     }
 }

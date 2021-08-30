@@ -19,11 +19,11 @@ namespace TicksWpf
     {
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        private readonly Subject<string> SymbolSubject = new();
         public string Symbol
         {
             set => SymbolSubject.OnNext(value);
         }
-        private readonly Subject<string> SymbolSubject = new();
 
         private string description = "";
         public string Description
@@ -175,7 +175,7 @@ namespace TicksWpf
             }
             catch (TimeoutException)
             {
-                MessageBox.Show("ContractDetails: Timeout Exception");
+                MessageBox.Show("ContractDetails: Timeout.");
                 return;
             }
 
@@ -201,9 +201,9 @@ namespace TicksWpf
         private void SubscribeToTicks(IObservable<ITick> ticks)
         {
             ticks.Subscribe(onNext: _ => { }, onError: exception => MessageBox.Show($"Fatal: {exception.Message}"));
-            ticks.OfITickClass(t => t.Alert).Subscribe(alert => MessageBox.Show($"{alert.Message}")) ;
+            ticks.OfTickClass(t => t.Alert).Subscribe(alert => MessageBox.Show($"{alert.Message}")) ;
 
-            IObservable<PriceTick> priceTicks = ticks.OfITickClass(t => t.PriceTick);
+            IObservable<PriceTick> priceTicks = ticks.OfTickClass(t => t.PriceTick);
             priceTicks.Where(t => t.TickType == TickType.BidPrice).Select(t => t.Price).Subscribe(p => BidPrice = p);
             priceTicks.Where(t => t.TickType == TickType.AskPrice).Select(t => t.Price).Subscribe(p => AskPrice = p);
             

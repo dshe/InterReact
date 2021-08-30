@@ -9,7 +9,7 @@ namespace InterReact
     {
         /// <summary>
         /// Creates an observable which emits a snapshot of market data ticks, then completes.
-        /// Tick class may be selected by using the OfITickClass extension method.
+        /// Tick class may be selected by using the OfTickClass extension method.
         /// </summary>
         public IObservable<ITick> CreateTickSnapshotObservable(
             Contract contract, IEnumerable<GenericTickType>? genericTickTypes = null, bool isRegulatorySnapshot = false, IEnumerable<Tag>? options = null)
@@ -25,9 +25,9 @@ namespace InterReact
         /// <summary>
         /// Creates an observable which continually emits market data ticks for the specified contract.
         /// Use CreateTickObservable(...).Publish()[.RefCount() | .AutoConnect()] to share the subscription.
-        /// Use CreateTickObservable(...).CacheSource(InterReact.Services.GetTickCacheKey)
+        /// Or use CreateTickObservable(...).CacheSource(InterReact.Services.GetTickCacheKey)
         /// to cache the latest values for replay to new subscribers.
-        /// Tick class may be selected by using the OfITickClass extension method.
+        /// Tick class may be selected by using the OfTickClass extension method.
         /// </summary>
         public IObservable<ITick> CreateTickObservable(Contract contract,
             IEnumerable<GenericTickType>? genericTickTypes = null, IEnumerable<Tag>? options = null)
@@ -43,10 +43,10 @@ namespace InterReact
         public static string GetTickCacheKey(IHasRequestId t) => t is Tick tick ? tick.TickType.ToStringFast() : "";
     }
 
-    public class ITickClassSelector
+    public class TickClassSelector
     {
         private readonly IObservable<ITick> Source;
-        public ITickClassSelector(IObservable<ITick> source) => Source = source;
+        public TickClassSelector(IObservable<ITick> source) => Source = source;
         public IObservable<PriceTick> PriceTick => Source.OfType<PriceTick>();
         public IObservable<SizeTick> SizeTick => Source.OfType<SizeTick>();
         public IObservable<StringTick> StringTick => Source.OfType<StringTick>();
@@ -63,8 +63,8 @@ namespace InterReact
 
     public static partial class Extensions
     {
-        public static IObservable<T> OfITickClass<T>(this IObservable<ITick> source, Func<ITickClassSelector, IObservable<T>> selector) =>
-            selector(new ITickClassSelector(source));
+        public static IObservable<T> OfTickClass<T>(this IObservable<ITick> source, Func<TickClassSelector, IObservable<T>> selector) =>
+            selector(new TickClassSelector(source));
 
         public static IObservable<ITick> UndelayTicks(this IObservable<ITick> source) =>
             source.Do(x =>

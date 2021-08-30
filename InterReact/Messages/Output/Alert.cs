@@ -33,11 +33,13 @@ namespace InterReact
             string msg = r.ReadString();
             if (r.Config.SupportsServerVersion(ServerVersion.ENCODE_MSG_ASCII7))
                 msg = Regex.Unescape(msg);
-            return new Alert(id, code, msg, IsFatalCode(code));
+            return new Alert(id, code, msg, IsFatalCode(id, code));
         }
 
-        private static bool IsFatalCode(int code)
+        private static bool IsFatalCode(int id, int code)
         {
+            if (id < 1)
+                return false;
             // "Requested market data is not subscribed. Displaying delayed market data."
             if (code == 10167)             
                 return false;

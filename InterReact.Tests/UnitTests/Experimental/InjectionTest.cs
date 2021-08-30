@@ -47,13 +47,13 @@ namespace InterReact.UnitTests.Experimental
     public class StartupService : IHostedService
     {
         private readonly IServiceProvider Providor;
-        private readonly ILogger Logger;
+        //private readonly ILogger Logger;
         internal IInterReactClient? Client = null;
 
         public StartupService(IServiceProvider providor)
         {
             Providor = providor;
-            Logger = providor.GetService<ILogger<InterReactClient>>()!;
+            //Logger = providor.GetService<ILogger<InterReactClient>>()!;
         }
 
         public async Task StartAsync(CancellationToken ct)
