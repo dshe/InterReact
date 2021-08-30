@@ -40,7 +40,7 @@ Contract contract = new Contract
 IDisposable subscription = interReact
     .Services
     .CreateTickObservable(contract)
-    .OfTickType(tickType => tickType.PriceTick)
+    .OfTickClass(selector => selector.PriceTick)
     .Subscribe(onNext: tickPrice => Console.WriteLine($"Price = {tickPrice.Price}"));
     
 Console.WriteLine(Environment.NewLine + "press a key to exit...");
