@@ -23,7 +23,7 @@ using InterReact;
 ```
 ```csharp
 // Create the InterReact client by first connecting to TWS/Gateway on the local host.
-IInterReactClient interReact = await InterReactClientBuilder
+IInterReactClient client = await InterReactClientBuilder
     .Create()
     .BuildAsync();
 
@@ -37,13 +37,13 @@ Contract contract = new()
 };
 
 // Create and then subscribe to the observable which can observe ticks for the contract.
-IDisposable subscription = interReact
+IDisposable subscription = client
     .Services
     .CreateTickObservable(contract)
     .OfTickClass(selector => selector.PriceTick)
     .Subscribe(onNext: tickPrice => 
         Console.WriteLine($"Price = {tickPrice.Price}"));
-    
+
 Console.WriteLine(Environment.NewLine + "press a key to exit...");
 Console.ReadKey();
 Console.Clear();
@@ -52,7 +52,7 @@ Console.Clear();
 subscription.Dispose();
 
 // Disconnect from TWS/Gateway.
-await interReact.DisposeAsync();
+await client.DisposeAsync();
 ```
 ### Notes ###
 
