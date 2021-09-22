@@ -41,8 +41,8 @@ IDisposable subscription = client
     .Services
     .CreateTickObservable(contract)
     .OfTickClass(selector => selector.PriceTick)
-    .Subscribe(onNext: tickPrice => 
-        Console.WriteLine($"Price = {tickPrice.Price}"));
+    .Subscribe(onNext: priceTick => 
+        Console.WriteLine($"Price = {priceTick.Price}"));
 
 Console.WriteLine(Environment.NewLine + "press a key to exit...");
 Console.ReadKey();
