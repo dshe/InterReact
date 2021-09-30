@@ -7,7 +7,7 @@
 - demo applications: Console, WPF.
 
 ```csharp
-interface IInterReact : IAsyncDisposable
+interface IInterReactClient : IAsyncDisposable
 {
     Request Request { get; }
     IObservable<object> Response { get; }
