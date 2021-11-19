@@ -1,10 +1,10 @@
 # InterReact&nbsp;&nbsp; [![License](https://img.shields.io/badge/Version-0.0.3-blue)]() [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ***Reactive C# API to Interactive Brokers***
-- compatible with Interactive Brokers API 9.85.02 (Aug 05 2021).
-- supports **.NET 5**.
-- dependencies: RxSockets, StringEnums, Stringification, Reactive Extensions, NodaTime.
-- demo applications: Console, WPF.
+- **.NET 5.0** library
+- compatible with Interactive Brokers API 9.85.02 (Aug 05 2021)
+- dependencies: RxSockets, StringEnums, Stringification, Reactive Extensions, NodaTime
+- demo applications: Console, WPF
 
 ```csharp
 interface IInterReactClient : IAsyncDisposable
