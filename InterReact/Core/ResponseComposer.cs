@@ -8,22 +8,10 @@ internal static class ToMessagesEx
 {
     internal static IObservable<object> ToMessages(this IObservable<string[]> source, Config config)
     {
-        ResponseComposer composer = new(config);
-
         return Observable.Create<object>(observer =>
         {
-            return source
-                .Subscribe(strings =>
-                {
-                    object message = composer.Compose(strings);
-                    if (message is ((PriceTick priceTick, SizeTick sizeTick)))
-                    {
-                        observer.OnNext(priceTick);
-                        observer.OnNext(sizeTick);
-                        return;
-                    }
-                    observer.OnNext(message);
-                });
+            ResponseComposer composer = new(config, observer.OnNext);
+            return source.Subscribe(strings => composer.ComposeAndSend(strings));
         });
     }
 }
@@ -31,23 +19,32 @@ internal static class ToMessagesEx
 internal sealed class ResponseComposer
 {
     private readonly Config Config;
+    private readonly Action<object> Send;
     private readonly ResponseParser Parser;
 
-    internal ResponseComposer(Config config)
+    internal ResponseComposer(Config config, Action<object> send)
     {
         Config = config;
+        Send = send;
         Parser = new ResponseParser(config.Logger);
     }
 
-    internal object Compose(string[] strings)
+    internal void ComposeAndSend(string[] strings)
     {
         try
         {
             ResponseReader reader = new(Config, Parser, strings);
             string code = reader.ReadString(); // read the code (first string)
-            object message = GetMessage(code, reader);
+            if (code == "1")
+            {
+                (PriceTick priceTick, SizeTick? sizeTick) = Tick.CreatePriceAndSizeTicks(reader);
+                Send(priceTick);
+                if (sizeTick != null)
+                    Send(sizeTick);
+            }
+            else
+                Send(GetMessage(code, reader));
             reader.VerifyMessageEnd();
-            return message;
         }
         catch (Exception e)
         {
@@ -59,7 +56,6 @@ internal sealed class ResponseComposer
 
     private static object GetMessage(string code, ResponseReader reader) => code switch
     {
-        "1" => Tick.CreatePriceAndSizeTicks(reader),
         "2" => new SizeTick(reader),
         "3" => new OrderStatusReport(reader),
         "4" => Alert.Create(reader),
