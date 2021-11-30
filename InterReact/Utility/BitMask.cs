@@ -1,19 +1,16 @@
-﻿using System;
+﻿namespace InterReact;
 
-namespace InterReact
+internal struct BitMask
 {
-    internal struct BitMask
+    private readonly int Mask;
+    internal BitMask(int i) => Mask = i;
+    internal bool this[int index]
     {
-        private readonly int Mask;
-        internal BitMask(int i) => Mask = i;
-        internal bool this[int index]
+        get
         {
-            get
-            {
-                if (index < 0 || index >= 32)
-                    throw new ArgumentException("Invalid", nameof(index));
-                return (Mask & (1 << index)) != 0;
-            }
+            if (index < 0 || index >= 32)
+                throw new ArgumentException("Invalid", nameof(index));
+            return (Mask & (1 << index)) != 0;
         }
     }
 }

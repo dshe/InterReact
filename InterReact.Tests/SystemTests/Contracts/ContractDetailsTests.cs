@@ -1,79 +1,74 @@
-﻿using InterReact;
-using InterReact.SystemTests;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace InterReact.SystemTests.Contracts
+namespace InterReact.SystemTests.Contracts;
+
+public class ContractDetailsTests : TestCollectionBase
 {
-    public class ContractDetailsTests : TestCollectionBase
+    public ContractDetailsTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+
+    private async Task<IList<IHasRequestId>> MakeRequest(Contract contract)
     {
-        public ContractDetailsTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+        int id = Client.Request.GetNextId();
 
-        private async Task<IList<IHasRequestId>> MakeRequest(Contract contract)
-        {
-            int id = Client.Request.GetNextId();
+        var task = Client
+            .Response
+            .OfType<IHasRequestId>()
+            .Where(x => x.RequestId == id)
+            .TakeUntil(x => x is Alert || x is ContractDetailsEnd)
+            .Where(x => x is not ContractDetailsEnd)
+            .ToList()
+            .ToTask(); // start task
 
-            var task = Client
-                .Response
-                .OfType<IHasRequestId>()
-                .Where(x => x.RequestId == id)
-                .TakeUntil(x => x is Alert || x is ContractDetailsEnd)
-                .Where(x => x is not ContractDetailsEnd)
-                .ToList()
-                .ToTask(); // start task
+        Client.Request.RequestContractDetails(id, contract);
 
-            Client.Request.RequestContractDetails(id, contract);
+        IList<IHasRequestId> messages = await task;
 
-            IList<IHasRequestId> messages = await task;
+        Alert? alert = messages.OfType<Alert>().Where(alert => alert.IsFatal).FirstOrDefault();
+        if (alert != null)
+            throw new AlertException(alert);
 
-            Alert? alert = messages.OfType<Alert>().Where(alert => alert.IsFatal).FirstOrDefault();
-            if (alert != null)
-                throw new AlertException(alert);
+        return messages;
+    }
 
-            return messages;
-        }
+    [Fact]
+    public async Task TestSingle()
+    {
+        Contract contract = new()
+        { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
 
-        [Fact]
-        public async Task TestSingle()
-        {
-            Contract contract = new()
-                { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
+        IList<IHasRequestId> messages = await MakeRequest(contract);
 
-            IList<IHasRequestId> messages = await MakeRequest(contract);
+        IHasRequestId message = messages.Single();
+        Assert.IsType<ContractDetails>(message);
+    }
 
-            IHasRequestId message = messages.Single();
-            Assert.IsType<ContractDetails>(message);
-        }
+    [Fact]
+    public async Task TestMulti()
+    {
+        Contract contract = new()
+        { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD" };
 
-        [Fact]
-        public async Task TestMulti()
-        {
-            Contract contract = new()
-                { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD" };
+        IList<IHasRequestId> messages = await MakeRequest(contract);
 
-            IList<IHasRequestId> messages = await MakeRequest(contract);
+        Assert.True(messages.Count > 1);
+        Assert.True(messages.All(x => x is ContractDetails));
+    }
 
-            Assert.True(messages.Count > 1);
-            Assert.True(messages.All(x => x is ContractDetails));
-        }
+    [Fact]
+    public async Task TestInvalid()
+    {
+        Contract contract = new()
+        { SecurityType = SecurityType.Stock, Symbol = "ThisIsAnInvalidSymbol", Currency = "SMART", Exchange = "SMART" };
 
-        [Fact]
-        public async Task TestInvalid()
-        {
-            Contract contract = new()
-                { SecurityType = SecurityType.Stock, Symbol = "ThisIsAnInvalidSymbol", Currency = "SMART", Exchange = "SMART" };
+        var alertException = await Assert.ThrowsAsync<AlertException>(async () => await MakeRequest(contract));
 
-            var alertException = await Assert.ThrowsAsync<AlertException>(async () => await MakeRequest(contract));
-
-            Write(alertException.Message);
-        }
+        Write(alertException.Message);
     }
 }
 

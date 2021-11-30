@@ -1,7 +1,6 @@
-﻿namespace InterReact
+﻿namespace InterReact;
+
+public interface IHasExecutionId
 {
-    public interface IHasExecutionId
-    {
-        string ExecutionId { get; }
-    }
+    string ExecutionId { get; }
 }

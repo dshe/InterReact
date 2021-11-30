@@ -1,9 +1,8 @@
-﻿namespace InterReact
+﻿namespace InterReact;
+
+public enum ShortSaleSlot
 {
-    public enum ShortSaleSlot
-    {
-        Inapplicable = 0,
-        CustomerHoldsShares = 1,
-        SharesWillBeDelivered = 2
-    }
+    Inapplicable = 0,
+    CustomerHoldsShares = 1,
+    SharesWillBeDelivered = 2
 }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Diagnostics;
@@ -8,141 +7,140 @@ using System.Reactive.Linq;
 using System.Reactive.Disposables;
 using NodaTime;
 using NodaTime.Text;
+namespace InterReact;
 
-namespace InterReact
+public sealed record ContractDetailsTimeEvent(ZonedDateTime Time, ContractTimeStatus Status);
+public sealed record ContractDetailsTimePeriod(ContractDetailsTimeEvent? Previous, ContractDetailsTimeEvent? Next);
+
+public sealed class ContractDetailsTime
 {
-    public sealed record ContractDetailsTimeEvent(ZonedDateTime Time, ContractTimeStatus Status);
-    public sealed record ContractDetailsTimePeriod(ContractDetailsTimeEvent? Previous, ContractDetailsTimeEvent? Next);
+    private static readonly LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HHmm");
+    private static readonly LocalDatePattern DatePattern = LocalDatePattern.CreateWithInvariantCulture("yyyyMMdd");
+    private readonly ContractDetails ContractDetails;
+    private readonly IScheduler TheScheduler;
+    public DateTimeZone TimeZone { get; } // null if not available
+    public IList<ContractDetailsTimeEvent> Events { get; } = new List<ContractDetailsTimeEvent>();
+    // empty if no hours or timeZone
+    public IObservable<ContractDetailsTimePeriod> ContractTimeObservable { get; } // completes immediately if no timeZone or hours
 
-    public sealed class ContractDetailsTime
+    public ContractDetailsTime(ContractDetails contractDetails, IScheduler? scheduler = null)
     {
-        private static readonly LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HHmm");
-        private static readonly LocalDatePattern DatePattern = LocalDatePattern.CreateWithInvariantCulture("yyyyMMdd");
-        private readonly ContractDetails ContractDetails;
-        private readonly IScheduler TheScheduler;
-        public DateTimeZone TimeZone { get; } // null if not available
-        public List<ContractDetailsTimeEvent> Events { get; } = new();
-        // empty if no hours or timeZone
-        public IObservable<ContractDetailsTimePeriod> ContractTimeObservable { get; } // completes immediately if no timeZone or hours
+        ArgumentNullException.ThrowIfNull(contractDetails);
+        ContractDetails = contractDetails;
+        TheScheduler = scheduler ?? Scheduler.Default;
+        ContractTimeObservable = CreateContractTimeObservable();
 
-        public ContractDetailsTime(ContractDetails contractDetails, IScheduler? scheduler = null)
+        string tzi = contractDetails.TimeZoneId;
+        if (string.IsNullOrEmpty(tzi)) // for expired Future Options there is no TimeZoneId(?)
+            tzi = "Etc/GMT";
+        TimeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull(tzi) ?? throw new ArgumentException($"TimeZoneId '{tzi}' not found.");
+        Events = GetList();
+    }
+
+    private List<ContractDetailsTimeEvent> GetList()
+    {
+        // sorted list is used to ensure that dates are unique and to maintain order
+        SortedList<LocalDateTime, ContractTimeStatus> list = new();
+
+        foreach ((LocalDateTime start, LocalDateTime end) in GetSessions(ContractDetails.TradingHours))
         {
-            ContractDetails = contractDetails;
-            TheScheduler = scheduler ?? Scheduler.Default;
-            ContractTimeObservable = CreateContractTimeObservable();
-
-            string tzi = contractDetails.TimeZoneId;
-            if (string.IsNullOrEmpty(tzi)) // for expired Future Options there is no TimeZoneId(?)
-                tzi = "Etc/GMT";
-            TimeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull(tzi) ?? throw new ArgumentException($"TimeZoneId '{tzi}' not found.");
-            Events = GetList();
+            list.Add(start, ContractTimeStatus.Trading);
+            list.Add(end, ContractTimeStatus.Closed);
         }
-
-        private List<ContractDetailsTimeEvent> GetList()
+        foreach ((LocalDateTime start, LocalDateTime end) in GetSessions(ContractDetails.LiquidHours))
         {
-            // sorted list is used to ensure that dates are unique and to maintain order
-            SortedList<LocalDateTime, ContractTimeStatus> list = new();
-
-            foreach ((LocalDateTime start, LocalDateTime end) in GetSessions(ContractDetails.TradingHours))
-            {
-                list.Add(start, ContractTimeStatus.Trading);
-                list.Add(end, ContractTimeStatus.Closed);
-            }
-            foreach ((LocalDateTime start, LocalDateTime end) in GetSessions(ContractDetails.LiquidHours))
-            {
-                KeyValuePair<LocalDateTime, ContractTimeStatus> previous = list.Where(x => x.Key < end).LastOrDefault();
-                list.Add(start, ContractTimeStatus.Liquid);
-                list.Add(end, previous.Value == ContractTimeStatus.Trading ? ContractTimeStatus.Trading : ContractTimeStatus.Closed);
-            }
-            return list.Select(x => new ContractDetailsTimeEvent(x.Key.InZoneLeniently(TimeZone), x.Value)).ToList();
+            KeyValuePair<LocalDateTime, ContractTimeStatus> previous = list.Where(x => x.Key < end).LastOrDefault();
+            list.Add(start, ContractTimeStatus.Liquid);
+            list.Add(end, previous.Value == ContractTimeStatus.Trading ? ContractTimeStatus.Trading : ContractTimeStatus.Closed);
         }
+        return list.Select(x => new ContractDetailsTimeEvent(x.Key.InZoneLeniently(TimeZone), x.Value)).ToList();
+    }
 
-        private static List<(LocalDateTime start, LocalDateTime end)> GetSessions(string s)
-        {
-            List<(LocalDateTime start, LocalDateTime end)> list = new();
+    private static List<(LocalDateTime start, LocalDateTime end)> GetSessions(string s)
+    {
+        List<(LocalDateTime start, LocalDateTime end)> list = new();
 
-            if (string.IsNullOrEmpty(s))
-                return list;
-
-            string[] days = s.Split(';');
-            foreach (string day in days)
-            {
-                string[] parts = day.Split(':');
-
-                Debug.Assert(parts.Length == 2);
-                LocalDate date = DatePattern.Parse(parts[0]).Value;
-                IEnumerable<string> sessions = parts[1].Split(',').Distinct(); // the sessions may be repeated(?)
-                foreach (string session in sessions.Where(x => x != "CLOSED"))
-                {
-                    (LocalTime startTime, LocalTime endTime) = GetSessionTime(session);
-                    LocalDateTime start = date.At(startTime);
-                    LocalDateTime end = date.At(endTime);
-                    if (end < start)
-                        start = start.PlusDays(-1); //end = end.PlusDays(1); ??
-                    if (list.Any() && (start <= list.Last().end || end <= start)) // ensure consecutive, non-overlapping periods
-                        throw new InvalidDataException("Invalid period.");
-                    list.Add((start, end));
-                }
-            }
+        if (string.IsNullOrEmpty(s))
             return list;
 
-            // local
-            static (LocalTime start, LocalTime end) GetSessionTime(string session)
+        string[] days = s.Split(';');
+        foreach (string day in days)
+        {
+            string[] parts = day.Split(':');
+
+            Debug.Assert(parts.Length == 2);
+            LocalDate date = DatePattern.Parse(parts[0]).Value;
+            IEnumerable<string> sessions = parts[1].Split(',').Distinct(); // the sessions may be repeated(?)
+            foreach (string session in sessions.Where(x => x != "CLOSED"))
             {
-                LocalTime[] times = session.Split('-').Select(t => TimePattern.Parse(t).Value).ToArray();
-                Debug.Assert(times.Length == 2);
-                return (times[0], times[1]);
+                (LocalTime startTime, LocalTime endTime) = GetSessionTime(session);
+                LocalDateTime start = date.At(startTime);
+                LocalDateTime end = date.At(endTime);
+                if (end < start)
+                    start = start.PlusDays(-1); //end = end.PlusDays(1); ??
+                if (list.Any() && (start <= list.Last().end || end <= start)) // ensure consecutive, non-overlapping periods
+                    throw new InvalidDataException("Invalid period.");
+                list.Add((start, end));
             }
         }
+        return list;
 
-        // get the current time from the scheduler
-        public ContractDetailsTimePeriod? Get() => Get(Instant.FromDateTimeOffset(TheScheduler.Now));
-        public ContractDetailsTimePeriod? Get(Instant dt)
+        // local
+        static (LocalTime start, LocalTime end) GetSessionTime(string session)
         {
-            if (!Events.Any())
-                return null;
-
-            return new ContractDetailsTimePeriod(
-                Events.LastOrDefault(x => x.Time.ToInstant() <= dt),
-                Events.FirstOrDefault(x => x.Time.ToInstant() > dt));
+            LocalTime[] times = session.Split('-').Select(t => TimePattern.Parse(t).Value).ToArray();
+            Debug.Assert(times.Length == 2);
+            return (times[0], times[1]);
         }
+    }
 
-        /// <summary>
-        /// Creates an observable which emits Contract time events for the specified contract details.
-        /// </summary>
-        private IObservable<ContractDetailsTimePeriod> CreateContractTimeObservable()
+    // get the current time from the scheduler
+    public ContractDetailsTimePeriod? Get() => Get(Instant.FromDateTimeOffset(TheScheduler.Now));
+    public ContractDetailsTimePeriod? Get(Instant dt)
+    {
+        if (!Events.Any())
+            return null;
+
+        return new ContractDetailsTimePeriod(
+            Events.LastOrDefault(x => x.Time.ToInstant() <= dt),
+            Events.FirstOrDefault(x => x.Time.ToInstant() > dt));
+    }
+
+    /// <summary>
+    /// Creates an observable which emits Contract time events for the specified contract details.
+    /// </summary>
+    private IObservable<ContractDetailsTimePeriod> CreateContractTimeObservable()
+    {
+        return Observable.Create<ContractDetailsTimePeriod>(observer =>
         {
-            return Observable.Create<ContractDetailsTimePeriod>(observer =>
+            ContractDetailsTimePeriod? initialResult = Get();
+            if (initialResult != null)
+                observer.OnNext(initialResult);
+            if (initialResult?.Next == null)
             {
-                ContractDetailsTimePeriod? initialResult = Get();
-                if (initialResult != null)
-                    observer.OnNext(initialResult);
-                if (initialResult?.Next == null)
-                {
-                    observer.OnCompleted();
-                    return Disposable.Empty;
-                }
+                observer.OnCompleted();
+                return Disposable.Empty;
+            }
 
-                void work(Action<DateTimeOffset> self)
+            void work(Action<DateTimeOffset> self)
+            {
+                try
                 {
-                    try
-                    {
-                        ContractDetailsTimePeriod? result = Get();
-                        if (result != null)
-                            observer.OnNext(result);
-                        if (result?.Next == null)
-                            observer.OnCompleted();
-                        else
-                            self(result.Next.Time.ToDateTimeOffset());
-                    }
-                    catch (Exception e)
-                    {
-                        observer.OnError(e);
-                    }
+                    ContractDetailsTimePeriod? result = Get();
+                    if (result != null)
+                        observer.OnNext(result);
+                    if (result?.Next == null)
+                        observer.OnCompleted();
+                    else
+                        self(result.Next.Time.ToDateTimeOffset());
                 }
+                catch (Exception e)
+                {
+                    observer.OnError(e);
+                }
+            }
 
-                return TheScheduler.Schedule(initialResult.Next.Time.ToDateTimeOffset(), work);
-            });
-        }
+            return TheScheduler.Schedule(initialResult.Next.Time.ToDateTimeOffset(), work);
+        });
     }
 }

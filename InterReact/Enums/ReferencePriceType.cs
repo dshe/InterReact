@@ -1,9 +1,8 @@
-﻿namespace InterReact
+﻿namespace InterReact;
+
+public enum ReferencePriceType
 {
-    public enum ReferencePriceType
-    {
-        Undefined = 0,
-        BidAskMidPoint = 1,
-        BidOrAsk = 2
-    }
+    Undefined = 0,
+    BidAskMidPoint = 1,
+    BidOrAsk = 2
 }

@@ -1,132 +1,129 @@
-﻿using InterReact;
-using InterReact.SystemTests;
-using System;
+﻿using System;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace InterReact.SystemTests.Orders
+namespace InterReact.SystemTests.Orders;
+
+public class OrdersTests : TestCollectionBase
 {
-    public class OrdersTests : TestCollectionBase
+    public OrdersTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+
+    [Fact]
+    public async Task TestMarketPlaceOrder()
     {
-        public OrdersTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+        if (!Client.Request.Config.IsDemoAccount)
+            throw new Exception("Cannot place order. Not the demo account");
 
-        [Fact]
-        public async Task TestMarketPlaceOrder()
+        var id = Client.Request.GetNextId();
+
+        var task = Client.Response
+            .OfType<Execution>()
+            .Where(x => x.RequestId == id)
+            .FirstAsync()
+            .Timeout(TimeSpan.FromSeconds(5))
+            .ToTask();
+
+        var order = new Order
         {
-            if (!Client.Request.Config.IsDemoAccount)
-                throw new Exception("Cannot place order. Not the demo account");
+            OrderId = id,
+            OrderAction = OrderAction.Buy,
+            TotalQuantity = 100,
+            OrderType = OrderType.Market
+        };
 
-            var id = Client.Request.GetNextId();
+        Client.Request.PlaceOrder(id, order, StockContract1);
 
-            var task = Client.Response
-                .OfType<Execution>()
-                .Where(x => x.RequestId == id)
-                .FirstAsync()
-                .Timeout(TimeSpan.FromSeconds(5))
-                .ToTask();
+        await task;
+    }
 
-            var order = new Order
-            {
-                OrderId = id,
-                OrderAction = OrderAction.Buy,
-                TotalQuantity = 100,
-                OrderType = OrderType.Market
-            };
+    [Fact]
+    public async Task TestPlaceLimitOrder()
+    {
+        if (!Client.Request.Config.IsDemoAccount)
+            throw new Exception("Cannot place order. Not the demo account");
 
-            Client.Request.PlaceOrder(id, order, StockContract1);
+        var id = Client.Request.GetNextId();
 
-            await task;
-        }
+        // find the price
+        var taskPrice = Client.Response
+            .OfType<PriceTick>()
+            .Where(x => x.RequestId == id)
+            .Where(x => x.TickType == TickType.AskPrice)
+            .FirstAsync()
+            .Timeout(TimeSpan.FromSeconds(3))
+            .ToTask();
 
-        [Fact]
-        public async Task TestPlaceLimitOrder()
+        Client.Request.RequestMarketData(id, StockContract1, null, isSnapshot: true);
+
+        var priceTick = await taskPrice;
+
+        // place the order
+        var taskOpenOrder = Client.Response
+            .OfType<OpenOrder>()
+            .Where(x => x.OrderId == id)
+            .FirstAsync()
+            .Timeout(TimeSpan.FromSeconds(3))
+            .ToTask();
+
+        var order = new Order
         {
-            if (!Client.Request.Config.IsDemoAccount)
-                throw new Exception("Cannot place order. Not the demo account");
+            OrderId = id,
+            OrderAction = OrderAction.Buy,
+            TotalQuantity = 100,
+            OrderType = OrderType.Limit,
+            LimitPrice = priceTick.Price - 1
+        };
 
-            var id = Client.Request.GetNextId();
+        Client.Request.PlaceOrder(id, order, StockContract1);
 
-            // find the price
-            var taskPrice = Client.Response
-                .OfType<PriceTick>()
-                .Where(x => x.RequestId == id)
-                .Where(x => x.TickType == TickType.AskPrice)
-                .FirstAsync()
-                .Timeout(TimeSpan.FromSeconds(3))
-                .ToTask();
+        await taskOpenOrder;
 
-            Client.Request.RequestMarketData(id, StockContract1, null, isSnapshot: true);
+        // cancel the order
+        var taskCancelled = Client.Response
+            .OfType<OrderStatusReport>()
+            .Where(x => x.OrderId == id)
+            .Where(x => x.Status == OrderStatus.Cancelled)
+            .FirstAsync()
+            .Timeout(TimeSpan.FromSeconds(3))
+            .ToTask();
 
-            var priceTick = await taskPrice;
+        Client.Request.CancelOrder(id);
 
-            // place the order
-            var taskOpenOrder = Client.Response
-                .OfType<OpenOrder>()
-                .Where(x => x.OrderId == id)
-                .FirstAsync()
-                .Timeout(TimeSpan.FromSeconds(3))
-                .ToTask();
+        await taskCancelled;
+    }
 
-            var order = new Order
-            {
-                OrderId = id,
-                OrderAction = OrderAction.Buy,
-                TotalQuantity = 100,
-                OrderType = OrderType.Limit,
-                LimitPrice = priceTick.Price - 1
-            };
+    [Fact]
+    public async Task TestRequestOpenOrders()
+    {
+        var task = Client.Response
+            .OfType<OpenOrderEnd>()
+            .FirstAsync()
+            .Timeout(TimeSpan.FromSeconds(3))
+            .ToTask();
 
-            Client.Request.PlaceOrder(id, order, StockContract1);
+        Client.Request.RequestOpenOrders();
 
-            await taskOpenOrder;
+        await task;
+    }
 
-            // cancel the order
-            var taskCancelled = Client.Response
-                .OfType<OrderStatusReport>()
-                .Where(x => x.OrderId == id)
-                .Where(x => x.Status == OrderStatus.Cancelled)
-                .FirstAsync()
-                .Timeout(TimeSpan.FromSeconds(3))
-                .ToTask();
+    [Fact]
+    public async Task TestRequestExecutions()
+    {
+        var id = Client.Request.GetNextId();
 
-            Client.Request.CancelOrder(id);
+        var task = Client.Response
+            .OfType<ExecutionEnd>()
+            .Where(x => x.RequestId == id)
+            .FirstAsync()
+            .Timeout(TimeSpan.FromSeconds(3))
+            .ToTask();
 
-            await taskCancelled;
-        }
+        Client.Request.RequestExecutions(id);
 
-        [Fact]
-        public async Task TestRequestOpenOrders()
-        {
-            var task = Client.Response
-                .OfType<OpenOrderEnd>()
-                .FirstAsync()
-                .Timeout(TimeSpan.FromSeconds(3))
-                .ToTask();
-
-            Client.Request.RequestOpenOrders();
-
-            await task;
-        }
-
-        [Fact]
-        public async Task TestRequestExecutions()
-        {
-            var id = Client.Request.GetNextId();
-
-            var task = Client.Response
-                .OfType<ExecutionEnd>()
-                .Where(x => x.RequestId == id)
-                .FirstAsync()
-                .Timeout(TimeSpan.FromSeconds(3))
-                .ToTask();
-
-            Client.Request.RequestExecutions(id);
-
-            await task;
-        }
+        await task;
     }
 }
 

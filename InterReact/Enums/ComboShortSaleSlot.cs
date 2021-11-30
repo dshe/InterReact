@@ -1,15 +1,13 @@
-namespace InterReact
+namespace InterReact;
+
+public enum ComboShortSaleSlot
 {
-    public enum ComboShortSaleSlot
-    {
-        /// <summary>
-        /// Retail customer or not SSHORT leg.
-        /// </summary>
-        Inapplicable = 0,
+    /// <summary>
+    /// Retail customer or not SSHORT leg.
+    /// </summary>
+    Inapplicable = 0,
 
-        ClearingBroker = 1,
+    ClearingBroker = 1,
 
-        ThirdParty = 2
-    }
-
+    ThirdParty = 2
 }

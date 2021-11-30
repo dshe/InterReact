@@ -1,7 +1,6 @@
-﻿namespace InterReact
+﻿namespace InterReact;
+
+public interface IHasOrderId
 {
-    public interface IHasOrderId
-    {
-        int OrderId { get; }
-    }
+    int OrderId { get; }
 }

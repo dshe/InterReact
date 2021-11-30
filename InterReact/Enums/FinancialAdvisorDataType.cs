@@ -1,10 +1,9 @@
-namespace InterReact
+namespace InterReact;
+
+public enum FinancialAdvisorDataType
 {
-    public enum FinancialAdvisorDataType
-    {
-        Undefined = 0,
-        Groups = 1,
-        Profiles = 2,
-        AccountAliases = 3
-    }
+    Undefined = 0,
+    Groups = 1,
+    Profiles = 2,
+    AccountAliases = 3
 }

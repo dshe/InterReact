@@ -1,21 +1,18 @@
-﻿using System;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using NodaTime;
+namespace InterReact;
 
-namespace InterReact
+public partial class Services
 {
-    public partial class Services
-    {
-        /// <summary>
-        /// An observable which emits the current time, then completes.
-        /// </summary>
-        public IObservable<Instant> CurrentTimeObservable { get; }
+    /// <summary>
+    /// An observable which emits the current time, then completes.
+    /// </summary>
+    public IObservable<Instant> CurrentTimeObservable { get; }
 
-        private IObservable<Instant> CreateCurrentTimeObservable() =>
-            Response
-                .ToObservableSingle<CurrentTime>(Request.RequestCurrentTime)
-                .Select(m => m.Time)
-                .ShareSource();
-    }
+    private IObservable<Instant> CreateCurrentTimeObservable() =>
+        Response
+            .ToObservableSingle<CurrentTime>(Request.RequestCurrentTime)
+            .Select(m => m.Time)
+            .ShareSource();
 }
 

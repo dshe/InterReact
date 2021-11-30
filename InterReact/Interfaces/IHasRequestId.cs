@@ -1,7 +1,6 @@
-﻿namespace InterReact
+﻿namespace InterReact;
+
+public interface IHasRequestId
 {
-    public interface IHasRequestId
-    {
-        int RequestId { get; }
-    }
+    int RequestId { get; }
 }

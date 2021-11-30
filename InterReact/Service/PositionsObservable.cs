@@ -1,37 +1,34 @@
 ﻿using Stringification;
-using System;
 using System.Reactive.Linq;
+namespace InterReact;
 
-namespace InterReact
+public partial class Services
 {
-    public partial class Services
+    /// <summary>
+    /// An observable which emits Position objects for all accounts.
+    /// All positions are sent initially, and then only updates as positions change. 
+    /// PositionEnd is emitted after the initial values for each account have been emitted.
+    /// Multiple subscribers are supported. The latest values are cached for replay to new subscribers.
+    /// </summary>
+    public IObservable<object> PositionsObservable { get; }
+
+    private IObservable<object> CreatePositionsObservable()
     {
-        /// <summary>
-        /// An observable which emits Position objects for all accounts.
-        /// All positions are sent initially, and then only updates as positions change. 
-        /// PositionEnd is emitted after the initial values for each account have been emitted.
-        /// Multiple subscribers are supported. The latest values are cached for replay to new subscribers.
-        /// </summary>
-        public IObservable<object> PositionsObservable { get; }
+        return Response
+            .Where(x => x is Position || x is PositionEnd)
+            .ToObservableContinuous(
+                Request.RequestPositions,
+                Request.CancelPositions)
+            .CacheSource(GetPositionsCacheKey);
+    }
 
-        private IObservable<object> CreatePositionsObservable()
+    private static string GetPositionsCacheKey(object o)
+    {
+        return o switch
         {
-            return Response
-                .Where(x => x is Position || x is PositionEnd)
-                .ToObservableContinuous(
-                    Request.RequestPositions,
-                    Request.CancelPositions)
-                .CacheSource(GetPositionsCacheKey);
-        }
-
-        private static string GetPositionsCacheKey(object o)
-        {
-            return o switch
-            {
-                Position p => $"{p.Account}+{p.Contract.Stringify()}",
-                PositionEnd => "PositionEnd",
-                _ => throw new ArgumentException($"Unhandled type: {o.GetType()}.")
-            };
-        }
+            Position p => $"{p.Account}+{p.Contract.Stringify()}",
+            PositionEnd => "PositionEnd",
+            _ => throw new ArgumentException($"Unhandled type: {o.GetType()}.")
+        };
     }
 }

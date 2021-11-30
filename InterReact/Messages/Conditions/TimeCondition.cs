@@ -1,45 +1,48 @@
 ﻿/* Copyright (C) 2019 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
  * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
 
-namespace InterReact
+#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
+
+namespace InterReact;
+
+/**
+* @brief Time condition used in conditional orders to submit or cancel orders at specified time. 
+*/
+public sealed class TimeCondition : OperatorCondition
 {
-    /**
-    * @brief Time condition used in conditional orders to submit or cancel orders at specified time. 
-    */
-    public sealed class TimeCondition : OperatorCondition
+    const string header = "time";
+
+    protected override string Value
     {
-        const string header = "time";
-
-        protected override string Value
+        get
         {
-            get
-            {
-                return Time;
-            }
-            set
-            {
-                Time = value;
-            }
+            return Time;
         }
-
-        public override string ToString()
+        set
         {
-            return header + base.ToString();
-        }
-
-        /**
-        * @brief Time field used in conditional order logic. Valid format: YYYYMMDD HH:MM:SS
-        */
-
-        public string Time { get; set; } = "";
-
-        protected override bool TryParse(string cond)
-        {
-            if (!cond.StartsWith(header))
-                return false;
-
-            cond = cond.Replace(header, "");
-            return base.TryParse(cond);
+            Time = value;
         }
     }
+
+    public override string ToString()
+    {
+        return header + base.ToString();
+    }
+
+    /**
+    * @brief Time field used in conditional order logic. Valid format: YYYYMMDD HH:MM:SS
+    */
+
+    public string Time { get; set; } = "";
+
+    protected override bool TryParse(string cond)
+    {
+        if (!cond.StartsWith(header))
+            return false;
+
+        cond = cond.Replace(header, "");
+        return base.TryParse(cond);
+    }
 }
+
+#pragma warning restore CA1012, CA1307, CA1309, CA1031, CA1310, CA1305

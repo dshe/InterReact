@@ -1,9 +1,8 @@
-﻿namespace InterReact
-{
-    public enum OptionExerciseAction
-    {
-        Exercise = 1,
-        Lapse = 2
-    }
+﻿namespace InterReact;
 
+public enum OptionExerciseAction
+{
+    None = 0,
+    Exercise = 1,
+    Lapse = 2
 }

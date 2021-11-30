@@ -6,58 +6,57 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace InterReact.SystemTests.MarketData
+namespace InterReact.SystemTests.MarketData;
+
+public class MarketDataSnapshotTests : TestCollectionBase
 {
-    public class MarketDataSnapshotTests : TestCollectionBase
+    public MarketDataSnapshotTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+
+    private async Task<IList<IHasRequestId>> MakeRequest(Contract contract)
     {
-        public MarketDataSnapshotTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+        int id = Client.Request.GetNextId();
 
-        private async Task<IList<IHasRequestId>> MakeRequest(Contract contract)
-        {
-            int id = Client.Request.GetNextId();
+        var task = Client
+            .Response
+            .OfType<IHasRequestId>()
+            .Where(x => x.RequestId == id)
+            .TakeUntil(x => x is SnapshotEndTick || (x is Alert alert && alert.IsFatal))
+            .Where(x => x is not SnapshotEndTick)
+            .ToList()
+            .ToTask(); // start task
 
-            var task = Client
-                .Response
-                .OfType<IHasRequestId>()
-                .Where(x => x.RequestId == id)
-                .TakeUntil(x => x is SnapshotEndTick || (x is Alert alert && alert.IsFatal))
-                .Where(x => x is not SnapshotEndTick)
-                .ToList()
-                .ToTask(); // start task
+        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
-            Client.Request.RequestMarketDataType(MarketDataType.Delayed);
+        Client.Request.RequestMarketData(id, contract, isSnapshot: true);
 
-            Client.Request.RequestMarketData(id, contract, isSnapshot: true);
+        IList<IHasRequestId> messages = await task;
 
-            IList<IHasRequestId> messages = await task;
+        Alert? alert = messages.OfType<Alert>().Where(alert => alert.IsFatal).FirstOrDefault();
+        if (alert != null)
+            throw new AlertException(alert);
 
-            Alert? alert = messages.OfType<Alert>().Where(alert => alert.IsFatal).FirstOrDefault();
-            if (alert != null)
-                throw new AlertException(alert);
+        return messages;
+    }
 
-            return messages;
-        }
+    [Fact]
+    public async Task TestTickSnapshot()
+    {
+        Contract contract = new()
+        { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
 
-        [Fact]
-        public async Task TestTickSnapshot()
-        {
-             Contract contract = new()
-               { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
+        IList<IHasRequestId> messages = await MakeRequest(contract);
 
-            IList<IHasRequestId> messages = await MakeRequest(contract);
+        Assert.True(messages.Count > 1);
+    }
 
-            Assert.True(messages.Count > 1);
-        }
+    [Fact]
+    public async Task TestTickSnapshotInvalid()
+    {
+        Contract contract = new()
+        { SecurityType = SecurityType.Stock, Symbol = "InvalidSymbol", Currency = "USD", Exchange = "SMART" };
 
-        [Fact]
-        public async Task TestTickSnapshotInvalid()
-        {
-            Contract contract = new()
-                { SecurityType = SecurityType.Stock, Symbol = "InvalidSymbol", Currency = "USD", Exchange = "SMART" };
+        var alertException = await Assert.ThrowsAsync<AlertException>(async () => await MakeRequest(contract));
 
-            var alertException = await Assert.ThrowsAsync<AlertException>(async () => await MakeRequest(contract));
-
-            Write(alertException.Message);
-        }
+        Write(alertException.Message);
     }
 }

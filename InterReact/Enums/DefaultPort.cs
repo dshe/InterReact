@@ -1,10 +1,10 @@
-﻿namespace InterReact
+﻿namespace InterReact;
+
+public enum DefaultPort
 {
-    public enum DefaultPort
-    {
-        TwsRegularAccount = 7496,
-        TwsDemoAccount = 7497,
-        GatewayRegularAccount = 4001,
-        GatewayDemoAccount = 4002
-    }
+    None = 0,
+    TwsRegularAccount = 7496,
+    TwsDemoAccount = 7497,
+    GatewayRegularAccount = 4001,
+    GatewayDemoAccount = 4002
 }

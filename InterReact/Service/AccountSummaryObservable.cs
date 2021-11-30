@@ -1,37 +1,32 @@
-﻿using System;
-using System.Linq;
-using System.Reactive.Linq;
+﻿namespace InterReact;
 
-namespace InterReact
+public partial class Services
 {
-    public partial class Services
+    /// <summary>
+    /// Creates an observable which continually emits AccountSummary objects.
+    /// The complete account summary is sent initially, and then only any changes.
+    /// AccountSummaryEnd is emitted after the initial values for each account have been emitted.
+    /// Multiple subscribers are supported. The latest values are cached for replay to new subscribers.
+    /// </summary>
+    public IObservable<IHasRequestId> AccountSummaryObservable { get; }
+
+    private IObservable<IHasRequestId> CreateAccountSummaryObservable()
     {
-        /// <summary>
-        /// Creates an observable which continually emits AccountSummary objects.
-        /// The complete account summary is sent initially, and then only any changes.
-        /// AccountSummaryEnd is emitted after the initial values for each account have been emitted.
-        /// Multiple subscribers are supported. The latest values are cached for replay to new subscribers.
-        /// </summary>
-        public IObservable<IHasRequestId> AccountSummaryObservable { get; }
+        return Response
+            .ToObservableContinuousWithId(
+                Request.GetNextId,
+                id => Request.RequestAccountSummary(id), Request.CancelAccountSummary)
+            .CacheSource(GetAccountSummaryCacheKey);
+    }
 
-        private IObservable<IHasRequestId> CreateAccountSummaryObservable()
+    private static string GetAccountSummaryCacheKey(IHasRequestId o)
+    {
+        return o switch
         {
-            return Response
-                .ToObservableContinuousWithId(
-                    Request.GetNextId, 
-                    id => Request.RequestAccountSummary(id), Request.CancelAccountSummary)
-                .CacheSource(GetAccountSummaryCacheKey);
-        }
-
-        private static string GetAccountSummaryCacheKey(IHasRequestId o)
-        {
-            return o switch
-            {
-                AccountSummary a => $"{a.Account}+{a.Currency}+{a.Tag}",
-                AccountSummaryEnd => "AccountSummaryEnd",
-                Alert _ => "",
-                _ => throw new ArgumentException($"Unhandled type: {o.GetType()}.")
-            };
-        }
+            AccountSummary a => $"{a.Account}+{a.Currency}+{a.Tag}",
+            AccountSummaryEnd => "AccountSummaryEnd",
+            Alert _ => "",
+            _ => throw new ArgumentException($"Unhandled type: {o.GetType()}.")
+        };
     }
 }

@@ -1,20 +1,17 @@
-﻿using System;
+﻿namespace InterReact;
 
-namespace InterReact
+public sealed partial class Services
 {
-    public sealed partial class Services : EditorBrowsableNever
-    {
-        private readonly Request Request;
-        private readonly IObservable<object> Response;
+    private readonly Request Request;
+    private readonly IObservable<object> Response;
 
-        public Services(Request request, IObservable<object> response)
-        {
-            Request = request;
-            Response = response;
-            CurrentTimeObservable = CreateCurrentTimeObservable();
-            AccountUpdatesObservable = CreateAccountUpdatesObservable();
-            PositionsObservable = CreatePositionsObservable();
-            AccountSummaryObservable = CreateAccountSummaryObservable();
-        }
+    public Services(Request request, IObservable<object> response)
+    {
+        Request = request;
+        Response = response;
+        CurrentTimeObservable = CreateCurrentTimeObservable();
+        AccountUpdatesObservable = CreateAccountUpdatesObservable();
+        PositionsObservable = CreatePositionsObservable();
+        AccountSummaryObservable = CreateAccountSummaryObservable();
     }
 }

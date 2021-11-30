@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Nullable>enable</Nullable>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProject>https://github.com/dshe/InterReact</PackageProject>
@@ -9,19 +9,26 @@
     <PackageTags>IB Interactive-Brokers Trader-Workstation TWS reactive reactive-extensions Rx</PackageTags>
     <Description>Interactive Brokers reactive C# API.</Description>
     <Authors>DavidS</Authors>
-    <Version>0.0.3-alpha</Version>
-    <AssemblyVersion>0.0.3</AssemblyVersion>
-    <FileVersion>0.0.3</FileVersion>
+    <Version>0.1.0</Version>
+    <AssemblyVersion>0.1.0</AssemblyVersion>
+    <FileVersion>0.1.0</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
+	<EnablePackageValidation>true</EnablePackageValidation>
+	<AnalysisMode>All</AnalysisMode>
+	<NoWarn>CA1707;CA1724;CA1848</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
-    <PackageReference Include="NodaTime" Version="3.0.5" />
-    <PackageReference Include="RxSockets" Version="3.0.1" />
-    <PackageReference Include="Stringification" Version="2.0.0" />
+    <Compile Remove="Extensions\Union.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
+    <PackageReference Include="NodaTime" Version="3.0.9" />
+    <PackageReference Include="RxSockets" Version="4.0.1" />
+    <PackageReference Include="Stringification" Version="3.0.0" />
     <PackageReference Include="System.Reactive" Version="5.0.0" />
   </ItemGroup>
 

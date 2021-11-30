@@ -1,66 +1,62 @@
-﻿using InterReact;
-using InterReact.SystemTests;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace InterReact.SystemTests.Contracts
+namespace InterReact.SystemTests.Contracts;
+
+public class ContractDetailsServiceTests : TestCollectionBase
 {
-    public class ContractDetailsServiceTests : TestCollectionBase
+    public ContractDetailsServiceTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+    [Fact]
+    public async Task TestSingle()
     {
-        public ContractDetailsServiceTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
-        [Fact]
-        public async Task TestSingle()
-        {
-            Contract contract = new() { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
+        Contract contract = new() { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
 
-            IList<ContractDetails> cds = await Client
-                .Services
-                .CreateContractDetailsObservable(contract)
-                .ToList();
+        IList<ContractDetails> cds = await Client
+            .Services
+            .CreateContractDetailsObservable(contract)
+            .ToList();
 
-            Assert.Single(cds);
-        }
+        Assert.Single(cds);
+    }
 
-        [Fact]
-        public async Task TestMulti()
-        {
-            Contract contract = new() { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD" };
+    [Fact]
+    public async Task TestMulti()
+    {
+        Contract contract = new() { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD" };
 
-            var cds = await Client
-                .Services
-                .CreateContractDetailsObservable(contract)
-                .ToList();
-            
-            Assert.True(cds.Count > 1); // multiple exchanges
-        }
+        var cds = await Client
+            .Services
+            .CreateContractDetailsObservable(contract)
+            .ToList();
 
-        [Fact]
-        public async Task TestInvalid()
-        {
-            var contract = new Contract { ContractId = 99999 };
+        Assert.True(cds.Count > 1); // multiple exchanges
+    }
 
-            var alertException = await Assert.ThrowsAsync<AlertException>(async () => await Client
-                .Services
-                .CreateContractDetailsObservable(contract));
+    [Fact]
+    public async Task TestInvalid()
+    {
+        var contract = new Contract { ContractId = 99999 };
 
-            Assert.Equal(200, alertException.Alert.Code);
-        }
+        var alertException = await Assert.ThrowsAsync<AlertException>(async () => await Client
+            .Services
+            .CreateContractDetailsObservable(contract));
 
-        [Fact]
-        public async Task TestTimeout()
-        {
-            var contract = new Contract { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "EUR" };
+        Assert.Equal(200, alertException.Alert.Code);
+    }
 
-            await Assert.ThrowsAsync<TimeoutException>(async () => await Client
-                .Services
-                .CreateContractDetailsObservable(contract)
-                .Timeout(TimeSpan.Zero));
-        }
+    [Fact]
+    public async Task TestTimeout()
+    {
+        var contract = new Contract { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "EUR" };
+
+        await Assert.ThrowsAsync<TimeoutException>(async () => await Client
+            .Services
+            .CreateContractDetailsObservable(contract)
+            .Timeout(TimeSpan.Zero));
     }
 }

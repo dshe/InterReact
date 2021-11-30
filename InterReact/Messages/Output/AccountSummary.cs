@@ -1,31 +1,30 @@
-﻿namespace InterReact
-{
-    public sealed class AccountSummary : IHasRequestId
-    {
-        public int RequestId { get; }
-        public string Account { get; } = "";
-        public string Tag { get; } = "";
-        public string Currency { get; } = "";
-        public string Value { get; } = "";
-        internal AccountSummary() { }
-        internal AccountSummary(ResponseReader r)
-        {
-            r.IgnoreVersion();
-            RequestId = r.ReadInt();
-            Account = r.ReadString();
-            Tag = r.ReadString();
-            Value = r.ReadString();
-            Currency = r.ReadString();
-        }
-    }
+﻿namespace InterReact;
 
-    public sealed class AccountSummaryEnd : IHasRequestId
+public sealed class AccountSummary : IHasRequestId
+{
+    public int RequestId { get; }
+    public string Account { get; } = "";
+    public string Tag { get; } = "";
+    public string Currency { get; } = "";
+    public string Value { get; } = "";
+    internal AccountSummary() { }
+    internal AccountSummary(ResponseReader r)
     {
-        public int RequestId { get; }
-        internal AccountSummaryEnd(ResponseReader r)
-        {
-            r.IgnoreVersion();
-            RequestId = r.ReadInt();
-        }
+        r.IgnoreVersion();
+        RequestId = r.ReadInt();
+        Account = r.ReadString();
+        Tag = r.ReadString();
+        Value = r.ReadString();
+        Currency = r.ReadString();
+    }
+}
+
+public sealed class AccountSummaryEnd : IHasRequestId
+{
+    public int RequestId { get; }
+    internal AccountSummaryEnd(ResponseReader r)
+    {
+        r.IgnoreVersion();
+        RequestId = r.ReadInt();
     }
 }

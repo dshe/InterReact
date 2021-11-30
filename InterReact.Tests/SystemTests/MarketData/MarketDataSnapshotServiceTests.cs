@@ -1,50 +1,45 @@
-﻿using InterReact;
-using InterReact.SystemTests;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace InterReact.SystemTests.MarketData
+namespace InterReact.SystemTests.MarketData;
+
+public class MarketDataSnapshotServiceTests : TestCollectionBase
 {
-    public class MarketDataSnapshotServiceTests : TestCollectionBase
+    public MarketDataSnapshotServiceTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+
+    [Fact]
+    public async Task TestTickSnapshot()
     {
-        public MarketDataSnapshotServiceTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+        Contract contract = new()
+        { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
 
-        [Fact]
-        public async Task TestTickSnapshot()
-        {
-            Contract contract = new()
-                { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
+        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
-            Client.Request.RequestMarketDataType(MarketDataType.Delayed);
+        IList<ITick> ticks = await Client
+            .Services
+            .CreateTickSnapshotObservable(contract)
+            .ToList();
 
-            IList<ITick> ticks = await Client
+        Assert.NotEmpty(ticks);
+    }
+
+    [Fact]
+    public async Task TestTickSnapshotInvalid()
+    {
+        Contract contract = new()
+        { SecurityType = SecurityType.Stock, Symbol = "InvalidSymbol", Currency = "USD", Exchange = "SMART" };
+
+        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
+
+        var alertException = await Assert.ThrowsAsync<AlertException>(async () => await Client
                 .Services
                 .CreateTickSnapshotObservable(contract)
-                .ToList();
+                .ToList());
 
-            Assert.NotEmpty(ticks);
-        }
-
-        [Fact]
-        public async Task TestTickSnapshotInvalid()
-        {
-            Contract contract = new()
-                { SecurityType = SecurityType.Stock, Symbol = "InvalidSymbol", Currency = "USD", Exchange = "SMART" };
-
-            Client.Request.RequestMarketDataType(MarketDataType.Delayed);
-
-            var alertException = await Assert.ThrowsAsync<AlertException>(async () => await Client
-                    .Services
-                    .CreateTickSnapshotObservable(contract)
-                    .ToList());
-
-            Write(alertException.Message);
-        }
+        Write(alertException.Message);
     }
 }

@@ -1,5 +1,4 @@
-﻿namespace InterReact
-{
-    // marks Tick and Alert objects
-    public interface ITick : IHasRequestId { }
-}
+﻿namespace InterReact;
+
+// marks Tick and Alert objects
+public interface ITick : IHasRequestId { }
