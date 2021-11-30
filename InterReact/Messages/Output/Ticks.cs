@@ -7,7 +7,7 @@ public abstract class Tick : ITick
     public int RequestId { get; protected set; } = -1;
     public TickType TickType { get; protected set; } = TickType.Undefined;
 
-    internal static object[] CreatePriceAndSizeTicks(ResponseReader r)
+    internal static (PriceTick, SizeTick?) CreatePriceAndSizeTicks(ResponseReader r)
     {
         r.RequireVersion(3);
         int requestId = r.ReadInt();
@@ -18,9 +18,9 @@ public abstract class Tick : ITick
         PriceTick tickPrice = new(requestId, priceTickType, price, attr);
         TickType tickTypeSize = GetTickTypeSize(priceTickType);
         if (tickTypeSize == TickType.Undefined)
-            return new object[] { tickPrice };
+            return (tickPrice, null);
         SizeTick tickSize = new(requestId, tickTypeSize, size);
-        return new object[] { tickPrice, tickSize };
+        return (tickPrice, tickSize);
     }
 
     private static TickType GetTickTypeSize(TickType tickType) => tickType switch

@@ -21,11 +21,11 @@ public class ResponseComposerTests : UnitTestsBase
     [Fact]
     public void T01_Short_Message()
     {
-        var e = Assert.Throws<InvalidDataException>(() => Composer.Compose(new string[] { }));
-        Assert.IsType<IndexOutOfRangeException>(e.InnerException);
+        var e = Assert.Throws<InvalidDataException>(() => Composer.Compose(Array.Empty<string>()));
+        Assert.IsType<InvalidDataException>(e.InnerException);
 
         e = Assert.Throws<InvalidDataException>(() => Composer.Compose(new[] { "2", "2" })); // short
-        Assert.IsType<IndexOutOfRangeException>(e.InnerException);
+        Assert.IsType<InvalidDataException>(e.InnerException);
     }
 
     [Fact]
@@ -72,6 +72,6 @@ public class ResponseComposerTests : UnitTestsBase
                 "5",  // tickType
                 "100" // size
             });
-        Assert.IsType<SizeTick>(messages.Single());
+        Assert.IsType<SizeTick>(messages);
     }
 }

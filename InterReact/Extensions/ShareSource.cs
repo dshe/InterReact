@@ -32,7 +32,7 @@ public static partial class Extensions
                     lock (gate)
                     {
                         observerSubscription.Dispose();
-                        if (subject.HasObservers)
+                        if (subject == null || subject.HasObservers)
                             return;
                         subjectSubscription.Dispose();
                         subjectSubscription = Disposable.Empty;

@@ -95,11 +95,10 @@ public sealed class InterReactClientBuilder
         AssemblyName name = GetType().Assembly.GetName();
         Logger.LogInformation("{Name} v{Version}.", name.Name, name.Version);
 
-        IRxSocketClient rxSocket = await ConnectAsync(ct).ConfigureAwait(false);
-
+        IRxSocketClient? rxSocket = null;
         try
         {
-            await Login(rxSocket, ct).ConfigureAwait(false);
+            rxSocket = await Initialize(ct).ConfigureAwait(false);
 
             Stringifier stringifier = new(Logger);
 
@@ -108,7 +107,12 @@ public sealed class InterReactClientBuilder
                 .ToArraysFromBytesWithLengthPrefix()
                 .ToStringArrays()
                 .ToObservableFromAsyncEnumerable()
-                .ToMessages(Config, stringifier)
+                .ToMessages(Config)
+                .Do(m =>
+                {
+                    if (Config.LogIncomingMessages)
+                        Logger.LogInformation("Incoming message: {Message}", stringifier.Stringify(m));
+                })
                 .Publish()
                 .AutoConnect(); // connect on first observer
 
@@ -126,9 +130,18 @@ public sealed class InterReactClientBuilder
         catch (Exception ex)
         {
             Logger.LogCritical(ex, "InterReactClientBuilder");
-            await rxSocket.DisposeAsync().ConfigureAwait(false);
+            if (rxSocket != null)
+                await rxSocket.DisposeAsync().ConfigureAwait(false);
             throw;
         }
+    }
+
+    private async Task<IRxSocketClient> Initialize(CancellationToken ct)
+    {
+        var rxsocket = await ConnectAsync(ct).ConfigureAwait(false);
+        await Login(rxsocket, ct).ConfigureAwait(false);
+        Logger.LogInformation("Logged into Tws/Gateway using clientId: {ClientId} and server version: {ServerVersionCurrent}.", Config.ClientId, (int)Config.ServerVersionCurrent);
+        return rxsocket;
     }
 
     private async Task<IRxSocketClient> ConnectAsync(CancellationToken ct)
@@ -167,19 +180,15 @@ public sealed class InterReactClientBuilder
             throw new InvalidDataException($"Could not parse server version '{message[0]}'.");
         Config.ServerVersionCurrent = version;
         Config.Date = message[1];
-        Logger.LogInformation("Logged into Tws/Gateway using clientId: {ClientId} and server version: {ServerVersionCurrent}.", Config.ClientId, (int)Config.ServerVersionCurrent);
 
         // local methods
-        void Send(string str) =>
-            rxsocket
+        void Send(string str) => rxsocket
             .Send(str.ToByteArray());
 
-        void SendWithPrefix(params string[] strings) =>
-            rxsocket
+        void SendWithPrefix(params string[] strings) => rxsocket
             .Send(strings.ToByteArray().ToByteArrayWithLengthPrefix());
 
-        async Task<string[]> GetMessage() => await
-            rxsocket
+        async Task<string[]> GetMessage() => await rxsocket
             .ReceiveAllAsync()
             .ToArraysFromBytesWithLengthPrefix()
             .ToStringArrays()
