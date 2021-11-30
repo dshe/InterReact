@@ -1,13 +1,13 @@
-# InterReact&nbsp;&nbsp; [![License](https://img.shields.io/badge/Version-0.0.2-blue)]() [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)
+# InterReact&nbsp;&nbsp; [![License](https://img.shields.io/badge/Version-0.0.3-blue)]() [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ***Reactive C# API to Interactive Brokers***
-- compatible with Interactive Brokers API 9.85.02 (Aug 05 2021).
-- supports **.NET 5**.
-- dependencies: RxSockets, StringEnums, Stringification, Reactive Extensions, NodaTime.
-- demo applications: Console, WPF.
+- **.NET 5.0** library
+- compatible with Interactive Brokers API 9.85.02 (Aug 05 2021)
+- dependencies: RxSockets, StringEnums, Stringification, Reactive Extensions, NodaTime
+- demo applications: Console, WPF
 
 ```csharp
-interface IInterReact : IAsyncDisposable
+interface IInterReactClient : IAsyncDisposable
 {
     Request Request { get; }
     IObservable<object> Response { get; }
@@ -23,12 +23,12 @@ using InterReact;
 ```
 ```csharp
 // Create the InterReact client by first connecting to TWS/Gateway on the local host.
-IInterReactClient interReact = await InterReactClientBuilder
+IInterReactClient client = await InterReactClientBuilder
     .Create()
     .BuildAsync();
 
 // Create a contract object.
-Contract contract = new Contract
+Contract contract = new()
 {
    SecurityType = SecurityType.Stock,
    Symbol       = "SPY",
@@ -37,12 +37,13 @@ Contract contract = new Contract
 };
 
 // Create and then subscribe to the observable which can observe ticks for the contract.
-IDisposable subscription = interReact
+IDisposable subscription = client
     .Services
     .CreateTickObservable(contract)
-    .OfTickType(tickType => tickType.PriceTick)
-    .Subscribe(onNext: tickPrice => Console.WriteLine($"Price = {tickPrice.Price}"));
-    
+    .OfTickClass(selector => selector.PriceTick)
+    .Subscribe(onNext: priceTick => 
+        Console.WriteLine($"Price = {priceTick.Price}"));
+
 Console.WriteLine(Environment.NewLine + "press a key to exit...");
 Console.ReadKey();
 Console.Clear();
@@ -51,7 +52,7 @@ Console.Clear();
 subscription.Dispose();
 
 // Disconnect from TWS/Gateway.
-await interReact.DisposeAsync();
+await client.DisposeAsync();
 ```
 ### Notes ###
 
