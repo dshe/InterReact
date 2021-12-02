@@ -7,6 +7,7 @@ public abstract class Tick : ITick
     public int RequestId { get; protected set; } = -1;
     public TickType TickType { get; protected set; } = TickType.Undefined;
 
+    /*
     internal static (PriceTick, SizeTick?) CreatePriceAndSizeTicks(ResponseReader r)
     {
         r.RequireVersion(3);
@@ -15,15 +16,16 @@ public abstract class Tick : ITick
         double price = r.ReadDouble();
         long size = r.ReadLong();
         TickAttrib attr = new(r);
-        PriceTick tickPrice = new(requestId, priceTickType, price, attr);
-        TickType tickTypeSize = GetTickTypeSize(priceTickType);
-        if (tickTypeSize == TickType.Undefined)
-            return (tickPrice, null);
-        SizeTick tickSize = new(requestId, tickTypeSize, size);
-        return (tickPrice, tickSize);
+
+        PriceTick priceTick = new(requestId, priceTickType, price, attr);
+        TickType sizeTickType = GetSizeTickType(priceTickType);
+        if (sizeTickType == TickType.Undefined)
+            return (priceTick, null);
+        SizeTick sizeTick = new(requestId, sizeTickType, size);
+        return (priceTick, sizeTick);
     }
 
-    private static TickType GetTickTypeSize(TickType tickType) => tickType switch
+    private static TickType GetSizeTickType(TickType tickType) => tickType switch
     {
         TickType.BidPrice => TickType.BidSize,
         TickType.AskPrice => TickType.AskSize,
@@ -33,6 +35,7 @@ public abstract class Tick : ITick
         TickType.DelayedLastPrice => TickType.DelayedLastSize,
         _ => TickType.Undefined
     };
+    */
 
     internal void Undelay()
     {
@@ -66,21 +69,39 @@ public abstract class Tick : ITick
 // https://www.interactivebrokers.com/en/software/api/apiguide/tables/tick_types.htm
 
 /// <summary>
+/// A trade/bid/ask at a price which is different from the previous trade/bid/ask price.
+/// A TickPrice is followed by a corresponding TickSize tick. 
+/// </summary>
+public sealed class PriceTick : Tick
+{
+    public double Price { get; }
+    public long Size { get; }
+    public TickAttrib TickAttrib { get; }
+    internal PriceTick() { TickAttrib = new TickAttrib(); }
+    internal PriceTick(ResponseReader r)
+    {
+        r.RequireVersion(3);
+        RequestId = r.ReadInt();
+        TickType = r.ReadEnum<TickType>();
+        Price = r.ReadDouble();
+        Size = r.ReadLong();
+        TickAttrib = new TickAttrib(r);
+    }
+}
+
+/// <summary>
 /// Size only. For example, a trade/bid/ask at the previous trade/bid/ask price.
 /// </summary>
 public sealed class SizeTick : Tick
 {
     public long Size { get; }
-
     internal SizeTick() { }
-
-    internal SizeTick(int requestId, TickType tickType, long size)
+    internal SizeTick(PriceTick priceTick)
     {
-        RequestId = requestId;
-        TickType = tickType;
-        Size = size;
+        RequestId = priceTick.RequestId;
+        TickType = priceTick.TickType;
+        Size = priceTick.Size;
     }
-
     internal SizeTick(ResponseReader r)
     {
         r.IgnoreVersion();
@@ -90,43 +111,16 @@ public sealed class SizeTick : Tick
     }
 }
 
-/// <summary>
-/// Combined Price AND Size tick. IB's own API client sends separate messages.
-/// A trade/bid/ask at a price which is different from the previous trade/bid/ask price.
-/// A TickPrice is followed by a corresponding TickSize tick. 
-/// You can either choose to ignore the size property in TickPrice,
-/// or else filter out the redundant TickSize messages using TickRedundentSizeFilter.
-/// </summary>
-public sealed class PriceTick : Tick
-{
-    public double Price { get; }
-    public long Size { get; }
-    public TickAttrib TickAttrib { get; }
-
-    internal PriceTick() { TickAttrib = new TickAttrib(); }
-
-    internal PriceTick(int requestId, TickType tickType, double price, TickAttrib attrib)
-    {
-        RequestId = requestId;
-        TickType = tickType;
-        Price = price;
-        TickAttrib = attrib;
-    }
-}
-
 public sealed class StringTick : Tick
 {
     public string Value { get; } = "";
-
     internal StringTick() { }
-
     internal StringTick(int requestId, TickType tickType, string value)
     {
         RequestId = requestId;
         TickType = tickType;
         Value = value;
     }
-
     internal static Tick Create(ResponseReader r)
     {
         r.IgnoreVersion();
@@ -147,9 +141,7 @@ public sealed class TimeTick : Tick // from TickString
     /// Seconds precision.
     /// </summary>
     public Instant Time { get; }
-
     internal TimeTick() { }
-
     internal TimeTick(int requestId, string str)
     {
         RequestId = requestId;
@@ -198,9 +190,7 @@ public sealed class RealtimeVolumeTick : Tick // from TickString
 public sealed class GenericTick : Tick
 {
     public double Value { get; }
-
     internal GenericTick() { }
-
     internal GenericTick(int requestId, TickType tickType, double value)
     {
         RequestId = requestId;
@@ -228,9 +218,7 @@ public sealed class ExchangeForPhysicalTick : Tick
     public string FutureLastTradeDate { get; } = "";
     public double DividendImpact { get; }
     public double DividendsToLastTradeDate { get; }
-
     internal ExchangeForPhysicalTick() { }
-
     internal ExchangeForPhysicalTick(ResponseReader r)
     {
         r.IgnoreVersion();
@@ -261,9 +249,7 @@ public sealed class OptionComputationTick : Tick
     public double? Vega { get; }
     public double? Theta { get; }
     public double? UndPrice { get; }
-
     internal OptionComputationTick() { }
-
     internal OptionComputationTick(ResponseReader r)
     {
         if (!r.Config.SupportsServerVersion(ServerVersion.PRICE_BASED_VOLATILITY))
@@ -314,9 +300,7 @@ public sealed class OptionComputationTick : Tick
 public sealed class HaltedTick : Tick
 {
     public HaltType HaltType { get; } = HaltType.Undefined;
-
     internal HaltedTick() { }
-
     internal HaltedTick(int requestId, TickType tickType, HaltType haltType)
     {
         RequestId = requestId;
@@ -326,16 +310,14 @@ public sealed class HaltedTick : Tick
 };
 
 /// <summary>
-/// Tws sends this message to announce that market data has been switched between frozen and real-time.
 /// This message indicates a change in MarketDataType. 
+/// Tws sends this message to announce that market data has been switched between frozen and real-time.
 /// This response could also result from calling: RequestMarketData(returns Tick),
 /// </summary>
 public sealed class MarketDataTypeTick : Tick
 {
     public MarketDataType MarketDataType { get; } = MarketDataType.Undefined;
-
     internal MarketDataTypeTick() { }
-
     internal MarketDataTypeTick(ResponseReader r)
     {
         r.IgnoreVersion();

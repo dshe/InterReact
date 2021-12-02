@@ -8,43 +8,31 @@ internal static class ToMessagesEx
 {
     internal static IObservable<object> ToMessages(this IObservable<string[]> source, Config config)
     {
-        return Observable.Create<object>(observer =>
-        {
-            ResponseComposer composer = new(config, observer.OnNext);
-            return source.Subscribe(strings => composer.ComposeAndSend(strings));
-        });
+        ResponseComposer composer = new(config);
+        return source.Select(strings => composer.Compose(strings));
     }
 }
 
 internal sealed class ResponseComposer
 {
     private readonly Config Config;
-    private readonly Action<object> Send;
     private readonly ResponseParser Parser;
 
-    internal ResponseComposer(Config config, Action<object> send)
+    internal ResponseComposer(Config config)
     {
         Config = config;
-        Send = send;
         Parser = new ResponseParser(config.Logger);
     }
 
-    internal void ComposeAndSend(string[] strings)
+    internal object Compose(string[] strings)
     {
         try
         {
             ResponseReader reader = new(Config, Parser, strings);
-            string code = reader.ReadString(); // read the code (first string)
-            if (code == "1")
-            {
-                (PriceTick priceTick, SizeTick? sizeTick) = Tick.CreatePriceAndSizeTicks(reader);
-                Send(priceTick);
-                if (sizeTick != null)
-                    Send(sizeTick);
-            }
-            else
-                Send(GetMessage(code, reader));
+            string code = reader.ReadString(); // read the first string to find the code
+            object message = GetMessage(code, reader);
             reader.VerifyMessageEnd();
+            return message;
         }
         catch (Exception e)
         {
@@ -56,6 +44,7 @@ internal sealed class ResponseComposer
 
     private static object GetMessage(string code, ResponseReader reader) => code switch
     {
+        "1" => new PriceTick(reader),
         "2" => new SizeTick(reader),
         "3" => new OrderStatusReport(reader),
         "4" => Alert.Create(reader),

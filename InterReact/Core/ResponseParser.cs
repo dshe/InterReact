@@ -7,7 +7,7 @@ namespace InterReact;
 
 internal sealed class ResponseParser
 {
-    private readonly Dictionary<Type, Dictionary<string, object>> enumCache = new();
+    private readonly Dictionary<Type, Dictionary<string, object>> EnumCache = new();
     private readonly ILogger Logger;
 
     internal ResponseParser(ILogger logger) => Logger = logger;
@@ -65,10 +65,10 @@ internal sealed class ResponseParser
     internal T ParseEnum<T>(string numberString) where T : Enum
     {
         Type type = typeof(T);
-        if (!enumCache.TryGetValue(type, out var enumValues))
+        if (!EnumCache.TryGetValue(type, out var enumValues))
         {
             enumValues = Enum.GetValues(type).OfType<object>().ToDictionary(x => ((int)(x)).ToString(CultureInfo.InvariantCulture));
-            enumCache.Add(type, enumValues);
+            EnumCache.Add(type, enumValues);
         }
         if (!enumValues.TryGetValue(numberString, out object? e))
         {
