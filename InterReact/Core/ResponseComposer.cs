@@ -9,29 +9,56 @@ internal static class ToMessagesEx
     internal static IObservable<object> ToMessages(this IObservable<string[]> source, Config config)
     {
         ResponseComposer composer = new(config);
-        return source.Select(strings => composer.Compose(strings));
+        return Observable.Create<object>(observer =>
+        {
+            return source.Subscribe(
+                strings =>
+                {
+                    object message = composer.Compose(strings);
+                    observer.OnNext(message);
+                    if (config.FollowPriceTickWithSizeTick && message is PriceTick priceTick)
+                    {
+                        TickType type = GetSizeTickType(priceTick.TickType);
+                        if (type != TickType.Undefined)
+                            observer.OnNext(new SizeTick(priceTick.RequestId, type, priceTick.Size));
+                    }
+                },
+                e => observer.OnError(e),
+                observer.OnCompleted);
+        });
     }
+
+    private static TickType GetSizeTickType(TickType tickType) => tickType switch
+    {
+        TickType.BidPrice => TickType.BidSize,
+        TickType.AskPrice => TickType.AskSize,
+        TickType.LastPrice => TickType.LastSize,
+        TickType.DelayedBidPrice => TickType.DelayedBidSize,
+        TickType.DelayedAskPrice => TickType.DelayedAskSize,
+        TickType.DelayedLastPrice => TickType.DelayedLastSize,
+        _ => TickType.Undefined
+    };
 }
 
 internal sealed class ResponseComposer
 {
     private readonly Config Config;
-    private readonly ResponseParser Parser;
+    private readonly ResponseReader Reader;
 
     internal ResponseComposer(Config config)
     {
         Config = config;
-        Parser = new ResponseParser(config.Logger);
+        Reader = new ResponseReader(Config);
     }
 
     internal object Compose(string[] strings)
     {
         try
         {
-            ResponseReader reader = new(Config, Parser, strings);
-            string code = reader.ReadString(); // read the first string to find the code
-            object message = GetMessage(code, reader);
-            reader.VerifyMessageEnd();
+            Reader.Initialize(strings);
+            string code = Reader.ReadString();
+            object message = CodeToMessage(code, Reader);
+            Reader.VerifyMessageEnd();
             return message;
         }
         catch (Exception e)
@@ -42,7 +69,7 @@ internal sealed class ResponseComposer
         }
     }
 
-    private static object GetMessage(string code, ResponseReader reader) => code switch
+    private static object CodeToMessage(string code, ResponseReader reader) => code switch
     {
         "1" => new PriceTick(reader),
         "2" => new SizeTick(reader),

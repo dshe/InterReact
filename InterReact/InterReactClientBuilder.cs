@@ -88,6 +88,12 @@ public sealed class InterReactClientBuilder
         return this;
     }
 
+    public InterReactClientBuilder FollowPriceTickWithSizeTick()
+    {
+        Config.FollowPriceTickWithSizeTick = true;
+        return this;
+    }
+
     /////////////////////////////////////////////////////////////
 
     public async Task<IInterReactClient> BuildAsync(CancellationToken ct = default)

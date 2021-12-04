@@ -8,25 +8,28 @@ namespace InterReact;
 
 public sealed class ResponseReader
 {
-    private readonly IEnumerator<string> Enumerator;
     internal readonly Config Config;
     internal readonly ResponseParser Parser;
+    private IEnumerator<string>? Enumerator;
 
-    internal ResponseReader(Config config, ResponseParser responseParser, string[] strings)
+    internal ResponseReader(Config config)
     {
         Config = config;
-        Parser = responseParser;
-        Enumerator = strings.AsEnumerable().GetEnumerator();
+        Parser = new ResponseParser(config.Logger);
     }
+
+    internal void Initialize(string[] strings) => Enumerator = strings.AsEnumerable().GetEnumerator();
 
     internal void VerifyMessageEnd()
     {
+        ArgumentNullException.ThrowIfNull(Enumerator);
         if (Enumerator.MoveNext())
             throw new InvalidDataException("Message longer than expected.");
     }
 
     internal string ReadString()
     {
+        ArgumentNullException.ThrowIfNull(Enumerator);
         if (Enumerator.MoveNext())
             return Enumerator.Current;
         throw new InvalidDataException("Message is shorter than expected.");

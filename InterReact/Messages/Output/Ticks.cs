@@ -7,36 +7,6 @@ public abstract class Tick : ITick
     public int RequestId { get; protected set; } = -1;
     public TickType TickType { get; protected set; } = TickType.Undefined;
 
-    /*
-    internal static (PriceTick, SizeTick?) CreatePriceAndSizeTicks(ResponseReader r)
-    {
-        r.RequireVersion(3);
-        int requestId = r.ReadInt();
-        TickType priceTickType = r.ReadEnum<TickType>();
-        double price = r.ReadDouble();
-        long size = r.ReadLong();
-        TickAttrib attr = new(r);
-
-        PriceTick priceTick = new(requestId, priceTickType, price, attr);
-        TickType sizeTickType = GetSizeTickType(priceTickType);
-        if (sizeTickType == TickType.Undefined)
-            return (priceTick, null);
-        SizeTick sizeTick = new(requestId, sizeTickType, size);
-        return (priceTick, sizeTick);
-    }
-
-    private static TickType GetSizeTickType(TickType tickType) => tickType switch
-    {
-        TickType.BidPrice => TickType.BidSize,
-        TickType.AskPrice => TickType.AskSize,
-        TickType.LastPrice => TickType.LastSize,
-        TickType.DelayedBidPrice => TickType.DelayedBidSize,
-        TickType.DelayedAskPrice => TickType.DelayedAskSize,
-        TickType.DelayedLastPrice => TickType.DelayedLastSize,
-        _ => TickType.Undefined
-    };
-    */
-
     internal void Undelay()
     {
         TickType = TickType switch
@@ -70,7 +40,6 @@ public abstract class Tick : ITick
 
 /// <summary>
 /// A trade/bid/ask at a price which is different from the previous trade/bid/ask price.
-/// A TickPrice is followed by a corresponding TickSize tick. 
 /// </summary>
 public sealed class PriceTick : Tick
 {
@@ -96,11 +65,11 @@ public sealed class SizeTick : Tick
 {
     public long Size { get; }
     internal SizeTick() { }
-    internal SizeTick(PriceTick priceTick)
+    internal SizeTick(int requestId, TickType tickType, long size)
     {
-        RequestId = priceTick.RequestId;
-        TickType = priceTick.TickType;
-        Size = priceTick.Size;
+        RequestId = requestId;
+        TickType = tickType;
+        Size = size;
     }
     internal SizeTick(ResponseReader r)
     {

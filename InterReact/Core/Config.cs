@@ -19,6 +19,7 @@ public class Config
     public int ClientId { get; internal set; } = RandomNumberGenerator.GetInt32(100000, 999999);
     public int MaxRequestsPerSecond { get; internal set; } = 50;
     public string OptionalCapabilities { get; internal set; } = "";
+    public bool FollowPriceTickWithSizeTick { get; internal set; }
 
     public ServerVersion ServerVersionCurrent { get; internal set; } = ServerVersion.NONE;
     public ServerVersion ServerVersionMin { get; } = ServerVersion.FRACTIONAL_POSITIONS;

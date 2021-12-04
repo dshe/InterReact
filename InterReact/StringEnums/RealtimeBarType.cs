@@ -8,3 +8,5 @@ public sealed class RealtimeBarType : StringEnum<RealtimeBarType>
     public static RealtimeBarType Ask { get; } = Create("ASK");
     public static RealtimeBarType MidPoint { get; } = Create("MIDPOINT");
 }
+
+

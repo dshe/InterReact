@@ -108,7 +108,7 @@ internal class Server
         Logger.LogInformation($"Received {frequency:N0} messages/second.");
 
         var message = new RequestMessage(x => send(x));
-        for (int i = 0; i < 10_000; i++)
+        for (int i = 0; i < 30_000; i++)
             message.Write("2", "3", 1, TickType.LastSize, 300).Send();
         message.Write("1", "3", 1, TickType.LastPrice, 100, 200, true).Send();
 

@@ -67,7 +67,7 @@ public class ResponseComposerTests : UnitTestsBase
     [Fact]
     public void T03_Ok()
     {
-        object message = Composer.Compose(new[] {
+        var message = Composer.Compose(new[] {
                 "2",  // code = size
                 "99", // version
                 "2",  // requestId
