@@ -16,7 +16,7 @@ public sealed class HistoricalData : IHasRequestId
 
     internal HistoricalData(ResponseReader r) // a one-shot deal
     {
-        if (!r.Config.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
+        if (!r.Builder.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
             r.RequireVersion(3);
 
         RequestId = r.ReadInt();
@@ -50,7 +50,7 @@ public sealed class HistoricalDataBar
         Close = r.ReadDouble();
         Volume = r.ReadLong();
         WeightedAveragePrice = r.ReadDouble();
-        if (!r.Config.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
+        if (!r.Builder.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
             r.ReadString(); /*string hasGaps = */
         Count = r.ReadInt();
     }

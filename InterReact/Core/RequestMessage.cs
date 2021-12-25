@@ -14,6 +14,8 @@ public sealed class RequestMessage
     // V100Plus format: 4 byte message length prefix plus payload of null-terminated strings.
     internal void Send()
     {
+        if (!Strings.Any())
+            throw new InvalidOperationException("Empty send message.");
         SendAction(Strings);
         Strings.Clear();
     }

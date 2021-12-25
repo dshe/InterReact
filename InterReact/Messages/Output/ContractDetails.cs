@@ -150,7 +150,7 @@ public sealed class ContractDetails : IHasRequestId // output
                 Contract.TradingClass = r.ReadString();
                 Contract.ContractId = r.ReadInt();
                 MinimumTick = r.ReadDouble();
-                if (r.Config.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER))
+                if (r.Builder.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER))
                     MdSizeMultiplier = r.ReadInt();
                 Contract.Multiplier = r.ReadString();
                 OrderTypes = r.ReadString();
@@ -169,18 +169,18 @@ public sealed class ContractDetails : IHasRequestId // output
                 EconomicValueRule = r.ReadString();
                 EconomicValueMultiplier = r.ReadDouble();
                 r.AddTagsToList(SecurityIds);
-                if (r.Config.SupportsServerVersion(ServerVersion.AGG_GROUP))
+                if (r.Builder.SupportsServerVersion(ServerVersion.AGG_GROUP))
                     AggGroup = r.ReadInt();
-                if (r.Config.SupportsServerVersion(ServerVersion.UNDERLYING_INFO))
+                if (r.Builder.SupportsServerVersion(ServerVersion.UNDERLYING_INFO))
                 {
                     UnderSymbol = r.ReadString();
                     UnderSecType = r.ReadString();
                 }
-                if (r.Config.SupportsServerVersion(ServerVersion.MARKET_RULES))
+                if (r.Builder.SupportsServerVersion(ServerVersion.MARKET_RULES))
                     MarketRuleIds = r.ReadString();
-                if (r.Config.SupportsServerVersion(ServerVersion.REAL_EXPIRATION_DATE))
+                if (r.Builder.SupportsServerVersion(ServerVersion.REAL_EXPIRATION_DATE))
                     RealExpirationDate = r.ReadString();
-                if (r.Config.SupportsServerVersion(ServerVersion.STOCK_TYPE))
+                if (r.Builder.SupportsServerVersion(ServerVersion.STOCK_TYPE))
                     StockType = r.ReadString();
                 break;
 
@@ -208,7 +208,7 @@ public sealed class ContractDetails : IHasRequestId // output
                 Contract.TradingClass = r.ReadString();
                 Contract.ContractId = r.ReadInt();
                 MinimumTick = r.ReadDouble();
-                if (r.Config.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER))
+                if (r.Builder.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER))
                     MdSizeMultiplier = r.ReadInt();
                 OrderTypes = r.ReadString();
                 ValidExchanges = r.ReadString();
@@ -220,9 +220,9 @@ public sealed class ContractDetails : IHasRequestId // output
                 EconomicValueRule = r.ReadString();
                 EconomicValueMultiplier = r.ReadDouble();
                 r.AddTagsToList(SecurityIds);
-                if (r.Config.SupportsServerVersion(ServerVersion.AGG_GROUP))
+                if (r.Builder.SupportsServerVersion(ServerVersion.AGG_GROUP))
                     AggGroup = r.ReadInt();
-                if (r.Config.SupportsServerVersion(ServerVersion.MARKET_RULES))
+                if (r.Builder.SupportsServerVersion(ServerVersion.MARKET_RULES))
                     MarketRuleIds = r.ReadString();
                 break;
 

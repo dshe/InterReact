@@ -115,7 +115,7 @@ internal sealed class OrderDecoder
 
     internal void ReadModelCode()
     {
-        if (R.Config.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
+        if (R.Builder.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
             Order.ModelCode = R.ReadString();
     }
 
@@ -149,7 +149,7 @@ internal sealed class OrderDecoder
         {
             Order.ShortSaleSlot = R.ReadEnum<ShortSaleSlot>();
             Order.DesignatedLocation = R.ReadString();
-            if ((int)R.Config.ServerVersionCurrent == 51)
+            if ((int)R.Builder.ServerVersionCurrent == 51)
                 R.ReadInt(); // exemptCode
             else if (MessageVersion >= 23)
                 Order.ExemptCode = R.ReadInt();
@@ -287,7 +287,7 @@ internal sealed class OrderDecoder
                 }
             }
             Order.ContinuousUpdate = R.ReadInt();
-            if ((int)R.Config.ServerVersionCurrent == 26)
+            if ((int)R.Builder.ServerVersionCurrent == 26)
             {
                 Order.StockRangeLower = R.ReadDouble();
                 Order.StockRangeUpper = R.ReadDouble();
@@ -448,7 +448,7 @@ internal sealed class OrderDecoder
         {
             Order.WhatIf = R.ReadBool();
             ReadOrderStatus();
-            if (R.Config.SupportsServerVersion(ServerVersion.WHAT_IF_EXT_FIELDS))
+            if (R.Builder.SupportsServerVersion(ServerVersion.WHAT_IF_EXT_FIELDS))
             {
                 OrderState.InitialMarginBefore = R.ReadString();
                 OrderState.MaintenanceMarginBefore = R.ReadString();
@@ -482,7 +482,7 @@ internal sealed class OrderDecoder
 
     internal void ReadPegToBenchParams()
     {
-        if (R.Config.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
+        if (R.Builder.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
         {
             if (Order.OrderType == OrderType.PeggedToBenchmark)
             {
@@ -497,7 +497,7 @@ internal sealed class OrderDecoder
 
     internal void ReadConditions()
     {
-        if (R.Config.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
+        if (R.Builder.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
         {
             int n = R.ReadInt();
             if (n > 0)
@@ -518,7 +518,7 @@ internal sealed class OrderDecoder
 
     internal void ReadAdjustedOrderParams()
     {
-        if (R.Config.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
+        if (R.Builder.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
         {
             Order.AdjustedOrderType = R.ReadString();
             Order.TriggerPrice = R.ReadDoubleNullable();
@@ -538,31 +538,31 @@ internal sealed class OrderDecoder
 
     internal void ReadSoftDollarTier()
     {
-        if (R.Config.SupportsServerVersion(ServerVersion.SOFT_DOLLAR_TIER))
+        if (R.Builder.SupportsServerVersion(ServerVersion.SOFT_DOLLAR_TIER))
             Order.SoftDollarTier.Set(R);
     }
 
     internal void ReadCashQty()
     {
-        if (R.Config.SupportsServerVersion(ServerVersion.CASH_QTY))
+        if (R.Builder.SupportsServerVersion(ServerVersion.CASH_QTY))
             Order.CashQty = R.ReadDoubleNullable();
     }
 
     internal void ReadDontUseAutoPriceForHedge()
     {
-        if (R.Config.SupportsServerVersion(ServerVersion.AUTO_PRICE_FOR_HEDGE))
+        if (R.Builder.SupportsServerVersion(ServerVersion.AUTO_PRICE_FOR_HEDGE))
             Order.DontUseAutoPriceForHedge = R.ReadBool();
     }
 
     internal void ReadIsOmsContainer()
     {
-        if (R.Config.SupportsServerVersion(ServerVersion.ORDER_CONTAINER))
+        if (R.Builder.SupportsServerVersion(ServerVersion.ORDER_CONTAINER))
             Order.IsOmsContainer = R.ReadBool();
     }
 
     internal void ReadDiscretionaryUpToLimitPrice()
     {
-        if (R.Config.SupportsServerVersion(ServerVersion.D_PEG_ORDERS))
+        if (R.Builder.SupportsServerVersion(ServerVersion.D_PEG_ORDERS))
             Order.DiscretionaryUpToLimitPrice = R.ReadBool();
     }
 
@@ -579,19 +579,19 @@ internal sealed class OrderDecoder
 
     internal void ReadUsePriceMgmtAlgo()
     {
-        if (R.Config.SupportsServerVersion(ServerVersion.PRICE_MGMT_ALGO))
+        if (R.Builder.SupportsServerVersion(ServerVersion.PRICE_MGMT_ALGO))
             Order.UsePriceMgmtAlgo = R.ReadBool();
     }
 
     internal void ReadDuration()
     {
-        if (R.Config.SupportsServerVersion(ServerVersion.DURATION))
+        if (R.Builder.SupportsServerVersion(ServerVersion.DURATION))
             Order.Duration = R.ReadIntNullable();
     }
 
     internal void ReadPostToAts()
     {
-        if (R.Config.SupportsServerVersion(ServerVersion.POST_TO_ATS))
+        if (R.Builder.SupportsServerVersion(ServerVersion.POST_TO_ATS))
             Order.PostToAts = R.ReadIntNullable();
     }
 }

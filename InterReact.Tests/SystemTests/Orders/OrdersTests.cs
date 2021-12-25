@@ -14,7 +14,7 @@ public class OrdersTests : TestCollectionBase
     [Fact]
     public async Task TestMarketPlaceOrder()
     {
-        if (!Client.Request.Config.IsDemoAccount)
+        if (!Client.Request.Builder.IsDemoAccount)
             throw new Exception("Cannot place order. Not the demo account");
 
         var id = Client.Request.GetNextId();
@@ -42,7 +42,7 @@ public class OrdersTests : TestCollectionBase
     [Fact]
     public async Task TestPlaceLimitOrder()
     {
-        if (!Client.Request.Config.IsDemoAccount)
+        if (!Client.Request.Builder.IsDemoAccount)
             throw new Exception("Cannot place order. Not the demo account");
 
         var id = Client.Request.GetNextId();

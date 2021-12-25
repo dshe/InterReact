@@ -12,6 +12,9 @@ using Stringification;
 using RxSockets;
 using System.Reflection;
 using System.Globalization;
+using Microsoft.Extensions.Logging.Abstractions;
+using System.Collections.Generic;
+using System.Security.Cryptography;
 namespace InterReact;
 
 public sealed class InterReactClientBuilder
@@ -19,80 +22,88 @@ public sealed class InterReactClientBuilder
     public static InterReactClientBuilder Create() => new();
     private InterReactClientBuilder() { }
 
-    private readonly Config Config = new();
-    private ILogger Logger => Config.Logger;
-
+    internal IClock Clock { get; private set; } = SystemClock.Instance;
     internal InterReactClientBuilder WithClock(IClock clock)
     {
-        Config.Clock = clock;
+        Clock = clock;
         return this;
     }
 
+    internal ILogger Logger { get; private set; } = NullLogger.Instance;
+    internal bool LogIncomingMessages { get; private set; }
     public InterReactClientBuilder WithLogger(ILogger logger, bool logIncomingMessages = false)
     {
-        Config.Logger = logger;
-        Config.LogIncomingMessages = logIncomingMessages;
+        Logger = logger;
+        LogIncomingMessages = logIncomingMessages;
         return this;
     }
 
-    /// <summary>
-    /// Specify an IPAddress to connect to TWS/Gateway.
-    /// </summary>
-    public InterReactClientBuilder WithMaxServerVersion(ServerVersion maxServerVersion)
-    {
-        Config.ServerVersionMax = maxServerVersion;
-        return this;
-    }
-
-    /// <summary>
-    /// Specify an IPAddress to connect to TWS/Gateway.
-    /// </summary>
+    public IPEndPoint IPEndPoint { get; } = new(IPAddress.IPv6Loopback, 0);
     public InterReactClientBuilder WithIpAddress(IPAddress address)
     {
-        Config.IPEndPoint.Address = address;
+        IPEndPoint.Address = address;
         return this;
     }
+    public bool IsDemoAccount => IPEndPoint.Port == (int)DefaultPort.TwsDemoAccount || IPEndPoint.Port == (int)DefaultPort.GatewayDemoAccount;
 
+    internal IReadOnlyList<int> Ports { get; private set; } =
+        new[] { (int)DefaultPort.TwsRegularAccount, (int)DefaultPort.TwsDemoAccount, (int)DefaultPort.GatewayRegularAccount, (int)DefaultPort.GatewayDemoAccount };
     /// <summary>
     /// Specify a port to attempt connection to TWS/Gateway.
     /// Otherwise, connection will be attempted on ports 7496 and 7497, 4001, 4002.
     /// </summary>
-    public InterReactClientBuilder WithPort(int port)
+    public InterReactClientBuilder WithPorts(params int[] ports)
     {
-        Config.Ports = new[] { port };
+        Ports = ports;
         return this;
     }
 
+    public int ClientId { get; private set; } = RandomNumberGenerator.GetInt32(100000, 999999);
     /// <summary>
     /// Up to 8 clients can attach to TWS/Gateway. Each client requires a unique Id. The default Id is random.
-    /// Only ClientId = 0 is able to modify orders submitted manually through TWS.
     /// </summary>
     public InterReactClientBuilder WithClientId(int id)
     {
-        Config.ClientId = id >= 0 ? id : throw new ArgumentException("invalid", nameof(id));
+        ClientId = id >= 0 ? id : throw new ArgumentException("invalid", nameof(id));
         return this;
     }
 
+
+    internal int MaxRequestsPerSecond { get; private set; } = 50;
     /// <summary>
     /// Indicate the maximum number of requests per second sent to to TWS/Gateway.
     /// </summary>
     public InterReactClientBuilder WithMaxRequestsPerSecond(int requests)
     {
-        Config.MaxRequestsPerSecond = requests > 0 ? requests : throw new ArgumentException("invalid", nameof(requests));
+        MaxRequestsPerSecond = requests > 0 ? requests : throw new ArgumentException("invalid", nameof(requests));
         return this;
     }
 
+    internal string OptionalCapabilities { get; private set; } = "";
     public InterReactClientBuilder WithOptionalCapabilities(string capabilities)
     {
-        Config.OptionalCapabilities = capabilities;
+        OptionalCapabilities = capabilities;
         return this;
     }
 
+    internal bool FollowPriceTickWithSize { get; private set; }
     public InterReactClientBuilder FollowPriceTickWithSizeTick()
     {
-        Config.FollowPriceTickWithSizeTick = true;
+        FollowPriceTickWithSize = true;
         return this;
     }
+
+    public const ServerVersion ServerVersionMin = ServerVersion.FRACTIONAL_POSITIONS;
+    public ServerVersion ServerVersionMax { get; private set; } = ServerVersion.WSHE_CALENDAR;
+    public InterReactClientBuilder WithMaxServerVersion(ServerVersion maxServerVersion)
+    {
+        ServerVersionMax = maxServerVersion;
+        return this;
+    }
+    public ServerVersion ServerVersionCurrent { get; private set; } = ServerVersion.NONE;
+    internal bool SupportsServerVersion(ServerVersion version) => version <= ServerVersionCurrent;
+
+    public string Date { get; private set; } = "";
 
     /////////////////////////////////////////////////////////////
 
@@ -113,18 +124,18 @@ public sealed class InterReactClientBuilder
                 .ToArraysFromBytesWithLengthPrefix()
                 .ToStringArrays()
                 .ToObservableFromAsyncEnumerable()
-                .ToMessages(Config)
+                .ToMessages(this)
                 .Do(m =>
                 {
-                    if (Config.LogIncomingMessages)
+                    if (LogIncomingMessages)
                         Logger.LogInformation("Incoming message: {Message}", stringifier.Stringify(m));
                 })
                 .Publish()
                 .AutoConnect(); // connect on first observer
 
             return new ServiceCollection()
+                .AddSingleton(this) // builder
                 .AddSingleton(stringifier)
-                .AddSingleton(Config)   // Config has no dependencies
                 .AddSingleton(rxSocket) // rxSocket is an instance of RxSocketClient
                 .AddSingleton(response) // response is IObservable<object>
                 .AddSingleton<Request>()
@@ -146,26 +157,26 @@ public sealed class InterReactClientBuilder
     {
         var rxsocket = await ConnectAsync(ct).ConfigureAwait(false);
         await Login(rxsocket, ct).ConfigureAwait(false);
-        Logger.LogInformation("Logged into Tws/Gateway using clientId: {ClientId} and server version: {ServerVersionCurrent}.", Config.ClientId, (int)Config.ServerVersionCurrent);
+        Logger.LogInformation("Logged into Tws/Gateway using clientId: {ClientId} and server version: {ServerVersionCurrent}.", ClientId, (int)ServerVersionCurrent);
         return rxsocket;
     }
 
     private async Task<IRxSocketClient> ConnectAsync(CancellationToken ct)
     {
-        foreach (int port in Config.Ports)
+        foreach (int port in Ports)
         {
-            Config.IPEndPoint.Port = port;
+            IPEndPoint.Port = port;
             try
             {
-                return await Config.IPEndPoint.CreateRxSocketClientAsync(Logger, ct).ConfigureAwait(false);
+                return await IPEndPoint.CreateRxSocketClientAsync(Logger, ct).ConfigureAwait(false);
             }
             catch (SocketException e) when (e.SocketErrorCode == SocketError.ConnectionRefused || e.SocketErrorCode == SocketError.TimedOut)
             {
                 Logger.LogTrace("{Message}", e.Message);
             }
         }
-        string ports = Config.Ports.Select(p => p.ToString(CultureInfo.InvariantCulture)).JoinStrings(", ");
-        string message = $"Could not connect to TWS/Gateway at [{Config.IPEndPoint.Address}]:{ports}.";
+        string ports = Ports.Select(p => p.ToString(CultureInfo.InvariantCulture)).JoinStrings(", ");
+        string message = $"Could not connect to TWS/Gateway at [{IPEndPoint.Address}]:{ports}.";
         throw new ArgumentException(message);
     }
 
@@ -174,18 +185,18 @@ public sealed class InterReactClientBuilder
         Send("API");
 
         // Report a range of supported API versions to TWS.
-        SendWithPrefix($"v{(int)Config.ServerVersionMin}..{(int)Config.ServerVersionMax}");
+        SendWithPrefix($"v{(int)ServerVersionMin}..{(int)ServerVersionMax}");
 
         SendWithPrefix(((int)RequestCode.StartApi).ToString(CultureInfo.InvariantCulture),
-            "2", Config.ClientId.ToString(CultureInfo.InvariantCulture), Config.OptionalCapabilities);
+            "2", ClientId.ToString(CultureInfo.InvariantCulture), OptionalCapabilities);
 
         string[] message = await GetMessage().ConfigureAwait(false);
 
         // ServerVersion is the highest supported API version within the range specified.
         if (!Enum.TryParse(message[0], out ServerVersion version))
             throw new InvalidDataException($"Could not parse server version '{message[0]}'.");
-        Config.ServerVersionCurrent = version;
-        Config.Date = message[1];
+        ServerVersionCurrent = version;
+        Date = message[1];
 
         // local methods
         void Send(string str) => rxsocket

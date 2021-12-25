@@ -13,7 +13,7 @@ internal static class Client
     {
         IInterReactClient client = await InterReactClientBuilder.Create()
             .WithLogger(libLogger)
-            .WithPort(port)
+            .WithPorts(port)
             .BuildAsync()
             .ConfigureAwait(false);
 

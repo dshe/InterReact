@@ -29,7 +29,7 @@ IInterReactClient client = await InterReactClientBuilder
     .WithLogger(Logger, false)
     .BuildAsync();
 
-if (!client.Request.Config.IsDemoAccount)
+if (!client.Request.Builder.IsDemoAccount)
 {
     Console.WriteLine("Demo account is required since an order is placed. Please login to the TWS demo account.");
     return;

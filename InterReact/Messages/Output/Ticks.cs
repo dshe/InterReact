@@ -221,12 +221,12 @@ public sealed class OptionComputationTick : Tick
     internal OptionComputationTick() { }
     internal OptionComputationTick(ResponseReader r)
     {
-        if (!r.Config.SupportsServerVersion(ServerVersion.PRICE_BASED_VOLATILITY))
+        if (!r.Builder.SupportsServerVersion(ServerVersion.PRICE_BASED_VOLATILITY))
             r.RequireVersion(6);
 
         RequestId = r.ReadInt();
         TickType = r.ReadEnum<TickType>();
-        if (r.Config.SupportsServerVersion(ServerVersion.PRICE_BASED_VOLATILITY))
+        if (r.Builder.SupportsServerVersion(ServerVersion.PRICE_BASED_VOLATILITY))
             TickAttrib = r.ReadInt();
 
         ImpliedVolatility = r.ReadDoubleNullable();

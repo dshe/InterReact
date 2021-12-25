@@ -30,7 +30,7 @@ public sealed class MarketDepth : IHasRequestId
         Side = r.ReadEnum<MarketDepthSide>();
         Price = r.ReadDouble();
         Size = r.ReadLong();
-        if (isLevel2 && r.Config.SupportsServerVersion(ServerVersion.SMART_DEPTH))
+        if (isLevel2 && r.Builder.SupportsServerVersion(ServerVersion.SMART_DEPTH))
             IsSmartDepth = r.ReadBool();
     }
 }

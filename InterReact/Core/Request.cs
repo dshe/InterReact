@@ -14,16 +14,22 @@ namespace InterReact;
 /// </summary>
 public sealed class Request
 {
-    public Config Config { get; }
+    public InterReactClientBuilder Builder { get; }
     private readonly IRxSocketClient RxSocket;
     private readonly RingLimiter Limiter;
 
-    public Request(Config config, IRxSocketClient rxSocket)
+    public Request(InterReactClientBuilder builder, IRxSocketClient rxSocket)
     {
-        Config = config;
-        Limiter = new RingLimiter(Config.MaxRequestsPerSecond); // configured instance
+        Builder = builder;
+        Limiter = new RingLimiter(Builder.MaxRequestsPerSecond);
         ArgumentNullException.ThrowIfNull(rxSocket);
         RxSocket = rxSocket;
+    }
+
+    private void RequireServerVersion(ServerVersion version)
+    {
+        if (!Builder.SupportsServerVersion(version))
+            throw new ArgumentException($"The server does not support version: '{version}'.");
     }
 
     private void Send(List<string> strings)
@@ -73,7 +79,7 @@ public sealed class Request
         m.Write(MakeGenericTicksList(genericTickTypes));
         m.Write(isSnapshot);
 
-        if (Config.SupportsServerVersion(ServerVersion.SMART_COMPONENTS))
+        if (Builder.SupportsServerVersion(ServerVersion.SMART_COMPONENTS))
             m.Write(isRegulatorySnapshot); // $.01
         m.Write(Tag.Combine(options)).Send();
 
@@ -103,7 +109,7 @@ public sealed class Request
 
         m.Write(RequestCode.PlaceOrder);
 
-        if (!Config.SupportsServerVersion(ServerVersion.ORDER_CONTAINER))
+        if (!Builder.SupportsServerVersion(ServerVersion.ORDER_CONTAINER))
             m.Write("45");
 
         m.Write(id, contract.ContractId);
@@ -139,7 +145,7 @@ public sealed class Request
             order.FinancialAdvisorGroup, order.FinancialAdvisorMethod,
             order.FinancialAdvisorPercentage, order.FinancialAdvisorProfile);
 
-        if (Config.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
+        if (Builder.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
             m.Write(order.ModelCode);
 
         m.Write(order.ShortSaleSlot, order.DesignatedLocation, order.ExemptCode,
@@ -196,7 +202,7 @@ public sealed class Request
         m.Write(order.AlgoId, order.WhatIf, Tag.Combine(order.MiscOptions),
             order.Solicited, order.RandomizeSize, order.RandomizePrice);
 
-        if (Config.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
+        if (Builder.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
         {
             if (order.OrderType == OrderType.PeggedToBenchmark)
             {
@@ -214,37 +220,37 @@ public sealed class Request
                 order.AdjustedStopLimitPrice, order.AdjustedTrailingAmount, order.AdjustableTrailingUnit);
         }
 
-        if (Config.SupportsServerVersion(ServerVersion.EXT_OPERATOR))
+        if (Builder.SupportsServerVersion(ServerVersion.EXT_OPERATOR))
             m.Write(order.ExtOperator);
 
-        if (Config.SupportsServerVersion(ServerVersion.SOFT_DOLLAR_TIER))
+        if (Builder.SupportsServerVersion(ServerVersion.SOFT_DOLLAR_TIER))
             m.Write(order.SoftDollarTier.Name, order.SoftDollarTier.Value);
 
-        if (Config.SupportsServerVersion(ServerVersion.CASH_QTY))
+        if (Builder.SupportsServerVersion(ServerVersion.CASH_QTY))
             m.Write(order.CashQty);
 
-        if (Config.SupportsServerVersion(ServerVersion.DECISION_MAKER))
+        if (Builder.SupportsServerVersion(ServerVersion.DECISION_MAKER))
             m.Write(order.Mifid2DecisionMaker, order.Mifid2DecisionAlgo);
 
-        if (Config.SupportsServerVersion(ServerVersion.MIFID_EXECUTION))
+        if (Builder.SupportsServerVersion(ServerVersion.MIFID_EXECUTION))
             m.Write(order.Mifid2ExecutionTrader, order.Mifid2ExecutionAlgo);
 
-        if (Config.SupportsServerVersion(ServerVersion.AUTO_PRICE_FOR_HEDGE))
+        if (Builder.SupportsServerVersion(ServerVersion.AUTO_PRICE_FOR_HEDGE))
             m.Write(order.DontUseAutoPriceForHedge);
 
-        if (Config.SupportsServerVersion(ServerVersion.ORDER_CONTAINER))
+        if (Builder.SupportsServerVersion(ServerVersion.ORDER_CONTAINER))
             m.Write(order.IsOmsContainer);
 
-        if (Config.SupportsServerVersion(ServerVersion.D_PEG_ORDERS))
+        if (Builder.SupportsServerVersion(ServerVersion.D_PEG_ORDERS))
             m.Write(order.DiscretionaryUpToLimitPrice);
 
-        if (Config.SupportsServerVersion(ServerVersion.PRICE_MGMT_ALGO))
+        if (Builder.SupportsServerVersion(ServerVersion.PRICE_MGMT_ALGO))
             m.Write(order.UsePriceMgmtAlgo);
 
-        if (Config.SupportsServerVersion(ServerVersion.DURATION))
+        if (Builder.SupportsServerVersion(ServerVersion.DURATION))
             m.Write(order.Duration);
 
-        if (Config.SupportsServerVersion(ServerVersion.POST_TO_ATS))
+        if (Builder.SupportsServerVersion(ServerVersion.POST_TO_ATS))
             m.Write(order.PostToAts.EncodeNullable());
 
         m.Send();
@@ -253,34 +259,34 @@ public sealed class Request
     private void VerifyOrder(Order order)
     {
         if (!string.IsNullOrEmpty(order.ExtOperator))
-            Config.RequireServerVersion(ServerVersion.EXT_OPERATOR);
+            RequireServerVersion(ServerVersion.EXT_OPERATOR);
 
         if (order.CashQty != null && order.CashQty != double.MaxValue)
-            Config.RequireServerVersion(ServerVersion.CASH_QTY);
+            RequireServerVersion(ServerVersion.CASH_QTY);
 
         if (!string.IsNullOrEmpty(order.Mifid2DecisionMaker) || !string.IsNullOrEmpty(order.Mifid2DecisionAlgo))
-            Config.RequireServerVersion(ServerVersion.DECISION_MAKER);
+            RequireServerVersion(ServerVersion.DECISION_MAKER);
 
         if (!string.IsNullOrEmpty(order.Mifid2ExecutionTrader) || !string.IsNullOrEmpty(order.Mifid2ExecutionAlgo))
-            Config.RequireServerVersion(ServerVersion.DECISION_MAKER);
+            RequireServerVersion(ServerVersion.DECISION_MAKER);
 
         if (order.DontUseAutoPriceForHedge)
-            Config.RequireServerVersion(ServerVersion.AUTO_PRICE_FOR_HEDGE);
+            RequireServerVersion(ServerVersion.AUTO_PRICE_FOR_HEDGE);
 
         if (order.IsOmsContainer)
-            Config.RequireServerVersion(ServerVersion.ORDER_CONTAINER);
+            RequireServerVersion(ServerVersion.ORDER_CONTAINER);
 
         if (order.DiscretionaryUpToLimitPrice)
-            Config.RequireServerVersion(ServerVersion.D_PEG_ORDERS);
+            RequireServerVersion(ServerVersion.D_PEG_ORDERS);
 
         if (order.UsePriceMgmtAlgo.HasValue)
-            Config.RequireServerVersion(ServerVersion.PRICE_MGMT_ALGO);
+            RequireServerVersion(ServerVersion.PRICE_MGMT_ALGO);
 
         if (order.Duration != int.MaxValue && order.Duration != null)
-            Config.RequireServerVersion(ServerVersion.DURATION);
+            RequireServerVersion(ServerVersion.DURATION);
 
         if (order.PostToAts != int.MaxValue && order.PostToAts != null)
-            Config.RequireServerVersion(ServerVersion.POST_TO_ATS);
+            RequireServerVersion(ServerVersion.POST_TO_ATS);
     }
 
     public void CancelOrder(int orderId) => Message().Write(RequestCode.CancelOrder, "1", orderId).Send();
@@ -343,10 +349,10 @@ public sealed class Request
         ArgumentNullException.ThrowIfNull(contract);
 
         if (isSmartDepth)
-            Config.RequireServerVersion(ServerVersion.SMART_DEPTH);
+            RequireServerVersion(ServerVersion.SMART_DEPTH);
 
         if (!string.IsNullOrEmpty(contract.PrimaryExchange))
-            Config.RequireServerVersion(ServerVersion.MKT_DEPTH_PRIM_EXCHANGE);
+            RequireServerVersion(ServerVersion.MKT_DEPTH_PRIM_EXCHANGE);
 
         RequestMessage m = Message();
 
@@ -354,12 +360,12 @@ public sealed class Request
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
                 contract.Strike, contract.Right, contract.Multiplier, contract.Exchange);
 
-        if (Config.SupportsServerVersion(ServerVersion.MKT_DEPTH_PRIM_EXCHANGE))
+        if (Builder.SupportsServerVersion(ServerVersion.MKT_DEPTH_PRIM_EXCHANGE))
             m.Write(contract.PrimaryExchange);
 
         m.Write(contract.Currency, contract.LocalSymbol, contract.TradingClass, numRows);
 
-        if (Config.SupportsServerVersion(ServerVersion.SMART_DEPTH))
+        if (Builder.SupportsServerVersion(ServerVersion.SMART_DEPTH))
             m.Write(isSmartDepth);
 
         m.Write(Tag.Combine(options));
@@ -370,11 +376,11 @@ public sealed class Request
     public void CancelMarketDepth(int requestId, bool isSmartDepth = false)
     {
         if (isSmartDepth)
-            Config.RequireServerVersion(ServerVersion.SMART_DEPTH);
+            RequireServerVersion(ServerVersion.SMART_DEPTH);
 
         RequestMessage m = Message().Write(RequestCode.CancelMarketDepth, "1", requestId);
 
-        if (Config.SupportsServerVersion(ServerVersion.SMART_DEPTH))
+        if (Builder.SupportsServerVersion(ServerVersion.SMART_DEPTH))
             m.Write(isSmartDepth);
 
         m.Send();
@@ -407,7 +413,7 @@ public sealed class Request
     {
         RequestMessage m = Message().Write(RequestCode.ReplaceFinancialAdvisorConfiguration, "1", dataType, xml);
 
-        if (Config.SupportsServerVersion(ServerVersion.REPLACE_FA_END))
+        if (Builder.SupportsServerVersion(ServerVersion.REPLACE_FA_END))
             m.Write(requestId); // ???
 
         m.Send();
@@ -434,11 +440,11 @@ public sealed class Request
         ArgumentNullException.ThrowIfNull(contract);
 
         if (endDate == default && !keepUpToDate)
-            endDate = Config.Clock.GetCurrentInstant();
+            endDate = Builder.Clock.GetCurrentInstant();
 
         RequestMessage m = Message().Write(RequestCode.RequestHistoricalData);
 
-        if (!Config.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
+        if (!Builder.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
             m.Write("6");
 
         m.Write(requestId, contract.ContractId, contract.Symbol, contract.SecurityType,
@@ -459,7 +465,7 @@ public sealed class Request
                 m.Write(leg.ContractId, leg.Ratio, leg.TradeAction, leg.Exchange);
         }
 
-        if (Config.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
+        if (Builder.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
             m.Write(keepUpToDate);
 
         m.Write(Tag.Combine(options)).Send();
@@ -487,7 +493,7 @@ public sealed class Request
         ArgumentNullException.ThrowIfNull(subscription);
 
         RequestMessage m = Message().Write(RequestCode.RequestScannerSubscription);
-        if (!Config.SupportsServerVersion(ServerVersion.SCANNER_GENERIC_OPTS))
+        if (!Builder.SupportsServerVersion(ServerVersion.SCANNER_GENERIC_OPTS))
             m.Write("4");
 
         m.Write(requestId, subscription.NumberOfRows, subscription.Instrument,
@@ -501,7 +507,7 @@ public sealed class Request
            subscription.ExcludeConvertible, subscription.AverageOptionVolumeAbove,
            subscription.ScannerSettingPairs, subscription.StockType);
 
-        if (Config.SupportsServerVersion(ServerVersion.SCANNER_GENERIC_OPTS))
+        if (Builder.SupportsServerVersion(ServerVersion.SCANNER_GENERIC_OPTS))
             m.Write(Tag.Combine(subscriptionFilterOptions));
 
         m.Write(Tag.Combine(subscriptionOptions));
@@ -660,31 +666,31 @@ public sealed class Request
     */
     public void RequestPositionsMulti(int requestId, string account, string modelCode)
     {
-        Config.RequireServerVersion(ServerVersion.MODELS_SUPPORT);
+        RequireServerVersion(ServerVersion.MODELS_SUPPORT);
         Message().Write(RequestCode.RequestPositionsMulti, "1", requestId, account, modelCode).Send();
     }
 
     public void CancelPositionsMulti(int requestId)
     {
-        Config.RequireServerVersion(ServerVersion.MODELS_SUPPORT);
+        RequireServerVersion(ServerVersion.MODELS_SUPPORT);
         Message().Write(RequestCode.CancelPositionsMulti, "1", requestId).Send();
     }
 
     public void RequestAccountUpdatesMulti(int requestId, string account, string modelCode, bool ledgerAndNlv)
     {
-        Config.RequireServerVersion(ServerVersion.MODELS_SUPPORT);
+        RequireServerVersion(ServerVersion.MODELS_SUPPORT);
         Message().Write(RequestCode.RequestAccountUpdatesMulti, "1", requestId, account, modelCode, ledgerAndNlv).Send();
     }
 
     public void CancelAccountUpdatesMulti(int requestId)
     {
-        Config.RequireServerVersion(ServerVersion.MODELS_SUPPORT);
+        RequireServerVersion(ServerVersion.MODELS_SUPPORT);
         Message().Write(RequestCode.CancelAccountUpdatesMulti, "1", requestId).Send();
     }
 
     public void RequestSecDefOptParams(int requestId, string underlyingSymbol, string futFopExchange, string underlyingSecType, int underlyingConId)
     {
-        Config.RequireServerVersion(ServerVersion.SEC_DEF_OPT_PARAMS_REQ);
+        RequireServerVersion(ServerVersion.SEC_DEF_OPT_PARAMS_REQ);
         Message()
             .Write(RequestCode.RequestSecurityDefinitionOptionalParameters, requestId,
                 underlyingSymbol, futFopExchange, underlyingSecType, underlyingConId)
@@ -693,7 +699,7 @@ public sealed class Request
 
     public void RequestSoftDollarTiers(int requestId)
     {
-        Config.RequireServerVersion(ServerVersion.SOFT_DOLLAR_TIER);
+        RequireServerVersion(ServerVersion.SOFT_DOLLAR_TIER);
         Message()
             .Write(RequestCode.RequestSoftDollarTiers, requestId)
             .Send();
@@ -701,52 +707,52 @@ public sealed class Request
 
     public void RequestFamilyCodes()
     {
-        Config.RequireServerVersion(ServerVersion.REQ_FAMILY_CODES);
+        RequireServerVersion(ServerVersion.REQ_FAMILY_CODES);
         Message().Write(RequestCode.RequestFamilyCodes).Send();
     }
 
     public void RequestMatchingSymbols(int requestId, string pattern)
     {
-        Config.RequireServerVersion(ServerVersion.REQ_MATCHING_SYMBOLS);
+        RequireServerVersion(ServerVersion.REQ_MATCHING_SYMBOLS);
         Message().Write(RequestCode.RequestMatchingSymbols, requestId, pattern).Send();
     }
 
     // Discover exchhanges for which market data is returned to updateMktDepthL2(those with market makers)
     public void RequestMarketDepthExchanges()
     {
-        Config.RequireServerVersion(ServerVersion.REQ_MKT_DEPTH_EXCHANGES);
+        RequireServerVersion(ServerVersion.REQ_MKT_DEPTH_EXCHANGES);
         Message().Write(RequestCode.RequestMktDepthExchanges).Send();
     }
 
     // Returns the mapping of single letter codes to exchange names given the mapping identifier
     public void RequestSmartComponents(int requestId, string bboExchange)
     {
-        Config.RequireServerVersion(ServerVersion.REQ_MKT_DEPTH_EXCHANGES);
+        RequireServerVersion(ServerVersion.REQ_MKT_DEPTH_EXCHANGES);
         Message().Write(RequestCode.RequestSmartComponents, requestId, bboExchange).Send();
     }
 
     // retrieve the body of a news article
     public void RequestNewsArticle(int requestId, string providerCode, string articleId, IEnumerable<Tag>? options = null)
     {
-        Config.RequireServerVersion(ServerVersion.REQ_NEWS_ARTICLE);
+        RequireServerVersion(ServerVersion.REQ_NEWS_ARTICLE);
 
         RequestMessage m = Message().Write(RequestCode.RequestNewsArticle, requestId, providerCode, articleId);
-        if (Config.SupportsServerVersion(ServerVersion.NEWS_QUERY_ORIGINS))
+        if (Builder.SupportsServerVersion(ServerVersion.NEWS_QUERY_ORIGINS))
             m.Write(Tag.Combine(options));
         m.Send();
     }
 
     public void RequestNewsProviders()
     {
-        Config.RequireServerVersion(ServerVersion.REQ_NEWS_PROVIDERS);
+        RequireServerVersion(ServerVersion.REQ_NEWS_PROVIDERS);
         Message().Write(RequestCode.RequestNewsProviders).Send();
     }
 
     public void RequestHistoricalNews(int requestId, int conId, string providerCodes, string startTime, string endTime, int totalResults, IEnumerable<Tag>? options = null)
     {
-        Config.RequireServerVersion(ServerVersion.REQ_HISTORICAL_NEWS);
+        RequireServerVersion(ServerVersion.REQ_HISTORICAL_NEWS);
         RequestMessage m = Message().Write(RequestCode.RequestHistoricalNews, requestId, conId, providerCodes, startTime, endTime, totalResults);
-        if (Config.SupportsServerVersion(ServerVersion.NEWS_QUERY_ORIGINS))
+        if (Builder.SupportsServerVersion(ServerVersion.NEWS_QUERY_ORIGINS))
             m.Write(Tag.Combine(options));
         m.Send();
     }
@@ -759,7 +765,7 @@ public sealed class Request
     {
         ArgumentNullException.ThrowIfNull(contract);
 
-        Config.RequireServerVersion(ServerVersion.REQ_HEAD_TIMESTAMP);
+        RequireServerVersion(ServerVersion.REQ_HEAD_TIMESTAMP);
         Message()
             .Write(RequestCode.RequestHeadTimestamp, requestId)
             .WriteContract(contract)
@@ -772,7 +778,7 @@ public sealed class Request
     {
         ArgumentNullException.ThrowIfNull(contract);
 
-        Config.RequireServerVersion(ServerVersion.REQ_HISTOGRAM_DATA);
+        RequireServerVersion(ServerVersion.REQ_HISTOGRAM_DATA);
         Message()
             .Write(RequestCode.RequestHistogramData, requestId)
             .WriteContract(contract)
@@ -782,51 +788,51 @@ public sealed class Request
 
     public void CancelHistogramData(int requestId)
     {
-        Config.RequireServerVersion(ServerVersion.REQ_HISTOGRAM_DATA);
+        RequireServerVersion(ServerVersion.REQ_HISTOGRAM_DATA);
         Message().Write(RequestCode.CancelHistogramData, requestId).Send();
     }
 
     public void CancelHeadTimestamp(int requestId)
     {
-        Config.RequireServerVersion(ServerVersion.CANCEL_HEADTIMESTAMP);
+        RequireServerVersion(ServerVersion.CANCEL_HEADTIMESTAMP);
         Message().Write(RequestCode.CancelHeadTimestamp, requestId).Send();
     }
 
     // Find market rule (minimum price increment) from codes indicated in ContractDetails.
     public void RequestMarketRule(int requestId)
     {
-        Config.RequireServerVersion(ServerVersion.MARKET_RULES);
+        RequireServerVersion(ServerVersion.MARKET_RULES);
         Message().Write(RequestCode.RequestMarketRule, requestId).Send();
     }
 
     public void RequestPnL(int requestId, string account, string modelCode)
     {
-        Config.RequireServerVersion(ServerVersion.PNL);
+        RequireServerVersion(ServerVersion.PNL);
         Message().Write(RequestCode.ReqPnL, requestId, account, modelCode).Send();
     }
 
     public void CancelPnL(int requestId)
     {
-        Config.RequireServerVersion(ServerVersion.PNL);
+        RequireServerVersion(ServerVersion.PNL);
         Message().Write(RequestCode.CancelPnL, requestId).Send();
     }
 
     public void RequestPnLSingle(int requestId, string account, string modelCode, int contractId)
     {
-        Config.RequireServerVersion(ServerVersion.PNL);
+        RequireServerVersion(ServerVersion.PNL);
         Message().Write(RequestCode.ReqPnLSingle, requestId, account, modelCode, contractId).Send();
     }
 
     public void CancelPnLSingle(int requestId)
     {
-        Config.RequireServerVersion(ServerVersion.PNL);
+        RequireServerVersion(ServerVersion.PNL);
         Message().Write(RequestCode.CancelPnLSingle, requestId).Send();
     }
 
     public void RequestHistoricalTicks(int requestId, Contract contract, string startDateTime, string endDateTime,
         int numberOfTicks, string whatToShow, int useRth, bool ignoreSize, IEnumerable<Tag> miscOptions)
     {
-        Config.RequireServerVersion(ServerVersion.HISTORICAL_TICKS);
+        RequireServerVersion(ServerVersion.HISTORICAL_TICKS);
         Message().Write(RequestCode.ReqHistoricalTicks, requestId, contract,
             startDateTime, endDateTime, numberOfTicks, whatToShow, useRth, ignoreSize, miscOptions).Send();
     }
@@ -836,9 +842,9 @@ public sealed class Request
     {
         ArgumentNullException.ThrowIfNull(contract);
 
-        Config.RequireServerVersion(ServerVersion.TICK_BY_TICK);
+        RequireServerVersion(ServerVersion.TICK_BY_TICK);
         if (numberOfTicks != 0 || ignoreSize)
-            Config.RequireServerVersion(ServerVersion.TICK_BY_TICK_IGNORE_SIZE);
+            RequireServerVersion(ServerVersion.TICK_BY_TICK_IGNORE_SIZE);
 
         RequestMessage m = Message().Write(RequestCode.ReqTickByTickData, requestId,
             contract.ContractId,
@@ -855,7 +861,7 @@ public sealed class Request
             contract.TradingClass,
             tickType);
 
-        if (Config.SupportsServerVersion(ServerVersion.TICK_BY_TICK_IGNORE_SIZE))
+        if (Builder.SupportsServerVersion(ServerVersion.TICK_BY_TICK_IGNORE_SIZE))
             m.Write(numberOfTicks, ignoreSize);
 
         m.Send();
@@ -863,39 +869,39 @@ public sealed class Request
 
     public void CancelTickByTickData(int requestId)
     {
-        Config.RequireServerVersion(ServerVersion.TICK_BY_TICK);
+        RequireServerVersion(ServerVersion.TICK_BY_TICK);
         Message().Write(RequestCode.CancelTickByTickData, requestId).Send();
     }
 
     public void RequestCompletedOrders(bool apiOnly)
     {
-        Config.RequireServerVersion(ServerVersion.COMPLETED_ORDERS);
+        RequireServerVersion(ServerVersion.COMPLETED_ORDERS);
         Message().Write(RequestCode.ReqCompletedOrders, apiOnly).Send();
     }
 
     // Request fundamental data from the Wall Street Events Horizon Calendar
     public void RequestWshMetaData(int requestId)
     {
-        Config.RequireServerVersion(ServerVersion.WSHE_CALENDAR);
+        RequireServerVersion(ServerVersion.WSHE_CALENDAR);
         Message().Write(RequestCode.ReqWshMetaData, requestId).Send();
     }
 
     public void CancelWshMetaData(int requestId)
     {
 
-        Config.RequireServerVersion(ServerVersion.WSHE_CALENDAR);
+        RequireServerVersion(ServerVersion.WSHE_CALENDAR);
         Message().Write(RequestCode.CancelWshMetaData, requestId).Send();
     }
 
     public void RequestWshEventData(int requestId, int contractId)
     {
-        Config.RequireServerVersion(ServerVersion.WSHE_CALENDAR);
+        RequireServerVersion(ServerVersion.WSHE_CALENDAR);
         Message().Write(RequestCode.ReqWshEventData, requestId, contractId).Send();
     }
 
     public void CancelWshEventData(int requestId)
     {
-        Config.RequireServerVersion(ServerVersion.WSHE_CALENDAR);
+        RequireServerVersion(ServerVersion.WSHE_CALENDAR);
         Message().Write(RequestCode.CancelWshEventData, requestId).Send();
     }
 }

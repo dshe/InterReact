@@ -8,24 +8,17 @@ namespace InterReact;
 
 public sealed class ResponseReader
 {
-    internal readonly Config Config;
-    internal readonly ResponseParser Parser;
+    internal InterReactClientBuilder Builder { get; }
+    internal ResponseParser Parser { get; }
     private IEnumerator<string>? Enumerator;
 
-    internal ResponseReader(Config config)
+    internal ResponseReader(InterReactClientBuilder builder)
     {
-        Config = config;
-        Parser = new ResponseParser(config.Logger);
+        Builder = builder;
+        Parser = new ResponseParser(builder.Logger);
     }
 
-    internal void Initialize(string[] strings) => Enumerator = strings.AsEnumerable().GetEnumerator();
-
-    internal void VerifyMessageEnd()
-    {
-        ArgumentNullException.ThrowIfNull(Enumerator);
-        if (Enumerator.MoveNext())
-            throw new InvalidDataException("Message longer than expected.");
-    }
+    internal void SetEnumerator(string[] strings) => Enumerator = strings.AsEnumerable().GetEnumerator();
 
     internal string ReadString()
     {
@@ -35,14 +28,11 @@ public sealed class ResponseReader
         throw new InvalidDataException("Message is shorter than expected.");
     }
 
-    internal void IgnoreVersion() => ReadString();
-    internal int GetVersion() => ReadInt();
-    internal int RequireVersion(int minimumVersion)
+    internal void VerifyEnumerationEnd()
     {
-        int v = GetVersion();
-        if (v < minimumVersion)
-            throw new InvalidDataException($"Invalid response version: {v} < {minimumVersion}.");
-        return v;
+        ArgumentNullException.ThrowIfNull(Enumerator);
+        if (Enumerator.MoveNext())
+            throw new InvalidDataException("Message longer than expected.");
     }
 
     internal bool ReadBool() => ResponseParser.ParseBool(ReadString());
@@ -56,6 +46,15 @@ public sealed class ResponseReader
     internal LocalDateTime ReadLocalDateTime(LocalDateTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
     internal T ReadEnum<T>() where T : Enum => Parser.ParseEnum<T>(ReadString());
     internal T ReadStringEnum<T>() where T : StringEnum<T>, new() => Parser.ParseStringEnum<T>(ReadString());
+    internal int GetVersion() => ReadInt();
+    internal int RequireVersion(int minimumVersion)
+    {
+        int v = GetVersion();
+        if (v < minimumVersion)
+            throw new InvalidDataException($"Invalid response version: {v} < {minimumVersion}.");
+        return v;
+    }
+    internal void IgnoreVersion() => ReadString();
 
     internal void AddStringsToList(IList<string> list)
     {

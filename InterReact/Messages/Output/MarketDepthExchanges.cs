@@ -29,7 +29,7 @@ public sealed class MarketDepthExchange
     {
         Exchange = r.ReadString();
         SecType = r.ReadString();
-        if (r.Config.SupportsServerVersion(ServerVersion.SERVICE_DATA_TYPE))
+        if (r.Builder.SupportsServerVersion(ServerVersion.SERVICE_DATA_TYPE))
         {
             ListingExch = r.ReadString();
             ServiceDataTyp = r.ReadString();

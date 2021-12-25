@@ -6,9 +6,9 @@ namespace InterReact;
 
 internal static class ToMessagesEx
 {
-    internal static IObservable<object> ToMessages(this IObservable<string[]> source, Config config)
+    internal static IObservable<object> ToMessages(this IObservable<string[]> source, InterReactClientBuilder builder)
     {
-        ResponseComposer composer = new(config);
+        ResponseComposer composer = new(builder);
         return Observable.Create<object>(observer =>
         {
             return source.Subscribe(
@@ -16,7 +16,7 @@ internal static class ToMessagesEx
                 {
                     object message = composer.Compose(strings);
                     observer.OnNext(message);
-                    if (config.FollowPriceTickWithSizeTick && message is PriceTick priceTick)
+                    if (message is PriceTick priceTick && builder.FollowPriceTickWithSize)
                     {
                         TickType type = GetSizeTickType(priceTick.TickType);
                         if (type != TickType.Undefined)
@@ -42,29 +42,29 @@ internal static class ToMessagesEx
 
 internal sealed class ResponseComposer
 {
-    private readonly Config Config;
-    private readonly ResponseReader Reader;
+    private ILogger Logger { get; }
+    private ResponseReader Reader { get; }
 
-    internal ResponseComposer(Config config)
+    internal ResponseComposer(InterReactClientBuilder builder)
     {
-        Config = config;
-        Reader = new ResponseReader(Config);
+        Logger = builder.Logger;
+        Reader = new ResponseReader(builder);
     }
 
     internal object Compose(string[] strings)
     {
         try
         {
-            Reader.Initialize(strings);
+            Reader.SetEnumerator(strings);
             string code = Reader.ReadString();
             object message = CodeToMessage(code, Reader);
-            Reader.VerifyMessageEnd();
+            Reader.VerifyEnumerationEnd();
             return message;
         }
         catch (Exception e)
         {
             string m = $"ResponseComposer error: [{strings.JoinStrings(", ")}].";
-            Config.Logger.LogError(e, "{Message}", m);
+            Logger.LogError(e, "{Message}", m);
             throw new InvalidDataException(m, e);
         }
     }
