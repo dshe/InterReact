@@ -29,7 +29,7 @@ public abstract class SystemTestsBase : IAsyncLifetime, IDisposable
     protected SystemTestsBase(ITestOutputHelper output)
     {
         Write = output.WriteLine;
-        Logger = new LoggerFactory().AddMXLogger(Write).CreateLogger("Test");
+        Logger = new LoggerFactory().AddMXLogger(Write, LogLevel.Debug).CreateLogger("Test");
         DynamicLogger.Add(Logger);
     }
 

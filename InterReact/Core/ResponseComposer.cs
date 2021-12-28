@@ -16,7 +16,7 @@ internal static class ToMessagesEx
                 {
                     object message = composer.Compose(strings);
                     observer.OnNext(message);
-                    if (message is PriceTick priceTick && builder.FollowPriceTickWithSize)
+                    if (message is PriceTick priceTick && builder.FollowPriceTickWithSizeTick)
                     {
                         TickType type = GetSizeTickType(priceTick.TickType);
                         if (type != TickType.Undefined)

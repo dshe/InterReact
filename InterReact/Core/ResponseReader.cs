@@ -9,15 +9,14 @@ namespace InterReact;
 public sealed class ResponseReader
 {
     internal InterReactClientBuilder Builder { get; }
-    internal ResponseParser Parser { get; }
-    private IEnumerator<string>? Enumerator;
-
+    private readonly ResponseParser Parser;
     internal ResponseReader(InterReactClientBuilder builder)
     {
         Builder = builder;
         Parser = new ResponseParser(builder.Logger);
     }
 
+    private IEnumerator<string>? Enumerator;
     internal void SetEnumerator(string[] strings) => Enumerator = strings.AsEnumerable().GetEnumerator();
 
     internal string ReadString()

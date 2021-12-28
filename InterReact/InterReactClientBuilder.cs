@@ -86,10 +86,10 @@ public sealed class InterReactClientBuilder
         return this;
     }
 
-    internal bool FollowPriceTickWithSize { get; private set; }
-    public InterReactClientBuilder FollowPriceTickWithSizeTick()
+    internal bool FollowPriceTickWithSizeTick { get; private set; }
+    public InterReactClientBuilder WithFollowPriceTickWithSizeTick()
     {
-        FollowPriceTickWithSize = true;
+        FollowPriceTickWithSizeTick = true;
         return this;
     }
 
@@ -136,8 +136,8 @@ public sealed class InterReactClientBuilder
             return new ServiceCollection()
                 .AddSingleton(this) // builder
                 .AddSingleton(stringifier)
-                .AddSingleton(rxSocket) // rxSocket is an instance of RxSocketClient
-                .AddSingleton(response) // response is IObservable<object>
+                .AddSingleton(rxSocket) // instance of RxSocketClient
+                .AddSingleton(response) // IObservable<object>
                 .AddSingleton<Request>()
                 .AddSingleton<Services>()
                 .AddSingleton<IInterReactClient, InterReactClient>()

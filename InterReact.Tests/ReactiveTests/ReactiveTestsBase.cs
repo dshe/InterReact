@@ -16,7 +16,7 @@ public class ReactiveTestsBase : ReactiveTest
     {
         Write = output.WriteLine;
         Logger = new LoggerFactory()
-            .AddMXLogger(Write)
+            .AddMXLogger(Write, LogLevel.Debug)
             .CreateLogger("ReactiveTest");
     }
 }
