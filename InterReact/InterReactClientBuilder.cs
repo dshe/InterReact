@@ -49,7 +49,7 @@ public sealed class InterReactClientBuilder
     internal IReadOnlyList<int> Ports { get; private set; } =
         new[] { (int)DefaultPort.TwsRegularAccount, (int)DefaultPort.TwsDemoAccount, (int)DefaultPort.GatewayRegularAccount, (int)DefaultPort.GatewayDemoAccount };
     /// <summary>
-    /// Specify a port to attempt connection to TWS/Gateway.
+    /// Specify the port(s) used to attempt connection to TWS/Gateway.
     /// Otherwise, connection will be attempted on ports 7496 and 7497, 4001, 4002.
     /// </summary>
     public InterReactClientBuilder WithPorts(params int[] ports)
@@ -60,6 +60,7 @@ public sealed class InterReactClientBuilder
 
     public int ClientId { get; private set; } = RandomNumberGenerator.GetInt32(100000, 999999);
     /// <summary>
+    /// Specify a client id.
     /// Up to 8 clients can attach to TWS/Gateway. Each client requires a unique Id. The default Id is random.
     /// </summary>
     public InterReactClientBuilder WithClientId(int id)
@@ -71,7 +72,7 @@ public sealed class InterReactClientBuilder
 
     internal int MaxRequestsPerSecond { get; private set; } = 50;
     /// <summary>
-    /// Indicate the maximum number of requests per second sent to to TWS/Gateway.
+    /// Specify the maximum number of requests per second sent to to TWS/Gateway.
     /// </summary>
     public InterReactClientBuilder WithMaxRequestsPerSecond(int requests)
     {

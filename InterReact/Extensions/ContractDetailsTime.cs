@@ -9,8 +9,8 @@ using NodaTime;
 using NodaTime.Text;
 namespace InterReact;
 
-public sealed record ContractDetailsTimeEvent(ZonedDateTime Time, ContractTimeStatus Status);
-public sealed record ContractDetailsTimePeriod(ContractDetailsTimeEvent? Previous, ContractDetailsTimeEvent? Next);
+public record struct ContractDetailsTimeEvent(ZonedDateTime Time, ContractTimeStatus Status);
+public record struct ContractDetailsTimePeriod(ContractDetailsTimeEvent? Previous, ContractDetailsTimeEvent? Next);
 
 public sealed class ContractDetailsTime
 {
@@ -115,7 +115,7 @@ public sealed class ContractDetailsTime
         {
             ContractDetailsTimePeriod? initialResult = Get();
             if (initialResult != null)
-                observer.OnNext(initialResult);
+                observer.OnNext(initialResult.Value);
             if (initialResult?.Next == null)
             {
                 observer.OnCompleted();
@@ -128,11 +128,11 @@ public sealed class ContractDetailsTime
                 {
                     ContractDetailsTimePeriod? result = Get();
                     if (result != null)
-                        observer.OnNext(result);
+                        observer.OnNext(result.Value);
                     if (result?.Next == null)
                         observer.OnCompleted();
                     else
-                        self(result.Next.Time.ToDateTimeOffset());
+                        self(result.Value.Next.Value.Time.ToDateTimeOffset());
                 }
                 catch (Exception e)
                 {
@@ -140,7 +140,7 @@ public sealed class ContractDetailsTime
                 }
             }
 
-            return TheScheduler.Schedule(initialResult.Next.Time.ToDateTimeOffset(), work);
+            return TheScheduler.Schedule(initialResult.Value.Next.Value.Time.ToDateTimeOffset(), work);
         });
     }
 }
