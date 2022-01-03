@@ -9,9 +9,9 @@
     <PackageTags>IB Interactive-Brokers Trader-Workstation TWS reactive reactive-extensions Rx</PackageTags>
     <Description>Interactive Brokers reactive C# API.</Description>
     <Authors>DavidS</Authors>
-    <Version>0.1.0</Version>
-    <AssemblyVersion>0.1.0</AssemblyVersion>
-    <FileVersion>0.1.0</FileVersion>
+    <Version>0.1.1</Version>
+    <AssemblyVersion>0.1.1</AssemblyVersion>
+    <FileVersion>0.1.1</FileVersion>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
