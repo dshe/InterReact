@@ -30,11 +30,9 @@ public sealed class InterReactClientBuilder
     }
 
     internal ILogger Logger { get; private set; } = NullLogger.Instance;
-    internal bool LogIncomingMessages { get; private set; }
-    public InterReactClientBuilder WithLogger(ILogger logger, bool logIncomingMessages = false)
+    public InterReactClientBuilder WithLogger(ILogger logger)
     {
         Logger = logger;
-        LogIncomingMessages = logIncomingMessages;
         return this;
     }
 
@@ -68,7 +66,6 @@ public sealed class InterReactClientBuilder
         ClientId = id >= 0 ? id : throw new ArgumentException("invalid", nameof(id));
         return this;
     }
-
 
     internal int MaxRequestsPerSecond { get; private set; } = 50;
     /// <summary>
@@ -126,10 +123,10 @@ public sealed class InterReactClientBuilder
                 .ToStringArrays()
                 .ToObservableFromAsyncEnumerable()
                 .ToMessages(this)
-                .Do(m =>
+                .Do(message =>
                 {
-                    if (LogIncomingMessages)
-                        Logger.LogInformation("Incoming message: {Message}", stringifier.Stringify(m));
+                    if (Logger.IsEnabled(LogLevel.Debug))
+                        Logger.LogDebug("Incoming message: {Message}", stringifier.Stringify(message));
                 })
                 .Publish()
                 .AutoConnect(); // connect on first observer

@@ -3,10 +3,8 @@ using System;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-
-// CollectionDefinition - tests do not run in parallel, which keeps logging relevent!
-
 namespace InterReact.SystemTests;
+// CollectionDefinition - tests do not run in parallel, which keeps logging relevent!
 
 public class TestFixture : IAsyncLifetime
 {
@@ -16,7 +14,7 @@ public class TestFixture : IAsyncLifetime
     public async Task InitializeAsync()
     {
         Client = await InterReactClientBuilder.Create()
-            .WithLogger(DynamicLogger, true)
+            .WithLogger(DynamicLogger)
             .BuildAsync()
             .ConfigureAwait(false);
     }

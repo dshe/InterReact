@@ -4,7 +4,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using InterReact;
 using Microsoft.Extensions.Logging;
-
 namespace CoreClientServer;
 
 internal static class Client
@@ -17,9 +16,9 @@ internal static class Client
             .BuildAsync()
             .ConfigureAwait(false);
 
-        logger.LogInformation("Connected to server.");
+        logger.LogCritical("Connected to server.");
 
-        logger.LogInformation("Sending some messages...");
+        logger.LogCritical("Sending some messages...");
         Enumerable.Range(0, 50).ToList().ForEach(client.Request.CancelMarketData);
 
         // indicate test end
@@ -28,7 +27,7 @@ internal static class Client
         // wait to get the first tickSize message, indicating test start
         await client.Response.OfType<SizeTick>().FirstAsync();
 
-        logger.LogInformation("Receiving...");
+        logger.LogCritical("Receiving...");
 
         // receive some messages to measure throughput
         Stopwatch watch = new();
@@ -37,10 +36,10 @@ internal static class Client
         watch.Stop();
 
         long frequency = Stopwatch.Frequency * count / watch.ElapsedTicks;
-        logger.LogInformation("Received!! {Frequency:N0} messages/second.", frequency);
+        logger.LogCritical("Received!! {Frequency:N0} messages/second.", frequency);
 
-        logger.LogInformation("Disconnecting.");
+        logger.LogCritical("Disconnecting.");
         await client.DisposeAsync();
-        logger.LogInformation("Disconnected.");
+        logger.LogCritical("Disconnected.");
     }
 }

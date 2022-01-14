@@ -26,7 +26,7 @@ ILogger Logger = LoggerFactory
 // WithLogger(Logger, true) will also send all incoming messages to the Logger. Try it.
 IInterReactClient client = await InterReactClientBuilder
     .Create()
-    .WithLogger(Logger, false)
+    .WithLogger(Logger)
     .BuildAsync();
 
 if (!client.Request.Builder.IsDemoAccount)

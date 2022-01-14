@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-
 namespace CoreClientServer;
 
 public static class Program
@@ -16,14 +16,10 @@ public static class Program
             Console.SetBufferSize(100, 100);
         }
 
-        ConsoleLogger clientLogger =
-            new("Client:    ", ConsoleColor.DarkYellow);
-        ConsoleLogger clientLibLogger =
-            new("ClientLib: ", ConsoleColor.DarkGreen);
-        ConsoleLogger serverLogger =
-            new("Server:    ", ConsoleColor.DarkMagenta);
-        ConsoleLogger serverLibLogger =
-            new("ServerLib: ", ConsoleColor.DarkCyan);
+        ConsoleLogger clientLogger = new("Client:    ", LogLevel.Trace, ConsoleColor.DarkYellow);
+        ConsoleLogger serverLogger = new("Server:    ", LogLevel.Trace, ConsoleColor.DarkMagenta);
+        ConsoleLogger clientLibLogger = new("ClientLib: ", LogLevel.Information, ConsoleColor.DarkGreen);
+        ConsoleLogger serverLibLogger = new("ServerLib: ", LogLevel.Information, ConsoleColor.DarkCyan);
 
         Server server = new(serverLogger, serverLibLogger);
         int port = server.SocketServer.IPEndPoint.Port;

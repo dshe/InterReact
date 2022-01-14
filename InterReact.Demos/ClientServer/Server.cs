@@ -8,7 +8,6 @@ using RxSockets;
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
-
 namespace CoreClientServer;
 
 internal class Server
@@ -24,15 +23,15 @@ internal class Server
 
     internal async Task Run()
     {
-        Logger.LogInformation("Waiting for client.");
+        Logger.LogCritical("Waiting for client.");
         IRxSocketClient accept = await SocketServer.AcceptAllAsync().FirstAsync();
-        Logger.LogInformation("Client connection accepted.");
+        Logger.LogCritical("Client connection accepted.");
 
         string firstString = await accept.ReceiveAllAsync().ToStrings().FirstAsync();
 
         if (firstString != "API")
             throw new InvalidDataException("'API' not received.");
-        Logger.LogInformation("Received 'API'.");
+        Logger.LogCritical("Received 'API'.");
 
         // Start receiving messages with length prefix.
         // Get the first message (string array).
@@ -47,7 +46,7 @@ internal class Server
 
         if (!versions.StartsWith("v"))
             throw new InvalidDataException("Versions not received.");
-        Logger.LogInformation($"Received supported server versions: '{versions}'.");
+        Logger.LogCritical($"Received supported server versions: '{versions}'.");
 
         // Get the second message.
         string[] messages2 = await accept
@@ -58,7 +57,7 @@ internal class Server
 
         if (messages2[0] != "71")
             throw new InvalidDataException("StartApi message not received.");
-        Logger.LogInformation("Received StartApi message.");
+        Logger.LogCritical("Received StartApi message.");
 
         void send(List<string> strings) => accept.Send(strings.ToByteArray().ToByteArrayWithLengthPrefix());
 
@@ -82,7 +81,7 @@ internal class Server
             .Write("10")
             .Send();
 
-        Logger.LogInformation("Client login complete.");
+        Logger.LogCritical("Client login complete.");
 
         ////////////////////////////////////////////////////
 
@@ -105,20 +104,20 @@ internal class Server
         watch.Stop();
 
         long frequency = Stopwatch.Frequency * (count + 1) / watch.ElapsedTicks;
-        Logger.LogInformation($"Received {frequency:N0} messages/second.");
+        Logger.LogCritical($"Received {frequency:N0} messages/second.");
 
         var message = new RequestMessage(x => send(x));
         for (int i = 0; i < 30_000; i++)
             message.Write("2", "3", 1, TickType.LastSize, 300).Send();
         message.Write("1", "3", 1, TickType.LastPrice, 100, 200, true).Send();
 
-        Logger.LogInformation("Sending some messages...");
+        Logger.LogCritical("Sending some messages...");
 
         // wait for OnCompleted()
         await obs.LastOrDefaultAsync();
 
-        Logger.LogInformation("Disconnecting.");
+        Logger.LogCritical("Disconnecting.");
         await SocketServer.DisposeAsync();
-        Logger.LogInformation("Disconnected.");
+        Logger.LogCritical("Disconnected.");
     }
 }
