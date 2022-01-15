@@ -15,9 +15,7 @@ public class SimplestExample
     public async Task Test()
     {
         // Create the InterReact client by first connecting to TWS/Gateway on the local host.
-        IInterReactClient interReact = await InterReactClientBuilder
-            .Create()
-            .BuildAsync();
+        IInterReactClient interReact = await new InterReactClientConnector().ConnectAsync();
 
         // Create a contract object.
         Contract contract = new()

@@ -17,7 +17,7 @@ public abstract class SystemTestsBase : IAsyncLifetime, IDisposable
 
     static SystemTestsBase()
     {
-        ClientTask = InterReactClientBuilder.Create().BuildAsync();
+        ClientTask = new InterReactClientConnector().ConnectAsync();
         AppDomain.CurrentDomain.DomainUnload += async (sender, e) =>
         {
             if (!ClientTask.IsCompletedSuccessfully)

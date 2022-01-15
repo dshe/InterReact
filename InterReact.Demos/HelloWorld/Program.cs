@@ -18,16 +18,17 @@ if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 
 // Create a logger which will log messages to the console.
 ILogger Logger = LoggerFactory
-    .Create(builder => builder.AddSimpleConsole(c => c.SingleLine = true))
+    .Create(builder => builder
+        .AddSimpleConsole(c => c.SingleLine = true)
+        .SetMinimumLevel(LogLevel.Debug))
     .CreateLogger("Hello");
 
 // Create the InterReact client by connecting to TWS/Gateway on your local machine.
 // WithLogger(Logger, false) sends InterReact debug messages to the Logger, which will be sent to the console.
 // WithLogger(Logger, true) will also send all incoming messages to the Logger. Try it.
-IInterReactClient client = await InterReactClientBuilder
-    .Create()
+IInterReactClient client = await new InterReactClientConnector()
     .WithLogger(Logger)
-    .BuildAsync();
+    .ConnectAsync();
 
 if (!client.Request.Builder.IsDemoAccount)
 {

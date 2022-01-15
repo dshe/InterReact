@@ -9,7 +9,6 @@ using System.Reactive.Subjects;
 using System.Windows;
 using System.Reactive.Disposables;
 using System.Windows.Media;
-
 namespace TicksWpf;
 
 public partial class MainWindow : Window, INotifyPropertyChanged
@@ -115,7 +114,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         try
         {
-            Client = await InterReactClientBuilder.Create().BuildAsync();
+            Client = await new InterReactClientConnector().ConnectAsync();
         }
         catch (Exception exception)
         {

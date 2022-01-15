@@ -14,7 +14,7 @@ public class Client_No_Connect_Tests : UnitTestsBase
     public async Task T01_Cancel()
     {
         var ct = new CancellationToken(true);
-        var task = InterReactClientBuilder.Create().WithLogger(Logger).BuildAsync(ct);
+        var task = new InterReactClientConnector().WithLogger(Logger).ConnectAsync(ct);
         var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await task);
         Write(ex.ToString());
     }
@@ -23,7 +23,7 @@ public class Client_No_Connect_Tests : UnitTestsBase
     public async Task T02_Timeout()
     {
         var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(1000));
-        var task = InterReactClientBuilder.Create().WithLogger(Logger).BuildAsync(cts.Token);
+        var task = new InterReactClientConnector().WithLogger(Logger).ConnectAsync(cts.Token);
         var ex = await Assert.ThrowsAsync<OperationCanceledException>(async () => await task);
         Write(ex.ToString());
     }
@@ -31,7 +31,7 @@ public class Client_No_Connect_Tests : UnitTestsBase
     [Fact]
     public async Task T03_Connection_Refused()
     {
-        var task = InterReactClientBuilder.Create().WithLogger(Logger).WithPorts(999).BuildAsync();
+        var task = new InterReactClientConnector().WithLogger(Logger).WithPorts(999).ConnectAsync();
         var ex = await Assert.ThrowsAsync<ArgumentException>(async () => await task);
         Write(ex.ToString());
     }

@@ -6,7 +6,7 @@ namespace InterReact;
 
 internal static class ToMessagesEx
 {
-    internal static IObservable<object> ToMessages(this IObservable<string[]> source, InterReactClientBuilder builder)
+    internal static IObservable<object> ToMessages(this IObservable<string[]> source, InterReactClientConnector builder)
     {
         ResponseComposer composer = new(builder);
         return Observable.Create<object>(observer =>
@@ -45,7 +45,7 @@ internal sealed class ResponseComposer
     private ILogger Logger { get; }
     private ResponseReader Reader { get; }
 
-    internal ResponseComposer(InterReactClientBuilder builder)
+    internal ResponseComposer(InterReactClientConnector builder)
     {
         Logger = builder.Logger;
         Reader = new ResponseReader(builder);

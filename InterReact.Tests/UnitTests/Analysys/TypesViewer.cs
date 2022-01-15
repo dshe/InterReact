@@ -97,7 +97,8 @@ public class Types_Viewer : UnitTestsBase
             catch (Exception e)
             {
                 Write($"Type: {type.Name} EXCEPTION: {e.Message}");
-                throw;
+                if (type.Name != "InterReactClientConnector")
+                    throw;
             }
         }
     }

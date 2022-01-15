@@ -12,7 +12,7 @@ public class ResponseComposerTests : UnitTestsBase
     internal ResponseComposer Composer;
 
     public ResponseComposerTests(ITestOutputHelper output) : base(output) =>
-        Composer = new ResponseComposer(InterReactClientBuilder.Create());
+        Composer = new ResponseComposer(new InterReactClientConnector());
 
     [Fact]
     public void T00_Null()

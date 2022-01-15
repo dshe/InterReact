@@ -13,9 +13,9 @@ public class TestFixture : IAsyncLifetime
     public TestFixture() { }
     public async Task InitializeAsync()
     {
-        Client = await InterReactClientBuilder.Create()
+        Client = await new InterReactClientConnector()
             .WithLogger(DynamicLogger)
-            .BuildAsync()
+            .ConnectAsync()
             .ConfigureAwait(false);
     }
     public async Task DisposeAsync()

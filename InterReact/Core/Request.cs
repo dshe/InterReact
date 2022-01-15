@@ -14,11 +14,11 @@ namespace InterReact;
 /// </summary>
 public sealed class Request
 {
-    public InterReactClientBuilder Builder { get; }
+    public InterReactClientConnector Builder { get; }
     private readonly IRxSocketClient RxSocket;
     private readonly RingLimiter Limiter;
 
-    public Request(InterReactClientBuilder builder, IRxSocketClient rxSocket)
+    public Request(InterReactClientConnector builder, IRxSocketClient rxSocket)
     {
         Builder = builder;
         Limiter = new RingLimiter(Builder.MaxRequestsPerSecond);

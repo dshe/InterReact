@@ -23,9 +23,9 @@ public class Test_Logging : UnitTestsBase
                 .SetMinimumLevel(LogLevel.Trace))
             .ConfigureServices((context, services) => services
                 //.AddLogging()
-                .AddSingleton<InterReactClientBuilder>()
+                .AddSingleton<InterReactClientConnector>()
                 .AddSingleton<Task<IInterReactClient>>(providor =>
-                    providor.GetRequiredService<InterReactClientBuilder>().BuildAsync())
+                    providor.GetRequiredService<InterReactClientConnector>().ConnectAsync())
                 .AddHostedService<StartupService>(services => new StartupService(services)))
             .Build();
 

@@ -10,10 +10,10 @@ internal static class Client
 {
     internal static async Task Run(int port, ILogger logger, ILogger libLogger)
     {
-        IInterReactClient client = await InterReactClientBuilder.Create()
+        IInterReactClient client = await new InterReactClientConnector()
             .WithLogger(libLogger)
             .WithPorts(port)
-            .BuildAsync()
+            .ConnectAsync()
             .ConfigureAwait(false);
 
         logger.LogCritical("Connected to server.");

@@ -17,27 +17,24 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 namespace InterReact;
 
-public sealed class InterReactClientBuilder
+public sealed class InterReactClientConnector
 {
-    public static InterReactClientBuilder Create() => new();
-    private InterReactClientBuilder() { }
-
     internal IClock Clock { get; private set; } = SystemClock.Instance;
-    internal InterReactClientBuilder WithClock(IClock clock)
+    internal InterReactClientConnector WithClock(IClock clock)
     {
         Clock = clock;
         return this;
     }
 
     internal ILogger Logger { get; private set; } = NullLogger.Instance;
-    public InterReactClientBuilder WithLogger(ILogger logger)
+    public InterReactClientConnector WithLogger(ILogger logger)
     {
         Logger = logger;
         return this;
     }
 
     public IPEndPoint IPEndPoint { get; } = new(IPAddress.IPv6Loopback, 0);
-    public InterReactClientBuilder WithIpAddress(IPAddress address)
+    public InterReactClientConnector WithIpAddress(IPAddress address)
     {
         IPEndPoint.Address = address;
         return this;
@@ -50,7 +47,7 @@ public sealed class InterReactClientBuilder
     /// Specify the port(s) used to attempt connection to TWS/Gateway.
     /// Otherwise, connection will be attempted on ports 7496 and 7497, 4001, 4002.
     /// </summary>
-    public InterReactClientBuilder WithPorts(params int[] ports)
+    public InterReactClientConnector WithPorts(params int[] ports)
     {
         Ports = ports;
         return this;
@@ -61,7 +58,7 @@ public sealed class InterReactClientBuilder
     /// Specify a client id.
     /// Up to 8 clients can attach to TWS/Gateway. Each client requires a unique Id. The default Id is random.
     /// </summary>
-    public InterReactClientBuilder WithClientId(int id)
+    public InterReactClientConnector WithClientId(int id)
     {
         ClientId = id >= 0 ? id : throw new ArgumentException("invalid", nameof(id));
         return this;
@@ -71,21 +68,21 @@ public sealed class InterReactClientBuilder
     /// <summary>
     /// Specify the maximum number of requests per second sent to to TWS/Gateway.
     /// </summary>
-    public InterReactClientBuilder WithMaxRequestsPerSecond(int requests)
+    public InterReactClientConnector WithMaxRequestsPerSecond(int requests)
     {
         MaxRequestsPerSecond = requests > 0 ? requests : throw new ArgumentException("invalid", nameof(requests));
         return this;
     }
 
     internal string OptionalCapabilities { get; private set; } = "";
-    public InterReactClientBuilder WithOptionalCapabilities(string capabilities)
+    public InterReactClientConnector WithOptionalCapabilities(string capabilities)
     {
         OptionalCapabilities = capabilities;
         return this;
     }
 
     internal bool FollowPriceTickWithSizeTick { get; private set; }
-    public InterReactClientBuilder WithFollowPriceTickWithSizeTick()
+    public InterReactClientConnector WithFollowPriceTickWithSizeTick()
     {
         FollowPriceTickWithSizeTick = true;
         return this;
@@ -93,7 +90,7 @@ public sealed class InterReactClientBuilder
 
     public const ServerVersion ServerVersionMin = ServerVersion.FRACTIONAL_POSITIONS;
     public ServerVersion ServerVersionMax { get; private set; } = ServerVersion.WSHE_CALENDAR;
-    public InterReactClientBuilder WithMaxServerVersion(ServerVersion maxServerVersion)
+    public InterReactClientConnector WithMaxServerVersion(ServerVersion maxServerVersion)
     {
         ServerVersionMax = maxServerVersion;
         return this;
@@ -105,7 +102,7 @@ public sealed class InterReactClientBuilder
 
     /////////////////////////////////////////////////////////////
 
-    public async Task<IInterReactClient> BuildAsync(CancellationToken ct = default)
+    public async Task<IInterReactClient> ConnectAsync(CancellationToken ct = default)
     {
         AssemblyName name = GetType().Assembly.GetName();
         Logger.LogInformation("{Name} v{Version}.", name.Name, name.Version);
@@ -113,7 +110,9 @@ public sealed class InterReactClientBuilder
         IRxSocketClient? rxSocket = null;
         try
         {
-            rxSocket = await Initialize(ct).ConfigureAwait(false);
+            rxSocket = await ConnectSocketAsync(ct).ConfigureAwait(false);
+            await Login(rxSocket, ct).ConfigureAwait(false);
+            Logger.LogInformation("Logged into Tws/Gateway using clientId: {ClientId} and server version: {ServerVersionCurrent}.", ClientId, (int)ServerVersionCurrent);
 
             Stringifier stringifier = new(Logger);
 
@@ -151,15 +150,7 @@ public sealed class InterReactClientBuilder
         }
     }
 
-    private async Task<IRxSocketClient> Initialize(CancellationToken ct)
-    {
-        var rxsocket = await ConnectAsync(ct).ConfigureAwait(false);
-        await Login(rxsocket, ct).ConfigureAwait(false);
-        Logger.LogInformation("Logged into Tws/Gateway using clientId: {ClientId} and server version: {ServerVersionCurrent}.", ClientId, (int)ServerVersionCurrent);
-        return rxsocket;
-    }
-
-    private async Task<IRxSocketClient> ConnectAsync(CancellationToken ct)
+    private async Task<IRxSocketClient> ConnectSocketAsync(CancellationToken ct)
     {
         foreach (int port in Ports)
         {

@@ -8,9 +8,9 @@ namespace InterReact;
 
 public sealed class ResponseReader
 {
-    internal InterReactClientBuilder Builder { get; }
+    internal InterReactClientConnector Builder { get; }
     private readonly ResponseParser Parser;
-    internal ResponseReader(InterReactClientBuilder builder)
+    internal ResponseReader(InterReactClientConnector builder)
     {
         Builder = builder;
         Parser = new ResponseParser(builder.Logger);
