@@ -1,4 +1,4 @@
-# InterReact&nbsp;&nbsp; [![License](https://img.shields.io/badge/Version-0.1.1-blue)]() [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)
+# InterReact&nbsp;&nbsp; [![License](https://img.shields.io/badge/Version-0.1.2-blue)]() [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)
 
 ***Reactive C# API to Interactive Brokers***
 - **.NET 6.0** library
@@ -23,7 +23,7 @@ using InterReact;
 ```
 ```csharp
 // Create the InterReact client by first connecting to TWS/Gateway on the local host.
-IInterReactClient client = await new InterReactClientBuilder().BuildAsync();
+IInterReactClient client = await new InterReactClientConnector().ConnectAsync();
 
 // Create a contract object.
 Contract contract = new()
