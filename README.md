@@ -23,9 +23,7 @@ using InterReact;
 ```
 ```csharp
 // Create the InterReact client by first connecting to TWS/Gateway on the local host.
-IInterReactClient client = await InterReactClientBuilder
-    .Create()
-    .BuildAsync();
+IInterReactClient client = await new InterReactClientBuilder().BuildAsync();
 
 // Create a contract object.
 Contract contract = new()
