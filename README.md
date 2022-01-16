@@ -22,7 +22,7 @@ using System.Reactive.Linq;
 using InterReact;
 ```
 ```csharp
-// Create the InterReact client by first connecting to TWS/Gateway on the local host.
+// Create the InterReact client by connecting to TWS/Gateway on the local host.
 IInterReactClient client = await new InterReactClientConnector().ConnectAsync();
 
 // Create a contract object.
