@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-
 namespace InterReact.UnitTests.Extensions;
 
 public class ToCacheSourceTests : ReactiveTestsBase

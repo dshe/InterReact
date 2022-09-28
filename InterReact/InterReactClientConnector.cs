@@ -136,7 +136,7 @@ public sealed class InterReactClientConnector
                 .AddSingleton(rxSocket) // instance of RxSocketClient
                 .AddSingleton(response) // IObservable<object>
                 .AddSingleton<Request>()
-                .AddSingleton<Services>()
+                .AddSingleton<Svc>()
                 .AddSingleton<IInterReactClient, InterReactClient>()
                 .BuildServiceProvider()
                 .GetService<IInterReactClient>() ?? throw new InvalidOperationException("GetService<IInterReactClient>.");
@@ -144,7 +144,7 @@ public sealed class InterReactClientConnector
         catch (Exception ex)
         {
             Logger.LogCritical(ex, "InterReactClientBuilder");
-            if (rxSocket != null)
+            if (rxSocket is not null)
                 await rxSocket.DisposeAsync().ConfigureAwait(false);
             throw;
         }

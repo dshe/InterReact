@@ -64,6 +64,7 @@ internal sealed class ResponseComposer
         catch (Exception e)
         {
             string m = $"ResponseComposer error: [{strings.JoinStrings(", ")}].";
+            //Logger.LogError(e, "{Message}", m);
             Logger.LogError(e, "{Message}", m);
             throw new InvalidDataException(m, e);
         }

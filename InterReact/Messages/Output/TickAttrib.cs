@@ -13,7 +13,7 @@ public sealed class TickAttrib
 
     internal TickAttrib(ResponseReader? r = null)
     {
-        if (r == null)
+        if (r is null)
             return;
         int value = r.ReadInt();
         CanAutoExecute = value == 1;

@@ -2,7 +2,7 @@
 using System.Reactive.Linq;
 namespace InterReact;
 
-public partial class Services
+public partial class Svc
 {
     /// <summary>
     /// An observable which emits Position objects for all accounts.

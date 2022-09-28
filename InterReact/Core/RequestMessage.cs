@@ -30,7 +30,7 @@ public sealed class RequestMessage
 
     private static IEnumerable<string> GetStrings(object?[]? objs)
     {
-        if (objs == null)
+        if (objs is null)
             return new[] { string.Empty };
         if (objs.Length == 0)
             throw new ArgumentException("invalid length", nameof(objs));
@@ -39,7 +39,7 @@ public sealed class RequestMessage
 
     private static string GetString(object? o)
     {
-        if (o == null)
+        if (o is null)
             return "";
 
         switch (o)
@@ -59,7 +59,7 @@ public sealed class RequestMessage
             return o.ToString() ?? "";
 
         Type? utype = Nullable.GetUnderlyingType(type);
-        if (utype != null)
+        if (utype is not null)
         {
             if (utype != typeof(int) && utype != typeof(long) && utype != typeof(double))
                 throw new InvalidDataException($"Nullable '{utype.Name}' is not supported.");

@@ -35,13 +35,17 @@ public sealed class Alert : IHasRequestId, IHasOrderId, ITick
         return new Alert(id, code, msg, IsFatalCode(id, code));
     }
 
+    // https://interactivebrokers.github.io/tws-api/message_codes.html
     private static bool IsFatalCode(int id, int code)
     {
         if (id < 1)
+        {
+            if (code >= 500 && code <= 599)
+                return true;
+            if (code == 1300) // port changed
+                return true;
             return false;
-        // "Requested market data is not subscribed. Displaying delayed market data."
-        if (code == 10167)
-            return false;
+        }
         return true;
     }
 

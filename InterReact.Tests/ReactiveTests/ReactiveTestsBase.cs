@@ -3,7 +3,6 @@ using Microsoft.Reactive.Testing;
 using System;
 using Xunit;
 using Xunit.Abstractions;
-
 namespace InterReact.UnitTests;
 
 [Trait("Category", "UnitReactiveTests")]

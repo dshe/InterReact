@@ -2,7 +2,7 @@
 using Stringification;
 namespace InterReact;
 
-public partial class Services
+public partial class Svc
 {
     /// <summary>
     /// An observable which, upon subscription, continually emits account update objects for all accounts:
@@ -26,8 +26,8 @@ public partial class Services
     {
         return o switch
         {
-            AccountValue av => $"{av.Account}+{av.Key}:{av.Currency}",
-            PortfolioValue pv => $"{pv.AccountName}+{(pv.Contract == null ? "" : pv.Contract.Stringify(includeTypeName: false))}",
+            AccountValue av => $"{av.AccountName}+{av.Key}:{av.Currency}",
+            PortfolioValue pv => $"{pv.AccountName}+{(pv.Contract is null ? "" : pv.Contract.Stringify(includeTypeName: false))}",
             AccountUpdateTime => "AccountUpdateTime",
             AccountUpdateEnd _ => "AccountUpdateEnd",
             _ => throw new ArgumentException($"Unhandled type: {o.GetType()}.")

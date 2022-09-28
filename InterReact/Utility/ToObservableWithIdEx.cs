@@ -4,7 +4,7 @@ using System.Reactive.Linq;
 namespace InterReact;
 
 // For requests that use RequestId.
-public static partial class Extensions
+public static partial class Ext
 {
     // Single result: FundamentalData, SymbolSamples.
     // but may also return alers(s)
@@ -45,14 +45,14 @@ public static partial class Extensions
                         observer.OnCompleted();
                     }));
 
-            if (cancelable == null)
+            if (cancelable is null)
                 startRequest(id);
-            if (cancelable == null)
+            if (cancelable is null)
                 cancelable = true;
 
             return Disposable.Create(() =>
             {
-                if (stopRequest != null && cancelable == true)
+                if (stopRequest is not null && cancelable == true)
                     stopRequest(id);
                 subscription.Dispose();
             });
@@ -123,9 +123,9 @@ public static partial class Extensions
                         observer.OnCompleted();
                     }));
 
-            if (cancelable == null)
+            if (cancelable is null)
                 startRequest(id);
-            if (cancelable == null)
+            if (cancelable is null)
                 cancelable = true;
 
             return Disposable.Create(() =>

@@ -6,7 +6,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 namespace InterReact;
 
-public partial class Services
+public partial class Svc
 {
     private readonly Dictionary<string, ContractDetails[]> ContractsCache = new();
 
@@ -28,9 +28,9 @@ public partial class Services
             throw new ArgumentException("Contract must not include ComboLegs.");
         if (!string.IsNullOrEmpty(contract.ComboLegsDescription))
             throw new ArgumentException("Contract must not include ComboLegsDescription.");
-        if (contract.DeltaNeutralContract != null)
+        if (contract.DeltaNeutralContract is not null)
             throw new ArgumentException("Contract must not include DeltaNeutralValidation.");
-        if ((contract.SecurityIdType == null || contract.SecurityIdType == SecurityIdType.Undefined) ^ string.IsNullOrEmpty(contract.SecurityId))
+        if ((contract.SecurityIdType is null || contract.SecurityIdType == SecurityIdType.Undefined) ^ string.IsNullOrEmpty(contract.SecurityId))
             throw new ArgumentException("Invalid SecurityId/SecurityIdType combination.");
 
         string key = contract.Stringify();

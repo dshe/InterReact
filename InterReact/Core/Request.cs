@@ -72,8 +72,8 @@ public sealed class Request
         }
 
         DeltaNeutralContract? dnc = contract.DeltaNeutralContract;
-        m.Write(dnc != null);
-        if (dnc != null)
+        m.Write(dnc is not null);
+        if (dnc is not null)
             m.Write(dnc.ContractId, dnc.Delta, dnc.Price);
 
         m.Write(MakeGenericTicksList(genericTickTypes));
@@ -86,7 +86,7 @@ public sealed class Request
         // local
         static string MakeGenericTicksList(IEnumerable<GenericTickType>? genericTickTypes)
         {
-            if (genericTickTypes == null || !genericTickTypes.Any())
+            if (genericTickTypes is null || !genericTickTypes.Any())
                 return "";
             return genericTickTypes
                 .Cast<Enum>()
@@ -184,8 +184,8 @@ public sealed class Request
 
         m.Write(order.OptOutSmartRouting, order.ClearingAccount, order.ClearingIntent, order.NotHeld);
 
-        m.Write(contract.DeltaNeutralContract != null);
-        if (contract.DeltaNeutralContract != null)
+        m.Write(contract.DeltaNeutralContract is not null);
+        if (contract.DeltaNeutralContract is not null)
         {
             m.Write(contract.DeltaNeutralContract.ContractId, contract.DeltaNeutralContract.Delta,
                 contract.DeltaNeutralContract.Price);
@@ -261,7 +261,7 @@ public sealed class Request
         if (!string.IsNullOrEmpty(order.ExtOperator))
             RequireServerVersion(ServerVersion.EXT_OPERATOR);
 
-        if (order.CashQty != null && order.CashQty != double.MaxValue)
+        if (order.CashQty is not null && order.CashQty != double.MaxValue)
             RequireServerVersion(ServerVersion.CASH_QTY);
 
         if (!string.IsNullOrEmpty(order.Mifid2DecisionMaker) || !string.IsNullOrEmpty(order.Mifid2DecisionAlgo))
@@ -282,10 +282,10 @@ public sealed class Request
         if (order.UsePriceMgmtAlgo.HasValue)
             RequireServerVersion(ServerVersion.PRICE_MGMT_ALGO);
 
-        if (order.Duration != int.MaxValue && order.Duration != null)
+        if (order.Duration != int.MaxValue && order.Duration is not null)
             RequireServerVersion(ServerVersion.DURATION);
 
-        if (order.PostToAts != int.MaxValue && order.PostToAts != null)
+        if (order.PostToAts != int.MaxValue && order.PostToAts is not null)
             RequireServerVersion(ServerVersion.POST_TO_ATS);
     }
 
@@ -312,7 +312,7 @@ public sealed class Request
         Message()
             .Write(RequestCode.RequestExecutions, "3", requestId,
                 filter?.ClientId, filter?.Account,
-                filter == null ? null : LocalDateTimePattern.CreateWithInvariantCulture("yyyyMMdd-HH:mm:ss").Format(filter.Time),
+                filter is null ? null : LocalDateTimePattern.CreateWithInvariantCulture("yyyyMMdd-HH:mm:ss").Format(filter.Time),
                 filter?.Symbol, filter?.SecurityType,
                 filter?.Exchange, filter?.Side)
             .Send();
@@ -635,7 +635,7 @@ public sealed class Request
     public void RequestAccountSummary(int requestId, string group = "All", IEnumerable<AccountSummaryTag>? tags = null)
     {
         List<string>? tagNames = tags?.Select(tag => tag.ToString()).ToList();
-        if (tagNames == null || !tagNames.Any())
+        if (tagNames is null || !tagNames.Any())
             tagNames = Enum.GetNames<AccountSummaryTag>().ToList();
         Message()
             .Write(RequestCode.RequestAccountSummary, "1", requestId, group, string.Join(",", tagNames))

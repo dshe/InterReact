@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 namespace InterReact;
 
-public static partial class Extensions
+public static partial class Ext
 {
     /// <summary>
     /// Returns an observable which shares a subscription to the source observable.
@@ -32,7 +32,7 @@ public static partial class Extensions
                     lock (gate)
                     {
                         observerSubscription.Dispose();
-                        if (subject == null || subject.HasObservers)
+                        if (subject is null || subject.HasObservers)
                             return;
                         subjectSubscription.Dispose();
                         subjectSubscription = Disposable.Empty;

@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 namespace InterReact;
 
-public static partial class Extensions
+public static partial class Ext
 {
     /// <summary>
     /// Returns an observable which shares a single subscription to the source observable.

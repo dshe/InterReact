@@ -1,5 +1,7 @@
 ﻿namespace InterReact;
 
+#pragma warning disable CA1707
+
 public enum ServerVersion
 {
     NONE = 0,
@@ -64,3 +66,5 @@ public enum ServerVersion
     POST_TO_ATS = 160,
     WSHE_CALENDAR = 161,
 }
+
+#pragma warning restore CA1707

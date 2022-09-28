@@ -19,9 +19,7 @@ public abstract class OperatorCondition : OrderCondition
 
     public override bool Equals(object? obj)
     {
-        var other = obj as OperatorCondition;
-
-        if (other == null)
+        if (obj is not OperatorCondition other)
             return false;
 
         return base.Equals(obj)

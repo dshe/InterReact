@@ -44,7 +44,7 @@ public abstract class OrderCondition
                 break;
         }
 
-        if (rval != null)
+        if (rval is not null)
             rval.Type = type;
 
         return rval ?? throw new InvalidOperationException("Invalid OrderConditionType.");

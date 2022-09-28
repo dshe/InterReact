@@ -5,7 +5,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-
 namespace InterReact.ConnectTests;
 
 [Trait("Category", "ConnectTests")]

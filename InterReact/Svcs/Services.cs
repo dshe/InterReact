@@ -1,11 +1,11 @@
 ﻿namespace InterReact;
 
-public sealed partial class Services
+public sealed partial class Svc
 {
     private readonly Request Request;
     private readonly IObservable<object> Response;
 
-    public Services(Request request, IObservable<object> response)
+    public Svc(Request request, IObservable<object> response)
     {
         Request = request;
         Response = response;

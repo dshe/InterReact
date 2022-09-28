@@ -345,7 +345,7 @@ public enum TickType
     EtfNavLow = 99
 }
 
-public static partial class Extensions
+public static partial class Ext
 {
     public static string ToStringFast(this TickType tickType)
     {

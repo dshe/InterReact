@@ -24,15 +24,13 @@ ILogger Logger = LoggerFactory
     .CreateLogger("Hello");
 
 // Create the InterReact client by connecting to TWS/Gateway on your local machine.
-// WithLogger(Logger, false) sends InterReact debug messages to the Logger, which will be sent to the console.
-// WithLogger(Logger, true) will also send all incoming messages to the Logger. Try it.
 IInterReactClient client = await new InterReactClientConnector()
     .WithLogger(Logger)
     .ConnectAsync();
 
 if (!client.Request.Builder.IsDemoAccount)
 {
-    Console.WriteLine("Demo account is required since an order is placed. Please login to the TWS demo account.");
+    Console.WriteLine("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
     return;
 }
 

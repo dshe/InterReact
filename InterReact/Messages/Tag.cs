@@ -18,7 +18,7 @@ public sealed class Tag // input + output
 
     internal static string Combine(IEnumerable<Tag>? tags)
     {
-        if (tags == null || !tags.Any())
+        if (tags is null || !tags.Any())
             return "";
 
         return tags

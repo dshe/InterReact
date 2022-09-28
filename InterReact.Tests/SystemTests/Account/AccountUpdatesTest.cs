@@ -6,7 +6,6 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
-
 namespace InterReact.SystemTests.Account;
 
 public class AccountUpdateTest : TestCollectionBase
@@ -45,7 +44,7 @@ public class AccountUpdateTest : TestCollectionBase
             .AccountUpdatesObservable
             .Subscribe(list2.Add);
 
-        Assert.Equal(list1.Count - 1, list2.Count); // the first list has two UpdateAccountTime objects
+        Assert.Equal(list1.Count, list2.Count); // the first list has two UpdateAccountTime objects
 
         subscription1.Dispose();
         subscription2.Dispose();

@@ -78,9 +78,7 @@ public sealed class ExecutionCondition : OrderCondition
 
     public override bool Equals(object? obj)
     {
-        ExecutionCondition? other = obj as ExecutionCondition;
-
-        if (other == null)
+        if (obj is not ExecutionCondition other)
             return false;
 
         return base.Equals(obj)

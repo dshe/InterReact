@@ -7,30 +7,29 @@ public sealed class AccountValue
     public string Key { get; init; } = "";
     public string Value { get; init; } = "";
     public string Currency { get; init; } = "";
-    public string Account { get; init; } = "";
-
-    internal AccountValue() { }
+    public string AccountName { get; init; } = "";
+    public AccountValue() { } // testing
     internal AccountValue(ResponseReader r)
     {
         int version = r.GetVersion();
         Key = r.ReadString();
         Value = r.ReadString();
         Currency = r.ReadString();
-        Account = version >= 2 ? r.ReadString() : "";
+        AccountName = version >= 2 ? r.ReadString() : "";
     }
 }
 
 public sealed class PortfolioValue
 {
-    public string AccountName { get; } = "";
-    public Contract Contract { get; } = new();
-    public double Position { get; }
-    public double MarketPrice { get; }
-    public double MarketValue { get; }
-    public double AverageCost { get; }
-    public double UnrealizedPnl { get; }
-    public double RealizedPnl { get; }
-    internal PortfolioValue() { }
+    public string AccountName { get; init; } = "";
+    public Contract Contract { get; init; } = new();
+    public double Position { get; init; }
+    public double MarketPrice { get; init; }
+    public double MarketValue { get; init; }
+    public double AverageCost { get; init; }
+    public double UnrealizedPnl { get; init; }
+    public double RealizedPnl { get; init; }
+    public PortfolioValue() { } // testing
     internal PortfolioValue(ResponseReader r)
     {
         r.RequireVersion(8);
@@ -59,7 +58,7 @@ public sealed class AccountUpdateTime
 {
     private static readonly LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HH:mm");
     public LocalTime Time { get; }
-    internal AccountUpdateTime() { }
+    public AccountUpdateTime(LocalTime time) => Time = time; // testing
     internal AccountUpdateTime(ResponseReader r)
     {
         r.IgnoreVersion();
@@ -72,11 +71,11 @@ public sealed class AccountUpdateTime
 /// </summary>
 public sealed class AccountUpdateEnd
 {
-    public string Account { get; }
-    public AccountUpdateEnd(string account = "") => Account = account;
+    public string AccountName { get; }
+    public AccountUpdateEnd(string account) => AccountName = account;  // testing
     internal AccountUpdateEnd(ResponseReader r)
     {
         r.IgnoreVersion();
-        Account = r.ReadString();
+        AccountName = r.ReadString();
     }
 }

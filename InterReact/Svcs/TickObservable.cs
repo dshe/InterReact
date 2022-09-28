@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 namespace InterReact;
 
-public partial class Services
+public partial class Svc
 {
     /// <summary>
     /// Creates an observable which emits a snapshot of market data ticks, then completes.
@@ -59,7 +59,7 @@ public class TickClassSelector
     public IObservable<Alert> Alert => Source.OfType<Alert>();
 }
 
-public static partial class Extensions
+public static partial class Ext
 {
     public static IObservable<T> OfTickClass<T>(this IObservable<ITick> source, Func<TickClassSelector, IObservable<T>> selector)
     {

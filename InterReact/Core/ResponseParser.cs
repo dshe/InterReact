@@ -84,10 +84,10 @@ internal sealed class ResponseParser
     internal T ParseStringEnum<T>(string s) where T : StringEnum<T>, new()
     {
         T? e = StringEnum<T>.ToStringEnum(s);
-        if (e == null)
+        if (e is null)
         {
             e = StringEnum<T>.Add(s);
-            if (e == null)
+            if (e is null)
                 throw new InvalidOperationException($"Could not add new value {s} to StringEnum.");
             Logger.LogTrace("ParseStringEnum<{Name}>('{E}') added new value.", typeof(T).Name, e);
         }

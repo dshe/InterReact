@@ -51,7 +51,7 @@ public sealed class PriceCondition : ContractCondition
     {
         var other = obj as PriceCondition;
 
-        if (other == null)
+        if (other is null)
             return false;
 
         return base.Equals(obj)
@@ -82,7 +82,7 @@ public sealed class PriceCondition : ContractCondition
     {
         var fName = CTriggerMethod.friendlyNames.Where(n => cond.StartsWith(n)).OrderByDescending(n => n.Length).FirstOrDefault();
 
-        if (fName == null)
+        if (fName is null)
             return false;
 
         try

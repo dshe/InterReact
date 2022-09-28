@@ -2,7 +2,7 @@
 using NodaTime;
 namespace InterReact;
 
-public partial class Services
+public partial class Svc
 {
     /// <summary>
     /// An observable which emits the current time, then completes.

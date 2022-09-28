@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 namespace InterReact;
 
 // For requests that do not use requestId. 
-public static partial class Extensions
+public static partial class Ext
 {
     // Returns a single result: CurrentTime.
     internal static IObservable<T> ToObservableSingle<T>
@@ -78,9 +78,9 @@ public static partial class Extensions
                         observer.OnCompleted();
                     }));
 
-            if (cancelable == null)
+            if (cancelable is null)
                 startRequest();
-            if (cancelable == null)
+            if (cancelable is null)
                 cancelable = true;
 
             return Disposable.Create(() =>

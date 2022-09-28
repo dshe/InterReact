@@ -89,7 +89,7 @@ public sealed class ContractDetailsTime
         static (LocalTime start, LocalTime end) GetSessionTime(string session)
         {
             LocalTime[] times = session.Split('-').Select(t => TimePattern.Parse(t).Value).ToArray();
-            Debug.Assert(times.Length == 2);
+            Trace.Assert(times.Length == 2,"times.Length == 2");
             return (times[0], times[1]);
         }
     }
@@ -114,9 +114,9 @@ public sealed class ContractDetailsTime
         return Observable.Create<ContractDetailsTimePeriod>(observer =>
         {
             ContractDetailsTimePeriod? initialResult = Get();
-            if (initialResult != null)
+            if (initialResult is not null)
                 observer.OnNext(initialResult.Value);
-            if (initialResult?.Next == null)
+            if (initialResult?.Next is null)
             {
                 observer.OnCompleted();
                 return Disposable.Empty;
@@ -127,14 +127,16 @@ public sealed class ContractDetailsTime
                 try
                 {
                     ContractDetailsTimePeriod? result = Get();
-                    if (result != null)
+                    if (result is not null)
                         observer.OnNext(result.Value);
-                    if (result?.Next == null)
+                    if (result?.Next is null)
                         observer.OnCompleted();
                     else
                         self(result.Value.Next.Value.Time.ToDateTimeOffset());
                 }
+#pragma warning disable CA1031
                 catch (Exception e)
+#pragma warning restore CA1031
                 {
                     observer.OnError(e);
                 }
