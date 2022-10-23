@@ -20,7 +20,7 @@ public class TestFixture : IAsyncLifetime
     }
     public async Task DisposeAsync()
     {
-        if (Client != null)
+        if (Client is not null)
             await Client.DisposeAsync().ConfigureAwait(false);
     }
 }

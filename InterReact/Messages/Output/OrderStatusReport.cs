@@ -60,7 +60,7 @@ public sealed class OrderStatusReport : IHasOrderId
 
     internal OrderStatusReport(ResponseReader r)
     {
-        if (!r.Builder.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE))
+        if (!r.Connector.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE))
             r.IgnoreVersion();
 
         OrderId = r.ReadInt();
@@ -74,7 +74,7 @@ public sealed class OrderStatusReport : IHasOrderId
         ClientId = r.ReadInt();
         WhyHeld = r.ReadString();
 
-        if (r.Builder.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE))
+        if (r.Connector.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE))
             MktCapPrice = r.ReadDouble();
     }
 }

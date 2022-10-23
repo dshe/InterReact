@@ -213,7 +213,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private async void MainWindow_OnClosing(object sender, CancelEventArgs e)
     {
-        if (Client != null)
+        if (Client is not null)
             await Client.DisposeAsync();
     }
 }

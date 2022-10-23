@@ -64,7 +64,7 @@ public class StartupService : IHostedService
 
     public async Task StopAsync(CancellationToken ct)
     {
-        if (Client != null)
+        if (Client is not null)
             await Client.DisposeAsync().ConfigureAwait(false);
     }
 }

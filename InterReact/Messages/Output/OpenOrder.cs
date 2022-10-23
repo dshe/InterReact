@@ -11,7 +11,7 @@ public sealed class OpenOrder : IHasOrderId
 
     internal OpenOrder(ResponseReader r)
     {
-        int messageVersion = r.Builder.SupportsServerVersion(ServerVersion.ORDER_CONTAINER) ? (int)r.Builder.ServerVersionCurrent : r.ReadInt();
+        int messageVersion = r.Connector.SupportsServerVersion(ServerVersion.ORDER_CONTAINER) ? (int)r.Connector.ServerVersionCurrent : r.ReadInt();
         OrderDecoder decoder = new(r, Contract, Order, OrderState, messageVersion);
 
         decoder.ReadOrderId();

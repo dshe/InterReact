@@ -34,7 +34,7 @@ public class Enum_Checker : UnitTestsBase
             var dict = new Dictionary<int, object>();
             foreach (var val in type.GetEnumValues())
             {
-                if (val == null)
+                if (val is null)
                     throw new Exception("invalid");
                 var v = (int)val;
                 if (dict.ContainsKey(v))

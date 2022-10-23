@@ -6,9 +6,9 @@ namespace InterReact;
 
 internal static class ToMessagesEx
 {
-    internal static IObservable<object> ToMessages(this IObservable<string[]> source, InterReactClientConnector builder)
+    internal static IObservable<object> ToMessages(this IObservable<string[]> source, InterReactClientConnector connector)
     {
-        ResponseComposer composer = new(builder);
+        ResponseComposer composer = new(connector);
         return Observable.Create<object>(observer =>
         {
             return source.Subscribe(
@@ -16,7 +16,7 @@ internal static class ToMessagesEx
                 {
                     object message = composer.Compose(strings);
                     observer.OnNext(message);
-                    if (message is PriceTick priceTick && builder.FollowPriceTickWithSizeTick)
+                    if (message is PriceTick priceTick && connector.FollowPriceTickWithSizeTick)
                     {
                         TickType type = GetSizeTickType(priceTick.TickType);
                         if (type != TickType.Undefined)
@@ -45,10 +45,10 @@ internal sealed class ResponseComposer
     private ILogger Logger { get; }
     private ResponseReader Reader { get; }
 
-    internal ResponseComposer(InterReactClientConnector builder)
+    internal ResponseComposer(InterReactClientConnector connector)
     {
-        Logger = builder.Logger;
-        Reader = new ResponseReader(builder);
+        Logger = connector.Logger;
+        Reader = new ResponseReader(connector);
     }
 
     internal object Compose(string[] strings)

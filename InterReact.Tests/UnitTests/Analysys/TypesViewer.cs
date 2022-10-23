@@ -46,7 +46,7 @@ public class Types_Viewer : UnitTestsBase
         foreach (var group in Types
             .Select(t => t.DeclaredMembers.Where(m => !m.Name.StartsWith("<")).OfType<MemberInfo>().Select(m => (t, m)))
             .SelectMany(x => x)
-            //.Where(x => x.m != null) //.OfType<(TypeInfo, MemberInfo)>()
+            //.Where(x => x.m is not null) //.OfType<(TypeInfo, MemberInfo)>()
 
             .Select(x => x.m.GetCustomAttributes(false).Select(q => new { type = x.t, method = x.m, attr = q }))
             .SelectMany(x => x)
@@ -97,7 +97,7 @@ public class Types_Viewer : UnitTestsBase
             catch (Exception e)
             {
                 Write($"Type: {type.Name} EXCEPTION: {e.Message}");
-                if (type.Name != "InterReactClientConnector")
+                if (type.Name != "InterReactClientConnector" && type.Name != "InterReactClient")
                     throw;
             }
         }

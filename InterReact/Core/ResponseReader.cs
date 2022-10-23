@@ -8,12 +8,12 @@ namespace InterReact;
 
 public sealed class ResponseReader
 {
-    internal InterReactClientConnector Builder { get; }
+    internal InterReactClientConnector Connector { get; }
     private readonly ResponseParser Parser;
-    internal ResponseReader(InterReactClientConnector builder)
+    internal ResponseReader(InterReactClientConnector connector)
     {
-        Builder = builder;
-        Parser = new ResponseParser(builder.Logger);
+        Connector = connector;
+        Parser = new ResponseParser(connector.Logger);
     }
 
     private IEnumerator<string>? Enumerator;

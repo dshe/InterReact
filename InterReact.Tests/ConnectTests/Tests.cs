@@ -60,9 +60,9 @@ public class ConnectArgumentsTest : ConnectTestsBase
             .WithMaxRequestsPerSecond(123)
             .ConnectAsync();
         await TestClient(client);
-        Assert.Equal(IPAddress.IPv6Loopback, client.Request.Builder.IPEndPoint.Address);
-        Assert.Equal(111, client.Request.Builder.ClientId);
-        Assert.True(client.Request.Builder.ServerVersionCurrent >= InterReactClientConnector.ServerVersionMin);
+        Assert.Equal(IPAddress.IPv6Loopback, client.RemoteIPEndPoint.Address);
+        Assert.Equal(111, client.Request.Connector.ClientId);
+        Assert.True(client.Request.Connector.ServerVersionCurrent >= InterReactClientConnector.ServerVersionMin);
         await client.DisposeAsync();
     }
 

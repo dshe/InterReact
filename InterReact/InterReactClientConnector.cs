@@ -17,84 +17,51 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 namespace InterReact;
 
-public sealed class InterReactClientConnector
+public sealed record InterReactClientConnector
 {
     internal IClock Clock { get; private set; } = SystemClock.Instance;
-    internal InterReactClientConnector WithClock(IClock clock)
-    {
-        Clock = clock;
-        return this;
-    }
+    internal InterReactClientConnector WithClock(IClock clock) => this with { Clock = clock };
 
     internal ILogger Logger { get; private set; } = NullLogger.Instance;
-    public InterReactClientConnector WithLogger(ILogger logger)
-    {
-        Logger = logger;
-        return this;
-    }
+    public InterReactClientConnector WithLogger(ILogger logger) => this with { Logger = logger };
 
-    public IPEndPoint IPEndPoint { get; } = new(IPAddress.IPv6Loopback, 0);
-    public InterReactClientConnector WithIpAddress(IPAddress address)
-    {
-        IPEndPoint.Address = address;
-        return this;
-    }
-    public bool IsDemoAccount => IPEndPoint.Port == (int)DefaultPort.TwsDemoAccount || IPEndPoint.Port == (int)DefaultPort.GatewayDemoAccount;
+    public IPAddress IPAddress { get; private set; } = IPAddress.IPv6Loopback;
+    public InterReactClientConnector WithIpAddress(IPAddress address) => this with { IPAddress = address };
 
     internal IReadOnlyList<int> Ports { get; private set; } =
         new[] { (int)DefaultPort.TwsRegularAccount, (int)DefaultPort.TwsDemoAccount, (int)DefaultPort.GatewayRegularAccount, (int)DefaultPort.GatewayDemoAccount };
     /// <summary>
-    /// Specify the port(s) used to attempt connection to TWS/Gateway.
-    /// Otherwise, connection will be attempted on ports 7496 and 7497, 4001, 4002.
+    /// Specify the port used to attempt connection to TWS/Gateway.
+    /// If unspecified, connection will be attempted on ports 7496 and 7497, 4001, 4002.
     /// </summary>
-    public InterReactClientConnector WithPorts(params int[] ports)
-    {
-        Ports = ports;
-        return this;
-    }
+    public InterReactClientConnector WithPort(int port) => this with { Ports = new[] { port } };
 
     public int ClientId { get; private set; } = RandomNumberGenerator.GetInt32(100000, 999999);
     /// <summary>
     /// Specify a client id.
     /// Up to 8 clients can attach to TWS/Gateway. Each client requires a unique Id. The default Id is random.
     /// </summary>
-    public InterReactClientConnector WithClientId(int id)
-    {
-        ClientId = id >= 0 ? id : throw new ArgumentException("invalid", nameof(id));
-        return this;
-    }
+    public InterReactClientConnector WithClientId(int id) => 
+        this with { ClientId = id >= 0 ? id : throw new ArgumentException("Invalid ClientId", nameof(id)) };
 
     internal int MaxRequestsPerSecond { get; private set; } = 50;
     /// <summary>
     /// Specify the maximum number of requests per second sent to to TWS/Gateway.
     /// </summary>
-    public InterReactClientConnector WithMaxRequestsPerSecond(int requests)
-    {
-        MaxRequestsPerSecond = requests > 0 ? requests : throw new ArgumentException("invalid", nameof(requests));
-        return this;
-    }
+    public InterReactClientConnector WithMaxRequestsPerSecond(int requests) =>
+        this with { MaxRequestsPerSecond = requests > 0 ? requests : throw new ArgumentException("invalid", nameof(requests)) };
 
     internal string OptionalCapabilities { get; private set; } = "";
-    public InterReactClientConnector WithOptionalCapabilities(string capabilities)
-    {
-        OptionalCapabilities = capabilities;
-        return this;
-    }
+    public InterReactClientConnector WithOptionalCapabilities(string capabilities) => this with { OptionalCapabilities = capabilities };
 
     internal bool FollowPriceTickWithSizeTick { get; private set; }
-    public InterReactClientConnector WithFollowPriceTickWithSizeTick()
-    {
-        FollowPriceTickWithSizeTick = true;
-        return this;
-    }
+    public InterReactClientConnector WithFollowPriceTickWithSizeTick() => this with { FollowPriceTickWithSizeTick = true };
+
 
     public const ServerVersion ServerVersionMin = ServerVersion.FRACTIONAL_POSITIONS;
     public ServerVersion ServerVersionMax { get; private set; } = ServerVersion.WSHE_CALENDAR;
-    public InterReactClientConnector WithMaxServerVersion(ServerVersion maxServerVersion)
-    {
-        ServerVersionMax = maxServerVersion;
-        return this;
-    }
+    public InterReactClientConnector WithMaxServerVersion(ServerVersion maxServerVersion) => this with { ServerVersionMax = maxServerVersion };
+
     public ServerVersion ServerVersionCurrent { get; private set; } = ServerVersion.NONE;
     internal bool SupportsServerVersion(ServerVersion version) => version <= ServerVersionCurrent;
 
@@ -131,7 +98,7 @@ public sealed class InterReactClientConnector
                 .AutoConnect(); // connect on first observer
 
             return new ServiceCollection()
-                .AddSingleton(this) // builder
+                .AddSingleton(this) // connector
                 .AddSingleton(stringifier)
                 .AddSingleton(rxSocket) // instance of RxSocketClient
                 .AddSingleton(response) // IObservable<object>
@@ -143,7 +110,7 @@ public sealed class InterReactClientConnector
         }
         catch (Exception ex)
         {
-            Logger.LogCritical(ex, "InterReactClientBuilder");
+            Logger.LogCritical(ex, "InterReactClientConnector");
             if (rxSocket is not null)
                 await rxSocket.DisposeAsync().ConfigureAwait(false);
             throw;
@@ -152,12 +119,13 @@ public sealed class InterReactClientConnector
 
     private async Task<IRxSocketClient> ConnectSocketAsync(CancellationToken ct)
     {
+        IPEndPoint ipEndPoint = new(IPAddress, 0);
         foreach (int port in Ports)
         {
-            IPEndPoint.Port = port;
+            ipEndPoint.Port = port;
             try
             {
-                return await IPEndPoint.CreateRxSocketClientAsync(Logger, ct).ConfigureAwait(false);
+                return await ipEndPoint.CreateRxSocketClientAsync(Logger, ct).ConfigureAwait(false);
             }
             catch (SocketException e) when (e.SocketErrorCode == SocketError.ConnectionRefused || e.SocketErrorCode == SocketError.TimedOut)
             {
@@ -165,7 +133,7 @@ public sealed class InterReactClientConnector
             }
         }
         string ports = Ports.Select(p => p.ToString(CultureInfo.InvariantCulture)).JoinStrings(", ");
-        string message = $"Could not connect to TWS/Gateway at [{IPEndPoint.Address}]:{ports}.";
+        string message = $"Could not connect to TWS/Gateway at [{ipEndPoint.Address}]:{ports}.";
         throw new ArgumentException(message);
     }
 

@@ -30,7 +30,7 @@ public sealed class Alert : IHasRequestId, IHasOrderId, ITick
         int id = r.ReadInt();
         int code = r.ReadInt();
         string msg = r.ReadString();
-        if (r.Builder.SupportsServerVersion(ServerVersion.ENCODE_MSG_ASCII7))
+        if (r.Connector.SupportsServerVersion(ServerVersion.ENCODE_MSG_ASCII7))
             msg = Regex.Unescape(msg);
         return new Alert(id, code, msg, IsFatalCode(id, code));
     }

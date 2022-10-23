@@ -27,7 +27,7 @@ public partial class Svc
         return o switch
         {
             AccountValue av => $"{av.AccountName}+{av.Key}:{av.Currency}",
-            PortfolioValue pv => $"{pv.AccountName}+{(pv.Contract is null ? "" : pv.Contract.Stringify(includeTypeName: false))}",
+            PortfolioValue pv => $"{pv.AccountName}+{(pv.Contract?.Stringify(includeTypeName: false) ?? "")}",
             AccountUpdateTime => "AccountUpdateTime",
             AccountUpdateEnd _ => "AccountUpdateEnd",
             _ => throw new ArgumentException($"Unhandled type: {o.GetType()}.")

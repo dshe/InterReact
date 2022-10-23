@@ -85,7 +85,7 @@ public static partial class Ext
 
             return Disposable.Create(() =>
             {
-                if (cancelable == true)
+                if (cancelable is true)
                     stopRequest();
                 subscription.Dispose();
             });

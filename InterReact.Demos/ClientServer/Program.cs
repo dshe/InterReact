@@ -22,7 +22,7 @@ public static class Program
         ConsoleLogger serverLibLogger = new("ServerLib: ", LogLevel.Information, ConsoleColor.DarkCyan);
 
         Server server = new(serverLogger, serverLibLogger);
-        int port = server.SocketServer.IPEndPoint.Port;
+        int port = server.SocketServer.LocalIPEndPoint.Port;
         Task serverTask = server.Run();
 
         Task clientTask = Client.Run(port, clientLogger, clientLibLogger);

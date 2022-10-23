@@ -14,21 +14,21 @@ namespace InterReact;
 /// </summary>
 public sealed class Request
 {
-    public InterReactClientConnector Builder { get; }
+    public InterReactClientConnector Connector { get; }
     private readonly IRxSocketClient RxSocket;
     private readonly RingLimiter Limiter;
 
-    public Request(InterReactClientConnector builder, IRxSocketClient rxSocket)
+    public Request(InterReactClientConnector connector, IRxSocketClient rxSocket)
     {
-        Builder = builder;
-        Limiter = new RingLimiter(Builder.MaxRequestsPerSecond);
+        Connector = connector;
+        Limiter = new RingLimiter(Connector.MaxRequestsPerSecond);
         ArgumentNullException.ThrowIfNull(rxSocket);
         RxSocket = rxSocket;
     }
 
     private void RequireServerVersion(ServerVersion version)
     {
-        if (!Builder.SupportsServerVersion(version))
+        if (!Connector.SupportsServerVersion(version))
             throw new ArgumentException($"The server does not support version: '{version}'.");
     }
 
@@ -79,7 +79,7 @@ public sealed class Request
         m.Write(MakeGenericTicksList(genericTickTypes));
         m.Write(isSnapshot);
 
-        if (Builder.SupportsServerVersion(ServerVersion.SMART_COMPONENTS))
+        if (Connector.SupportsServerVersion(ServerVersion.SMART_COMPONENTS))
             m.Write(isRegulatorySnapshot); // $.01
         m.Write(Tag.Combine(options)).Send();
 
@@ -109,7 +109,7 @@ public sealed class Request
 
         m.Write(RequestCode.PlaceOrder);
 
-        if (!Builder.SupportsServerVersion(ServerVersion.ORDER_CONTAINER))
+        if (!Connector.SupportsServerVersion(ServerVersion.ORDER_CONTAINER))
             m.Write("45");
 
         m.Write(id, contract.ContractId);
@@ -145,7 +145,7 @@ public sealed class Request
             order.FinancialAdvisorGroup, order.FinancialAdvisorMethod,
             order.FinancialAdvisorPercentage, order.FinancialAdvisorProfile);
 
-        if (Builder.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
+        if (Connector.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
             m.Write(order.ModelCode);
 
         m.Write(order.ShortSaleSlot, order.DesignatedLocation, order.ExemptCode,
@@ -202,7 +202,7 @@ public sealed class Request
         m.Write(order.AlgoId, order.WhatIf, Tag.Combine(order.MiscOptions),
             order.Solicited, order.RandomizeSize, order.RandomizePrice);
 
-        if (Builder.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
+        if (Connector.SupportsServerVersion(ServerVersion.PEGGED_TO_BENCHMARK))
         {
             if (order.OrderType == OrderType.PeggedToBenchmark)
             {
@@ -220,37 +220,37 @@ public sealed class Request
                 order.AdjustedStopLimitPrice, order.AdjustedTrailingAmount, order.AdjustableTrailingUnit);
         }
 
-        if (Builder.SupportsServerVersion(ServerVersion.EXT_OPERATOR))
+        if (Connector.SupportsServerVersion(ServerVersion.EXT_OPERATOR))
             m.Write(order.ExtOperator);
 
-        if (Builder.SupportsServerVersion(ServerVersion.SOFT_DOLLAR_TIER))
+        if (Connector.SupportsServerVersion(ServerVersion.SOFT_DOLLAR_TIER))
             m.Write(order.SoftDollarTier.Name, order.SoftDollarTier.Value);
 
-        if (Builder.SupportsServerVersion(ServerVersion.CASH_QTY))
+        if (Connector.SupportsServerVersion(ServerVersion.CASH_QTY))
             m.Write(order.CashQty);
 
-        if (Builder.SupportsServerVersion(ServerVersion.DECISION_MAKER))
+        if (Connector.SupportsServerVersion(ServerVersion.DECISION_MAKER))
             m.Write(order.Mifid2DecisionMaker, order.Mifid2DecisionAlgo);
 
-        if (Builder.SupportsServerVersion(ServerVersion.MIFID_EXECUTION))
+        if (Connector.SupportsServerVersion(ServerVersion.MIFID_EXECUTION))
             m.Write(order.Mifid2ExecutionTrader, order.Mifid2ExecutionAlgo);
 
-        if (Builder.SupportsServerVersion(ServerVersion.AUTO_PRICE_FOR_HEDGE))
+        if (Connector.SupportsServerVersion(ServerVersion.AUTO_PRICE_FOR_HEDGE))
             m.Write(order.DontUseAutoPriceForHedge);
 
-        if (Builder.SupportsServerVersion(ServerVersion.ORDER_CONTAINER))
+        if (Connector.SupportsServerVersion(ServerVersion.ORDER_CONTAINER))
             m.Write(order.IsOmsContainer);
 
-        if (Builder.SupportsServerVersion(ServerVersion.D_PEG_ORDERS))
+        if (Connector.SupportsServerVersion(ServerVersion.D_PEG_ORDERS))
             m.Write(order.DiscretionaryUpToLimitPrice);
 
-        if (Builder.SupportsServerVersion(ServerVersion.PRICE_MGMT_ALGO))
+        if (Connector.SupportsServerVersion(ServerVersion.PRICE_MGMT_ALGO))
             m.Write(order.UsePriceMgmtAlgo);
 
-        if (Builder.SupportsServerVersion(ServerVersion.DURATION))
+        if (Connector.SupportsServerVersion(ServerVersion.DURATION))
             m.Write(order.Duration);
 
-        if (Builder.SupportsServerVersion(ServerVersion.POST_TO_ATS))
+        if (Connector.SupportsServerVersion(ServerVersion.POST_TO_ATS))
             m.Write(order.PostToAts.EncodeNullable());
 
         m.Send();
@@ -360,12 +360,12 @@ public sealed class Request
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
                 contract.Strike, contract.Right, contract.Multiplier, contract.Exchange);
 
-        if (Builder.SupportsServerVersion(ServerVersion.MKT_DEPTH_PRIM_EXCHANGE))
+        if (Connector.SupportsServerVersion(ServerVersion.MKT_DEPTH_PRIM_EXCHANGE))
             m.Write(contract.PrimaryExchange);
 
         m.Write(contract.Currency, contract.LocalSymbol, contract.TradingClass, numRows);
 
-        if (Builder.SupportsServerVersion(ServerVersion.SMART_DEPTH))
+        if (Connector.SupportsServerVersion(ServerVersion.SMART_DEPTH))
             m.Write(isSmartDepth);
 
         m.Write(Tag.Combine(options));
@@ -380,7 +380,7 @@ public sealed class Request
 
         RequestMessage m = Message().Write(RequestCode.CancelMarketDepth, "1", requestId);
 
-        if (Builder.SupportsServerVersion(ServerVersion.SMART_DEPTH))
+        if (Connector.SupportsServerVersion(ServerVersion.SMART_DEPTH))
             m.Write(isSmartDepth);
 
         m.Send();
@@ -413,7 +413,7 @@ public sealed class Request
     {
         RequestMessage m = Message().Write(RequestCode.ReplaceFinancialAdvisorConfiguration, "1", dataType, xml);
 
-        if (Builder.SupportsServerVersion(ServerVersion.REPLACE_FA_END))
+        if (Connector.SupportsServerVersion(ServerVersion.REPLACE_FA_END))
             m.Write(requestId); // ???
 
         m.Send();
@@ -440,11 +440,11 @@ public sealed class Request
         ArgumentNullException.ThrowIfNull(contract);
 
         if (endDate == default && !keepUpToDate)
-            endDate = Builder.Clock.GetCurrentInstant();
+            endDate = Connector.Clock.GetCurrentInstant();
 
         RequestMessage m = Message().Write(RequestCode.RequestHistoricalData);
 
-        if (!Builder.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
+        if (!Connector.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
             m.Write("6");
 
         m.Write(requestId, contract.ContractId, contract.Symbol, contract.SecurityType,
@@ -465,7 +465,7 @@ public sealed class Request
                 m.Write(leg.ContractId, leg.Ratio, leg.TradeAction, leg.Exchange);
         }
 
-        if (Builder.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
+        if (Connector.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
             m.Write(keepUpToDate);
 
         m.Write(Tag.Combine(options)).Send();
@@ -493,7 +493,7 @@ public sealed class Request
         ArgumentNullException.ThrowIfNull(subscription);
 
         RequestMessage m = Message().Write(RequestCode.RequestScannerSubscription);
-        if (!Builder.SupportsServerVersion(ServerVersion.SCANNER_GENERIC_OPTS))
+        if (!Connector.SupportsServerVersion(ServerVersion.SCANNER_GENERIC_OPTS))
             m.Write("4");
 
         m.Write(requestId, subscription.NumberOfRows, subscription.Instrument,
@@ -507,7 +507,7 @@ public sealed class Request
            subscription.ExcludeConvertible, subscription.AverageOptionVolumeAbove,
            subscription.ScannerSettingPairs, subscription.StockType);
 
-        if (Builder.SupportsServerVersion(ServerVersion.SCANNER_GENERIC_OPTS))
+        if (Connector.SupportsServerVersion(ServerVersion.SCANNER_GENERIC_OPTS))
             m.Write(Tag.Combine(subscriptionFilterOptions));
 
         m.Write(Tag.Combine(subscriptionOptions));
@@ -737,7 +737,7 @@ public sealed class Request
         RequireServerVersion(ServerVersion.REQ_NEWS_ARTICLE);
 
         RequestMessage m = Message().Write(RequestCode.RequestNewsArticle, requestId, providerCode, articleId);
-        if (Builder.SupportsServerVersion(ServerVersion.NEWS_QUERY_ORIGINS))
+        if (Connector.SupportsServerVersion(ServerVersion.NEWS_QUERY_ORIGINS))
             m.Write(Tag.Combine(options));
         m.Send();
     }
@@ -752,7 +752,7 @@ public sealed class Request
     {
         RequireServerVersion(ServerVersion.REQ_HISTORICAL_NEWS);
         RequestMessage m = Message().Write(RequestCode.RequestHistoricalNews, requestId, conId, providerCodes, startTime, endTime, totalResults);
-        if (Builder.SupportsServerVersion(ServerVersion.NEWS_QUERY_ORIGINS))
+        if (Connector.SupportsServerVersion(ServerVersion.NEWS_QUERY_ORIGINS))
             m.Write(Tag.Combine(options));
         m.Send();
     }
@@ -861,7 +861,7 @@ public sealed class Request
             contract.TradingClass,
             tickType);
 
-        if (Builder.SupportsServerVersion(ServerVersion.TICK_BY_TICK_IGNORE_SIZE))
+        if (Connector.SupportsServerVersion(ServerVersion.TICK_BY_TICK_IGNORE_SIZE))
             m.Write(numberOfTicks, ignoreSize);
 
         m.Send();

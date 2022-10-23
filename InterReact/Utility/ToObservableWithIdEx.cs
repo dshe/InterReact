@@ -52,7 +52,7 @@ public static partial class Ext
 
             return Disposable.Create(() =>
             {
-                if (stopRequest is not null && cancelable == true)
+                if (stopRequest is not null && cancelable is true)
                     stopRequest(id);
                 subscription.Dispose();
             });
@@ -130,7 +130,7 @@ public static partial class Ext
 
             return Disposable.Create(() =>
             {
-                if (cancelable == true)
+                if (cancelable is true)
                     stopRequest(id);
                 subscription.Dispose();
             });

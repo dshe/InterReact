@@ -31,7 +31,7 @@ public class Client_No_Connect_Tests : UnitTestsBase
     [Fact]
     public async Task T03_Connection_Refused()
     {
-        var task = new InterReactClientConnector().WithLogger(Logger).WithPorts(999).ConnectAsync();
+        var task = new InterReactClientConnector().WithLogger(Logger).WithPort(999).ConnectAsync();
         var ex = await Assert.ThrowsAsync<ArgumentException>(async () => await task);
         Write(ex.ToString());
     }

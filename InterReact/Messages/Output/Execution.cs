@@ -85,7 +85,7 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
 
     internal Execution(ResponseReader r)
     {
-        if (r.Builder.ServerVersionCurrent < ServerVersion.LAST_LIQUIDITY)
+        if (r.Connector.ServerVersionCurrent < ServerVersion.LAST_LIQUIDITY)
             r.RequireVersion(10);
         RequestId = r.ReadInt();
         OrderId = r.ReadInt();
@@ -115,9 +115,9 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
         OrderReference = r.ReadString();
         EconomicValueRule = r.ReadString();
         EconomicValueMultiplier = r.ReadDouble();
-        if (r.Builder.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
+        if (r.Connector.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
             ModelCode = r.ReadString();
-        if (r.Builder.SupportsServerVersion(ServerVersion.LAST_LIQUIDITY))
+        if (r.Connector.SupportsServerVersion(ServerVersion.LAST_LIQUIDITY))
             LastLiquidity = r.ReadEnum<Liquidity>();
         Executions[ExecutionId] = this;
     }

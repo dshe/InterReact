@@ -13,9 +13,9 @@ public sealed class PnL : IHasRequestId
     {
         RequestId = r.ReadInt();
         DailyPnL = r.ReadDouble();
-        if (r.Builder.SupportsServerVersion(ServerVersion.UNREALIZED_PNL))
+        if (r.Connector.SupportsServerVersion(ServerVersion.UNREALIZED_PNL))
             UnrealizedPnL = r.ReadDouble();
-        if (r.Builder.SupportsServerVersion(ServerVersion.REALIZED_PNL))
+        if (r.Connector.SupportsServerVersion(ServerVersion.REALIZED_PNL))
             RealizedPnL = r.ReadDouble();
     }
 }
@@ -36,9 +36,9 @@ public sealed class PnLSingle : IHasRequestId
         RequestId = r.ReadInt();
         Pos = r.ReadInt();
         DailyPnL = r.ReadDouble();
-        if (r.Builder.SupportsServerVersion(ServerVersion.UNREALIZED_PNL))
+        if (r.Connector.SupportsServerVersion(ServerVersion.UNREALIZED_PNL))
             UnrealizedPnL = r.ReadDouble();
-        if (r.Builder.SupportsServerVersion(ServerVersion.REALIZED_PNL))
+        if (r.Connector.SupportsServerVersion(ServerVersion.REALIZED_PNL))
             RealizedPnL = r.ReadDouble();
         Value = r.ReadDouble();
     }

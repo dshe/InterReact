@@ -20,23 +20,23 @@ public class Interface_Checker : UnitTestsBase
     public void Find_Classes_With_RequestId_But_Not_Interface()
     {
         Assert.Empty(Types.Where(t =>
-                t.GetProperty("RequestId") != null &&
-                t.GetInterface("IHasRequestId") == null));
+                t.GetProperty("RequestId") is not null &&
+                t.GetInterface("IHasRequestId") is null));
     }
 
     [Fact]
     public void Find_Classes_With_OrderId_But_Not_Interface()
     {
         Assert.Empty(Types.Where(t =>
-                t.GetProperty("OrderId") != null &&
-                t.GetInterface("IHasOrderId") == null));
+                t.GetProperty("OrderId") is not null &&
+                t.GetInterface("IHasOrderId") is null));
     }
 
     [Fact]
     public void Find_Classes_With_ExecutioinId_But_Not_Interface()
     {
         Assert.Empty(Types.Where(t =>
-                t.GetProperty("ExecutionId") != null &&
-                t.GetInterface("IHasExecutionId") == null));
+                t.GetProperty("ExecutionId") is not null &&
+                t.GetInterface("IHasExecutionId") is null));
     }
 }

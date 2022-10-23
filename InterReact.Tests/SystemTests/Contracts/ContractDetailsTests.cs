@@ -30,7 +30,7 @@ public class ContractDetailsTests : TestCollectionBase
         IList<IHasRequestId> messages = await task;
 
         Alert? alert = messages.OfType<Alert>().Where(alert => alert.IsFatal).FirstOrDefault();
-        if (alert != null)
+        if (alert is not null)
             throw new AlertException(alert);
 
         return messages;

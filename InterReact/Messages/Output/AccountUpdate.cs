@@ -1,5 +1,6 @@
 ﻿using NodaTime;
 using NodaTime.Text;
+
 namespace InterReact;
 
 public sealed class AccountValue
@@ -22,7 +23,7 @@ public sealed class AccountValue
 public sealed class PortfolioValue
 {
     public string AccountName { get; init; } = "";
-    public Contract Contract { get; init; } = new();
+    public Contract Contract { get; } = new Contract();
     public double Position { get; init; }
     public double MarketPrice { get; init; }
     public double MarketValue { get; init; }
