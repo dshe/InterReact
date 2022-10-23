@@ -1,6 +1,6 @@
 # InterReact&nbsp;&nbsp; [![Version](https://img.shields.io/badge/Version-0.1.3-blue)](../..) [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0) [![Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
-***Reactive C# API to Interactive Brokers***
+***Reactive C# API to Interactive Brokers Trader Workstation***
 - **.NET 6.0** library
 - compatible with Interactive Brokers API 9.85 (Aug 2021)
 - dependencies: RxSockets, StringEnums, Reactive Extensions, NodaTime
