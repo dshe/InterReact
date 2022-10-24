@@ -12,7 +12,7 @@ interface IInterReactClient : IAsyncDisposable
     IPEndPoint RemoteIPEndPoint { get; }
     Request Request { get; }
     IObservable<object> Response { get; }
-    Services Services { get; }
+    Service Service { get; }
 }
 ```
 ### Example ###
@@ -37,7 +37,7 @@ Contract contract = new()
 
 // Create and then subscribe to the observable which can observe ticks for the contract.
 IDisposable subscription = client
-    .Services
+    .Service
     .CreateTickObservable(contract)
     .OfTickClass(selector => selector.PriceTick)
     .Subscribe(onNext: priceTick => 
