@@ -16,7 +16,7 @@ public class AccountSummaryTest : TestCollectionBase
     public async Task AccountSummary()
     {
         IList<IHasRequestId> list = await Client
-            .Services
+            .Service
             .AccountSummaryObservable
             .TakeWhile(o => o is not AccountSummaryEnd)
             .ToList();

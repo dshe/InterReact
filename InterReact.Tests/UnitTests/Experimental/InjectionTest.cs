@@ -24,9 +24,9 @@ public class Test_Logging : UnitTestsBase
             .ConfigureServices((context, services) => services
                 //.AddLogging()
                 .AddSingleton<InterReactClientConnector>()
-                .AddSingleton<Task<IInterReactClient>>(providor =>
+                .AddSingleton(providor =>
                     providor.GetRequiredService<InterReactClientConnector>().ConnectAsync())
-                .AddHostedService<StartupService>(services => new StartupService(services)))
+                .AddHostedService(services => new StartupService(services)))
             .Build();
 
         await host.StartAsync();

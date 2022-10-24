@@ -156,7 +156,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         try
         {
             ContractDetails cd = await Client!
-                .Services
+                .Service
                 .CreateContractDetailsObservable(contract)
                 .FirstAsync() // Multiple may be returned. Take the first one.
                 .Timeout(TimeSpan.FromSeconds(2));
@@ -183,7 +183,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         // Create the observable which will emit realtime updates.
         IConnectableObservable<ITick> ticks = Client!
-            .Services
+            .Service
             .CreateTickObservable(contract)
             .UndelayTicks()
             .ObserveOn(Application.Current.Dispatcher)

@@ -2,7 +2,7 @@
 using Stringification;
 namespace InterReact;
 
-public partial class Svc
+public partial class Service
 {
     /// <summary>
     /// An observable which, upon subscription, continually emits account update objects for all accounts:

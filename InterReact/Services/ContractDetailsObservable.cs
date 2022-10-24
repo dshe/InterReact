@@ -6,7 +6,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 namespace InterReact;
 
-public partial class Svc
+public partial class Service
 {
     private readonly Dictionary<string, ContractDetails[]> ContractsCache = new();
 

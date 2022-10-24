@@ -16,7 +16,7 @@ public class AccountPositionsTest : TestCollectionBase
     public async Task AccountPositions()
     {
         IList<Position> list = await Client
-            .Services
+            .Service
             .PositionsObservable
             .TakeWhile(o => o is not PositionEnd)
             .Cast<Position>()

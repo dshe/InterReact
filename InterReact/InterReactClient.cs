@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using RxSockets;
 namespace InterReact;
@@ -8,7 +9,7 @@ public interface IInterReactClient : IAsyncDisposable
     IPEndPoint RemoteIPEndPoint { get; }
     Request Request { get; }
     IObservable<object> Response { get; }
-    Svc Services { get; }
+    Service Service { get; }
 }
 
 public sealed class InterReactClient : IInterReactClient
@@ -17,22 +18,28 @@ public sealed class InterReactClient : IInterReactClient
     public IPEndPoint RemoteIPEndPoint => RxSocket.RemoteIPEndPoint;
     public Request Request { get; }
     public IObservable<object> Response { get; }
-    public Svc Services { get; }
+    public Service Service { get; }
 
-    // This constructor must be public since it is constructed by the container.
-    public InterReactClient(IRxSocketClient rxsocket, Request request, IObservable<object> response, Svc services)
+    // This constructor is called by InterReactClientConnector.ConnectAsync().
+    internal InterReactClient(IRxSocketClient rxsocket, Request request, IObservable<object> response, Service service)
     {
-        ArgumentNullException.ThrowIfNull(rxsocket);
         RxSocket = rxsocket;
         Request = request;
         Response = response;
-        Services = services;
+        Service = service;
     }
 
     public async ValueTask DisposeAsync() => await RxSocket.DisposeAsync().ConfigureAwait(false);
 }
 
-public static class Xtensions
+public static partial class Ext
 {
-    public static bool IsDemoPort(this int port) => port == (int)DefaultPort.TwsDemoAccount || port == (int)DefaultPort.GatewayDemoAccount;
+    public static IBDefaultPort GetIBDefaultPort(this int port) =>
+        Enum.GetValues<IBDefaultPort>().Where(v => (int)v == port).SingleOrDefault(IBDefaultPort.None);
+
+    public static bool IsIBDemoPort(this int port)
+    {
+        IBDefaultPort portType = GetIBDefaultPort(port);
+        return portType == IBDefaultPort.TwsDemoAccount || portType == IBDefaultPort.GatewayDemoAccount;
+    }
 }

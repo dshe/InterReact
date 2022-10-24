@@ -14,7 +14,7 @@ public class OrdersTests : TestCollectionBase
     [Fact]
     public async Task TestMarketPlaceOrder()
     {
-        if (!Client.RemoteIPEndPoint.Port.IsDemoPort())
+        if (!Client.RemoteIPEndPoint.Port.IsIBDemoPort())
             throw new Exception("Cannot place order. Not the demo account");
 
         var id = Client.Request.GetNextId();
@@ -42,7 +42,7 @@ public class OrdersTests : TestCollectionBase
     [Fact]
     public async Task TestPlaceLimitOrder()
     {
-        if (!Client.RemoteIPEndPoint.Port.IsDemoPort())
+        if (!Client.RemoteIPEndPoint.Port.IsIBDemoPort())
             throw new Exception("Cannot place order. Not the demo account");
 
         var id = Client.Request.GetNextId();

@@ -20,7 +20,7 @@ public class MarketDataSnapshotServiceTests : TestCollectionBase
         Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
         IList<ITick> ticks = await Client
-            .Services
+            .Service
             .CreateTickSnapshotObservable(contract)
             .ToList();
 
@@ -36,7 +36,7 @@ public class MarketDataSnapshotServiceTests : TestCollectionBase
         Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
         var alertException = await Assert.ThrowsAsync<AlertException>(async () => await Client
-                .Services
+                .Service
                 .CreateTickSnapshotObservable(contract)
                 .ToList());
 

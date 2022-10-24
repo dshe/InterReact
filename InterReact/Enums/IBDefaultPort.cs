@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-public enum DefaultPort
+public enum IBDefaultPort
 {
     None = 0,
     TwsRegularAccount = 7496,

@@ -21,10 +21,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Exts\Union.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
     <PackageReference Include="NodaTime" Version="3.1.4" />
     <PackageReference Include="RxSockets" Version="4.0.5" />
@@ -35,6 +31,5 @@
   <ItemGroup>
     <None Include="worm64.png" Pack="true" PackagePath="\" />
   </ItemGroup>
-
 
 </Project>

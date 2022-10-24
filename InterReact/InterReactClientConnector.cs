@@ -29,7 +29,7 @@ public sealed record InterReactClientConnector
     public InterReactClientConnector WithIpAddress(IPAddress address) => this with { IPAddress = address };
 
     internal IReadOnlyList<int> Ports { get; private set; } =
-        new[] { (int)DefaultPort.TwsRegularAccount, (int)DefaultPort.TwsDemoAccount, (int)DefaultPort.GatewayRegularAccount, (int)DefaultPort.GatewayDemoAccount };
+        new[] { (int)IBDefaultPort.TwsRegularAccount, (int)IBDefaultPort.TwsDemoAccount, (int)IBDefaultPort.GatewayRegularAccount, (int)IBDefaultPort.GatewayDemoAccount };
     /// <summary>
     /// Specify the port used to attempt connection to TWS/Gateway.
     /// If unspecified, connection will be attempted on ports 7496 and 7497, 4001, 4002.
@@ -103,7 +103,7 @@ public sealed record InterReactClientConnector
                 .AddSingleton(rxSocket) // instance of RxSocketClient
                 .AddSingleton(response) // IObservable<object>
                 .AddSingleton<Request>()
-                .AddSingleton<Svc>()
+                .AddSingleton<Service>()
                 .AddSingleton<IInterReactClient, InterReactClient>()
                 .BuildServiceProvider()
                 .GetService<IInterReactClient>() ?? throw new InvalidOperationException("GetService<IInterReactClient>.");

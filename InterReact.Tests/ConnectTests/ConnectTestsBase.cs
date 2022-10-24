@@ -24,7 +24,7 @@ public abstract class ConnectTestsBase
     protected async Task TestClient(IInterReactClient client)
     {
         client.Response.Select(x => x.Stringify()).Subscribe(s => Write($"response: {s}"));
-        var instant = await client.Services.CurrentTimeObservable;
+        var instant = await client.Service.CurrentTimeObservable;
         Write($"Test calling CurrentTimeObservable: {instant}");
         await Task.Delay(500);
     }

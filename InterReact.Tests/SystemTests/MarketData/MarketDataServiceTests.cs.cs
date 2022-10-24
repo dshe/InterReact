@@ -17,7 +17,7 @@ public class MarketDataServiceTests : TestCollectionBase
         Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
         IList<ITick> ticks = await Client
-            .Services
+            .Service
             .CreateTickObservable(contract)
             .Take(TimeSpan.FromSeconds(2))
             .ToList();

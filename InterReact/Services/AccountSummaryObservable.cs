@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-public partial class Svc
+public partial class Service
 {
     /// <summary>
     /// Creates an observable which continually emits AccountSummary objects.

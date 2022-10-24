@@ -17,7 +17,7 @@ public class ContractDetailsServiceTests : TestCollectionBase
         Contract contract = new() { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
 
         IList<ContractDetails> cds = await Client
-            .Services
+            .Service
             .CreateContractDetailsObservable(contract)
             .ToList();
 
@@ -30,7 +30,7 @@ public class ContractDetailsServiceTests : TestCollectionBase
         Contract contract = new() { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD" };
 
         var cds = await Client
-            .Services
+            .Service
             .CreateContractDetailsObservable(contract)
             .ToList();
 
@@ -43,7 +43,7 @@ public class ContractDetailsServiceTests : TestCollectionBase
         var contract = new Contract { ContractId = 99999 };
 
         var alertException = await Assert.ThrowsAsync<AlertException>(async () => await Client
-            .Services
+            .Service
             .CreateContractDetailsObservable(contract));
 
         Assert.Equal(200, alertException.Alert.Code);
@@ -55,7 +55,7 @@ public class ContractDetailsServiceTests : TestCollectionBase
         var contract = new Contract { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "EUR" };
 
         await Assert.ThrowsAsync<TimeoutException>(async () => await Client
-            .Services
+            .Service
             .CreateContractDetailsObservable(contract)
             .Timeout(TimeSpan.Zero));
     }

@@ -16,7 +16,7 @@ public class AccountUpdateTest : TestCollectionBase
     public async Task TakeTest()
     {
         IList<object> list = await Client
-            .Services
+            .Service
             .AccountUpdatesObservable
             .TakeWhile(o => o is not AccountUpdateEnd)
             //.Take(TimeSpan.FromSeconds(2))
@@ -33,14 +33,14 @@ public class AccountUpdateTest : TestCollectionBase
         List<object> list2 = new();
 
         IDisposable subscription1 = Client
-            .Services
+            .Service
             .AccountUpdatesObservable
             .Subscribe(list1.Add);
 
         await Task.Delay(2000);
 
         IDisposable subscription2 = Client
-            .Services
+            .Service
             .AccountUpdatesObservable
             .Subscribe(list2.Add);
 

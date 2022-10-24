@@ -28,7 +28,7 @@ IInterReactClient client = await new InterReactClientConnector()
     .WithLogger(Logger)
     .ConnectAsync();
 
-if (!client.RemoteIPEndPoint.Port.IsDemoPort())
+if (!client.RemoteIPEndPoint.Port.IsIBDemoPort())
 {
     Console.WriteLine("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
     return;

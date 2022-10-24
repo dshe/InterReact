@@ -13,7 +13,7 @@ public class TimeServiceTests : TestCollectionBase
     [Fact]
     public async Task TestTime()
     {
-        Instant dt = await Client.Services.CurrentTimeObservable;
+        Instant dt = await Client.Service.CurrentTimeObservable;
 
         Write($"Time: {dt}.");
     }

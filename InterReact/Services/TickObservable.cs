@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Reactive.Linq;
 namespace InterReact;
 
-public partial class Svc
+public partial class Service
 {
     /// <summary>
     /// Creates an observable which emits a snapshot of market data ticks, then completes.
