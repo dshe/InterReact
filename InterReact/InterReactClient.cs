@@ -21,7 +21,8 @@ public sealed class InterReactClient : IInterReactClient
     public Service Service { get; }
 
     // This constructor is called by InterReactClientConnector.ConnectAsync().
-    internal InterReactClient(IRxSocketClient rxsocket, Request request, IObservable<object> response, Service service)
+    // Must be public because it is called through Microsoft dependency injection.
+    public InterReactClient(IRxSocketClient rxsocket, Request request, IObservable<object> response, Service service)
     {
         RxSocket = rxsocket;
         Request = request;

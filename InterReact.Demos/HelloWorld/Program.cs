@@ -36,11 +36,21 @@ if (!client.RemoteIPEndPoint.Port.IsIBDemoPort())
 
 Contract contract = new()
 {
+    ///*
     SecurityType = SecurityType.Cash,
     Symbol = "EUR",
     Currency = "USD",
     Exchange = "IDEALPRO"
+    //*/
+    /*
+    SecurityType = SecurityType.Stock,
+    Symbol = "IBKR",
+    Currency = "USD",
+    Exchange = "SMART"
+    */
 };
+
+//client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
 int tickRequestId = client.Request.GetNextId();
 client.Request.RequestMarketData(tickRequestId, contract);

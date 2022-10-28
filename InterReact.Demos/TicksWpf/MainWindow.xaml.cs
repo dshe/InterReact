@@ -130,7 +130,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         SymbolSubject
             .DistinctUntilChanged()
-            .ObserveOnCoreDispatcher()
+            .ObserveOnDispatcher()
             .Subscribe(UpdateSymbol);
     }
 

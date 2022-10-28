@@ -133,7 +133,7 @@ public sealed record InterReactClientConnector
             }
         }
         string ports = Ports.Select(p => p.ToString(CultureInfo.InvariantCulture)).JoinStrings(", ");
-        string message = $"Could not connect to TWS/Gateway at [{ipEndPoint.Address}]:{ports}.";
+        string message = $"Could not connect to TWS/Gateway at [{ipEndPoint.Address}]:{ports}. In TWS, navigate to Edit / Global Configuration / API / Settings and ensure the option \"Enable ActiveX and Socket Clients\" is selected.";
         throw new ArgumentException(message);
     }
 
