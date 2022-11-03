@@ -67,7 +67,7 @@ internal sealed class ResponseParser
         Type type = typeof(T);
         if (!EnumCache.TryGetValue(type, out var enumValues))
         {
-            enumValues = Enum.GetValues(type).OfType<object>().ToDictionary(x => ((int)(x)).ToString(CultureInfo.InvariantCulture));
+            enumValues = Enum.GetValues(type).OfType<object>().ToDictionary(x => ((int)x).ToString(CultureInfo.InvariantCulture));
             EnumCache.Add(type, enumValues);
         }
         if (!enumValues.TryGetValue(numberString, out object? e))

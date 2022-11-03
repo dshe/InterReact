@@ -21,7 +21,7 @@ ILogger Logger = LoggerFactory
     .Create(builder => builder
         .AddSimpleConsole(c => c.SingleLine = true)
         .SetMinimumLevel(LogLevel.Debug))
-    .CreateLogger("Hello");
+    .CreateLogger("HelloWorld");
 
 // Create the InterReact client by connecting to TWS/Gateway on your local machine.
 IInterReactClient client = await new InterReactClientConnector()
@@ -36,36 +36,36 @@ if (!client.RemoteIPEndPoint.Port.IsIBDemoPort())
 
 Contract contract = new()
 {
-    ///*
+    /*
     SecurityType = SecurityType.Cash,
     Symbol = "EUR",
     Currency = "USD",
     Exchange = "IDEALPRO"
-    //*/
-    /*
+    */
     SecurityType = SecurityType.Stock,
     Symbol = "IBKR",
     Currency = "USD",
     Exchange = "SMART"
-    */
 };
 
-//client.Request.RequestMarketDataType(MarketDataType.Delayed);
+client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
-int tickRequestId = client.Request.GetNextId();
-client.Request.RequestMarketData(tickRequestId, contract);
+int requestId = client.Request.GetNextId();
+
+client.Request.RequestMarketData(requestId, contract);
 
 // Find the latest ask price for the security.
-PriceTick priceTick = await client
+PriceTick askPriceTick = await client
     .Response
     .OfType<PriceTick>()
-    .Where(t => t.RequestId == tickRequestId)
-    .Where(x => x.TickType == TickType.AskPrice)
+    .Where(t => t.RequestId == requestId)
+    .Where(x => x.TickType == TickType.AskPrice || x.TickType == TickType.DelayedAskPrice)
+    .Timeout(TimeSpan.FromSeconds(30)) // max time to wait for an ask price
     .FirstAsync();
 
-if (priceTick.Price <= 0)
+if (askPriceTick.Price <= 0)
 {
-    Console.WriteLine($"\nInvalid price: {priceTick.Price}. Perhaps the market is closed.\n");
+    Console.WriteLine($"\nInvalid price: {askPriceTick.Price}. Perhaps the market is closed.\n");
     return;
 }
 
@@ -74,8 +74,8 @@ Order order = new()
 {
     OrderAction = OrderAction.Buy,
     OrderType = OrderType.Limit,
-    LimitPrice = Math.Round(priceTick.Price + .0001, 4),
-    TotalQuantity = 50000,
+    LimitPrice = askPriceTick.Price,
+    TotalQuantity = 100,
 };
 
 int orderId = client.Request.GetNextId();
@@ -87,7 +87,7 @@ Task<OrderStatusReport> orderTask = client
     .Where(x => x.OrderId == orderId)
     .Where(x => x.Status == OrderStatus.Filled || x.Status == OrderStatus.Cancelled || x.Status == OrderStatus.ApiCancelled)
     .FirstAsync()
-    .Timeout(TimeSpan.FromSeconds(10))
+    .Timeout(TimeSpan.FromSeconds(10)) // max time to fill the order
     .ToTask();
 
 Console.WriteLine($"\nPlacing a buy order at limit price: {order.LimitPrice}.\n");
@@ -108,6 +108,6 @@ catch (TimeoutException)
     Console.WriteLine("\nTimeout! Order cancelled. Perhaps try again.\n");
 }
 
-client.Request.CancelMarketData(tickRequestId);
+client.Request.CancelMarketData(requestId);
 await Task.Delay(1000);
 await client.DisposeAsync();

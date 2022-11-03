@@ -7,7 +7,7 @@ namespace InterReact;
 // For requests that do not use requestId. 
 public static partial class Ext
 {
-    // Returns a single result: CurrentTime.
+    // Usage: Returns a single result: CurrentTime.
     internal static IObservable<T> ToObservableSingle<T>
         (this IObservable<object> unfilteredSource, Action startRequest)
     {
@@ -31,7 +31,7 @@ public static partial class Ext
     }
 
 
-    // Multiple results: OpenOrders.
+    // Usage: Multiple results: OpenOrders.
     internal static IObservable<T> ToObservableMultiple<T, TEnd>(
         this IObservable<T> filteredSource, Action startRequest)
     {
@@ -56,7 +56,7 @@ public static partial class Ext
     }
 
 
-    // Continuous results: AccountUpdates, Positions.
+    // Usage: Continuous results: AccountUpdates, Positions.
     internal static IObservable<T> ToObservableContinuous<T>(this IObservable<T> filteredSource,
         Action startRequest, Action stopRequest)
     {
@@ -80,8 +80,7 @@ public static partial class Ext
 
             if (cancelable is null)
                 startRequest();
-            if (cancelable is null)
-                cancelable = true;
+            cancelable ??= true;
 
             return Disposable.Create(() =>
             {

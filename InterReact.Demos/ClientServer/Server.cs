@@ -106,7 +106,7 @@ internal class Server
         long frequency = Stopwatch.Frequency * (count + 1) / watch.ElapsedTicks;
         Logger.LogCritical($"Received {frequency:N0} messages/second.");
 
-        var message = new RequestMessage(x => send(x));
+        RequestMessage message = new(x => send(x));
         for (int i = 0; i < 30_000; i++)
             message.Write("2", "3", 1, TickType.LastSize, 300).Send();
         message.Write("1", "3", 1, TickType.LastPrice, 100, 200, true).Send();

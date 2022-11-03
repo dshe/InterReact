@@ -14,7 +14,6 @@ public sealed class Tag // input + output
         Name = name;
         Value = value;
     }
-    internal Tag(ResponseReader r) : this(r.ReadString(), r.ReadString()) { }
 
     internal static string Combine(IEnumerable<Tag>? tags)
     {

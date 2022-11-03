@@ -3,11 +3,11 @@ using System.Reactive.Disposables;
 using System.Reactive.Linq;
 namespace InterReact;
 
-// For requests that use RequestId.
+// Usage: for requests that use RequestId.
 public static partial class Ext
 {
-    // Single result: FundamentalData, SymbolSamples.
-    // but may also return alers(s)
+    // Usage: Single result: FundamentalData, SymbolSamples.
+    // may also return alerts(s)
     internal static IObservable<IHasRequestId> ToObservableSingleWithId(this IObservable<object> source,
         Func<int> getNextId, Action<int> startRequest, Action<int>? stopRequest = null)
     {
@@ -27,7 +27,7 @@ public static partial class Ext
                         {
                             if (alert.IsFatal)
                                 observer.OnError(alert.ToException()); // IMPORTANT!
-                                else
+                            else
                                 observer.OnNext(m);
                             return;
                         }
@@ -47,8 +47,7 @@ public static partial class Ext
 
             if (cancelable is null)
                 startRequest(id);
-            if (cancelable is null)
-                cancelable = true;
+            cancelable ??= true;
 
             return Disposable.Create(() =>
             {
@@ -60,7 +59,7 @@ public static partial class Ext
     }
 
 
-    // Multiple results: TickSnapshot, Executions.
+    // Usage: Multiple results: TickSnapshot, Executions.
     internal static IObservable<IHasRequestId> ToObservableMultipleWithId<TEnd>(
         this IObservable<object> source, Func<int> getNextId, Action<int> startRequest)
             where TEnd : IHasRequestId
@@ -92,7 +91,7 @@ public static partial class Ext
     }
 
 
-    // Continuous results: AccountSummary, Tick, MarketDepth.
+    // Usage: Continuous results: AccountSummary, Tick, MarketDepth.
     internal static IObservable<IHasRequestId> ToObservableContinuousWithId(this IObservable<object> source,
         Func<int> getNextId, Action<int> startRequest, Action<int> stopRequest)
     {
@@ -125,8 +124,7 @@ public static partial class Ext
 
             if (cancelable is null)
                 startRequest(id);
-            if (cancelable is null)
-                cancelable = true;
+            cancelable ??= true;
 
             return Disposable.Create(() =>
             {

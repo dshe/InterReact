@@ -39,7 +39,7 @@ public partial class Service
         {
             if (ContractsCache.TryGetValue(key, out ContractDetails[]? cds))
             {
-                foreach (var cd in cds)
+                foreach (ContractDetails cd in cds)
                     observer.OnNext(cd);
                 observer.OnCompleted();
                 return Disposable.Empty;

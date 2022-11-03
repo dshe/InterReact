@@ -66,6 +66,6 @@ public sealed class ResponseReader
     {
         int n = ReadInt();
         for (int i = 0; i < n; i++)
-            list.Add(new Tag(this));
+            list.Add(new Tag(ReadString(), ReadString()));
     }
 }

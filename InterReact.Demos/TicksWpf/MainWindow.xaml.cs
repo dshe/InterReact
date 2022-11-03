@@ -122,20 +122,22 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             return;
         }
 
-        Client.Response.Subscribe(x => Debug.WriteLine(x.Stringify()));
-
-        int requestId = Client.Request.GetNextId();
+        // display response messages to the debug window.
+        Client.Response.Subscribe(msg => Debug.WriteLine(msg.Stringify()));
 
         Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
+        // Subscribe to changes of the text in the SymbolTextBox.
         SymbolSubject
             .DistinctUntilChanged()
-            .ObserveOnDispatcher()
             .Subscribe(UpdateSymbol);
     }
 
     private async void UpdateSymbol(string symbol)
     {
+        // Note that this is the UI thread.
+        Application.Current.Dispatcher.VerifyAccess();
+
         Description = "";
         BidPrice = AskPrice = LastPrice = ChangePrice = 0;
 
@@ -147,8 +149,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         Contract contract = new()
         {
-            SecurityType = SecurityType.Stock,
             Symbol = symbol,
+            SecurityType = SecurityType.Stock,
             Currency = "USD",
             Exchange = "SMART"
         };
@@ -158,8 +160,8 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             ContractDetails cd = await Client!
                 .Service
                 .CreateContractDetailsObservable(contract)
-                .FirstAsync() // Multiple may be returned. Take the first one.
-                .Timeout(TimeSpan.FromSeconds(2));
+                .Timeout(TimeSpan.FromSeconds(2))
+                .FirstAsync(); // Multiple may be returned. Take the first one.
 
             // Display the stock name.
             Description = cd.LongName;
@@ -180,7 +182,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void SubscribeToTicks(Contract contract)
     {
-
         // Create the observable which will emit realtime updates.
         IConnectableObservable<ITick> ticks = Client!
             .Service

@@ -43,7 +43,7 @@
 
         <StackPanel Grid.Row="0" Grid.ColumnSpan="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,10">
             <TextBlock Text="Symbol:  " VerticalAlignment="Center" />
-            <TextBox Text="{Binding Symbol, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged, Delay=1000}" CharacterCasing="Upper" Width="120"  Height="30"/>
+            <TextBox Name="SymbolTextBox" Text="{Binding Symbol, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged, Delay=1000}" CharacterCasing="Upper" Width="120"  Height="30"/>
         </StackPanel>
 
         <TextBlock Grid.Row="1" Grid.ColumnSpan="4" Text="{Binding Description, Mode=OneWay}" TextAlignment="Center" FontStyle="Italic" />

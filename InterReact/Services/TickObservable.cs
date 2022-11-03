@@ -68,6 +68,7 @@ public static partial class Ext
         return selector(new TickClassSelector(source));
     }
 
+    // If tick is delayed, substitute the corresponding 
     public static IObservable<ITick> UndelayTicks(this IObservable<ITick> source) =>
         source.Do(x =>
         {
