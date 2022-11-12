@@ -2,6 +2,7 @@
 using System.Net;
 using System.Threading.Tasks;
 using RxSockets;
+
 namespace InterReact;
 
 public interface IInterReactClient : IAsyncDisposable

@@ -1,4 +1,5 @@
 using StringEnums;
+
 namespace InterReact;
 
 /// <summary>

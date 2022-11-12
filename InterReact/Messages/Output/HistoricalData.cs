@@ -1,6 +1,7 @@
 ﻿using NodaTime;
 using NodaTime.Text;
 using System.Collections.Generic;
+
 namespace InterReact;
 
 public sealed class HistoricalData : IHasRequestId

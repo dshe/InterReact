@@ -7,6 +7,7 @@ using System.Reactive.Linq;
 using System.Reactive.Disposables;
 using NodaTime;
 using NodaTime.Text;
+
 namespace InterReact;
 
 public record struct ContractDetailsTimeEvent(ZonedDateTime Time, ContractTimeStatus Status);

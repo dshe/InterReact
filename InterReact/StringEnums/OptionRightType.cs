@@ -1,4 +1,5 @@
 using StringEnums;
+
 namespace InterReact;
 
 public sealed class OptionRightType : StringEnum<OptionRightType>

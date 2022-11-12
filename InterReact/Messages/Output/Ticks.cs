@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using NodaTime;
+
 namespace InterReact;
 
 public abstract class Tick : ITick

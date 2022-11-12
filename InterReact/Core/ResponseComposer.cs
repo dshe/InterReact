@@ -2,6 +2,7 @@
 using System.Reactive.Linq;
 using Microsoft.Extensions.Logging;
 using Stringification;
+
 namespace InterReact;
 
 internal static class ToMessagesEx

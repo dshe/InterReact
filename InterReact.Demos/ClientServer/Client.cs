@@ -4,6 +4,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using InterReact;
 using Microsoft.Extensions.Logging;
+
 namespace CoreClientServer;
 
 internal static class Client

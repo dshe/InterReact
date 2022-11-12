@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+
 namespace InterReact;
 
 public sealed class Contract // input + output

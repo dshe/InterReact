@@ -4,6 +4,7 @@ using System.IO;
 using StringEnums;
 using NodaTime;
 using NodaTime.Text;
+
 namespace InterReact;
 
 public sealed class ResponseReader

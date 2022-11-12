@@ -3,6 +3,7 @@ using System.Globalization;
 using StringEnums;
 using System.Linq;
 using Microsoft.Extensions.Logging;
+
 namespace InterReact;
 
 internal sealed class ResponseParser

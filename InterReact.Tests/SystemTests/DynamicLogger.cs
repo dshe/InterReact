@@ -27,11 +27,15 @@ public class DynamicLogger : ILogger
                 throw new InvalidOperationException("Remove");
         }
     }
-    public IDisposable BeginScope<TState>(TState state)
+
+    public IDisposable? BeginScope<TState>(TState state) where TState : notnull
     {
         lock (Loggers)
         {
-            var disposables = Loggers.Select(logger => logger.BeginScope(state));
+            IEnumerable<IDisposable> disposables = Loggers
+                .Select(logger => logger.BeginScope(state))
+                .OfType<IDisposable>();
+
             return new CompositeDisposable(disposables);
         }
     }

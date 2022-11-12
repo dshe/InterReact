@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Text.RegularExpressions;
+
 namespace InterReact;
 
 internal enum ContractDetailsType { GeneralContractType, BondContractType, ScannerContractType }

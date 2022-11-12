@@ -3,6 +3,7 @@ using System.Globalization;
 using System.IO;
 using StringEnums;
 using System.Linq;
+
 namespace InterReact;
 
 public sealed class RequestMessage

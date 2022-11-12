@@ -1,4 +1,5 @@
 ﻿using StringEnums;
+
 namespace InterReact;
 
 public sealed class HedgeType : StringEnum<HedgeType>

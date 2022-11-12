@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Reactive.Disposables;
 using Microsoft.Extensions.Logging;
+
 namespace CoreClientServer;
 
 public class ConsoleLogger : ILogger
@@ -33,6 +34,7 @@ public class ConsoleLogger : ILogger
         return logLevel >= LogLevel;
     }
 
-    public IDisposable BeginScope<TState>(TState state) => Disposable.Empty;
+    public IDisposable BeginScope<TState>(TState state) where TState : notnull
+        => Disposable.Empty;
 
 }
