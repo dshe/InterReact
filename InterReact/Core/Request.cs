@@ -45,6 +45,7 @@ public sealed class Request
     /// Returns successive unique ids which are used to uniquely identify requests and orders.
     /// </summary>
     public int GetNextId() => Interlocked.Increment(ref NextIdValue);
+    public int SetNextId(int nextIdValue) => Interlocked.Exchange(ref NextIdValue, nextIdValue);
     private int NextIdValue;
 
     //////////////////////////////////////////////////////////////////////////////////////////////
