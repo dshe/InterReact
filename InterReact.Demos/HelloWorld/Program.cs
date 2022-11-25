@@ -4,14 +4,14 @@
 * File / GlobalConfiguration / API / Settings/ "Enable ActiveX and Socket Clients".
 */
 
+using InterReact;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using InterReact;
-using Microsoft.Extensions.Logging;
 
 if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
     Console.BufferWidth = 2000;

@@ -46,7 +46,7 @@ public static partial class Ext
                             observer.OnCompleted();
                         else
                             observer.OnNext(o); // IMPORTANT!
-                        },
+                    },
                     onError: observer.OnError,
                     onCompleted: observer.OnCompleted));
 

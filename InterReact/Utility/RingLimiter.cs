@@ -5,7 +5,7 @@ using System.Threading;
 
 namespace InterReact;
 
-public sealed class RingLimiter
+internal sealed class RingLimiter
 {
     private readonly object Locker = new();
     private readonly int Rate;

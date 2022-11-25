@@ -1,20 +1,19 @@
-﻿using System.IO;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using RxSockets;
+using Stringification;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reactive.Linq;
+using System.Reflection;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using NodaTime;
-using Stringification;
-using RxSockets;
-using System.Reflection;
-using System.Globalization;
-using Microsoft.Extensions.Logging.Abstractions;
-using System.Collections.Generic;
-using System.Security.Cryptography;
 
 namespace InterReact;
 
@@ -42,7 +41,7 @@ public sealed record InterReactClientConnector
     /// Specify a client id.
     /// Up to 8 clients can attach to TWS/Gateway. Each client requires a unique Id. The default Id is random.
     /// </summary>
-    public InterReactClientConnector WithClientId(int id) => 
+    public InterReactClientConnector WithClientId(int id) =>
         this with { ClientId = id >= 0 ? id : throw new ArgumentException("Invalid ClientId", nameof(id)) };
 
     internal int MaxRequestsPerSecond { get; private set; } = 50;
@@ -70,21 +69,22 @@ public sealed record InterReactClientConnector
 
     /////////////////////////////////////////////////////////////
 
+    internal IRxSocketClient? RxSocketClient { get; private set; }
+
     public async Task<IInterReactClient> ConnectAsync(CancellationToken ct = default)
     {
         AssemblyName name = GetType().Assembly.GetName();
         Logger.LogInformation("{Name} v{Version}.", name.Name, name.Version);
 
-        IRxSocketClient? rxSocket = null;
         try
         {
-            rxSocket = await ConnectSocketAsync(ct).ConfigureAwait(false);
-            await Login(rxSocket, ct).ConfigureAwait(false);
+            RxSocketClient = await ConnectSocketAsync(ct).ConfigureAwait(false);
+            await Login(RxSocketClient, ct).ConfigureAwait(false);
             Logger.LogInformation("Logged into Tws/Gateway using clientId: {ClientId} and server version: {ServerVersionCurrent}.", ClientId, (int)ServerVersionCurrent);
 
             Stringifier stringifier = new(Logger);
 
-            IObservable<object> response = rxSocket
+            IObservable<object> response = RxSocketClient
                 .ReceiveAllAsync()
                 .ToArraysFromBytesWithLengthPrefix()
                 .ToStringArrays()
@@ -101,7 +101,7 @@ public sealed record InterReactClientConnector
             return new ServiceCollection()
                 .AddSingleton(this) // connector
                 .AddSingleton(stringifier)
-                .AddSingleton(rxSocket) // instance of RxSocketClient
+                .AddSingleton(RxSocketClient) // instance of RxSocketClient
                 .AddSingleton(response) // IObservable<object>
                 .AddSingleton<Request>()
                 .AddSingleton<Service>()
@@ -112,8 +112,8 @@ public sealed record InterReactClientConnector
         catch (Exception ex)
         {
             Logger.LogCritical(ex, "InterReactClientConnector");
-            if (rxSocket is not null)
-                await rxSocket.DisposeAsync().ConfigureAwait(false);
+            if (RxSocketClient is not null)
+                await RxSocketClient.DisposeAsync().ConfigureAwait(false);
             throw;
         }
     }
@@ -170,4 +170,5 @@ public sealed record InterReactClientConnector
             .FirstAsync(ct)
             .ConfigureAwait(false);
     }
+
 }

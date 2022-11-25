@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using NodaTime.Text;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Diagnostics;
 using System.Reactive.Concurrency;
-using System.Reactive.Linq;
 using System.Reactive.Disposables;
-using NodaTime;
-using NodaTime.Text;
+using System.Reactive.Linq;
 
 namespace InterReact;
 
@@ -20,7 +19,7 @@ public sealed class ContractDetailsTime
     private readonly ContractDetails ContractDetails;
     private readonly IScheduler TheScheduler;
     public DateTimeZone TimeZone { get; } // null if not available
-    public IList<ContractDetailsTimeEvent> Events { get; } = new List<ContractDetailsTimeEvent>();
+    public IReadOnlyList<ContractDetailsTimeEvent> Events { get; } = new List<ContractDetailsTimeEvent>();
     // empty if no hours or timeZone
     public IObservable<ContractDetailsTimePeriod> ContractTimeObservable { get; } // completes immediately if no timeZone or hours
 
@@ -90,7 +89,7 @@ public sealed class ContractDetailsTime
         static (LocalTime start, LocalTime end) GetSessionTime(string session)
         {
             LocalTime[] times = session.Split('-').Select(t => TimePattern.Parse(t).Value).ToArray();
-            Trace.Assert(times.Length == 2,"times.Length == 2");
+            Trace.Assert(times.Length == 2, "times.Length == 2");
             return (times[0], times[1]);
         }
     }

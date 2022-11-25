@@ -1,7 +1,7 @@
-﻿using System.IO;
-using System.Reactive.Linq;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using Stringification;
+using System.IO;
+using System.Reactive.Linq;
 
 namespace InterReact;
 

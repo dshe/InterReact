@@ -1,13 +1,13 @@
 ﻿using InterReact;
 using Stringification;
 using System;
-using System.Linq;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Windows;
-using System.Reactive.Disposables;
 using System.Windows.Media;
 
 namespace TicksWpf;

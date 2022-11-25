@@ -1,5 +1,5 @@
-﻿using System.Reactive.Linq;
-using Stringification;
+﻿using Stringification;
+using System.Reactive.Linq;
 
 namespace InterReact;
 

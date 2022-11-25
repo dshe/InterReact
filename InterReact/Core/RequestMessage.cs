@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using StringEnums;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using StringEnums;
 using System.Linq;
 
 namespace InterReact;

@@ -1,6 +1,4 @@
-﻿using NodaTime;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public sealed class ExecutionFilter // input
 {

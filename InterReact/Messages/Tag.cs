@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using Stringification;
+using System.Collections.Generic;
 using System.Linq;
-using Stringification;
 
 namespace InterReact;
 

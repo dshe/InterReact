@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using RxSockets;
 
 namespace InterReact;
 
@@ -15,33 +14,33 @@ public interface IInterReactClient : IAsyncDisposable
 
 public sealed class InterReactClient : IInterReactClient
 {
-    private readonly IRxSocketClient RxSocket;
-    public IPEndPoint RemoteIPEndPoint => RxSocket.RemoteIPEndPoint;
+    private readonly InterReactClientConnector ClientConnector;
+    public IPEndPoint RemoteIPEndPoint { get; }
     public Request Request { get; }
     public IObservable<object> Response { get; }
     public Service Service { get; }
 
-    // This constructor is called by InterReactClientConnector.ConnectAsync().
-    // Must be public because it is called through Microsoft dependency injection.
-    public InterReactClient(IRxSocketClient rxsocket, Request request, IObservable<object> response, Service service)
+    // InterReactClientConnector.ConnectAsync() calls this constructor.
+    // The class must be public since it is resolved through Microsoft dependency injection.
+    public InterReactClient(InterReactClientConnector connector, Request request, IObservable<object> response, Service service)
     {
-        RxSocket = rxsocket;
+        ArgumentNullException.ThrowIfNull(connector, nameof(connector));
+        ArgumentNullException.ThrowIfNull(connector.RxSocketClient, nameof(connector.RxSocketClient));
+        ClientConnector = connector;
+        RemoteIPEndPoint = connector.RxSocketClient.RemoteIPEndPoint;
         Request = request;
         Response = response;
         Service = service;
     }
 
-    public async ValueTask DisposeAsync() => await RxSocket.DisposeAsync().ConfigureAwait(false);
+    public async ValueTask DisposeAsync() =>
+        await ClientConnector.RxSocketClient!.DisposeAsync().ConfigureAwait(false);
 }
 
 public static partial class Ext
 {
+    public static bool IsIBDemoPort(this int port) =>
+        port == (int)IBDefaultPort.TwsDemoAccount || port == (int)IBDefaultPort.GatewayDemoAccount;
     public static IBDefaultPort GetIBDefaultPort(this int port) =>
         Enum.GetValues<IBDefaultPort>().Where(v => (int)v == port).SingleOrDefault(IBDefaultPort.None);
-
-    public static bool IsIBDemoPort(this int port)
-    {
-        IBDefaultPort portType = GetIBDefaultPort(port);
-        return portType == IBDefaultPort.TwsDemoAccount || portType == IBDefaultPort.GatewayDemoAccount;
-    }
 }

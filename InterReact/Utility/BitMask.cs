@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-internal struct BitMask
+internal readonly struct BitMask
 {
     private readonly int Mask;
     internal BitMask(int i) => Mask = i;

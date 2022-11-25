@@ -78,7 +78,7 @@ public static partial class Ext
                         if (m is TEnd)
                             observer.OnCompleted();
                         else if (m is Alert alert && alert.IsFatal) // IMPORTANT!
-                                observer.OnError(alert.ToException());
+                            observer.OnError(alert.ToException());
                         else
                             observer.OnNext(m);
                     },

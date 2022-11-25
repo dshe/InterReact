@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
+﻿using Microsoft.Extensions.Logging;
 using StringEnums;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using Microsoft.Extensions.Logging;
 
 namespace InterReact;
 
