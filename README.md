@@ -55,4 +55,4 @@ await client.DisposeAsync();
 ```
 ### Notes ###
 
-Interactive Brokers Trader Workstation (TWS) or Gateway must be running with API access enabled. In TWS, navigate to Edit / Global Configuration / API / Settings and ensure the option "Enable ActiveX and Socket Clients" is selected.
+Interactive Brokers Trader Workstation (TWS) or Gateway must be running with API access enabled. In TWS, navigate to Edit / Global Configuration / API / Settings. Ensure the option "Enable ActiveX and Socket Clients" is selected.
