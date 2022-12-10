@@ -3,7 +3,7 @@
 ***Reactive C# API to Interactive Brokers Trader Workstation***
 - **.NET 6.0** library
 - compatible with Interactive Brokers API 9.85 (Aug 2021)
-- dependencies: RxSockets, StringEnums, Reactive Extensions, NodaTime
+- dependencies: RxSockets, StringEnums, NodaTime
 - demo applications: Console, WPF
 
 ```csharp
