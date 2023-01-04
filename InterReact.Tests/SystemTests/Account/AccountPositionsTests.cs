@@ -1,4 +1,5 @@
 ﻿using Stringification;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
@@ -20,7 +21,8 @@ public class AccountPositionsTest : TestCollectionBase
             .PositionsObservable
             .TakeWhile(o => o is not PositionEnd)
             .Cast<Position>()
-            .ToList();
+            .ToList()
+            .Timeout(TimeSpan.FromSeconds(10));
 
         // The account may or may not have positions.
         if (!list.Any())

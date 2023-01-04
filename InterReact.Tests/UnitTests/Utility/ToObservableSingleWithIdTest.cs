@@ -32,7 +32,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     [Fact]
     public async Task Test_Ok()
     {
-        var observable = subject.ToObservableSingleWithId(
+        var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId =>
             {
@@ -65,7 +65,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     [Fact]
     public async Task Test_Fatal_Alert()
     {
-        var observable = subject.ToObservableSingleWithId(
+        var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId =>
             {
@@ -91,7 +91,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     [Fact]
     public async Task Test_NonFatal_Alert()
     {
-        var observable = subject.ToObservableSingleWithId(
+        var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId =>
             {
@@ -119,7 +119,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     [Fact]
     public async Task Test_Subscribe_Error()
     {
-        var observable = subject.ToObservableSingleWithId(
+        var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId => { throw new BarrierPostPhaseException(); },
             requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -130,7 +130,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     [Fact]
     public async Task Test_Source_Error()
     {
-        var observable = subject.ToObservableSingleWithId(
+        var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId => subject.OnError(new BarrierPostPhaseException()),
             requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -141,7 +141,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     [Fact]
     public async Task Test_Source_Completed()
     {
-        var observable = subject.ToObservableSingleWithId(
+        var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId => subject.OnCompleted(),
             requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -159,7 +159,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     {
         var ts = ticks == -1 ? TimeSpan.Zero : TimeSpan.FromTicks(ticks);
 
-        var observable = subject.ToObservableSingleWithId(
+        var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId => Interlocked.Increment(ref subscribeCalls),
             requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -173,7 +173,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     [Fact]
     public void Test_Unsubscribe_Error()
     {
-        var observable = subject.ToObservableSingleWithId(
+        var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId => Interlocked.Increment(ref subscribeCalls),
             requestId => { throw new BarrierPostPhaseException(); });

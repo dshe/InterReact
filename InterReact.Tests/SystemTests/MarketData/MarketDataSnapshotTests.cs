@@ -14,12 +14,12 @@ public class MarketDataSnapshotTests : TestCollectionBase
 
     private async Task<IList<IHasRequestId>> MakeRequest(Contract contract)
     {
-        int id = Client.Request.GetNextId();
+        int requestId = Client.Request.GetNextRequestId();
 
         var task = Client
             .Response
             .OfType<IHasRequestId>()
-            .Where(x => x.RequestId == id)
+            .Where(x => x.RequestId == requestId)
             .TakeUntil(x => x is SnapshotEndTick || (x is Alert alert && alert.IsFatal))
             .Where(x => x is not SnapshotEndTick)
             .ToList()
@@ -27,7 +27,7 @@ public class MarketDataSnapshotTests : TestCollectionBase
 
         Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
-        Client.Request.RequestMarketData(id, contract, isSnapshot: true);
+        Client.Request.RequestMarketData(requestId, contract, isSnapshot: true);
 
         IList<IHasRequestId> messages = await task;
 

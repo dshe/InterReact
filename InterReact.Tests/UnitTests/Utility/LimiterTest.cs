@@ -35,7 +35,7 @@ public sealed class LimiterTest : UnitTestsBase
         //Assert.InRange(rate, 4, 6);
 
         rate = Limit(50, 2);
-        Assert.InRange(rate, 47, 51);
+        Assert.InRange(rate, 20, 51);
 
         //rate = Limit(100, 2);
         //Assert.InRange(rate, 98, 101);

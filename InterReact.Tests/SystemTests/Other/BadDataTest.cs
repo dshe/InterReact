@@ -15,16 +15,16 @@ public class BadDataTest : TestCollectionBase
     [Fact]
     public async Task TestBadRequest()
     {
-        var id = Client.Request.GetNextId();
+        var requestId = Client.Request.GetNextRequestId();
 
         var alert = Client.Response
             .OfType<IHasRequestId>()
-            .Where(r => r.RequestId == id)
+            .Where(r => r.RequestId == requestId)
             .FirstAsync()
             .Timeout(TimeSpan.FromSeconds(5))
             .ToTask();
 
-        Client.Request.RequestMarketData(id, new Contract());
+        Client.Request.RequestMarketData(requestId, new Contract());
 
         var x = await alert;
         Assert.IsType<Alert>(x);

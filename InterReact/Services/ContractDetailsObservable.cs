@@ -46,13 +46,13 @@ public partial class Service
                 return Disposable.Empty;
             }
 
-            int id = Request.GetNextId();
+            int requestId = Request.GetNextRequestId();
 
             List<ContractDetails> cdList = new();
 
             IDisposable subscription = Response
                 .OfType<IHasRequestId>() // IMPORTANT!
-                .Where(m => m.RequestId == id)
+                .Where(m => m.RequestId == requestId)
                 .SubscribeSafe(Observer.Create<IHasRequestId>(
                     onNext: m =>
                     {
@@ -76,7 +76,7 @@ public partial class Service
                     onError: observer.OnError,
                     onCompleted: observer.OnCompleted));
 
-            Request.RequestContractDetails(id, contract);
+            Request.RequestContractDetails(requestId, contract);
 
             return subscription;
 
@@ -90,8 +90,8 @@ public partial class Service
     /// </summary>
     public IObservable<SymbolSamples> CreateMatchingSymbolsObservable(string pattern) =>
         Response
-            .ToObservableSingleWithId(
-                Request.GetNextId, id => Request.RequestMatchingSymbols(id, pattern))
+            .ToObservableSingleWithRequestId(
+                Request.GetNextRequestId, requestId => Request.RequestMatchingSymbols(requestId, pattern))
         .Cast<SymbolSamples>();
 }
 

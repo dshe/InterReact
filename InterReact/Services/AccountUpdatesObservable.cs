@@ -16,22 +16,22 @@ public partial class Service
     private IObservable<object> CreateAccountUpdatesObservable()
     {
         return Response
-            .Where(x => x is AccountValue || x is PortfolioValue || x is AccountUpdateTime || x is AccountUpdateEnd)
+            .Where(m => m is AccountValue || m is PortfolioValue || m is AccountUpdateTime || m is AccountUpdateEnd)
             .ToObservableContinuous(
                 () => Request.RequestAccountUpdates(subscribe: true),
                 () => Request.RequestAccountUpdates(subscribe: false))
             .CacheSource(GetAccountUpdatesCacheKey);
     }
 
-    private static string GetAccountUpdatesCacheKey(object o)
+    private static string GetAccountUpdatesCacheKey(object m)
     {
-        return o switch
+        return m switch
         {
             AccountValue av => $"{av.AccountName}+{av.Key}:{av.Currency}",
             PortfolioValue pv => $"{pv.AccountName}+{(pv.Contract?.Stringify(includeTypeName: false) ?? "")}",
             AccountUpdateTime => "AccountUpdateTime",
             AccountUpdateEnd _ => "AccountUpdateEnd",
-            _ => throw new ArgumentException($"Unhandled type: {o.GetType()}.")
+            _ => throw new ArgumentException($"Unhandled type: {m.GetType()}.")
         };
     }
 }

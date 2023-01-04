@@ -27,18 +27,19 @@ internal static class ToMessagesEx
                 e => observer.OnError(e),
                 observer.OnCompleted);
         });
-    }
 
-    private static TickType GetSizeTickType(TickType tickType) => tickType switch
-    {
-        TickType.BidPrice => TickType.BidSize,
-        TickType.AskPrice => TickType.AskSize,
-        TickType.LastPrice => TickType.LastSize,
-        TickType.DelayedBidPrice => TickType.DelayedBidSize,
-        TickType.DelayedAskPrice => TickType.DelayedAskSize,
-        TickType.DelayedLastPrice => TickType.DelayedLastSize,
-        _ => TickType.Undefined
-    };
+        // local
+        static TickType GetSizeTickType(TickType tickType) => tickType switch
+        {
+            TickType.BidPrice => TickType.BidSize,
+            TickType.AskPrice => TickType.AskSize,
+            TickType.LastPrice => TickType.LastSize,
+            TickType.DelayedBidPrice => TickType.DelayedBidSize,
+            TickType.DelayedAskPrice => TickType.DelayedAskSize,
+            TickType.DelayedLastPrice => TickType.DelayedLastSize,
+            _ => TickType.Undefined
+        };
+    }
 }
 
 internal sealed class ResponseComposer
@@ -65,7 +66,6 @@ internal sealed class ResponseComposer
         catch (Exception e)
         {
             string m = $"ResponseComposer error: [{strings.JoinStrings(", ")}].";
-            //Logger.LogError(e, "{Message}", m);
             Logger.LogError(e, "{Message}", m);
             throw new InvalidDataException(m, e);
         }
@@ -81,7 +81,7 @@ internal sealed class ResponseComposer
         "6" => new AccountValue(reader),
         "7" => new PortfolioValue(reader),
         "8" => new AccountUpdateTime(reader),
-        "9" => new NextId(reader),
+        "9" => new NextOrderId(reader),
         "10" => new ContractDetails(reader, ContractDetailsType.GeneralContractType),
         "11" => new Execution(reader),
         "12" => new MarketDepth(reader, false),

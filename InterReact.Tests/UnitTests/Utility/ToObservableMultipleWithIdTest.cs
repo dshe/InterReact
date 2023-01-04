@@ -32,7 +32,7 @@ public class ToObservableMultipleWithIdTest : UnitTestsBase
     [Fact]
     public async Task Test_Multi_Ok()
     {
-        var observable = subject.ToObservableMultipleWithId<SomeClassEnd>(
+        var observable = subject.ToObservableMultipleWithRequestId<SomeClassEnd>(
             () => Id,
             requestId =>
             {
@@ -50,7 +50,7 @@ public class ToObservableMultipleWithIdTest : UnitTestsBase
     [Fact]
     public async Task Test_NonFatal_Alert_Multi()
     {
-        var observable = subject.ToObservableMultipleWithId<SomeClassEnd>(
+        var observable = subject.ToObservableMultipleWithRequestId<SomeClassEnd>(
             () => Id,
             requestId =>
             {
@@ -69,7 +69,7 @@ public class ToObservableMultipleWithIdTest : UnitTestsBase
     [Fact]
     public async Task Test_Fatal_Alert_Multi()
     {
-        var observable = subject.ToObservableMultipleWithId<SomeClassEnd>(
+        var observable = subject.ToObservableMultipleWithRequestId<SomeClassEnd>(
             () => Id,
             requestId =>
             {
@@ -86,7 +86,7 @@ public class ToObservableMultipleWithIdTest : UnitTestsBase
     [Fact]
     public void Test_Unsubscribe_Error()
     {
-        var observable = subject.ToObservableSingleWithId(
+        var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId => Interlocked.Increment(ref subscribeCalls),
             requestId => { throw new BarrierPostPhaseException(); });

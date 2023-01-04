@@ -13,7 +13,6 @@ public abstract class SystemTestsBase : IAsyncLifetime, IDisposable
     protected static IInterReactClient Client => ClientTask.Result;
     protected readonly Action<string> Write;
     protected readonly ILogger Logger;
-    protected int Id;
 
     static SystemTestsBase()
     {
@@ -38,8 +37,6 @@ public abstract class SystemTestsBase : IAsyncLifetime, IDisposable
         await ClientTask.ConfigureAwait(false);
         //if (Client.Config.IsDemoAccount)
         //    Client.Request.RequestMarketDataType(MarketDataType.Delayed);
-        Id = Client.Request.GetNextId();
-        Write($"BaseTest: NextId = {Id}.");
         //subscription = Client.Response.Spy(Logger).Subscribe(Responses.Add);
     }
 

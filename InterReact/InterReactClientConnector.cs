@@ -44,17 +44,17 @@ public sealed record InterReactClientConnector
     public InterReactClientConnector WithClientId(int id) =>
         this with { ClientId = id >= 0 ? id : throw new ArgumentException("Invalid ClientId", nameof(id)) };
 
-    internal int MaxRequestsPerSecond { get; private set; } = 50;
+    public int MaxRequestsPerSecond { get; private set; } = 50;
     /// <summary>
     /// Specify the maximum number of requests per second sent to to TWS/Gateway.
     /// </summary>
     public InterReactClientConnector WithMaxRequestsPerSecond(int requests) =>
         this with { MaxRequestsPerSecond = requests > 0 ? requests : throw new ArgumentException("invalid", nameof(requests)) };
 
-    internal string OptionalCapabilities { get; private set; } = "";
+    public string OptionalCapabilities { get; private set; } = "";
     public InterReactClientConnector WithOptionalCapabilities(string capabilities) => this with { OptionalCapabilities = capabilities };
 
-    internal bool FollowPriceTickWithSizeTick { get; private set; }
+    public bool FollowPriceTickWithSizeTick { get; private set; }
     public InterReactClientConnector WithFollowPriceTickWithSizeTick() => this with { FollowPriceTickWithSizeTick = true };
 
 
@@ -64,8 +64,9 @@ public sealed record InterReactClientConnector
 
     public ServerVersion ServerVersionCurrent { get; private set; } = ServerVersion.NONE;
     internal bool SupportsServerVersion(ServerVersion version) => version <= ServerVersionCurrent;
-
+  
     public string Date { get; private set; } = "";
+    internal int InitialNextOrderId { get; private set; }
 
     /////////////////////////////////////////////////////////////
 
@@ -99,7 +100,7 @@ public sealed record InterReactClientConnector
                 .AutoConnect(); // connect on first observer
 
             return new ServiceCollection()
-                .AddSingleton(this) // connector
+                .AddSingleton(this) // InterReactClientConnector
                 .AddSingleton(stringifier)
                 .AddSingleton(RxSocketClient) // instance of RxSocketClient
                 .AddSingleton(response) // IObservable<object>
@@ -107,7 +108,7 @@ public sealed record InterReactClientConnector
                 .AddSingleton<Service>()
                 .AddSingleton<IInterReactClient, InterReactClient>()
                 .BuildServiceProvider()
-                .GetService<IInterReactClient>() ?? throw new InvalidOperationException("GetService<IInterReactClient>.");
+                .GetRequiredService<IInterReactClient>();
         }
         catch (Exception ex)
         {
@@ -148,13 +149,20 @@ public sealed record InterReactClientConnector
         SendWithPrefix(((int)RequestCode.StartApi).ToString(CultureInfo.InvariantCulture),
             "2", ClientId.ToString(CultureInfo.InvariantCulture), OptionalCapabilities);
 
-        string[] message = await GetMessage().ConfigureAwait(false);
+        string[] message1 = await GetMessage().ConfigureAwait(false);
 
         // ServerVersion is the highest supported API version within the range specified.
-        if (!Enum.TryParse(message[0], out ServerVersion version))
-            throw new InvalidDataException($"Could not parse server version '{message[0]}'.");
+        if (!Enum.TryParse(message1[0], out ServerVersion version))
+            throw new InvalidDataException($"Could not parse server version '{message1[0]}'.");
         ServerVersionCurrent = version;
-        Date = message[1];
+        Date = message1[1];
+
+        string[] message2 = await GetMessage().ConfigureAwait(false);
+        if (message2[0] != "9") // NextOrderId message
+            throw new InvalidDataException("Did not receive NextOrderId message.");
+        if (!int.TryParse(message2[2], out int nextOrderId))
+            throw new InvalidDataException($"Could not parse NextOrderId '{message2[2]}'.");
+        InitialNextOrderId = nextOrderId;
 
         // local methods
         void Send(string str) => rxsocket
@@ -170,5 +178,4 @@ public sealed record InterReactClientConnector
             .FirstAsync(ct)
             .ConfigureAwait(false);
     }
-
 }

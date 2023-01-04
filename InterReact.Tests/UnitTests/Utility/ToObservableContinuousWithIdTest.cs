@@ -31,7 +31,7 @@ public class ToObservableContinuousWithIdTest : UnitTestsBase
     [Fact]
     public async Task Test_Ok()
     {
-        var observable = subject.ToObservableSingleWithId(
+        var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId =>
             {

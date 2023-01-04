@@ -9,17 +9,17 @@ public static partial class Ext
 {
     // Usage: Single result: FundamentalData, SymbolSamples.
     // may also return alerts(s)
-    internal static IObservable<IHasRequestId> ToObservableSingleWithId(this IObservable<object> source,
-        Func<int> getNextId, Action<int> startRequest, Action<int>? stopRequest = null)
+    internal static IObservable<IHasRequestId> ToObservableSingleWithRequestId(this IObservable<object> source,
+        Func<int> getRequestId, Action<int> startRequest, Action<int>? stopRequest = null)
     {
         return Observable.Create<IHasRequestId>(observer =>
         {
-            int id = getNextId();
+            int requestId = getRequestId();
             bool? cancelable = null;
 
             IDisposable subscription = source
                 .OfType<IHasRequestId>() // IMPORTANT!
-                .Where(m => m.RequestId == id)
+                .Where(m => m.RequestId == requestId)
                 .SubscribeSafe(Observer.Create<IHasRequestId>(
                     onNext: m =>
                     {
@@ -47,13 +47,13 @@ public static partial class Ext
                     }));
 
             if (cancelable is null)
-                startRequest(id);
+                startRequest(requestId);
             cancelable ??= true;
 
             return Disposable.Create(() =>
             {
                 if (stopRequest is not null && cancelable is true)
-                    stopRequest(id);
+                    stopRequest(requestId);
                 subscription.Dispose();
             });
         });
@@ -61,17 +61,17 @@ public static partial class Ext
 
 
     // Usage: Multiple results: TickSnapshot, Executions.
-    internal static IObservable<IHasRequestId> ToObservableMultipleWithId<TEnd>(
-        this IObservable<object> source, Func<int> getNextId, Action<int> startRequest)
+    internal static IObservable<IHasRequestId> ToObservableMultipleWithRequestId<TEnd>(
+        this IObservable<object> source, Func<int> getRequestId, Action<int> startRequest)
             where TEnd : IHasRequestId
     {
         return Observable.Create<IHasRequestId>(observer =>
         {
-            int id = getNextId();
+            int requestId = getRequestId();
 
             IDisposable subscription = source
                 .OfType<IHasRequestId>() // IMPORTANT!
-                .Where(m => m.RequestId == id)
+                .Where(m => m.RequestId == requestId)
                 .SubscribeSafe(Observer.Create<IHasRequestId>(
                     onNext: m =>
                     {
@@ -85,7 +85,7 @@ public static partial class Ext
                     onError: observer.OnError,
                     onCompleted: observer.OnCompleted));
 
-            startRequest(id);
+            startRequest(requestId);
 
             return subscription;
         });
@@ -93,17 +93,17 @@ public static partial class Ext
 
 
     // Usage: Continuous results: AccountSummary, Tick, MarketDepth.
-    internal static IObservable<IHasRequestId> ToObservableContinuousWithId(this IObservable<object> source,
-        Func<int> getNextId, Action<int> startRequest, Action<int> stopRequest)
+    internal static IObservable<IHasRequestId> ToObservableContinuousWithRequestId(this IObservable<object> source,
+        Func<int> getRequestId, Action<int> startRequest, Action<int> stopRequest)
     {
         return Observable.Create<IHasRequestId>(observer =>
         {
-            int id = getNextId();
+            int requestId = getRequestId();
             bool? cancelable = null;
 
             IDisposable subscription = source
                 .OfType<IHasRequestId>() // IMPORTANT!
-                .Where(m => m.RequestId == id)
+                .Where(m => m.RequestId == requestId)
                 .SubscribeSafe(Observer.Create<IHasRequestId>(
                     onNext: m =>
                     {
@@ -124,13 +124,13 @@ public static partial class Ext
                     }));
 
             if (cancelable is null)
-                startRequest(id);
+                startRequest(requestId);
             cancelable ??= true;
 
             return Disposable.Create(() =>
             {
                 if (cancelable is true)
-                    stopRequest(id);
+                    stopRequest(requestId);
                 subscription.Dispose();
             });
         });

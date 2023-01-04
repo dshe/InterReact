@@ -13,20 +13,20 @@ public partial class Service
     private IObservable<IHasRequestId> CreateAccountSummaryObservable()
     {
         return Response
-            .ToObservableContinuousWithId(
-                Request.GetNextId,
-                id => Request.RequestAccountSummary(id), Request.CancelAccountSummary)
+            .ToObservableContinuousWithRequestId(
+                Request.GetNextRequestId,
+                requestId => Request.RequestAccountSummary(requestId), Request.CancelAccountSummary)
             .CacheSource(GetAccountSummaryCacheKey);
     }
 
-    private static string GetAccountSummaryCacheKey(IHasRequestId o)
+    private static string GetAccountSummaryCacheKey(IHasRequestId m)
     {
-        return o switch
+        return m switch
         {
             AccountSummary a => $"{a.Account}+{a.Currency}+{a.Tag}",
             AccountSummaryEnd => "AccountSummaryEnd",
             Alert _ => "",
-            _ => throw new ArgumentException($"Unhandled type: {o.GetType()}.")
+            _ => throw new ArgumentException($"Unhandled type: {m.GetType()}.")
         };
     }
 }

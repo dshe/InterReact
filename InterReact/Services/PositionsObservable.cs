@@ -23,13 +23,13 @@ public partial class Service
             .CacheSource(GetPositionsCacheKey);
     }
 
-    private static string GetPositionsCacheKey(object o)
+    private static string GetPositionsCacheKey(object m)
     {
-        return o switch
+        return m switch
         {
             Position p => $"{p.Account}+{p.Contract.Stringify()}",
             PositionEnd => "PositionEnd",
-            _ => throw new ArgumentException($"Unhandled type: {o.GetType()}.")
+            _ => throw new ArgumentException($"Unhandled type: {m.GetType()}.")
         };
     }
 }

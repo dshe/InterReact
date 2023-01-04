@@ -14,19 +14,19 @@ public class MarketDataTests : TestCollectionBase
 
     private async Task<List<IHasRequestId>> MakeRequest(Contract contract)
     {
-        int id = Client.Request.GetNextId();
+        int requestId = Client.Request.GetNextRequestId();
 
         List<IHasRequestId> messages = new();
 
         var subscription = Client
             .Response
             .OfType<IHasRequestId>()
-            .Where(x => x.RequestId == id)
+            .Where(x => x.RequestId == requestId)
             .Subscribe(m => messages.Add(m));
 
         Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
-        Client.Request.RequestMarketData(id, contract, isSnapshot: false);
+        Client.Request.RequestMarketData(requestId, contract, isSnapshot: false);
 
         await Task.Delay(2000);
 

@@ -9,7 +9,7 @@ internal enum RequestCode
     RequestOpenOrders = 5,
     RequestAccountData = 6,
     RequestExecutions = 7,
-    RequestIds = 8,
+    RequestNextOrderId = 8,
     RequestContractDetails = 9,
     RequestMarketDepth = 10,
     CancelMarketDepth = 11,

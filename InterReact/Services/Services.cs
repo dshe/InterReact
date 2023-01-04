@@ -13,6 +13,6 @@ public sealed partial class Service
         AccountUpdatesObservable = CreateAccountUpdatesObservable();
         PositionsObservable = CreatePositionsObservable();
         AccountSummaryObservable = CreateAccountSummaryObservable();
-        NextValidIdObservable = CreateNextValidIdObservable();
+        NextOrderIdObservable = CreateNextOrderIdObservable();
     }
 }

@@ -14,18 +14,18 @@ public class ContractDetailsTests : TestCollectionBase
 
     private async Task<IList<IHasRequestId>> MakeRequest(Contract contract)
     {
-        int id = Client.Request.GetNextId();
+        int requestId = Client.Request.GetNextRequestId();
 
         var task = Client
             .Response
             .OfType<IHasRequestId>()
-            .Where(x => x.RequestId == id)
+            .Where(x => x.RequestId == requestId)
             .TakeUntil(x => x is Alert || x is ContractDetailsEnd)
             .Where(x => x is not ContractDetailsEnd)
             .ToList()
             .ToTask(); // start task
 
-        Client.Request.RequestContractDetails(id, contract);
+        Client.Request.RequestContractDetails(requestId, contract);
 
         IList<IHasRequestId> messages = await task;
 

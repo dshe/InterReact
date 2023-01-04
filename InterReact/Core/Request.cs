@@ -3,6 +3,7 @@ using RxSockets;
 using Stringification;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -18,12 +19,25 @@ public sealed class Request
     private readonly IRxSocketClient RxSocket;
     private readonly RingLimiter Limiter;
 
+    /// <summary>
+    /// Returns successive ids to uniquely identify requests.
+    /// </summary>
+    public int GetNextRequestId() => Interlocked.Increment(ref NextRequestId);
+    private int NextRequestId;
+
+    /// <summary>
+    /// Returns successive ids used to uniquely identify orders.
+    /// The initial value is set during connection and may start with greater than 0 in case there are previous orders.
+    /// </summary>
+    public int GetNextOrderId() => Interlocked.Increment(ref NextOrderId);
+    internal int NextOrderId; // updated by Services.NextOrderIdObservable
+ 
     public Request(InterReactClientConnector connector, IRxSocketClient rxSocket)
     {
-        Connector = connector;
+        Connector = connector!;
+        NextOrderId = Connector.InitialNextOrderId - 1;
         Limiter = new RingLimiter(Connector.MaxRequestsPerSecond);
-        ArgumentNullException.ThrowIfNull(rxSocket);
-        RxSocket = rxSocket;
+        RxSocket = rxSocket!;
     }
 
     private void RequireServerVersion(ServerVersion version)
@@ -39,14 +53,7 @@ public sealed class Request
     }
 
     private RequestMessage Message() => new(Send);
-
-    /// <summary>
-    /// Returns successive unique ids which are used to uniquely identify requests and orders.
-    /// </summary>
-    public int GetNextId() => Interlocked.Increment(ref NextIdValue);
-    public int SetNextId(int nextIdValue) => Interlocked.Exchange(ref NextIdValue, nextIdValue);
-    private int NextIdValue;
-
+  
     //////////////////////////////////////////////////////////////////////////////////////////////
 
     /// <summary>
@@ -58,7 +65,7 @@ public sealed class Request
         bool isSnapshot = false, bool isRegulatorySnapshot = false, IEnumerable<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
-
+ 
         RequestMessage m = Message();
         m.Write(RequestCode.RequestMarketData, "11", requestId,
             contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
@@ -99,7 +106,7 @@ public sealed class Request
 
     public void CancelMarketData(int requestId) => Message().Write(RequestCode.CancelMarketData, "1", requestId).Send();
 
-    public void PlaceOrder(int id, Order order, Contract contract) // the monster
+    public void PlaceOrder(int orderId, Order order, Contract contract) // the monster
     {
         ArgumentNullException.ThrowIfNull(order);
         ArgumentNullException.ThrowIfNull(contract);
@@ -113,7 +120,7 @@ public sealed class Request
         if (!Connector.SupportsServerVersion(ServerVersion.ORDER_CONTAINER))
             m.Write("45");
 
-        m.Write(id, contract.ContractId);
+        m.Write(orderId, contract.ContractId);
         m.Write(contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
             contract.Strike, contract.Right, contract.Multiplier, contract.Exchange, contract.PrimaryExchange,
             contract.Currency, contract.LocalSymbol, contract.TradingClass,
@@ -319,10 +326,10 @@ public sealed class Request
             .Send();
 
     /// <summary>
-    /// In case there are multiple API clients attached to TWS, the OrderId may not be unique among the clients.
-    /// Call this function to request an OrderId that can be used with multiple clients.
+    /// Call this function to request the next available order Id.
+    /// (the numids parameter has been deprecated)
     /// </summary>
-    public void RequestIds(int number) => Message().Write(RequestCode.RequestIds, "1", number).Send();
+    public void RequestNextOrderId() => Message().Write(RequestCode.RequestNextOrderId, "1", -1).Send();
 
     /// <summary>
     /// Call this method to retrieve one or more ContractDetails objects for the specified selector contract.

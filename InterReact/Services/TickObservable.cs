@@ -14,9 +14,9 @@ public partial class Service
         Contract contract, IEnumerable<GenericTickType>? genericTickTypes = null, bool isRegulatorySnapshot = false, IEnumerable<Tag>? options = null)
     {
         return Response
-            .ToObservableMultipleWithId<SnapshotEndTick>(
-                Request.GetNextId,
-                id => Request.RequestMarketData(id, contract, genericTickTypes, true, isRegulatorySnapshot, options))
+            .ToObservableMultipleWithRequestId<SnapshotEndTick>(
+                Request.GetNextRequestId,
+                requestId => Request.RequestMarketData(requestId, contract, genericTickTypes, true, isRegulatorySnapshot, options))
             .Cast<ITick>()
             .ShareSource();
     }
@@ -32,10 +32,10 @@ public partial class Service
         IEnumerable<GenericTickType>? genericTickTypes = null, IEnumerable<Tag>? options = null)
     {
         return Response
-            .ToObservableContinuousWithId(
-                Request.GetNextId,
-                id => Request.RequestMarketData(id, contract, genericTickTypes, false, false, options),
-                id => Request.CancelMarketData(id))
+            .ToObservableContinuousWithRequestId(
+                Request.GetNextRequestId,
+                requestId => Request.RequestMarketData(requestId, contract, genericTickTypes, false, false, options),
+                requestId => Request.CancelMarketData(requestId))
             .Cast<ITick>();
     }
 
@@ -65,7 +65,6 @@ public static partial class Ext
     public static IObservable<T> OfTickClass<T>(this IObservable<ITick> source, Func<TickClassSelector, IObservable<T>> selector)
     {
         ArgumentNullException.ThrowIfNull(selector);
-
         return selector(new TickClassSelector(source));
     }
 

@@ -36,27 +36,19 @@ internal class Server
 
         // Start receiving messages with length prefix.
         // Get the first message (string array).
-        string[] messages1 = await accept
-            .ReceiveAllAsync()
-            .ToArraysFromBytesWithLengthPrefix()
-            .ToStringArrays()
-            .FirstAsync();
+        string[] message1 = await GetMessage(accept);
 
         // Get the first string of the first message,
-        string versions = messages1.Single();
+        string versions = message1.Single();
 
         if (!versions.StartsWith("v"))
             throw new InvalidDataException("Versions not received.");
         Logger.LogCritical($"Received supported server versions: '{versions}'.");
 
         // Get the second message.
-        string[] messages2 = await accept
-            .ReceiveAllAsync()
-            .ToArraysFromBytesWithLengthPrefix()
-            .ToStringArrays()
-            .FirstAsync();
-
-        if (messages2[0] != "71")
+        string[] message2 = await GetMessage(accept);
+   
+        if (message2[0] != "71")
             throw new InvalidDataException("StartApi message not received.");
         Logger.LogCritical("Received StartApi message.");
 
@@ -68,20 +60,20 @@ internal class Server
             .Write(DateTime.Now.ToString("yyyyMMdd HH:mm:ss XXX"))
             .Send();
 
-        // Send managed accounts
-        new RequestMessage(send)
-            .Write("15")
-            .Write("1")
-            .Write("123,456,789")
-            .Send();
-
-        // Send NextId = 1
+        // Send NextOrderId = 10
         new RequestMessage(send)
             .Write("9")
             .Write("1")
             .Write("10")
             .Send();
 
+        // Send managed accounts
+        new RequestMessage(send)
+            .Write("15")
+            .Write("1")
+            .Write("123,456,789")
+            .Send();
+    
         Logger.LogCritical("Client login complete.");
 
         ////////////////////////////////////////////////////
@@ -121,4 +113,14 @@ internal class Server
         await SocketServer.DisposeAsync();
         Logger.LogCritical("Disconnected.");
     }
+
+    internal static async Task<string[]> GetMessage(IRxSocketClient client)
+    {
+        return await client
+            .ReceiveAllAsync()
+            .ToArraysFromBytesWithLengthPrefix()
+            .ToStringArrays()
+            .FirstAsync();
+    }
+
 }
