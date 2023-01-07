@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Logging;
 using RxSockets;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -13,9 +12,10 @@ namespace CoreClientServer;
 
 internal class Server
 {
-    public IRxSocketServer SocketServer { get; }
+    private readonly RingLimiter Limiter = new();
     private readonly ILogger Logger;
-
+    public IRxSocketServer SocketServer { get; }
+  
     internal Server(ILogger logger, ILogger libLogger)
     {
         Logger = logger;
@@ -43,7 +43,7 @@ internal class Server
 
         if (!versions.StartsWith("v"))
             throw new InvalidDataException("Versions not received.");
-        Logger.LogCritical($"Received supported server versions: '{versions}'.");
+        Logger.LogCritical("Received supported server versions: '{Versions}'.", versions);
 
         // Get the second message.
         string[] message2 = await GetMessage(accept);
@@ -52,23 +52,21 @@ internal class Server
             throw new InvalidDataException("StartApi message not received.");
         Logger.LogCritical("Received StartApi message.");
 
-        void send(List<string> strings) => accept.Send(strings.ToByteArray().ToByteArrayWithLengthPrefix());
-
         // Send server version.
-        new RequestMessage(send)
+        new RequestMessage(accept, Limiter)
             .Write((int)ServerVersion.FRACTIONAL_POSITIONS)
             .Write(DateTime.Now.ToString("yyyyMMdd HH:mm:ss XXX"))
             .Send();
 
         // Send NextOrderId = 10
-        new RequestMessage(send)
+        new RequestMessage(accept, Limiter)
             .Write("9")
             .Write("1")
             .Write("10")
             .Send();
 
         // Send managed accounts
-        new RequestMessage(send)
+        new RequestMessage(accept, Limiter)
             .Write("15")
             .Write("1")
             .Write("123,456,789")
@@ -99,7 +97,7 @@ internal class Server
         long frequency = Stopwatch.Frequency * (count + 1) / watch.ElapsedTicks;
         Logger.LogCritical($"Received {frequency:N0} messages/second.");
 
-        RequestMessage message = new(x => send(x));
+        RequestMessage message = new(accept, Limiter);
         for (int i = 0; i < 30_000; i++)
             message.Write("2", "3", 1, TickType.LastSize, 300).Send();
         message.Write("1", "3", 1, TickType.LastPrice, 100, 200, true).Send();
@@ -122,5 +120,4 @@ internal class Server
             .ToStringArrays()
             .FirstAsync();
     }
-
 }

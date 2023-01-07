@@ -1,4 +1,5 @@
-﻿using StringEnums;
+﻿using RxSockets;
+using StringEnums;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -8,16 +9,24 @@ namespace InterReact;
 
 public sealed class RequestMessage
 {
-    private readonly List<string> Strings = new();
-    private readonly Action<List<string>> SendAction;
-    internal RequestMessage(Action<List<string>> sendAction) => SendAction = sendAction;
-
+    private readonly IRxSocketClient RxSocket;
+    private readonly RingLimiter Limiter;
+    internal readonly List<string> Strings = new(); // internal for testing
+    public RequestMessage(IRxSocketClient rxSocket, RingLimiter limiter)
+    {
+        RxSocket = rxSocket;
+        Limiter = limiter;
+    }
+ 
     // V100Plus format: 4 byte message length prefix plus payload of null-terminated strings.
     internal void Send()
     {
         if (!Strings.Any())
             throw new InvalidOperationException("Empty send message.");
-        SendAction(Strings);
+
+        byte[] bytes = Strings.ToByteArray().ToByteArrayWithLengthPrefix();
+        Limiter.Limit(() => RxSocket.Send(bytes));
+   
         Strings.Clear();
     }
 

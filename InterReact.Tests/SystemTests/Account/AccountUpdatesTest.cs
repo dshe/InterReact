@@ -6,6 +6,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+
 namespace InterReact.SystemTests.Account;
 
 public class AccountUpdateTest : TestCollectionBase
@@ -29,22 +30,28 @@ public class AccountUpdateTest : TestCollectionBase
     [Fact]
     public async Task Multi_Subscriber_Test()
     {
-        List<object> list1 = new();
-        List<object> list2 = new();
+        Stringifier stringifier = new();
+
+        HashSet<string> list1 = new();
+        HashSet<string> list2 = new();
 
         IDisposable subscription1 = Client
             .Service
             .AccountUpdatesObservable
-            .Subscribe(list1.Add);
+            .Select(x => x.Stringify())
+            .Subscribe(x => list1.Add(x));
 
         await Task.Delay(2000);
 
         IDisposable subscription2 = Client
             .Service
             .AccountUpdatesObservable
-            .Subscribe(list2.Add);
+            .Select(x => x.Stringify())
+            .Subscribe(x => list2.Add(x));
 
-        Assert.Equal(list1.Count, list2.Count); // the first list has two UpdateAccountTime objects
+        List<string> diff = list1.Except(list2).ToList();
+        Assert.Equal(1, diff.Count);
+        // the first list has two UpdateAccountTime objects
 
         subscription1.Dispose();
         subscription2.Dispose();

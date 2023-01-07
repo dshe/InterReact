@@ -1,9 +1,7 @@
 ﻿using NodaTime.Text;
-using RxSockets;
 using Stringification;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -16,45 +14,27 @@ namespace InterReact;
 public sealed class Request
 {
     public InterReactClientConnector Connector { get; }
-    private readonly IRxSocketClient RxSocket;
-    private readonly RingLimiter Limiter;
+    private readonly Func<RequestMessage> CreateMessage;
+    private int NextRequestId;
+    internal int NextOrderId; // updated by Services.NextOrderIdObservable
+
+    public Request(InterReactClientConnector connector, Func<RequestMessage> requestMessageFactory)
+    {
+        Connector = connector!;
+        CreateMessage = requestMessageFactory;
+        NextOrderId = Connector.InitialNextOrderId - 1;
+    }
 
     /// <summary>
     /// Returns successive ids to uniquely identify requests.
     /// </summary>
     public int GetNextRequestId() => Interlocked.Increment(ref NextRequestId);
-    private int NextRequestId;
 
     /// <summary>
     /// Returns successive ids used to uniquely identify orders.
     /// The initial value is set during connection and may start with greater than 0 in case there are previous orders.
     /// </summary>
     public int GetNextOrderId() => Interlocked.Increment(ref NextOrderId);
-    internal int NextOrderId; // updated by Services.NextOrderIdObservable
- 
-    public Request(InterReactClientConnector connector, IRxSocketClient rxSocket)
-    {
-        Connector = connector!;
-        NextOrderId = Connector.InitialNextOrderId - 1;
-        Limiter = new RingLimiter(Connector.MaxRequestsPerSecond);
-        RxSocket = rxSocket!;
-    }
-
-    private void RequireServerVersion(ServerVersion version)
-    {
-        if (!Connector.SupportsServerVersion(version))
-            throw new ArgumentException($"The server does not support version: '{version}'.");
-    }
-
-    private void Send(List<string> strings)
-    {
-        byte[] bytes = strings.ToByteArray().ToByteArrayWithLengthPrefix();
-        Limiter.Limit(() => RxSocket.Send(bytes));
-    }
-
-    private RequestMessage Message() => new(Send);
-  
-    //////////////////////////////////////////////////////////////////////////////////////////////
 
     /// <summary>
     /// Call this method to request market data, streaming or snapshot.
@@ -66,7 +46,7 @@ public sealed class Request
     {
         ArgumentNullException.ThrowIfNull(contract);
  
-        RequestMessage m = Message();
+        RequestMessage m = CreateMessage();
         m.Write(RequestCode.RequestMarketData, "11", requestId,
             contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
             contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
@@ -104,7 +84,7 @@ public sealed class Request
         }
     }
 
-    public void CancelMarketData(int requestId) => Message().Write(RequestCode.CancelMarketData, "1", requestId).Send();
+    public void CancelMarketData(int requestId) => CreateMessage().Write(RequestCode.CancelMarketData, "1", requestId).Send();
 
     public void PlaceOrder(int orderId, Order order, Contract contract) // the monster
     {
@@ -113,7 +93,7 @@ public sealed class Request
 
         VerifyOrder(order);
 
-        RequestMessage m = Message();
+        RequestMessage m = CreateMessage();
 
         m.Write(RequestCode.PlaceOrder);
 
@@ -267,39 +247,39 @@ public sealed class Request
     private void VerifyOrder(Order order)
     {
         if (!string.IsNullOrEmpty(order.ExtOperator))
-            RequireServerVersion(ServerVersion.EXT_OPERATOR);
+            Connector.RequireServerVersion(ServerVersion.EXT_OPERATOR);
 
         if (order.CashQty is not null && order.CashQty != double.MaxValue)
-            RequireServerVersion(ServerVersion.CASH_QTY);
+            Connector.RequireServerVersion(ServerVersion.CASH_QTY);
 
         if (!string.IsNullOrEmpty(order.Mifid2DecisionMaker) || !string.IsNullOrEmpty(order.Mifid2DecisionAlgo))
-            RequireServerVersion(ServerVersion.DECISION_MAKER);
+            Connector.RequireServerVersion(ServerVersion.DECISION_MAKER);
 
         if (!string.IsNullOrEmpty(order.Mifid2ExecutionTrader) || !string.IsNullOrEmpty(order.Mifid2ExecutionAlgo))
-            RequireServerVersion(ServerVersion.DECISION_MAKER);
+            Connector.RequireServerVersion(ServerVersion.DECISION_MAKER);
 
         if (order.DontUseAutoPriceForHedge)
-            RequireServerVersion(ServerVersion.AUTO_PRICE_FOR_HEDGE);
+            Connector.RequireServerVersion(ServerVersion.AUTO_PRICE_FOR_HEDGE);
 
         if (order.IsOmsContainer)
-            RequireServerVersion(ServerVersion.ORDER_CONTAINER);
+            Connector.RequireServerVersion(ServerVersion.ORDER_CONTAINER);
 
         if (order.DiscretionaryUpToLimitPrice)
-            RequireServerVersion(ServerVersion.D_PEG_ORDERS);
+            Connector.RequireServerVersion(ServerVersion.D_PEG_ORDERS);
 
         if (order.UsePriceMgmtAlgo.HasValue)
-            RequireServerVersion(ServerVersion.PRICE_MGMT_ALGO);
+            Connector.RequireServerVersion(ServerVersion.PRICE_MGMT_ALGO);
 
         if (order.Duration != int.MaxValue && order.Duration is not null)
-            RequireServerVersion(ServerVersion.DURATION);
+            Connector.RequireServerVersion(ServerVersion.DURATION);
 
         if (order.PostToAts != int.MaxValue && order.PostToAts is not null)
-            RequireServerVersion(ServerVersion.POST_TO_ATS);
+            Connector.RequireServerVersion(ServerVersion.POST_TO_ATS);
     }
 
-    public void CancelOrder(int orderId) => Message().Write(RequestCode.CancelOrder, "1", orderId).Send();
+    public void CancelOrder(int orderId) => CreateMessage().Write(RequestCode.CancelOrder, "1", orderId).Send();
 
-    public void RequestOpenOrders() => Message().Write(RequestCode.RequestOpenOrders, "1").Send();
+    public void RequestOpenOrders() => CreateMessage().Write(RequestCode.RequestOpenOrders, "1").Send();
 
     /// <summary>
     /// Call this function to start receiving account updates.
@@ -308,7 +288,7 @@ public sealed class Request
     /// This information is updated every three minutes.
     /// </summary>
     public void RequestAccountUpdates(bool subscribe, string? accountCode = null) => // ???
-        Message().Write(RequestCode.RequestAccountData, "2", subscribe, accountCode).Send();
+        CreateMessage().Write(RequestCode.RequestAccountData, "2", subscribe, accountCode).Send();
 
     /// <summary>
     /// When this method is called, execution reports from the last 24 hours that meet the filter criteria are retrieved.
@@ -317,7 +297,7 @@ public sealed class Request
     /// Note that the valid format for time is "yyyymmdd-hh:mm:ss"
     /// </summary>
     public void RequestExecutions(int requestId, ExecutionFilter? filter = null) =>
-        Message()
+        CreateMessage()
             .Write(RequestCode.RequestExecutions, "3", requestId,
                 filter?.ClientId, filter?.Account,
                 filter is null ? null : LocalDateTimePattern.CreateWithInvariantCulture("yyyyMMdd-HH:mm:ss").Format(filter.Time),
@@ -329,7 +309,7 @@ public sealed class Request
     /// Call this function to request the next available order Id.
     /// (the numids parameter has been deprecated)
     /// </summary>
-    public void RequestNextOrderId() => Message().Write(RequestCode.RequestNextOrderId, "1", -1).Send();
+    public void RequestNextOrderId() => CreateMessage().Write(RequestCode.RequestNextOrderId, "1", -1).Send();
 
     /// <summary>
     /// Call this method to retrieve one or more ContractDetails objects for the specified selector contract.
@@ -338,7 +318,7 @@ public sealed class Request
     {
         ArgumentNullException.ThrowIfNull(contract);
 
-        Message()
+        CreateMessage()
             .Write(RequestCode.RequestContractDetails, "8", requestId,
                 contract.ContractId,
                 contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
@@ -357,12 +337,12 @@ public sealed class Request
         ArgumentNullException.ThrowIfNull(contract);
 
         if (isSmartDepth)
-            RequireServerVersion(ServerVersion.SMART_DEPTH);
+            Connector.RequireServerVersion(ServerVersion.SMART_DEPTH);
 
         if (!string.IsNullOrEmpty(contract.PrimaryExchange))
-            RequireServerVersion(ServerVersion.MKT_DEPTH_PRIM_EXCHANGE);
+            Connector.RequireServerVersion(ServerVersion.MKT_DEPTH_PRIM_EXCHANGE);
 
-        RequestMessage m = Message();
+        RequestMessage m = CreateMessage();
 
         m.Write(RequestCode.RequestMarketDepth, "5", requestId,
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
@@ -384,9 +364,9 @@ public sealed class Request
     public void CancelMarketDepth(int requestId, bool isSmartDepth = false)
     {
         if (isSmartDepth)
-            RequireServerVersion(ServerVersion.SMART_DEPTH);
+            Connector.RequireServerVersion(ServerVersion.SMART_DEPTH);
 
-        RequestMessage m = Message().Write(RequestCode.CancelMarketDepth, "1", requestId);
+        RequestMessage m = CreateMessage().Write(RequestCode.CancelMarketDepth, "1", requestId);
 
         if (Connector.SupportsServerVersion(ServerVersion.SMART_DEPTH))
             m.Write(isSmartDepth);
@@ -398,28 +378,28 @@ public sealed class Request
     /// Call this method to start receiving news bulletins, such as information about exchange status.
     /// </summary>
     public void RequestNewsBulletins(bool all = true) =>
-        Message().Write(RequestCode.RequestNewsBulletins, "1", all).Send();
+        CreateMessage().Write(RequestCode.RequestNewsBulletins, "1", all).Send();
 
-    public void CancelNewsBulletins() => Message().Write(RequestCode.CancelNewsBulletins, "1").Send();
+    public void CancelNewsBulletins() => CreateMessage().Write(RequestCode.CancelNewsBulletins, "1").Send();
 
     public void ChangeServerLogLevel(LogEntryLevel logLevel) =>
-        Message().Write(RequestCode.ChangeServerLogLevel, "1", logLevel).Send();
+        CreateMessage().Write(RequestCode.ChangeServerLogLevel, "1", logLevel).Send();
 
     public void RequestAutoOpenOrders(bool autoBind) =>
-        Message().Write(RequestCode.RequestAutoOpenOrders, "1", autoBind).Send();
+        CreateMessage().Write(RequestCode.RequestAutoOpenOrders, "1", autoBind).Send();
 
     public void RequestAllOpenOrders() =>
-        Message().Write(RequestCode.RequestAllOpenOrders, "1").Send();
+        CreateMessage().Write(RequestCode.RequestAllOpenOrders, "1").Send();
 
     public void RequestManagedAccounts() =>
-        Message().Write(RequestCode.RequestManagedAccounts, "1").Send();
+        CreateMessage().Write(RequestCode.RequestManagedAccounts, "1").Send();
 
     public void RequestFinancialAdvisorConfiguration(FinancialAdvisorDataType dataType) =>
-        Message().Write(RequestCode.RequestFinancialAdvisorConfiguration, "1", dataType).Send();
+        CreateMessage().Write(RequestCode.RequestFinancialAdvisorConfiguration, "1", dataType).Send();
 
     public void ReplaceFinancialAdvisorConfiguration(int requestId, FinancialAdvisorDataType dataType, string xml)
     {
-        RequestMessage m = Message().Write(RequestCode.ReplaceFinancialAdvisorConfiguration, "1", dataType, xml);
+        RequestMessage m = CreateMessage().Write(RequestCode.ReplaceFinancialAdvisorConfiguration, "1", dataType, xml);
 
         if (Connector.SupportsServerVersion(ServerVersion.REPLACE_FA_END))
             m.Write(requestId); // ???
@@ -450,7 +430,7 @@ public sealed class Request
         if (endDate == default && !keepUpToDate)
             endDate = Connector.Clock.GetCurrentInstant();
 
-        RequestMessage m = Message().Write(RequestCode.RequestHistoricalData);
+        RequestMessage m = CreateMessage().Write(RequestCode.RequestHistoricalData);
 
         if (!Connector.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
             m.Write("6");
@@ -484,7 +464,7 @@ public sealed class Request
     {
         ArgumentNullException.ThrowIfNull(contract);
 
-        Message()
+        CreateMessage()
             .Write(RequestCode.ExerciseOptions, "2", requestId,
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
                 contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
@@ -500,7 +480,7 @@ public sealed class Request
     {
         ArgumentNullException.ThrowIfNull(subscription);
 
-        RequestMessage m = Message().Write(RequestCode.RequestScannerSubscription);
+        RequestMessage m = CreateMessage().Write(RequestCode.RequestScannerSubscription);
         if (!Connector.SupportsServerVersion(ServerVersion.SCANNER_GENERIC_OPTS))
             m.Write("4");
 
@@ -523,20 +503,20 @@ public sealed class Request
     }
 
     public void CancelScannerSubscription(int requestId) =>
-        Message().Write(RequestCode.CancelScannerSubscription, "1", requestId).Send();
+        CreateMessage().Write(RequestCode.CancelScannerSubscription, "1", requestId).Send();
 
     /// <summary>
     /// Call the this method to receive an XML document that describes the valid parameters that a scanner subscription can have.
     /// </summary>ca
-    public void RequestScannerParameters() => Message().Write(RequestCode.RequestScannerParameters, "1").Send();
+    public void RequestScannerParameters() => CreateMessage().Write(RequestCode.RequestScannerParameters, "1").Send();
 
     public void CancelHistoricalData(int requestId) =>
-        Message().Write(RequestCode.CancelHistoricalData, "1", requestId).Send();
+        CreateMessage().Write(RequestCode.CancelHistoricalData, "1", requestId).Send();
 
     /// <summary>
     /// This is the time reported by TWS. Seconds precision.
     /// </summary>
-    public void RequestCurrentTime() => Message().Write(RequestCode.RequestCurrentTime, 1).Send();
+    public void RequestCurrentTime() => CreateMessage().Write(RequestCode.RequestCurrentTime, 1).Send();
 
     /// <summary>
     /// Call this method to start receiving realtime bar data.
@@ -546,7 +526,7 @@ public sealed class Request
     {
         ArgumentNullException.ThrowIfNull(contract);
 
-        Message()
+        CreateMessage()
             .Write(RequestCode.RequestRealtimeBars, "3", requestId,
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
                 contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
@@ -557,7 +537,7 @@ public sealed class Request
             .Send();
     }
 
-    public void CancelRealTimeBars(int requestId) => Message().Write(RequestCode.CancelRealtimeBars, "1", requestId).Send();
+    public void CancelRealTimeBars(int requestId) => CreateMessage().Write(RequestCode.CancelRealtimeBars, "1", requestId).Send();
 
     /// <summary>
     /// Call this method to receive Reuters global fundamental data for stocks.
@@ -569,7 +549,7 @@ public sealed class Request
         ArgumentNullException.ThrowIfNull(contract);
 
         FundamentalDataReportType reportType = reportTypeN ?? FundamentalDataReportType.CompanyOverview;
-        Message()
+        CreateMessage()
             .Write(RequestCode.RequestFundamentalData, "3", requestId,
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.Exchange,
                 contract.PrimaryExchange, contract.Currency, contract.LocalSymbol,
@@ -577,7 +557,7 @@ public sealed class Request
             .Send();
     }
 
-    public void CancelFundamentalData(int requestId) => Message().Write(RequestCode.CancelFundamentalData, "1", requestId).Send();
+    public void CancelFundamentalData(int requestId) => CreateMessage().Write(RequestCode.CancelFundamentalData, "1", requestId).Send();
 
     /// <summary>
     /// Call this function to calculate volatility for a supplied option price and underlying price.
@@ -586,7 +566,7 @@ public sealed class Request
     {
         ArgumentNullException.ThrowIfNull(contract);
 
-        Message()
+        CreateMessage()
             .Write(RequestCode.RequestCalculatedImpliedVolatility, "3", requestId,
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
                 contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
@@ -602,7 +582,7 @@ public sealed class Request
     {
         ArgumentNullException.ThrowIfNull(contract);
 
-        Message()
+        CreateMessage()
             .Write(RequestCode.RequestCalculatedOptionPrice, "3", requestId,
                 contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
                 contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,
@@ -612,15 +592,15 @@ public sealed class Request
     }
 
     public void CancelCalculateImpliedVolatility(int requestId) =>
-        Message().Write(RequestCode.CancelCalculatedImpliedVolatility, "1", requestId).Send();
+        CreateMessage().Write(RequestCode.CancelCalculatedImpliedVolatility, "1", requestId).Send();
 
     public void CancelCalculateOptionPrice(int requestId) =>
-        Message().Write(RequestCode.CancelCalculatedOptionPrice, "1", requestId).Send();
+        CreateMessage().Write(RequestCode.CancelCalculatedOptionPrice, "1", requestId).Send();
 
     /// <summary>
     /// Use this method to cancel all open orders globally. It cancels both API and TWS open orders.
     /// </summary>
-    public void RequestGlobalCancel() => Message().Write(RequestCode.RequestGlobalCancel, "1").Send();
+    public void RequestGlobalCancel() => CreateMessage().Write(RequestCode.RequestGlobalCancel, "1").Send();
 
     /// <summary>
     /// The API can receive frozen market data from TWS. Frozen market data is the last data recorded in IB's system.
@@ -629,12 +609,12 @@ public sealed class Request
     /// Then, before the opening of the next trading day, market data will automatically switch back to real-time market data.
     /// </summary>
     public void RequestMarketDataType(MarketDataType marketDataType) =>
-        Message().Write(RequestCode.RequestMarketDataType, "1", marketDataType).Send();
+        CreateMessage().Write(RequestCode.RequestMarketDataType, "1", marketDataType).Send();
 
     /// <summary>
     /// Subscribes to position updates for all accessible accounts. All positions sent initially, and then only updates as positions change. 
     /// </summary>
-    public void RequestPositions() => Message().Write(RequestCode.RequestPositions, "1").Send();
+    public void RequestPositions() => CreateMessage().Write(RequestCode.RequestPositions, "1").Send();
 
     /// <summary>
     /// Subscribea to data that appears on the TWS Account Window Summary tab. 
@@ -645,27 +625,27 @@ public sealed class Request
         List<string>? tagNames = tags?.Select(tag => tag.ToString()).ToList();
         if (tagNames is null || !tagNames.Any())
             tagNames = Enum.GetNames<AccountSummaryTag>().ToList();
-        Message()
+        CreateMessage()
             .Write(RequestCode.RequestAccountSummary, "1", requestId, group, string.Join(",", tagNames))
             .Send();
     }
 
     public void CancelAccountSummary(int requestId) =>
-        Message().Write(RequestCode.CancelAccountSummary, "1", requestId).Send();
+        CreateMessage().Write(RequestCode.CancelAccountSummary, "1", requestId).Send();
 
-    public void CancelPositions() => Message().Write(RequestCode.CancelPositions, "1").Send();
+    public void CancelPositions() => CreateMessage().Write(RequestCode.CancelPositions, "1").Send();
 
     public void QueryDisplayGroups(int requestId) =>
-        Message().Write(RequestCode.QueryDisplayGroups, "1", requestId).Send();
+        CreateMessage().Write(RequestCode.QueryDisplayGroups, "1", requestId).Send();
 
     public void SubscribeToGroupEvents(int requestId, int groupId) =>
-        Message().Write(RequestCode.SubscribeToGroupEvents, "1", requestId, groupId).Send();
+        CreateMessage().Write(RequestCode.SubscribeToGroupEvents, "1", requestId, groupId).Send();
 
     public void UpdateDisplayGroup(int requestId, string contractInfo) =>
-        Message().Write(RequestCode.UpdateDisplayGroup, "1", requestId, contractInfo).Send();
+        CreateMessage().Write(RequestCode.UpdateDisplayGroup, "1", requestId, contractInfo).Send();
 
     public void UnsubscribeFromGroupEvents(int requestId) =>
-        Message().Write(RequestCode.UnsubscribeFromGroupEvents, "1", requestId).Send();
+        CreateMessage().Write(RequestCode.UnsubscribeFromGroupEvents, "1", requestId).Send();
 
     /**
     * Requests position subscription for account and/or model
@@ -674,32 +654,32 @@ public sealed class Request
     */
     public void RequestPositionsMulti(int requestId, string account, string modelCode)
     {
-        RequireServerVersion(ServerVersion.MODELS_SUPPORT);
-        Message().Write(RequestCode.RequestPositionsMulti, "1", requestId, account, modelCode).Send();
+        Connector.RequireServerVersion(ServerVersion.MODELS_SUPPORT);
+        CreateMessage().Write(RequestCode.RequestPositionsMulti, "1", requestId, account, modelCode).Send();
     }
 
     public void CancelPositionsMulti(int requestId)
     {
-        RequireServerVersion(ServerVersion.MODELS_SUPPORT);
-        Message().Write(RequestCode.CancelPositionsMulti, "1", requestId).Send();
+        Connector.RequireServerVersion(ServerVersion.MODELS_SUPPORT);
+        CreateMessage().Write(RequestCode.CancelPositionsMulti, "1", requestId).Send();
     }
 
     public void RequestAccountUpdatesMulti(int requestId, string account, string modelCode, bool ledgerAndNlv)
     {
-        RequireServerVersion(ServerVersion.MODELS_SUPPORT);
-        Message().Write(RequestCode.RequestAccountUpdatesMulti, "1", requestId, account, modelCode, ledgerAndNlv).Send();
+        Connector.RequireServerVersion(ServerVersion.MODELS_SUPPORT);
+        CreateMessage().Write(RequestCode.RequestAccountUpdatesMulti, "1", requestId, account, modelCode, ledgerAndNlv).Send();
     }
 
     public void CancelAccountUpdatesMulti(int requestId)
     {
-        RequireServerVersion(ServerVersion.MODELS_SUPPORT);
-        Message().Write(RequestCode.CancelAccountUpdatesMulti, "1", requestId).Send();
+        Connector.RequireServerVersion(ServerVersion.MODELS_SUPPORT);
+        CreateMessage().Write(RequestCode.CancelAccountUpdatesMulti, "1", requestId).Send();
     }
 
     public void RequestSecDefOptParams(int requestId, string underlyingSymbol, string futFopExchange, string underlyingSecType, int underlyingConId)
     {
-        RequireServerVersion(ServerVersion.SEC_DEF_OPT_PARAMS_REQ);
-        Message()
+        Connector.RequireServerVersion(ServerVersion.SEC_DEF_OPT_PARAMS_REQ);
+        CreateMessage()
             .Write(RequestCode.RequestSecurityDefinitionOptionalParameters, requestId,
                 underlyingSymbol, futFopExchange, underlyingSecType, underlyingConId)
             .Send();
@@ -707,44 +687,44 @@ public sealed class Request
 
     public void RequestSoftDollarTiers(int requestId)
     {
-        RequireServerVersion(ServerVersion.SOFT_DOLLAR_TIER);
-        Message()
+        Connector.RequireServerVersion(ServerVersion.SOFT_DOLLAR_TIER);
+        CreateMessage()
             .Write(RequestCode.RequestSoftDollarTiers, requestId)
             .Send();
     }
 
     public void RequestFamilyCodes()
     {
-        RequireServerVersion(ServerVersion.REQ_FAMILY_CODES);
-        Message().Write(RequestCode.RequestFamilyCodes).Send();
+        Connector.RequireServerVersion(ServerVersion.REQ_FAMILY_CODES);
+        CreateMessage().Write(RequestCode.RequestFamilyCodes).Send();
     }
 
     public void RequestMatchingSymbols(int requestId, string pattern)
     {
-        RequireServerVersion(ServerVersion.REQ_MATCHING_SYMBOLS);
-        Message().Write(RequestCode.RequestMatchingSymbols, requestId, pattern).Send();
+        Connector.RequireServerVersion(ServerVersion.REQ_MATCHING_SYMBOLS);
+        CreateMessage().Write(RequestCode.RequestMatchingSymbols, requestId, pattern).Send();
     }
 
     // Discover exchhanges for which market data is returned to updateMktDepthL2(those with market makers)
     public void RequestMarketDepthExchanges()
     {
-        RequireServerVersion(ServerVersion.REQ_MKT_DEPTH_EXCHANGES);
-        Message().Write(RequestCode.RequestMktDepthExchanges).Send();
+        Connector.RequireServerVersion(ServerVersion.REQ_MKT_DEPTH_EXCHANGES);
+        CreateMessage().Write(RequestCode.RequestMktDepthExchanges).Send();
     }
 
     // Returns the mapping of single letter codes to exchange names given the mapping identifier
     public void RequestSmartComponents(int requestId, string bboExchange)
     {
-        RequireServerVersion(ServerVersion.REQ_MKT_DEPTH_EXCHANGES);
-        Message().Write(RequestCode.RequestSmartComponents, requestId, bboExchange).Send();
+        Connector.RequireServerVersion(ServerVersion.REQ_MKT_DEPTH_EXCHANGES);
+        CreateMessage().Write(RequestCode.RequestSmartComponents, requestId, bboExchange).Send();
     }
 
     // retrieve the body of a news article
     public void RequestNewsArticle(int requestId, string providerCode, string articleId, IEnumerable<Tag>? options = null)
     {
-        RequireServerVersion(ServerVersion.REQ_NEWS_ARTICLE);
+        Connector.RequireServerVersion(ServerVersion.REQ_NEWS_ARTICLE);
 
-        RequestMessage m = Message().Write(RequestCode.RequestNewsArticle, requestId, providerCode, articleId);
+        RequestMessage m = CreateMessage().Write(RequestCode.RequestNewsArticle, requestId, providerCode, articleId);
         if (Connector.SupportsServerVersion(ServerVersion.NEWS_QUERY_ORIGINS))
             m.Write(Tag.Combine(options));
         m.Send();
@@ -752,14 +732,14 @@ public sealed class Request
 
     public void RequestNewsProviders()
     {
-        RequireServerVersion(ServerVersion.REQ_NEWS_PROVIDERS);
-        Message().Write(RequestCode.RequestNewsProviders).Send();
+        Connector.RequireServerVersion(ServerVersion.REQ_NEWS_PROVIDERS);
+        CreateMessage().Write(RequestCode.RequestNewsProviders).Send();
     }
 
     public void RequestHistoricalNews(int requestId, int conId, string providerCodes, string startTime, string endTime, int totalResults, IEnumerable<Tag>? options = null)
     {
-        RequireServerVersion(ServerVersion.REQ_HISTORICAL_NEWS);
-        RequestMessage m = Message().Write(RequestCode.RequestHistoricalNews, requestId, conId, providerCodes, startTime, endTime, totalResults);
+        Connector.RequireServerVersion(ServerVersion.REQ_HISTORICAL_NEWS);
+        RequestMessage m = CreateMessage().Write(RequestCode.RequestHistoricalNews, requestId, conId, providerCodes, startTime, endTime, totalResults);
         if (Connector.SupportsServerVersion(ServerVersion.NEWS_QUERY_ORIGINS))
             m.Write(Tag.Combine(options));
         m.Send();
@@ -773,8 +753,8 @@ public sealed class Request
     {
         ArgumentNullException.ThrowIfNull(contract);
 
-        RequireServerVersion(ServerVersion.REQ_HEAD_TIMESTAMP);
-        Message()
+        Connector.RequireServerVersion(ServerVersion.REQ_HEAD_TIMESTAMP);
+        CreateMessage()
             .Write(RequestCode.RequestHeadTimestamp, requestId)
             .WriteContract(contract)
             .Write(useRth, whatToShow, formatDate)
@@ -786,8 +766,8 @@ public sealed class Request
     {
         ArgumentNullException.ThrowIfNull(contract);
 
-        RequireServerVersion(ServerVersion.REQ_HISTOGRAM_DATA);
-        Message()
+        Connector.RequireServerVersion(ServerVersion.REQ_HISTOGRAM_DATA);
+        CreateMessage()
             .Write(RequestCode.RequestHistogramData, requestId)
             .WriteContract(contract)
             .Write(useRth, period)
@@ -796,52 +776,52 @@ public sealed class Request
 
     public void CancelHistogramData(int requestId)
     {
-        RequireServerVersion(ServerVersion.REQ_HISTOGRAM_DATA);
-        Message().Write(RequestCode.CancelHistogramData, requestId).Send();
+        Connector.RequireServerVersion(ServerVersion.REQ_HISTOGRAM_DATA);
+        CreateMessage().Write(RequestCode.CancelHistogramData, requestId).Send();
     }
 
     public void CancelHeadTimestamp(int requestId)
     {
-        RequireServerVersion(ServerVersion.CANCEL_HEADTIMESTAMP);
-        Message().Write(RequestCode.CancelHeadTimestamp, requestId).Send();
+        Connector.RequireServerVersion(ServerVersion.CANCEL_HEADTIMESTAMP);
+        CreateMessage().Write(RequestCode.CancelHeadTimestamp, requestId).Send();
     }
 
     // Find market rule (minimum price increment) from codes indicated in ContractDetails.
     public void RequestMarketRule(int requestId)
     {
-        RequireServerVersion(ServerVersion.MARKET_RULES);
-        Message().Write(RequestCode.RequestMarketRule, requestId).Send();
+        Connector.RequireServerVersion(ServerVersion.MARKET_RULES);
+        CreateMessage().Write(RequestCode.RequestMarketRule, requestId).Send();
     }
 
     public void RequestPnL(int requestId, string account, string modelCode)
     {
-        RequireServerVersion(ServerVersion.PNL);
-        Message().Write(RequestCode.ReqPnL, requestId, account, modelCode).Send();
+        Connector.RequireServerVersion(ServerVersion.PNL);
+        CreateMessage().Write(RequestCode.ReqPnL, requestId, account, modelCode).Send();
     }
 
     public void CancelPnL(int requestId)
     {
-        RequireServerVersion(ServerVersion.PNL);
-        Message().Write(RequestCode.CancelPnL, requestId).Send();
+        Connector.RequireServerVersion(ServerVersion.PNL);
+        CreateMessage().Write(RequestCode.CancelPnL, requestId).Send();
     }
 
     public void RequestPnLSingle(int requestId, string account, string modelCode, int contractId)
     {
-        RequireServerVersion(ServerVersion.PNL);
-        Message().Write(RequestCode.ReqPnLSingle, requestId, account, modelCode, contractId).Send();
+        Connector.RequireServerVersion(ServerVersion.PNL);
+        CreateMessage().Write(RequestCode.ReqPnLSingle, requestId, account, modelCode, contractId).Send();
     }
 
     public void CancelPnLSingle(int requestId)
     {
-        RequireServerVersion(ServerVersion.PNL);
-        Message().Write(RequestCode.CancelPnLSingle, requestId).Send();
+        Connector.RequireServerVersion(ServerVersion.PNL);
+        CreateMessage().Write(RequestCode.CancelPnLSingle, requestId).Send();
     }
 
     public void RequestHistoricalTicks(int requestId, Contract contract, string startDateTime, string endDateTime,
         int numberOfTicks, string whatToShow, int useRth, bool ignoreSize, IEnumerable<Tag> miscOptions)
     {
-        RequireServerVersion(ServerVersion.HISTORICAL_TICKS);
-        Message().Write(RequestCode.ReqHistoricalTicks, requestId, contract,
+        Connector.RequireServerVersion(ServerVersion.HISTORICAL_TICKS);
+        CreateMessage().Write(RequestCode.ReqHistoricalTicks, requestId, contract,
             startDateTime, endDateTime, numberOfTicks, whatToShow, useRth, ignoreSize, miscOptions).Send();
     }
 
@@ -850,11 +830,11 @@ public sealed class Request
     {
         ArgumentNullException.ThrowIfNull(contract);
 
-        RequireServerVersion(ServerVersion.TICK_BY_TICK);
+        Connector.RequireServerVersion(ServerVersion.TICK_BY_TICK);
         if (numberOfTicks != 0 || ignoreSize)
-            RequireServerVersion(ServerVersion.TICK_BY_TICK_IGNORE_SIZE);
+            Connector.RequireServerVersion(ServerVersion.TICK_BY_TICK_IGNORE_SIZE);
 
-        RequestMessage m = Message().Write(RequestCode.ReqTickByTickData, requestId,
+        RequestMessage m = CreateMessage().Write(RequestCode.ReqTickByTickData, requestId,
             contract.ContractId,
             contract.Symbol,
             contract.SecurityType,
@@ -877,39 +857,39 @@ public sealed class Request
 
     public void CancelTickByTickData(int requestId)
     {
-        RequireServerVersion(ServerVersion.TICK_BY_TICK);
-        Message().Write(RequestCode.CancelTickByTickData, requestId).Send();
+        Connector.RequireServerVersion(ServerVersion.TICK_BY_TICK);
+        CreateMessage().Write(RequestCode.CancelTickByTickData, requestId).Send();
     }
 
     public void RequestCompletedOrders(bool apiOnly)
     {
-        RequireServerVersion(ServerVersion.COMPLETED_ORDERS);
-        Message().Write(RequestCode.ReqCompletedOrders, apiOnly).Send();
+        Connector.RequireServerVersion(ServerVersion.COMPLETED_ORDERS);
+        CreateMessage().Write(RequestCode.ReqCompletedOrders, apiOnly).Send();
     }
 
     // Request fundamental data from the Wall Street Events Horizon Calendar
     public void RequestWshMetaData(int requestId)
     {
-        RequireServerVersion(ServerVersion.WSHE_CALENDAR);
-        Message().Write(RequestCode.ReqWshMetaData, requestId).Send();
+        Connector.RequireServerVersion(ServerVersion.WSHE_CALENDAR);
+        CreateMessage().Write(RequestCode.ReqWshMetaData, requestId).Send();
     }
 
     public void CancelWshMetaData(int requestId)
     {
 
-        RequireServerVersion(ServerVersion.WSHE_CALENDAR);
-        Message().Write(RequestCode.CancelWshMetaData, requestId).Send();
+        Connector.RequireServerVersion(ServerVersion.WSHE_CALENDAR);
+        CreateMessage().Write(RequestCode.CancelWshMetaData, requestId).Send();
     }
 
     public void RequestWshEventData(int requestId, int contractId)
     {
-        RequireServerVersion(ServerVersion.WSHE_CALENDAR);
-        Message().Write(RequestCode.ReqWshEventData, requestId, contractId).Send();
+        Connector.RequireServerVersion(ServerVersion.WSHE_CALENDAR);
+        CreateMessage().Write(RequestCode.ReqWshEventData, requestId, contractId).Send();
     }
 
     public void CancelWshEventData(int requestId)
     {
-        RequireServerVersion(ServerVersion.WSHE_CALENDAR);
-        Message().Write(RequestCode.CancelWshEventData, requestId).Send();
+        Connector.RequireServerVersion(ServerVersion.WSHE_CALENDAR);
+        CreateMessage().Write(RequestCode.CancelWshEventData, requestId).Send();
     }
 }

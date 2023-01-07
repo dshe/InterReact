@@ -15,29 +15,29 @@ public class BadDataTest : TestCollectionBase
     [Fact]
     public async Task TestBadRequest()
     {
-        var requestId = Client.Request.GetNextRequestId();
+        int requestId = Client.Request.GetNextRequestId();
 
-        var alert = Client.Response
+        Task<IHasRequestId> messageTask = Client.Response
             .OfType<IHasRequestId>()
             .Where(r => r.RequestId == requestId)
-            .FirstAsync()
             .Timeout(TimeSpan.FromSeconds(5))
+            .FirstAsync()
             .ToTask();
 
         Client.Request.RequestMarketData(requestId, new Contract());
 
-        var x = await alert;
-        Assert.IsType<Alert>(x);
+        IHasRequestId message = await messageTask;
+        Assert.IsType<Alert>(message);
     }
 
     [Fact]
     public async Task TestBadResponse()
     {
-        var requestId = int.MaxValue; // this value will trigger a receive parse error
+        int requestId = int.MaxValue; // this value will trigger a receive parse error
 
-        var response = Client.Response;
+        IObservable<object> response = Client.Response;
 
-        Client.Request.RequestMarketData(requestId, StockContract1);
+        Client.Request.RequestContractDetails(requestId, StockContract1);
 
         await Assert.ThrowsAnyAsync<InvalidDataException>(async () => await response);
     }

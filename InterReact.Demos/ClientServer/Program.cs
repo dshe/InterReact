@@ -17,8 +17,8 @@ public static class Program
             Console.SetBufferSize(100, 100);
         }
 
-        ConsoleLogger clientLogger = new("Client:    ", LogLevel.Trace, ConsoleColor.DarkYellow);
-        ConsoleLogger serverLogger = new("Server:    ", LogLevel.Trace, ConsoleColor.DarkMagenta);
+        ConsoleLogger clientLogger    = new("Client:    ", LogLevel.Trace, ConsoleColor.DarkYellow);
+        ConsoleLogger serverLogger    = new("Server:    ", LogLevel.Trace, ConsoleColor.DarkMagenta);
         ConsoleLogger clientLibLogger = new("ClientLib: ", LogLevel.Information, ConsoleColor.DarkGreen);
         ConsoleLogger serverLibLogger = new("ServerLib: ", LogLevel.Information, ConsoleColor.DarkCyan);
 

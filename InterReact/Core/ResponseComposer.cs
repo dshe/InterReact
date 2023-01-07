@@ -5,24 +5,31 @@ using System.Reactive.Linq;
 
 namespace InterReact;
 
-internal static class ToMessagesEx
+internal static class ConnectorEx
 {
     internal static IObservable<object> ToMessages(this IObservable<string[]> source, InterReactClientConnector connector)
     {
         ResponseComposer composer = new(connector);
+        return source.Select(strings => composer.Compose(strings));
+    }
+
+    internal static IObservable<object> FollowPriceTickWithSizeTick(this IObservable<object> source, bool followPriceTickWithSizeTick)
+    {
         return Observable.Create<object>(observer =>
         {
             return source.Subscribe(
-                strings =>
+                message =>
                 {
-                    object message = composer.Compose(strings);
                     observer.OnNext(message);
-                    if (message is PriceTick priceTick && connector.FollowPriceTickWithSizeTick)
-                    {
-                        TickType type = GetSizeTickType(priceTick.TickType);
-                        if (type != TickType.Undefined)
-                            observer.OnNext(new SizeTick(priceTick.RequestId, type, priceTick.Size));
-                    }
+                    if (!followPriceTickWithSizeTick)
+                        return;
+                    if (message is not PriceTick priceTick)
+                        return;
+                    TickType type = GetSizeTickType(priceTick.TickType);
+                    if (type == TickType.Undefined)
+                        return;
+                    SizeTick sizeTick = new(priceTick.RequestId, type, priceTick.Size);
+                    observer.OnNext(sizeTick);
                 },
                 e => observer.OnError(e),
                 observer.OnCompleted);
@@ -39,6 +46,16 @@ internal static class ToMessagesEx
             TickType.DelayedLastPrice => TickType.DelayedLastSize,
             _ => TickType.Undefined
         };
+    }
+
+    internal static IObservable<object> LogMessages(this IObservable<object> source, ILogger logger)
+    {
+        Stringifier stringifier = new(logger);
+        return source.Do(message =>
+        {
+            if (logger.IsEnabled(LogLevel.Debug))
+                logger.LogDebug("Incoming message: {Message}", stringifier.Stringify(message));
+        });
     }
 }
 

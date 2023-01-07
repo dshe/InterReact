@@ -1,7 +1,7 @@
 ﻿namespace InterReact;
 
 /// <summary>
-/// Sent after trades and after calling RequestExecutions.
+/// Sent after trades and also after calling RequestExecutions.
 /// (OrderId can be determined using the executionId from Execution)
 /// </summary>
 public sealed class CommissionReport : IHasRequestId, IHasOrderId, IHasExecutionId

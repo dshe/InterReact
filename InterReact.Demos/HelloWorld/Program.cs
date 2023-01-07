@@ -74,7 +74,7 @@ Order order = new()
 {
     OrderAction = OrderAction.Buy,
     OrderType = OrderType.Limit,
-    LimitPrice = askPriceTick.Price,
+    LimitPrice = askPriceTick.Price + .50,
     TotalQuantity = 100,
 };
 
@@ -109,5 +109,5 @@ catch (TimeoutException)
 }
 
 client.Request.CancelMarketData(requestId);
-await Task.Delay(1000);
+await Task.Delay(2000);
 await client.DisposeAsync();

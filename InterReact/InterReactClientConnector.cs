@@ -64,57 +64,59 @@ public sealed record InterReactClientConnector
 
     public ServerVersion ServerVersionCurrent { get; private set; } = ServerVersion.NONE;
     internal bool SupportsServerVersion(ServerVersion version) => version <= ServerVersionCurrent;
-  
+    internal void RequireServerVersion(ServerVersion version)
+    {
+        if (!SupportsServerVersion(version))
+            throw new ArgumentException($"The server does not support version: '{version}'.");
+    }
+
     public string Date { get; private set; } = "";
-    internal int InitialNextOrderId { get; private set; }
+    public int InitialNextOrderId { get; private set; }
 
     /////////////////////////////////////////////////////////////
-
-    internal IRxSocketClient? RxSocketClient { get; private set; }
 
     public async Task<IInterReactClient> ConnectAsync(CancellationToken ct = default)
     {
         AssemblyName name = GetType().Assembly.GetName();
         Logger.LogInformation("{Name} v{Version}.", name.Name, name.Version);
-
+        
+        IRxSocketClient? rxSocketClient = null;
         try
         {
-            RxSocketClient = await ConnectSocketAsync(ct).ConfigureAwait(false);
-            await Login(RxSocketClient, ct).ConfigureAwait(false);
+            rxSocketClient = await ConnectSocketAsync(ct).ConfigureAwait(false);
+            await Login(rxSocketClient, ct).ConfigureAwait(false);
             Logger.LogInformation("Logged into Tws/Gateway using clientId: {ClientId} and server version: {ServerVersionCurrent}.", ClientId, (int)ServerVersionCurrent);
 
-            Stringifier stringifier = new(Logger);
-
-            IObservable<object> response = RxSocketClient
+            IObservable<object> response = rxSocketClient
                 .ReceiveAllAsync()
                 .ToArraysFromBytesWithLengthPrefix()
                 .ToStringArrays()
                 .ToObservableFromAsyncEnumerable()
                 .ToMessages(this)
-                .Do(message =>
-                {
-                    if (Logger.IsEnabled(LogLevel.Debug))
-                        Logger.LogDebug("Incoming message: {Message}", stringifier.Stringify(message));
-                })
+                .FollowPriceTickWithSizeTick(FollowPriceTickWithSizeTick)
+                .LogMessages(Logger)
                 .Publish()
                 .AutoConnect(); // connect on first observer
 
             return new ServiceCollection()
                 .AddSingleton(this) // InterReactClientConnector
-                .AddSingleton(stringifier)
-                .AddSingleton(RxSocketClient) // instance of RxSocketClient
-                .AddSingleton(response) // IObservable<object>
+                .AddSingleton(rxSocketClient!) // instance
+                .AddSingleton(new RingLimiter(MaxRequestsPerSecond))
+                .AddSingleton<Stringifier>()
+                .AddTransient<RequestMessage>() // transient!
+                .AddSingleton<Func<RequestMessage>>(s => () => s.GetRequiredService<RequestMessage>())
                 .AddSingleton<Request>()
+                .AddSingleton(response) // IObservable<object>
                 .AddSingleton<Service>()
                 .AddSingleton<IInterReactClient, InterReactClient>()
-                .BuildServiceProvider()
+                .BuildServiceProvider(new ServiceProviderOptions() { ValidateOnBuild=true, ValidateScopes=true })
                 .GetRequiredService<IInterReactClient>();
         }
         catch (Exception ex)
         {
             Logger.LogCritical(ex, "InterReactClientConnector");
-            if (RxSocketClient is not null)
-                await RxSocketClient.DisposeAsync().ConfigureAwait(false);
+            if (rxSocketClient is not null)
+                await rxSocketClient.DisposeAsync().ConfigureAwait(false);
             throw;
         }
     }

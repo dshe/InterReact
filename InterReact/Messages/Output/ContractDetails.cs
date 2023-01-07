@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace InterReact;
 
@@ -241,6 +243,8 @@ public sealed class ContractDetails : IHasRequestId // output
                 Contract.TradingClass = r.ReadString();
                 break;
         }
+        if (RequestId == int.MaxValue)
+            throw new InvalidDataException("Test Exception!");
     }
 
     private void ReadLastTradeDate(string lastTradeDateOrContractMonth, bool isBond)

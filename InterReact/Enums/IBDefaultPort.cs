@@ -2,7 +2,7 @@
 
 public enum IBDefaultPort
 {
-    None = 0,
+    Other = 0,
     TwsRegularAccount = 7496,
     TwsDemoAccount = 7497,
     GatewayRegularAccount = 4001,
