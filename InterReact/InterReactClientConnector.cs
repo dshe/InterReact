@@ -160,12 +160,25 @@ public sealed record InterReactClientConnector
         Date = message1[1];
 
         string[] message2 = await GetMessage().ConfigureAwait(false);
-        if (message2[0] != "9") // NextOrderId message
-            throw new InvalidDataException("Did not receive NextOrderId message.");
-        if (!int.TryParse(message2[2], out int nextOrderId))
-            throw new InvalidDataException($"Could not parse NextOrderId '{message2[2]}'.");
-        InitialNextOrderId = nextOrderId;
-
+        //this can either be a NextOrderId message or an open order message(!)
+        if (message2[0] == "9")
+        {
+            if (!int.TryParse(message2[2], out int nextOrderId))
+                throw new InvalidDataException($"Could not parse NextOrderId '{message2[2]}'.");
+            InitialNextOrderId = nextOrderId;
+        }
+        else if (message2[0] == "5") 
+        {
+            //what happens w/ mult. open orders? Newest order is sent
+            if (!int.TryParse(message2[1], out int nextOrderId))
+                throw new InvalidDataException($"Could not parse NextOrderId '{message2[1]}'.");
+ 
+            InitialNextOrderId = nextOrderId;
+        }
+        else 
+        {
+            throw new InvalidDataException("Did not receive NextOrderId or Order message.");
+        }
         // local methods
         void Send(string str) => rxsocket
             .Send(str.ToByteArray());
