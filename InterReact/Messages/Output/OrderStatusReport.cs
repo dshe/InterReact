@@ -78,3 +78,9 @@ public sealed class OrderStatusReport : IHasOrderId
             MktCapPrice = r.ReadDouble();
     }
 }
+
+public sealed class OrderStatusReportEnd
+{
+    internal OrderStatusReportEnd(ResponseReader r) => r.IgnoreVersion();
+}
+
