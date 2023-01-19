@@ -18,7 +18,7 @@ public sealed class RealtimeBar : IHasRequestId
 
     internal RealtimeBar(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
         Time = Instant.FromUnixTimeSeconds(long.Parse(r.ReadString(), NumberFormatInfo.InvariantInfo));
         Open = r.ReadDouble();

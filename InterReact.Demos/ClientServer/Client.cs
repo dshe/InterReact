@@ -22,10 +22,10 @@ internal static class Client
         logger.LogCritical("Sending some messages...");
         Enumerable.Range(0, 50).ToList().ForEach(client.Request.CancelMarketData);
 
-        // indicate test end
+        // indicate send test end
         client.Request.RequestMarketData(42, new Contract());
 
-        // wait to get the first tickSize message, indicating test start
+        // wait to get the first tickSize message, indicating receive test start
         await client.Response.OfType<SizeTick>().FirstAsync();
 
         logger.LogCritical("Receiving...");
@@ -37,7 +37,7 @@ internal static class Client
         watch.Stop();
 
         long frequency = Stopwatch.Frequency * count / watch.ElapsedTicks;
-        logger.LogCritical("Received!! {Frequency:N0} messages/second.", frequency);
+        logger.LogCritical("Received {Frequency:N0} messages/second.", frequency);
 
         logger.LogCritical("Disconnecting.");
         await client.DisposeAsync();

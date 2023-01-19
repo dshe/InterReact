@@ -1,25 +1,20 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
+﻿using System.Reactive.Linq;
 
-namespace InterReact.SystemTests.MarketData;
+namespace MarketData;
 
-public class MarketDataSnapshotServiceTests : TestCollectionBase
+public class MarketDataSnapshotService : TestCollectionBase
 {
-    public MarketDataSnapshotServiceTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+    public MarketDataSnapshotService(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
     [Fact]
-    public async Task TestTickSnapshot()
+    public async Task TickSnapshotTest()
     {
         Contract contract = new()
         { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
 
         Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
-        IList<ITick> ticks = await Client
+        IList<IHasRequestId> ticks = await Client
             .Service
             .CreateTickSnapshotObservable(contract)
             .ToList();
@@ -28,18 +23,20 @@ public class MarketDataSnapshotServiceTests : TestCollectionBase
     }
 
     [Fact]
-    public async Task TestTickSnapshotInvalid()
+    public async Task TickSnapshotInvalidTest()
     {
         Contract contract = new()
         { SecurityType = SecurityType.Stock, Symbol = "InvalidSymbol", Currency = "USD", Exchange = "SMART" };
 
         Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
-        var alertException = await Assert.ThrowsAsync<AlertException>(async () => await Client
+        IList<IHasRequestId> list = await Client
                 .Service
                 .CreateTickSnapshotObservable(contract)
-                .ToList());
+                .ToList();
 
-        Write(alertException.Message);
+        Alert alert = (Alert)list.Single();
+
+        Write("Alert Mesaage: " + alert.Message);
     }
 }

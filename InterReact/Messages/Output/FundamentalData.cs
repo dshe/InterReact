@@ -10,7 +10,7 @@ public sealed class FundamentalData : IHasRequestId
 
     internal FundamentalData(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
         Data = r.ReadString();
     }

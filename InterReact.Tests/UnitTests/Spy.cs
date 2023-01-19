@@ -1,8 +1,7 @@
 ﻿using Stringification;
-using System;
 using System.Reactive.Linq;
 
-namespace InterReact.UnitTests;
+namespace UnitTests;
 
 public static class SpyEx
 {

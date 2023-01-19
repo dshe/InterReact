@@ -1,17 +1,12 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace InterReact.UnitTests.Utility;
+namespace Utility;
 
-public class ToObservableContinuousTest : UnitTestsBase
+public class ToObservableContinuous : UnitTestBase
 {
-    public ToObservableContinuousTest(ITestOutputHelper output) : base(output) { }
+    public ToObservableContinuous(ITestOutputHelper output) : base(output) { }
 
     private int subscribeCalls, unsubscribeCalls;
     private readonly Subject<object> subject = new();
@@ -27,7 +22,7 @@ public class ToObservableContinuousTest : UnitTestsBase
     InlineData(1),
     InlineData(10),
     InlineData(100)]
-    public async Task Test_Timeout(int ticks)
+    public async Task TimeoutTest(int ticks)
     {
         var ts = ticks == -1 ? TimeSpan.Zero : TimeSpan.FromTicks(ticks);
         var observable = subject.ToObservableContinuous(() => Interlocked.Increment(ref subscribeCalls), () => Interlocked.Increment(ref unsubscribeCalls));

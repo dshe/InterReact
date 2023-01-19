@@ -7,7 +7,7 @@ public sealed class FinancialAdvisor // output
     internal FinancialAdvisor() { }
     internal FinancialAdvisor(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         DataType = r.ReadEnum<FinancialAdvisorDataType>();
         Data = r.ReadString();
     }

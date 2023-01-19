@@ -11,7 +11,7 @@ public sealed class Position
 
     internal Position(ResponseReader r)
     {
-        r.RequireVersion(3);
+        r.RequireMessageVersion(3);
         Account = r.ReadString();
         Contract.ContractId = r.ReadInt();
         Contract.Symbol = r.ReadString();
@@ -31,5 +31,5 @@ public sealed class Position
 
 public sealed class PositionEnd
 {
-    internal PositionEnd(ResponseReader r) => r.IgnoreVersion();
+    internal PositionEnd(ResponseReader r) => r.IgnoreMessageVersion();
 }

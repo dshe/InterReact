@@ -2,18 +2,14 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace InterReact.UnitTests.Utility;
+namespace Utility;
 
-public class ToObservableContinuousWithIdTest : UnitTestsBase
+public class ToObservableContinuousWithId : UnitTestBase
 {
     private const int Id = 42;
     private int subscribeCalls, unsubscribeCalls;
-    private readonly Subject<object> subject = new Subject<object>();
+    private readonly Subject<object> subject = new();
 
     public interface ISomeClass : IHasRequestId { }
     public class SomeClass : ISomeClass
@@ -26,10 +22,10 @@ public class ToObservableContinuousWithIdTest : UnitTestsBase
         public int RequestId { get; } = Id;
     }
 
-    public ToObservableContinuousWithIdTest(ITestOutputHelper output) : base(output) { }
+    public ToObservableContinuousWithId(ITestOutputHelper output) : base(output) { }
 
     [Fact]
-    public async Task Test_Ok()
+    public async Task OkTest()
     {
         var observable = subject.ToObservableSingleWithRequestId(
             () => Id,

@@ -1,58 +1,79 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
+﻿using System.Reactive.Linq;
 
-namespace InterReact.SystemTests.Contracts;
+namespace Contracts;
 
-public class ContractDetailsServiceTests : TestCollectionBase
+public class ContractDetailService : TestCollectionBase
 {
-    public ContractDetailsServiceTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+    public ContractDetailService(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+ 
     [Fact]
-    public async Task TestSingle()
+    public async Task SingleTest()
     {
-        Contract contract = new() { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
+        Contract contract = new() 
+        { 
+            SecurityType = SecurityType.Stock, 
+            Symbol = "IBM", 
+            Currency = "USD", 
+            Exchange = "SMART" 
+        };
 
-        IList<ContractDetails> cds = await Client
+        IList<IHasRequestId> messages = await Client
             .Service
             .CreateContractDetailsObservable(contract)
             .ToList();
 
-        Assert.Single(cds);
+        IHasRequestId message = Assert.Single(messages);
+        ContractDetails cd = Assert.IsType<ContractDetails>(message);
+        Assert.Equal("IBM", cd.Contract.Symbol);
     }
 
     [Fact]
-    public async Task TestMulti()
+    public async Task MultiTest()
     {
-        Contract contract = new() { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD" };
+        Contract contract = new() 
+        { 
+            SecurityType = SecurityType.Stock, 
+            Symbol = "IBM", 
+            Currency = "USD" 
+        };
 
-        var cds = await Client
+        IList<IHasRequestId> messages = await Client
             .Service
             .CreateContractDetailsObservable(contract)
             .ToList();
 
-        Assert.True(cds.Count > 1); // multiple exchanges
+        Assert.True(messages.All(x => x is ContractDetails)); // no Alerts
+
+        Assert.True(messages.Count > 1); // multiple exchanges
     }
 
     [Fact]
-    public async Task TestInvalid()
+    public async Task InvalidTest()
     {
-        var contract = new Contract { ContractId = 99999 };
+        Contract contract = new()
+        { 
+            ContractId = 99999
+        };
 
-        var alertException = await Assert.ThrowsAsync<AlertException>(async () => await Client
-            .Service
-            .CreateContractDetailsObservable(contract));
+        IList<IHasRequestId> messages = await Client
+             .Service
+             .CreateContractDetailsObservable(contract)
+             .ToList();
 
-        Assert.Equal(200, alertException.Alert.Code);
+        IHasRequestId message = Assert.Single(messages);
+        Alert alert = Assert.IsType<Alert>(message);
+        Assert.Equal(200, alert.Code);
     }
 
     [Fact]
-    public async Task TestTimeout()
+    public async Task TimeoutTest()
     {
-        var contract = new Contract { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "EUR" };
+        Contract contract = new()
+        {
+            SecurityType = SecurityType.Stock, 
+            Symbol = "IBM", 
+            Currency = "EUR" 
+        };
 
         await Assert.ThrowsAsync<TimeoutException>(async () => await Client
             .Service

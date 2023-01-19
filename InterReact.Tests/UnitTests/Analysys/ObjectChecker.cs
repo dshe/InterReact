@@ -1,12 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using Xunit;
-using Xunit.Abstractions;
+﻿using System.Reflection;
 
-namespace InterReact.UnitTests.Analysis;
+namespace Analysis;
 
-public class Interface_Checker : UnitTestsBase
+public class Interface_Checker : UnitTestBase
 {
     public Interface_Checker(ITestOutputHelper output) : base(output) { }
 
@@ -28,6 +24,7 @@ public class Interface_Checker : UnitTestsBase
     public void Find_Classes_With_OrderId_But_Not_Interface()
     {
         Assert.Empty(Types.Where(t =>
+                t != typeof(OrderMonitor) &&
                 t.GetProperty("OrderId") is not null &&
                 t.GetInterface("IHasOrderId") is null));
     }

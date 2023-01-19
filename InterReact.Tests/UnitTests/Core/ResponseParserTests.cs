@@ -1,28 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using Xunit;
-using Xunit.Abstractions;
+﻿namespace Core;
 
-namespace InterReact.UnitTests.Core;
-
-public class Response_Parser_Tests : UnitTestsBase
+public class ResponseParserTests : UnitTestBase
 {
-    private readonly List<object> alerts = new List<object>();
+    private readonly List<object> alerts = new();
     private readonly ResponseParser parser;
-    public Response_Parser_Tests(ITestOutputHelper output) : base(output) =>
+    public ResponseParserTests(ITestOutputHelper output) : base(output) =>
         parser = new ResponseParser(Logger);
 
     [Fact]
     public void T04_Bool()
     {
         //Assert.Throws<ArgumentNullException>(() => parser.ParseBool(null));
-        Assert.False(ResponseParser.ParseBool(""));
-        Assert.False(ResponseParser.ParseBool("faLse"));
-        Assert.True(ResponseParser.ParseBool("TrUe"));
-        Assert.False(ResponseParser.ParseBool("0"));
-        Assert.True(ResponseParser.ParseBool("1"));
-        Assert.True(ResponseParser.ParseBool("2"));
-        Assert.Throws<ArgumentException>(() => ResponseParser.ParseBool("invalid"));
+        Assert.False(parser.ParseBool(""));
+        Assert.False(parser.ParseBool("faLse"));
+        Assert.True(parser.ParseBool("TrUe"));
+        Assert.False(parser.ParseBool("0"));
+        Assert.True(parser.ParseBool("1"));
+        Assert.True(parser.ParseBool("2"));
+        Assert.Throws<ArgumentException>(() => parser.ParseBool("invalid"));
         //Assert.Throws<ArgumentException>(() => parser.ParseBool("true"));
         Assert.Empty(alerts);
     }
@@ -31,26 +26,26 @@ public class Response_Parser_Tests : UnitTestsBase
     public void T06_Char()
     {
         //Assert.Throws<ArgumentNullException>(() => parser.ParseChar(null));
-        Assert.Equal('\0', ResponseParser.ParseChar(""));
+        Assert.Equal('\0', parser.ParseChar(""));
         //Assert.Throws<ArgumentException>(() => parser.ParseChar("A"));
-        Assert.Throws<ArgumentException>(() => ResponseParser.ParseChar("AB"));
-        Assert.Equal('A', ResponseParser.ParseChar("A"));
+        Assert.Throws<ArgumentException>(() => parser.ParseChar("AB"));
+        Assert.Equal('A', parser.ParseChar("A"));
     }
 
     [Fact]
     public void T07_Number()
     {
         //Assert.Throws<ArgumentNullException>(() => parser.ParseInt(null));
-        Assert.Equal(0, ResponseParser.ParseInt(""));
-        Assert.Equal(0, ResponseParser.ParseInt("0"));
-        Assert.Throws<ArgumentException>(() => ResponseParser.ParseInt("invalid"));
-        Assert.Equal(123, ResponseParser.ParseInt("123"));
-        Assert.Equal(-123, ResponseParser.ParseInt("-123"));
-        Assert.Throws<ArgumentException>(() => ResponseParser.ParseInt("1.5"));
-        Assert.Equal(123, ResponseParser.ParseLong("123"));
-        Assert.Equal(42.1, ResponseParser.ParseDouble("42.1"));
-        Assert.Equal(123, ResponseParser.ParseIntNullable("123"));
-        Assert.Null(ResponseParser.ParseIntNullable(""));
+        Assert.Equal(0, parser.ParseInt(""));
+        Assert.Equal(0, parser.ParseInt("0"));
+        Assert.Throws<ArgumentException>(() => parser.ParseInt("invalid"));
+        Assert.Equal(123, parser.ParseInt("123"));
+        Assert.Equal(-123, parser.ParseInt("-123"));
+        Assert.Throws<ArgumentException>(() => parser.ParseInt("1.5"));
+        Assert.Equal(123, parser.ParseLong("123"));
+        Assert.Equal(42.1, parser.ParseDouble("42.1"));
+        Assert.Equal(123, parser.ParseIntNullable("123"));
+        Assert.Null(parser.ParseIntNullable(""));
         Assert.Empty(alerts);
     }
 
@@ -66,6 +61,6 @@ public class Response_Parser_Tests : UnitTestsBase
         Assert.Throws<ArgumentException>(() => parser.ParseEnum<TestEnum>("Two"));
         Assert.Empty(alerts);
         Assert.Equal(99, (int)parser.ParseEnum<TestEnum>("99")); // new value
-                                                                 //Assert.IsType<ResponseWarning>(alerts.Single());
+        //Assert.IsType<ResponseWarning>(alerts.Single());
     }
 }

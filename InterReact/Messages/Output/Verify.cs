@@ -6,7 +6,7 @@ public sealed class VerifyMessageApi
     internal VerifyMessageApi() { }
     internal VerifyMessageApi(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         Data = r.ReadString();
     }
 }
@@ -18,7 +18,7 @@ public sealed class VerifyCompleted
     internal VerifyCompleted() { }
     internal VerifyCompleted(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         IsSuccessful = r.ReadBool();
         ErrorText = r.ReadString();
     }
@@ -31,7 +31,7 @@ public sealed class VerifyAndAuthorizeMessageApi
     internal VerifyAndAuthorizeMessageApi() { }
     internal VerifyAndAuthorizeMessageApi(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         ApiData = r.ReadString();
         XyzChallenge = r.ReadString();
     }
@@ -44,7 +44,7 @@ public sealed class VerifyAndAuthorizeCompleted
     internal VerifyAndAuthorizeCompleted() { }
     internal VerifyAndAuthorizeCompleted(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         IsSuccessful = r.ReadBool();
         ErrorText = r.ReadString();
     }

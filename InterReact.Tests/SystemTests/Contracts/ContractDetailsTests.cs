@@ -1,20 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace InterReact.SystemTests.Contracts;
+namespace Contracts;
 
-public class ContractDetailsTests : TestCollectionBase
+public class ContractDetail : TestCollectionBase
 {
-    public ContractDetailsTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+    public ContractDetail(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    private async Task<IList<IHasRequestId>> MakeRequest(Contract contract)
+    private async Task<IList<IHasRequestId>> MakeContractDetailsRequest(Contract contract)
     {
-        int requestId = Client.Request.GetNextRequestId();
+        int requestId = Client.Request.GetNextId();
 
         var task = Client
             .Response
@@ -29,46 +24,57 @@ public class ContractDetailsTests : TestCollectionBase
 
         IList<IHasRequestId> messages = await task;
 
-        Alert? alert = messages.OfType<Alert>().Where(alert => alert.IsFatal).FirstOrDefault();
-        if (alert is not null)
-            throw new AlertException(alert);
-
         return messages;
     }
 
     [Fact]
-    public async Task TestSingle()
+    public async Task SingleTest()
     {
         Contract contract = new()
-        { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
+        { 
+            SecurityType = SecurityType.Stock, 
+            Symbol = "IBM", 
+            Currency = "USD", 
+            Exchange = "SMART" 
+        };
 
-        IList<IHasRequestId> messages = await MakeRequest(contract);
+        IList<IHasRequestId> messages = await MakeContractDetailsRequest(contract);
 
         IHasRequestId message = messages.Single();
         Assert.IsType<ContractDetails>(message);
     }
 
     [Fact]
-    public async Task TestMulti()
+    public async Task MultiTest()
     {
         Contract contract = new()
-        { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD" };
+        { 
+            SecurityType = SecurityType.Stock, 
+            Symbol = "IBM", 
+            Currency = "USD" 
+        };
 
-        IList<IHasRequestId> messages = await MakeRequest(contract);
+        IList<IHasRequestId> messages = await MakeContractDetailsRequest(contract);
 
         Assert.True(messages.Count > 1);
         Assert.True(messages.All(x => x is ContractDetails));
     }
 
     [Fact]
-    public async Task TestInvalid()
+    public async Task InvalidTest()
     {
         Contract contract = new()
-        { SecurityType = SecurityType.Stock, Symbol = "ThisIsAnInvalidSymbol", Currency = "SMART", Exchange = "SMART" };
+        { 
+            SecurityType = SecurityType.Stock, 
+            Symbol = "ThisIsAnInvalidSymbol", 
+            Currency = "SMART", 
+            Exchange = "SMART" 
+        };
 
-        var alertException = await Assert.ThrowsAsync<AlertException>(async () => await MakeRequest(contract));
+        IList<IHasRequestId> messages = await MakeContractDetailsRequest(contract);
 
-        Write(alertException.Message);
+        Assert.Single(messages);
+        Alert alert = Assert.IsType<Alert>(messages.Single());
+        Write(alert.Message);
     }
 }
-

@@ -1,23 +1,20 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Diagnostics;
-using System.Threading;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace InterReact.UnitTests.Utility;
+namespace Utility;
 
-public sealed class LimiterTest : UnitTestsBase
+public sealed class Limiter : UnitTestBase
 {
-    public LimiterTest(ITestOutputHelper output) : base(output) { }
+    public Limiter(ITestOutputHelper output) : base(output) { }
 
     public double Limit(int rate, double duration)
     {
         var limiter = new RingLimiter(Logger, rate);
         var count = 0;
         var start = Stopwatch.GetTimestamp();
-        while (((Stopwatch.GetTimestamp() - start) / (double)Stopwatch.Frequency) < duration)
+        while ((Stopwatch.GetTimestamp() - start) / (double)Stopwatch.Frequency < duration)
         {
-            limiter.Limit(() => Thread.Sleep(1));
+            limiter.Limit(() => Thread.Sleep(0));
             count++;
         }
         var time = (Stopwatch.GetTimestamp() - start) / (double)Stopwatch.Frequency;

@@ -1,17 +1,15 @@
-﻿namespace InterReact;
+﻿using Microsoft.Extensions.Logging;
+
+namespace InterReact;
 
 /// <summary>
-/// Sent after trades and also after calling RequestExecutions.
-/// (OrderId can be determined using the executionId from Execution)
+/// Sent after trades and also after calling RequestExecutions().
 /// </summary>
-public sealed class CommissionReport : IHasRequestId, IHasOrderId, IHasExecutionId
+public sealed class CommissionReport : IHasExecutionId, IHasOrderId
 {
-    public int RequestId { get; } = -1;
-    public int OrderId { get; } = -1;
-    // Execution is set IF an Execution was received with the same ExecutionId.
-    public Execution? Execution { get; } // (not part of IB Api)
-
     public string ExecutionId { get; } = "";
+    /// OrderId is determined using the executionId from Execution.
+    public int OrderId { get; }
     public double Commission { get; }
     public string Currency { get; } = "";
     public double RealizedPnl { get; }
@@ -20,10 +18,9 @@ public sealed class CommissionReport : IHasRequestId, IHasOrderId, IHasExecution
     public int YieldRedemptionDate { get; }
 
     internal CommissionReport() { }
-
     internal CommissionReport(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         ExecutionId = r.ReadString();
         Commission = r.ReadDouble();
         Currency = r.ReadString();
@@ -31,11 +28,9 @@ public sealed class CommissionReport : IHasRequestId, IHasOrderId, IHasExecution
         Yield = r.ReadDouble();
         YieldRedemptionDate = r.ReadInt();
 
-        if (Execution.Executions.TryGetValue(ExecutionId, out Execution? execution))
-        {
-            Execution = execution;
-            OrderId = execution.OrderId;
-            RequestId = execution.RequestId;
-        }
+        if (Execution.ExecutionIds.TryGetValue(ExecutionId, out int orderId))
+            OrderId = orderId;
+        else
+           r.Logger.LogWarning("CommissionReport: could not determine OrderId from Executions.");
     }
 }

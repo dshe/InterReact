@@ -3,7 +3,7 @@
 /// <summary>
 /// Delta-Neutral Underlying Component.
 /// </summary>
-public sealed class DeltaNeutralContract : IHasRequestId
+public sealed class DeltaNeutralContract : IHasRequestId  // input + output
 {
     public int RequestId { get; init; }
 
@@ -25,7 +25,7 @@ public sealed class DeltaNeutralContract : IHasRequestId
     {
         if (independent)
         {
-            r.IgnoreVersion();
+            r.IgnoreMessageVersion();
             RequestId = r.ReadInt();
         }
         ContractId = r.ReadInt();

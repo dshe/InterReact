@@ -1,94 +1,40 @@
 ﻿using Microsoft.Extensions.Logging;
 using Stringification;
 using System.IO;
-using System.Reactive.Linq;
 
 namespace InterReact;
 
-internal static class ConnectorEx
-{
-    internal static IObservable<object> ToMessages(this IObservable<string[]> source, InterReactClientConnector connector)
-    {
-        ResponseComposer composer = new(connector);
-        return source.Select(strings => composer.Compose(strings));
-    }
-
-    internal static IObservable<object> FollowPriceTickWithSizeTick(this IObservable<object> source, bool followPriceTickWithSizeTick)
-    {
-        return Observable.Create<object>(observer =>
-        {
-            return source.Subscribe(
-                message =>
-                {
-                    observer.OnNext(message);
-                    if (!followPriceTickWithSizeTick)
-                        return;
-                    if (message is not PriceTick priceTick)
-                        return;
-                    TickType type = GetSizeTickType(priceTick.TickType);
-                    if (type == TickType.Undefined)
-                        return;
-                    SizeTick sizeTick = new(priceTick.RequestId, type, priceTick.Size);
-                    observer.OnNext(sizeTick);
-                },
-                e => observer.OnError(e),
-                observer.OnCompleted);
-        });
-
-        // local
-        static TickType GetSizeTickType(TickType tickType) => tickType switch
-        {
-            TickType.BidPrice => TickType.BidSize,
-            TickType.AskPrice => TickType.AskSize,
-            TickType.LastPrice => TickType.LastSize,
-            TickType.DelayedBidPrice => TickType.DelayedBidSize,
-            TickType.DelayedAskPrice => TickType.DelayedAskSize,
-            TickType.DelayedLastPrice => TickType.DelayedLastSize,
-            _ => TickType.Undefined
-        };
-    }
-
-    internal static IObservable<object> LogMessages(this IObservable<object> source, ILogger logger)
-    {
-        Stringifier stringifier = new(logger);
-        return source.Do(message =>
-        {
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.LogDebug("Incoming message: {Message}", stringifier.Stringify(message));
-        });
-    }
-}
-
-internal sealed class ResponseComposer
+internal sealed class ResponseMessageComposer
 {
     private ILogger Logger { get; }
     private ResponseReader Reader { get; }
 
-    internal ResponseComposer(InterReactClientConnector connector)
+    internal ResponseMessageComposer(InterReactClientConnector connector)
     {
         Logger = connector.Logger;
         Reader = new ResponseReader(connector);
     }
 
-    internal object Compose(string[] strings)
+    internal object ComposeMessage(string[] strings)
     {
+        string code = "";
         try
         {
             Reader.SetEnumerator(strings);
-            string code = Reader.ReadString();
-            object message = CodeToMessage(code, Reader);
+            code = Reader.ReadString();
+            object message = GetResponseMessage(code, Reader);
             Reader.VerifyEnumerationEnd();
             return message;
         }
         catch (Exception e)
         {
-            string m = $"ResponseComposer error: [{strings.JoinStrings(", ")}].";
+            string m = $"ResponseComposer error: [{code} => {strings.JoinStrings(", ")}].";
             Logger.LogError(e, "{Message}", m);
             throw new InvalidDataException(m, e);
         }
     }
 
-    private static object CodeToMessage(string code, ResponseReader reader) => code switch
+    private static object GetResponseMessage(string code, ResponseReader reader) => code switch
     {
         "1" => new PriceTick(reader),
         "2" => new SizeTick(reader),
@@ -156,7 +102,7 @@ internal sealed class ResponseComposer
         "86" => new HistoricalNews(reader),
         "87" => new HistoricalNewsEnd(reader),
         "88" => new HeadTimestamp(reader),
-        "89" => new HistogramItems(reader),
+        "89" => new HistogramData(reader),
         "90" => new HistoricalDataUpdate(reader),
         "91" => new RerouteMktData(reader),
         "92" => new RerouteMktDepth(reader),

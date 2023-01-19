@@ -14,7 +14,6 @@ public sealed class SmartComponents : IHasRequestId
     public Dictionary<int, KeyValuePair<string, char>> Map { get; } = new();
 
     internal SmartComponents() { }
-
     internal SmartComponents(ResponseReader r)
     {
         RequestId = r.ReadInt();

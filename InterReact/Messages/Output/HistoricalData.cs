@@ -17,7 +17,7 @@ public sealed class HistoricalData : IHasRequestId
     internal HistoricalData(ResponseReader r) // a one-shot deal
     {
         if (!r.Connector.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
-            r.RequireVersion(3);
+            r.RequireMessageVersion(3);
 
         RequestId = r.ReadInt();
         Start = r.ReadLocalDateTime(DateTimePattern);
@@ -35,12 +35,11 @@ public sealed class HistoricalDataBar
     public double High { get; }
     public double Low { get; }
     public double Close { get; }
-    public long Volume { get; }
-    public double WeightedAveragePrice { get; }
+    public decimal Volume { get; }
+    public decimal WeightedAveragePrice { get; }
     public int Count { get; }
 
     internal HistoricalDataBar() { }
-
     internal HistoricalDataBar(ResponseReader r)
     {
         Date = r.ReadLocalDateTime(HistoricalData.DateTimePattern);
@@ -48,10 +47,10 @@ public sealed class HistoricalDataBar
         High = r.ReadDouble();
         Low = r.ReadDouble();
         Close = r.ReadDouble();
-        Volume = r.ReadLong();
-        WeightedAveragePrice = r.ReadDouble();
+        Volume = r.ReadDecimal();
+        WeightedAveragePrice = r.ReadDecimal();
         if (!r.Connector.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
-            r.ReadString(); /*string hasGaps = */
+            r.ReadString(); /* string hasGaps */
         Count = r.ReadInt();
     }
 }

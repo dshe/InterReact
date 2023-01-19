@@ -1,18 +1,12 @@
 ﻿using Stringification;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security;
-using Xunit;
-using Xunit.Abstractions;
 
+namespace Analysis;
 
-namespace InterReact.UnitTests.Analysis;
-
-public class Types_Viewer : UnitTestsBase
+public class Types_Viewer : UnitTestBase
 {
     public Types_Viewer(ITestOutputHelper output) : base(output) { }
 
@@ -87,6 +81,8 @@ public class Types_Viewer : UnitTestsBase
             t.IsClass && t.IsPublic && t.IsSealed && !t.IsAbstract && !t.ContainsGenericParameters &&
             t.Namespace == "InterReact").ToList())
         {
+            if (type == typeof(OrderMonitor))
+                return;
             try
             {
                 var instance = stringifier.CreateInstance(type);

@@ -1,12 +1,7 @@
 ﻿using RxSockets;
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace InterReact.UnitTests.Core;
+namespace Core;
 
 public sealed class NullRxSocketClient : IRxSocketClient
 {
@@ -17,11 +12,11 @@ public sealed class NullRxSocketClient : IRxSocketClient
     public int Send(ReadOnlySpan<byte> buffer) => throw new NotImplementedException();
 }
 
-public class Request_Message_Tests : UnitTestsBase
+public class RequestMessageTests : UnitTestBase
 {
     private readonly RequestMessage requestMessage = 
         new(new NullRxSocketClient(), new RingLimiter());
-    public Request_Message_Tests(ITestOutputHelper output) : base(output) {}
+    public RequestMessageTests(ITestOutputHelper output) : base(output) {}
 
     private void AssertResult(params string[] strings)
     {

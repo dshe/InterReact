@@ -6,7 +6,7 @@ using System.Reactive.Linq;
 namespace InterReact;
 
 // For requests that do not use requestId. 
-public static partial class Ext
+public static partial class Extensionz
 {
     // Usage: Returns a single result: CurrentTime.
     internal static IObservable<T> ToObservableSingle<T>
@@ -31,8 +31,7 @@ public static partial class Ext
         });
     }
 
-
-    // Usage: Multiple results: OpenOrders.
+    // Usage: Multiple results: xOpenOrders.
     internal static IObservable<T> ToObservableMultiple<T, TEnd>(
         this IObservable<T> filteredSource, Action startRequest)
     {
@@ -55,7 +54,6 @@ public static partial class Ext
             return subscription;
         });
     }
-
 
     // Usage: Continuous results: AccountUpdates, Positions.
     internal static IObservable<T> ToObservableContinuous<T>(this IObservable<T> filteredSource,

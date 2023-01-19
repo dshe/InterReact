@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using Xunit;
-using Xunit.Abstractions;
+﻿using System.Reflection;
 
-namespace InterReact.UnitTests.Analysis;
+namespace Analysis;
 
-public class Enum_Checker : UnitTestsBase
+public class Enum_Checker : UnitTestBase
 {
     public Enum_Checker(ITestOutputHelper output) : base(output) { }
 

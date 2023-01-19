@@ -11,7 +11,7 @@ public sealed class AccountUpdateMulti : IHasRequestId
     internal AccountUpdateMulti() { }
     internal AccountUpdateMulti(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
         Account = r.ReadString();
         ModelCode = r.ReadString();
@@ -26,7 +26,7 @@ public sealed class AccountUpdateMultiEnd : IHasRequestId
     public int RequestId { get; internal set; }
     internal AccountUpdateMultiEnd(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
     }
 }

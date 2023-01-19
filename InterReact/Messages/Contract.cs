@@ -66,6 +66,9 @@ public sealed class Contract // input + output
     public SecurityIdType SecurityIdType { get; set; } = SecurityIdType.Undefined; // input only
     public string SecurityId { get; set; } = ""; // input only
 
+    public string Description { get; set; } = "";
+    public string IssuerId { get; set; } = "";
+
     public string ComboLegsDescription { get; internal set; } = "";
 
     /// <summary>

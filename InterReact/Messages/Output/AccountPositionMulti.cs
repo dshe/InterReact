@@ -11,7 +11,7 @@ public sealed class AccountPositionMulti : IHasRequestId
     internal AccountPositionMulti() { }
     internal AccountPositionMulti(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
         Account = r.ReadString();
         Contract.ContractId = r.ReadInt();
@@ -36,7 +36,7 @@ public sealed class AccountPositionMultiEnd : IHasRequestId
     public int RequestId { get; }
     internal AccountPositionMultiEnd(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
     }
 }

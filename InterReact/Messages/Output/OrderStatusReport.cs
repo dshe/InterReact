@@ -61,7 +61,7 @@ public sealed class OrderStatusReport : IHasOrderId
     internal OrderStatusReport(ResponseReader r)
     {
         if (!r.Connector.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE))
-            r.IgnoreVersion();
+            r.IgnoreMessageVersion();
 
         OrderId = r.ReadInt();
         Status = r.ReadStringEnum<OrderStatus>();

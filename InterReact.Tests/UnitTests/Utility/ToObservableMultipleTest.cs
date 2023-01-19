@@ -1,16 +1,12 @@
 ﻿using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace InterReact.UnitTests.Utility;
+namespace Utility;
 
-public class ToObservableMultipleTest : UnitTestsBase
+public class ToObservableMultiple : UnitTestBase
 {
-    public ToObservableMultipleTest(ITestOutputHelper output) : base(output) { }
+    public ToObservableMultiple(ITestOutputHelper output) : base(output) { }
 
     private int subscribeCalls;
     private readonly Subject<object> subject = new();
@@ -24,7 +20,7 @@ public class ToObservableMultipleTest : UnitTestsBase
 
 
     [Fact]
-    public async Task Test_Multi_Ok()
+    public async Task MultiOkTest()
     {
         var observable = subject.ToObservableMultiple<object, SomeClassEnd>(
             () =>

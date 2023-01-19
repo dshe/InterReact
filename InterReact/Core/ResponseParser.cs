@@ -6,23 +6,28 @@ using System.Linq;
 
 namespace InterReact;
 
+#pragma warning disable CA1822 // can be marked as static
+
 internal sealed class ResponseParser
 {
+    private const string MaxInt = "2147483647";
+    private const string MaxLong = "9223372036854775807";
+    private const string MaxDouble = "1.7976931348623157E308";
     private readonly Dictionary<Type, Dictionary<string, object>> EnumCache = new();
     private readonly ILogger Logger;
 
     internal ResponseParser(ILogger logger) => Logger = logger;
 
-    internal static char ParseChar(string s)
+    internal char ParseChar(string s)
     {
         if (s.Length == 0)
             return '\0';
         if (s.Length == 1)
             return s[0];
-        throw new ArgumentException($"ParseChar>('{s}') failure.");
+        throw new ArgumentException($"ParseChar('{s}') failure.");
     }
 
-    internal static bool ParseBool(string s)
+    internal bool ParseBool(string s)
     {
         if (s.Length == 0 || s == "0" || string.Equals(s, "false", StringComparison.OrdinalIgnoreCase))
             return false;
@@ -33,25 +38,27 @@ internal sealed class ResponseParser
         throw new ArgumentException($"ParseBool('{s}') failure.");
     }
 
-    internal static int ParseInt(string s)
+    internal int ParseInt(string s)
     {
         if (s.Length == 0 || s == "0")
             return 0;
-        if (int.TryParse(s, NumberStyles.AllowLeadingSign, NumberFormatInfo.InvariantInfo, out int n))
+        if (int.TryParse(s, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out int n))
             return n;
         throw new ArgumentException($"ParseInt('{s}') failure.");
     }
+    internal int ParseIntMax(string s) => s.Length == 0 ? int.MaxValue : ParseInt(s);
+    internal int? ParseIntNullable(string s) => (s.Length == 0 || s == MaxInt) ? null : ParseInt(s);
 
-    internal static long ParseLong(string s)
+    internal long ParseLong(string s)
     {
         if (s.Length == 0 || s == "0")
             return 0L;
-        if (long.TryParse(s, NumberStyles.AllowLeadingSign, NumberFormatInfo.InvariantInfo, out long n))
+        if (long.TryParse(s, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out long n))
             return n;
         throw new ArgumentException($"ParseLong('{s}') failure.");
     }
 
-    internal static double ParseDouble(string s)
+    internal double ParseDouble(string s)
     {
         if (s.Length == 0 || s == "0")
             return 0D;
@@ -59,16 +66,37 @@ internal sealed class ResponseParser
             return n;
         throw new ArgumentException($"ParseDouble('{s}') failure.");
     }
+    internal double ParseDoubleMax(string s)
+    {
+        if (s.Length == 0)
+            return double.MaxValue;
+        if (s == "Infinity")
+            return double.PositiveInfinity;
+        return ParseDouble(s);
+    }
+    internal double? ParseDoubleNullable(string s) =>
+        (s.Length == 0 || s == MaxDouble) ? null : ParseDouble(s);
 
-    internal static int? ParseIntNullable(string s) => (s.Length == 0 || s == "2147483647") ? null : ParseInt(s);
-    internal static double? ParseDoubleNullable(string s) => (s.Length == 0 || s == "1.7976931348623157E308") ? null : ParseDouble(s);
+    internal decimal ParseDecimal(string s)
+    {
+        if (s.Length == 0 || s == MaxInt || s == MaxLong || s == MaxDouble)
+            return decimal.MaxValue;
+        if (s == "0")
+            return 0M;
+        if (decimal.TryParse(s, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal n))
+            return n;
+        throw new ArgumentException($"ParseDecimal('{s}') failure.");
+    }  
 
     internal T ParseEnum<T>(string numberString) where T : Enum
     {
         Type type = typeof(T);
         if (!EnumCache.TryGetValue(type, out var enumValues))
         {
-            enumValues = Enum.GetValues(type).OfType<object>().ToDictionary(x => ((int)x).ToString(CultureInfo.InvariantCulture));
+            enumValues = Enum
+                .GetValues(type)
+                .OfType<object>()
+                .ToDictionary(x => ((int)x).ToString(CultureInfo.InvariantCulture));
             EnumCache.Add(type, enumValues);
         }
         if (!enumValues.TryGetValue(numberString, out object? e))

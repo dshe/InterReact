@@ -48,7 +48,7 @@ public sealed class PriceTick : Tick
     internal PriceTick() { TickAttrib = new TickAttrib(); }
     internal PriceTick(ResponseReader r)
     {
-        r.RequireVersion(3);
+        r.RequireMessageVersion(3);
         RequestId = r.ReadInt();
         TickType = r.ReadEnum<TickType>();
         Price = r.ReadDouble();
@@ -72,7 +72,7 @@ public sealed class SizeTick : Tick
     }
     internal SizeTick(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
         TickType = r.ReadEnum<TickType>();
         Size = r.ReadLong();
@@ -91,12 +91,12 @@ public sealed class StringTick : Tick
     }
     internal static Tick Create(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         int requestId = r.ReadInt();
         TickType tickType = r.ReadEnum<TickType>();
         string str = r.ReadString();
         if (tickType == TickType.RealtimeVolume)
-            return new RealtimeVolumeTick(requestId, str);
+            return new RealtimeVolumeTick(requestId, str, r.Parser);
         if (tickType == TickType.LastTimeStamp)
             return new TimeTick(requestId, str);
         return new StringTick(requestId, tickType, str);
@@ -141,17 +141,17 @@ public sealed class RealtimeVolumeTick : Tick // from TickString
 
     internal RealtimeVolumeTick() { }
 
-    internal RealtimeVolumeTick(int requestId, string str)
+    internal RealtimeVolumeTick(int requestId, string str, ResponseParser parser)
     {
         RequestId = requestId;
         TickType = TickType.RealtimeVolume;
         string[] parts = str.Split(';');
-        Price = ResponseParser.ParseDouble(parts[0]);
-        Size = ResponseParser.ParseLong(parts[1]);
+        Price = parser.ParseDouble(parts[0]);
+        Size = parser.ParseLong(parts[1]);
         Instant = Instant.FromUnixTimeMilliseconds(long.Parse(parts[2], NumberFormatInfo.InvariantInfo));
-        Volume = ResponseParser.ParseLong(parts[3]);
-        Vwap = ResponseParser.ParseDouble(parts[4]);
-        SingleTrade = ResponseParser.ParseBool(parts[5]);
+        Volume = parser.ParseLong(parts[3]);
+        Vwap = parser.ParseDouble(parts[4]);
+        SingleTrade = parser.ParseBool(parts[5]);
     }
 };
 
@@ -167,7 +167,7 @@ public sealed class GenericTick : Tick
     }
     internal static Tick Create(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         int requestId = r.ReadInt();
         TickType tickType = r.ReadEnum<TickType>();
         double value = r.ReadDouble();
@@ -189,7 +189,7 @@ public sealed class ExchangeForPhysicalTick : Tick
     internal ExchangeForPhysicalTick() { }
     internal ExchangeForPhysicalTick(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
         TickType = r.ReadEnum<TickType>();
         BasisPoints = r.ReadDouble();
@@ -221,7 +221,7 @@ public sealed class OptionComputationTick : Tick
     internal OptionComputationTick(ResponseReader r)
     {
         if (!r.Connector.SupportsServerVersion(ServerVersion.PRICE_BASED_VOLATILITY))
-            r.RequireVersion(6);
+            r.RequireMessageVersion(6);
 
         RequestId = r.ReadInt();
         TickType = r.ReadEnum<TickType>();
@@ -288,7 +288,7 @@ public sealed class MarketDataTypeTick : Tick
     internal MarketDataTypeTick() { }
     internal MarketDataTypeTick(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
         TickType = TickType.MarketDataType;
         MarketDataType = r.ReadEnum<MarketDataType>();
@@ -300,7 +300,7 @@ public sealed class SnapshotEndTick : IHasRequestId
     public int RequestId { get; }
     internal SnapshotEndTick(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
     }
 };

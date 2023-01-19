@@ -1,5 +1,7 @@
 namespace InterReact;
 
+#pragma warning disable CA1707
+
 public enum TickType
 {
     /// <summary> 
@@ -342,12 +344,15 @@ public enum TickType
     EtfNavLast = 96,
     EtfFrozenNavLast = 97,
     EtfNavHigh = 98,
-    EtfNavLow = 99
+    EtfNavLow = 99,
+    SOCIAL_MARKET_ANALYTICS = 100,
+    ESTIMATED_IPO_MIDPOINT = 101,
+    FINAL_IPO_LAST = 102
 }
 
-public static partial class Ext
+public static partial class Extensionz
 {
-    public static string ToStringFast(this TickType tickType)
+    internal static string ToStringFast(this TickType tickType)
     {
         return tickType switch
         {

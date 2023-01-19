@@ -1,15 +1,10 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace InterReact.UnitTests.Utility;
+namespace Utility;
 
-public class ToObservableMultipleWithIdTest : UnitTestsBase
+public class ToObservableMultipleWithId : UnitTestBase
 {
     private const int Id = 42;
     private int subscribeCalls;
@@ -26,11 +21,11 @@ public class ToObservableMultipleWithIdTest : UnitTestsBase
         public int RequestId { get; } = Id;
     }
 
-    public ToObservableMultipleWithIdTest(ITestOutputHelper output) : base(output) { }
+    public ToObservableMultipleWithId(ITestOutputHelper output) : base(output) { }
 
 
     [Fact]
-    public async Task Test_Multi_Ok()
+    public async Task MultiOkTest()
     {
         var observable = subject.ToObservableMultipleWithRequestId<SomeClassEnd>(
             () => Id,
@@ -48,7 +43,7 @@ public class ToObservableMultipleWithIdTest : UnitTestsBase
     }
 
     [Fact]
-    public async Task Test_NonFatal_Alert_Multi()
+    public async Task NonFatalAlertMultiTest()
     {
         var observable = subject.ToObservableMultipleWithRequestId<SomeClassEnd>(
             () => Id,
@@ -67,7 +62,7 @@ public class ToObservableMultipleWithIdTest : UnitTestsBase
     }
 
     [Fact]
-    public async Task Test_Fatal_Alert_Multi()
+    public async Task FatalAlertMultiTest()
     {
         var observable = subject.ToObservableMultipleWithRequestId<SomeClassEnd>(
             () => Id,
@@ -84,7 +79,7 @@ public class ToObservableMultipleWithIdTest : UnitTestsBase
     }
 
     [Fact]
-    public void Test_Unsubscribe_Error()
+    public void UnsubscribeErrorTest()
     {
         var observable = subject.ToObservableSingleWithRequestId(
             () => Id,

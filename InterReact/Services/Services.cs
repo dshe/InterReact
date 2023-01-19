@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-public sealed partial class Service
+public partial class Service
 {
     private readonly Request Request;
     private readonly IObservable<object> Response;
@@ -13,6 +13,5 @@ public sealed partial class Service
         AccountUpdatesObservable = CreateAccountUpdatesObservable();
         PositionsObservable = CreatePositionsObservable();
         AccountSummaryObservable = CreateAccountSummaryObservable();
-        NextOrderIdObservable = CreateNextOrderIdObservable();
     }
 }

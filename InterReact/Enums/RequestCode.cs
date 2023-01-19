@@ -2,6 +2,8 @@
 
 internal enum RequestCode
 {
+    Invalid = 0,
+
     RequestMarketData = 1,
     CancelMarketData = 2,
     PlaceOrder = 3,
@@ -44,6 +46,8 @@ internal enum RequestCode
     RequestAccountSummary = 62,
     CancelAccountSummary = 63,
     CancelPositions = 64,
+
+
     VerifyRequest = 65,
     VerifyMessage = 66,
     QueryDisplayGroups = 67,
@@ -79,9 +83,9 @@ internal enum RequestCode
     ReqTickByTickData = 97,
     CancelTickByTickData = 98,
     ReqCompletedOrders = 99,
-
     ReqWshMetaData = 100,
     CancelWshMetaData = 101,
     ReqWshEventData = 102,
-    CancelWshEventData = 103
+    CancelWshEventData = 103,
+    RequestUserInfo = 104
 }

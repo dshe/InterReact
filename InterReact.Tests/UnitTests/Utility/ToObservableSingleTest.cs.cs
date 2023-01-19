@@ -1,18 +1,13 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace InterReact.UnitTests.Utility;
+namespace Utility;
 
-public class ToObservableSingleTest : UnitTestsBase
+public class ToObservableSingle : UnitTestBase
 {
-    public ToObservableSingleTest(ITestOutputHelper output) : base(output) { }
+    public ToObservableSingle(ITestOutputHelper output) : base(output) { }
 
     private int subscribeCalls;
     private readonly Subject<object> subject = new();
@@ -26,7 +21,7 @@ public class ToObservableSingleTest : UnitTestsBase
 
 
     [Fact]
-    public async Task Test_Ok()
+    public async Task OkTest()
     {
         var observable = subject.ToObservableSingle<SomeClass>(
             () =>
@@ -51,21 +46,21 @@ public class ToObservableSingleTest : UnitTestsBase
     }
 
     [Fact]
-    public async Task Test_Subscribe_Error()
+    public async Task SubscribeErrorTest()
     {
         var observable = subject.ToObservableSingle<string>(() => { throw new BarrierPostPhaseException(); });
         await Assert.ThrowsAsync<BarrierPostPhaseException>(async () => await observable);
     }
 
     [Fact]
-    public async Task Test_Source_Error()
+    public async Task SourceErrorTest()
     {
         var observable = subject.ToObservableSingle<string>(() => subject.OnError(new BarrierPostPhaseException()));
         await Assert.ThrowsAsync<BarrierPostPhaseException>(async () => await observable);
     }
 
     [Fact]
-    public async Task Test_Source_Completed()
+    public async Task SourceCompletedTest()
     {
         var observable = subject.ToObservableSingle<string>(() => subject.OnCompleted());
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => await observable);

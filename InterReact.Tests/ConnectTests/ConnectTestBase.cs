@@ -1,20 +1,15 @@
 ﻿using Microsoft.Extensions.Logging;
-using Stringification;
-using System;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
-namespace InterReact.ConnectTests;
 
-[Trait("Category", "ConnectTests")]
-public abstract class ConnectTestsBase
+namespace ConnectTests;
+
+public abstract class ConnectTestBase
 {
     protected readonly Action<string> Write;
     protected readonly ILoggerFactory LoggerFactory;
     protected readonly ILogger Logger;
 
-    public ConnectTestsBase(ITestOutputHelper output)
+    public ConnectTestBase(ITestOutputHelper output)
     {
         Write = output.WriteLine;
         LoggerFactory = new LoggerFactory().AddMXLogger(Write, LogLevel.Debug);
@@ -23,9 +18,15 @@ public abstract class ConnectTestsBase
 
     protected async Task TestClient(IInterReactClient client)
     {
-        client.Response.Select(x => x.Stringify()).Subscribe(s => Write($"response: {s}"));
         var instant = await client.Service.CurrentTimeObservable;
-        Write($"Test calling CurrentTimeObservable: {instant}");
-        await Task.Delay(500);
+        Write($"Test received time from CurrentTimeObservable: {instant}");
     }
+
+    protected Contract StockContract1 { get; } = new()
+    { 
+        SecurityType = SecurityType.Stock, 
+        Symbol = "IBM", 
+        Currency = "USD", 
+        Exchange = "SMART" 
+    };
 }

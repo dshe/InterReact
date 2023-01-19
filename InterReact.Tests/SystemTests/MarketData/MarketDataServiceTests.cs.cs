@@ -1,22 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
+﻿using System.Reactive.Linq;
 
-namespace InterReact.SystemTests.MarketData;
+namespace MarketData;
 
-public class MarketDataServiceTests : TestCollectionBase
+public class MarketDataService : TestCollectionBase
 {
-    public MarketDataServiceTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+    public MarketDataService(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    private async Task<IList<ITick>> MakeRequest(Contract contract)
+    private async Task<IList<IHasRequestId>> MakeRequest(Contract contract)
     {
         Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
-        IList<ITick> ticks = await Client
+        IList<IHasRequestId> ticks = await Client
             .Service
             .CreateTickObservable(contract)
             .Take(TimeSpan.FromSeconds(2))
@@ -26,24 +20,28 @@ public class MarketDataServiceTests : TestCollectionBase
     }
 
     [Fact]
-    public async Task TestTicks()
+    public async Task TicksTest()
     {
         Contract contract = new()
         { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
 
-        IList<ITick> ticks = await MakeRequest(contract);
+        IList<IHasRequestId> ticks = await MakeRequest(contract);
 
         Assert.NotEmpty(ticks);
     }
 
     [Fact]
-    public async Task TestTicksInvalid()
+    public async Task TicksInvalidTest()
     {
         Contract contract = new()
         { SecurityType = SecurityType.Stock, Symbol = "InvalidSymbol", Currency = "USD", Exchange = "SMART" };
 
-        var alertException = await Assert.ThrowsAsync<AlertException>(async () => await MakeRequest(contract));
 
-        Write(alertException.Message);
+        IList<IHasRequestId> list = await MakeRequest(contract);
+
+        IHasRequestId message = list.Single();
+        Alert alert = (Alert)message;
+;
+        Write("Alert Meszsage: " + alert.Message);
     }
 }

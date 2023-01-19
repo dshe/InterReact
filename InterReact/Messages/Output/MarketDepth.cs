@@ -22,7 +22,7 @@ public sealed class MarketDepth : IHasRequestId
 
     internal MarketDepth(ResponseReader r, bool isLevel2)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
         Position = r.ReadInt();
         MarketMaker = isLevel2 ? r.ReadString() : string.Empty;

@@ -1,59 +1,44 @@
 ﻿using Stringification;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Linq;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
+using System.Reactive.Threading.Tasks;
 
-namespace InterReact.SystemTests.Account;
+namespace Account;
 
-public class AccountUpdateTest : TestCollectionBase
+public class Updates : TestCollectionBase
 {
-    public AccountUpdateTest(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+    public Updates(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
     [Fact]
-    public async Task TakeTest()
+    public async Task AccountUpdates()
     {
-        IList<object> list = await Client
-            .Service
-            .AccountUpdatesObservable
+        Task<IList<object>> task = Client
+            .Response
+            .Where(m => m is AccountValue || m is PortfolioValue || m is AccountUpdateTime || m is AccountUpdateEnd)
             .TakeWhile(o => o is not AccountUpdateEnd)
-            //.Take(TimeSpan.FromSeconds(2))
-            .ToList();
+            .ToList()
+            .ToTask();
+
+        Client.Request.RequestAccountUpdates(true);
+
+        IList<object> list = await task;
+
+        Client.Request.RequestAccountUpdates(false);
 
         foreach (object o in list)
             Write(o.Stringify());
     }
 
+
     [Fact]
-    public async Task Multi_Subscriber_Test()
+    public async Task AccountUpdatesService()
     {
-        Stringifier stringifier = new();
-
-        HashSet<string> list1 = new();
-        HashSet<string> list2 = new();
-
-        IDisposable subscription1 = Client
+        IList<object> list = await Client
             .Service
             .AccountUpdatesObservable
-            .Select(x => x.Stringify())
-            .Subscribe(x => list1.Add(x));
+            .TakeWhile(o => o is not AccountUpdateEnd)
+            .ToList();
 
-        await Task.Delay(2000);
-
-        IDisposable subscription2 = Client
-            .Service
-            .AccountUpdatesObservable
-            .Select(x => x.Stringify())
-            .Subscribe(x => list2.Add(x));
-
-        List<string> diff = list1.Except(list2).ToList();
-        Assert.Equal(1, diff.Count);
-        // the first list has two UpdateAccountTime objects
-
-        subscription1.Dispose();
-        subscription2.Dispose();
+        foreach (object o in list)
+            Write(o.Stringify());
     }
 }

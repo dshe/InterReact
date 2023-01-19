@@ -12,16 +12,16 @@ public partial class Service
     private readonly Dictionary<string, ContractDetails[]> ContractsCache = new();
 
     /// <summary>
-    /// Returns an observable which emits a list of ContractDetails objects.
-    /// using the supplied contract as selector, then completes. Results are cached. 
-    /// Fatal alerts are sent to OnError.
+    /// Returns an observable which emits a list of objects using the supplied 
+    /// contract as selector, then completes. Results are cached. 
+    /// The list contains one or more ContractDetail objects or an Alert message.
     /// If expiry is not specified, ContractDetails objects are retrieved for all expiries.
     /// If strike is not specified, ContractDetails objects are retrieved for all strikes.
     /// And so on. So beware that calling this method may result in attempting to retrieve a large number of contracts.
     /// This operation may take a long time and is subject to usage limiting, 
     /// so the Timeout() operator may be useful.
     /// </summary>
-    public IObservable<ContractDetails> CreateContractDetailsObservable(Contract contract)
+    public IObservable<IHasRequestId> CreateContractDetailsObservable(Contract contract)
     {
         ArgumentNullException.ThrowIfNull(contract);
 
@@ -36,7 +36,7 @@ public partial class Service
 
         string key = contract.Stringify();
 
-        return Observable.Create<ContractDetails>(observer =>
+        return Observable.Create<IHasRequestId>(observer =>
         {
             if (ContractsCache.TryGetValue(key, out ContractDetails[]? cds))
             {
@@ -46,8 +46,7 @@ public partial class Service
                 return Disposable.Empty;
             }
 
-            int requestId = Request.GetNextRequestId();
-
+            int requestId = Request.GetNextId();
             List<ContractDetails> cdList = new();
 
             IDisposable subscription = Response
@@ -58,7 +57,8 @@ public partial class Service
                     {
                         if (m is Alert alert)
                         {
-                            observer.OnError(alert.ToException()); // IMPORTANT: all alerts to OnError!
+                            observer.OnNext(alert);
+                            observer.OnCompleted(); // take first alert and abandon request 
                         }
                         else if (m is ContractDetails cd)
                         {
@@ -91,7 +91,6 @@ public partial class Service
     public IObservable<SymbolSamples> CreateMatchingSymbolsObservable(string pattern) =>
         Response
             .ToObservableSingleWithRequestId(
-                Request.GetNextRequestId, requestId => Request.RequestMatchingSymbols(requestId, pattern))
+                Request.GetNextId, requestId => Request.RequestMatchingSymbols(requestId, pattern))
         .Cast<SymbolSamples>();
 }
-

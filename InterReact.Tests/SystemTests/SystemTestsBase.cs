@@ -1,10 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace InterReact.SystemTests;
+namespace SystemTests;
 
 public abstract class SystemTestsBase : IAsyncLifetime, IDisposable
 {

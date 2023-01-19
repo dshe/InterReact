@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using RxSockets;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -28,7 +29,16 @@ internal class Server
         IRxSocketClient accept = await SocketServer.AcceptAllAsync().FirstAsync();
         Logger.LogCritical("Client connection accepted.");
 
-        string firstString = await accept.ReceiveAllAsync().ToStrings().FirstAsync();
+        //await Task.Delay(1000);
+
+        //var timer = Stopwatch.StartNew();
+        //List<byte> list = await accept.ReceiveAllAsync().TakeWhile(b => timer.ElapsedMilliseconds < 1000).ToListAsync();
+        //List<string> list = await accept.ReceiveAllAsync().ToStrings().TakeWhile(b => timer.ElapsedMilliseconds < 1000).ToListAsync();
+
+        //List<byte[]> list = await accept.ReceiveAllAsync().ToArraysFromBytesWithLengthPrefix().TakeWhile(b => timer.ElapsedMilliseconds < 1000).ToListAsync();
+        //List<string[]> list = await accept.ReceiveAllAsync().ToArraysFromBytesWithLengthPrefix().ToStringArrays().TakeWhile(b => timer.ElapsedMilliseconds < 1000).ToListAsync();
+
+        string firstString = await accept.ReceiveAllAsync().ToStrings().FirstAsync();  
 
         if (firstString != "API")
             throw new InvalidDataException("'API' not received.");

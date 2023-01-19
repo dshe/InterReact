@@ -1,10 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reactive.Disposables;
 
-namespace InterReact.SystemTests;
+namespace SystemTests;
 
 public class DynamicLogger : ILogger
 {
@@ -43,7 +40,7 @@ public class DynamicLogger : ILogger
     {
         lock (Loggers)
         {
-            return Loggers.Any() && Loggers.First().IsEnabled(logLevel);
+            return Loggers.Where(l => l.IsEnabled(logLevel)).Any();
         }
     }
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)

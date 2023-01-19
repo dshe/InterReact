@@ -10,7 +10,7 @@ public sealed class AccountSummary : IHasRequestId
     internal AccountSummary() { }
     internal AccountSummary(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
         Account = r.ReadString();
         Tag = r.ReadString();
@@ -24,7 +24,7 @@ public sealed class AccountSummaryEnd : IHasRequestId
     public int RequestId { get; }
     internal AccountSummaryEnd(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
     }
 }

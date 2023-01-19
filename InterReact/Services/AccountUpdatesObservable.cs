@@ -18,8 +18,8 @@ public partial class Service
         return Response
             .Where(m => m is AccountValue || m is PortfolioValue || m is AccountUpdateTime || m is AccountUpdateEnd)
             .ToObservableContinuous(
-                () => Request.RequestAccountUpdates(subscribe: true),
-                () => Request.RequestAccountUpdates(subscribe: false))
+                () => Request.RequestAccountUpdates(start: true),
+                () => Request.RequestAccountUpdates(start: false))
             .CacheSource(GetAccountUpdatesCacheKey);
     }
 

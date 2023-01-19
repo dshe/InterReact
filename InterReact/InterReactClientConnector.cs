@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -25,7 +26,7 @@ public sealed record InterReactClientConnector
     internal ILogger Logger { get; private set; } = NullLogger.Instance;
     public InterReactClientConnector WithLogger(ILogger logger) => this with { Logger = logger };
 
-    public IPAddress IPAddress { get; private set; } = IPAddress.IPv6Loopback;
+    internal IPAddress IPAddress { get; private set; } = IPAddress.IPv6Loopback;
     public InterReactClientConnector WithIpAddress(IPAddress address) => this with { IPAddress = address };
 
     internal IReadOnlyList<int> Ports { get; private set; } =
@@ -51,16 +52,17 @@ public sealed record InterReactClientConnector
     public InterReactClientConnector WithMaxRequestsPerSecond(int requests) =>
         this with { MaxRequestsPerSecond = requests > 0 ? requests : throw new ArgumentException("invalid", nameof(requests)) };
 
-    public string OptionalCapabilities { get; private set; } = "";
+    internal string OptionalCapabilities { get; private set; } = "";
     public InterReactClientConnector WithOptionalCapabilities(string capabilities) => this with { OptionalCapabilities = capabilities };
 
-    public bool FollowPriceTickWithSizeTick { get; private set; }
+    internal bool FollowPriceTickWithSizeTick { get; private set; }
     public InterReactClientConnector WithFollowPriceTickWithSizeTick() => this with { FollowPriceTickWithSizeTick = true };
-
 
     public const ServerVersion ServerVersionMin = ServerVersion.FRACTIONAL_POSITIONS;
     public ServerVersion ServerVersionMax { get; private set; } = ServerVersion.WSHE_CALENDAR;
     public InterReactClientConnector WithMaxServerVersion(ServerVersion maxServerVersion) => this with { ServerVersionMax = maxServerVersion };
+
+    /////////////////////////////////////////////////////////////
 
     public ServerVersion ServerVersionCurrent { get; private set; } = ServerVersion.NONE;
     internal bool SupportsServerVersion(ServerVersion version) => version <= ServerVersionCurrent;
@@ -70,20 +72,21 @@ public sealed record InterReactClientConnector
             throw new ArgumentException($"The server does not support version: '{version}'.");
     }
 
-    public string Date { get; private set; } = "";
-    public int InitialNextOrderId { get; private set; }
-
+    internal string Date = "";
+    internal int Id; // Used to generate sucessive RequestIds or OrderIds.
+    
     /////////////////////////////////////////////////////////////
 
     public async Task<IInterReactClient> ConnectAsync(CancellationToken ct = default)
     {
         AssemblyName name = GetType().Assembly.GetName();
         Logger.LogInformation("{Name} v{Version}.", name.Name, name.Version);
-        
+
         IRxSocketClient? rxSocketClient = null;
         try
         {
             rxSocketClient = await ConnectSocketAsync(ct).ConfigureAwait(false);
+
             await Login(rxSocketClient, ct).ConfigureAwait(false);
             Logger.LogInformation("Logged into Tws/Gateway using clientId: {ClientId} and server version: {ServerVersionCurrent}.", ClientId, (int)ServerVersionCurrent);
 
@@ -92,7 +95,7 @@ public sealed record InterReactClientConnector
                 .ToArraysFromBytesWithLengthPrefix()
                 .ToStringArrays()
                 .ToObservableFromAsyncEnumerable()
-                .ToMessages(this)
+                .ComposeMessages(this)
                 .FollowPriceTickWithSizeTick(FollowPriceTickWithSizeTick)
                 .LogMessages(Logger)
                 .Publish()
@@ -100,6 +103,7 @@ public sealed record InterReactClientConnector
 
             return new ServiceCollection()
                 .AddSingleton(this) // InterReactClientConnector
+                .AddSingleton(Logger)
                 .AddSingleton(rxSocketClient!) // instance
                 .AddSingleton(new RingLimiter(MaxRequestsPerSecond))
                 .AddSingleton<Stringifier>()
@@ -129,7 +133,8 @@ public sealed record InterReactClientConnector
             ipEndPoint.Port = port;
             try
             {
-                return await ipEndPoint.CreateRxSocketClientAsync(Logger, ct).ConfigureAwait(false);
+                // CreateRxSocketClientAsync(Logger, ct)
+                return await ipEndPoint.CreateRxSocketClientAsync(ct).ConfigureAwait(false);
             }
             catch (SocketException e) when (e.SocketErrorCode == SocketError.ConnectionRefused || e.SocketErrorCode == SocketError.TimedOut)
             {
@@ -143,7 +148,7 @@ public sealed record InterReactClientConnector
 
     private async Task Login(IRxSocketClient rxsocket, CancellationToken ct)
     {
-        Send("API");
+        SendWithoutPrefix("API");
 
         // Report a range of supported API versions to TWS.
         SendWithPrefix($"v{(int)ServerVersionMin}..{(int)ServerVersionMax}");
@@ -151,7 +156,10 @@ public sealed record InterReactClientConnector
         SendWithPrefix(((int)RequestCode.StartApi).ToString(CultureInfo.InvariantCulture),
             "2", ClientId.ToString(CultureInfo.InvariantCulture), OptionalCapabilities);
 
+        // may hang here
         string[] message1 = await GetMessage().ConfigureAwait(false);
+        if (message1 == Array.Empty<string>())
+            throw new TimeoutException("Timeout waiting for the first response from TWS/Gateway. Try restarting.");
 
         // ServerVersion is the highest supported API version within the range specified.
         if (!Enum.TryParse(message1[0], out ServerVersion version))
@@ -159,25 +167,61 @@ public sealed record InterReactClientConnector
         ServerVersionCurrent = version;
         Date = message1[1];
 
-        string[] message2 = await GetMessage().ConfigureAwait(false);
-        if (message2[0] != "9") // NextOrderId message
-            throw new InvalidDataException("Did not receive NextOrderId message.");
-        if (!int.TryParse(message2[2], out int nextOrderId))
-            throw new InvalidDataException($"Could not parse NextOrderId '{message2[2]}'.");
-        InitialNextOrderId = nextOrderId;
+        // there may be two messages, in any order
+        //if (!await ProcessMessage().ConfigureAwait(false))
+        //    return;
+        //if (!await ProcessMessage().ConfigureAwait(false))
+        //    return;
 
         // local methods
-        void Send(string str) => rxsocket
+        void SendWithoutPrefix(string str) => rxsocket
             .Send(str.ToByteArray());
 
         void SendWithPrefix(params string[] strings) => rxsocket
-            .Send(strings.ToByteArray().ToByteArrayWithLengthPrefix());
+            .Send(strings.ToByteArray()
+            .ToByteArrayWithLengthPrefix());
 
-        async Task<string[]> GetMessage() => await rxsocket
-            .ReceiveAllAsync()
-            .ToArraysFromBytesWithLengthPrefix()
-            .ToStringArrays()
-            .FirstAsync(ct)
-            .ConfigureAwait(false);
+        async Task<string[]> GetMessage()
+        {
+            try
+            {
+                return await rxsocket
+                    .ReceiveAllAsync()
+                    .ToArraysFromBytesWithLengthPrefix()
+                    .ToStringArrays()
+                    .FirstAsync(ct)
+                    .AsTask()
+                    .WaitAsync(TimeSpan.FromSeconds(2), ct)
+                    .ConfigureAwait(false);
+            }
+            catch (TimeoutException)
+            {
+                return Array.Empty<string>();
+            }
+        }
+
+        /*
+        async Task<bool> ProcessMessage()
+        {
+            string[] message = await GetMessage().ConfigureAwait(false);
+            if (message == Array.Empty<string>())
+                return false;
+
+            if (message[0] == "9") // NextOrderId message
+            {
+                if (!int.TryParse(message[2], out int nextOrderId))
+                    throw new InvalidDataException($"Could not parse NextOrderId '{message[2]}'.");
+                InitialOrderId = nextOrderId;
+                return true;
+            }
+ 
+            if (message[0] == "15") // ManagedAccounts
+            {
+                InitialManagedAccounts = message[2];
+                return true;
+            }
+            return false;
+        }
+        */
     }
 }

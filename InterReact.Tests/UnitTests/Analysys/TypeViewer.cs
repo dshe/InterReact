@@ -1,11 +1,8 @@
-﻿using System.Linq;
-using System.Reflection;
-using Xunit;
-using Xunit.Abstractions;
+﻿using System.Reflection;
 
-namespace InterReact.UnitTests.Analysis;
+namespace Analysis;
 
-public class Type_Viewer : UnitTestsBase
+public class Type_Viewer : UnitTestBase
 {
     public Type_Viewer(ITestOutputHelper output) : base(output) { }
 
@@ -54,7 +51,7 @@ public class Type_Viewer : UnitTestsBase
         foreach (var type in Assembly.ExportedTypes.OrderBy(type => type.Name))
         {
             type.GetTypeInfo().DeclaredMethods
-                //.Where(method => method.IsPublic)
+                .Where(method => method.IsPublic)
                 .Where(m =>
                     !(m.Name.StartsWith("<") || m.Name.StartsWith("get_") || m.Name.StartsWith("set_") ||
                       objectMethodNames.Contains(m.Name)))

@@ -1,20 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
+﻿using System.Reactive.Linq;
 
-namespace InterReact.SystemTests.MarketData;
+namespace MarketData;
 
-public class MarketDataTests : TestCollectionBase
+public class MarketData : TestCollectionBase
 {
-    public MarketDataTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+    public MarketData(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
     private async Task<List<IHasRequestId>> MakeRequest(Contract contract)
     {
-        int requestId = Client.Request.GetNextRequestId();
+        int requestId = Client.Request.GetNextId();
 
         List<IHasRequestId> messages = new();
 
@@ -36,7 +30,7 @@ public class MarketDataTests : TestCollectionBase
     }
 
     [Fact]
-    public async Task TestTicks()
+    public async Task TicksTest()
     {
         Contract contract = new()
         { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
@@ -51,7 +45,7 @@ public class MarketDataTests : TestCollectionBase
     }
 
     [Fact]
-    public async Task TestTicksInvalid()
+    public async Task TicksInvalidTest()
     {
         Contract contract = new()
         { SecurityType = SecurityType.Stock, Symbol = "InvalidSymbol", Currency = "USD", Exchange = "SMART" };

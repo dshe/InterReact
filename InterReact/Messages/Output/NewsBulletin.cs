@@ -17,7 +17,7 @@ public sealed class NewsBulletin
 
     internal NewsBulletin(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         MessageId = r.ReadInt();
         Type = r.ReadEnum<NewsBulletinType>();
         Message = r.ReadString();

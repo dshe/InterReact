@@ -50,7 +50,7 @@ Contract contract = new()
 
 client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
-int requestId = client.Request.GetNextRequestId();
+int requestId = client.Request.GetNextId();
 
 client.Request.RequestMarketData(requestId, contract);
 
@@ -78,7 +78,7 @@ Order order = new()
     TotalQuantity = 100,
 };
 
-int orderId = client.Request.GetNextOrderId();
+int orderId = client.Request.GetNextId();
 
 // Start the task to receive the first OrderStatusReport, indicating either a filled or cancelled order, within the time limit.
 Task<OrderStatusReport> orderTask = client

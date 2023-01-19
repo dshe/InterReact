@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
-namespace InterReact.SystemTests;
+
+namespace SystemTests;
 // CollectionDefinition - tests do not run in parallel, which keeps logging relevent!
 
 public class TestFixture : IAsyncLifetime
@@ -34,7 +31,6 @@ public class TestCollection : ICollectionFixture<TestFixture>
 }
 
 [Collection("Test Collection")]
-[Trait("Category", "SystemTests")]
 public class TestCollectionBase
 {
     protected readonly Action<string?> Write;
@@ -51,9 +47,9 @@ public class TestCollectionBase
         Client = fixture.Client ?? throw new Exception("Client");
     }
 
-    protected readonly Contract StockContract1 = new()
+    protected Contract StockContract1 { get; } = new()
     { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
 
-    protected readonly Contract ForexContract1 = new()
+    protected Contract ForexContract1 { get; } = new()
     { SecurityType = SecurityType.Cash, Symbol = "EUR", Currency = "USD", Exchange = "IDEALPRO" };
 }

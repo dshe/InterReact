@@ -22,29 +22,29 @@ public sealed class ScannerSubscription
     /// <summary>
     /// Filter out contracts with a price lower than this value.
     /// </summary>
-    public double AbovePrice { get; init; }
+    public double AbovePrice { get; init; } = double.MaxValue;
 
     /// <summary>
     /// Filter out contracts with a price higher than this value.
     /// </summary>
-    public double BelowPrice { get; init; }
+    public double BelowPrice { get; init; } = double.MaxValue;
 
     /// <summary>
     /// Filter out contracts with a volume lower than this value.
     /// </summary>
-    public int AboveVolume { get; init; }
+    public int AboveVolume { get; init; } = int.MaxValue;
 
-    public int AverageOptionVolumeAbove { get; init; }
+    public int AverageOptionVolumeAbove { get; init; } = int.MaxValue;
 
     /// <summary>
     /// Filter out contracts with a market cap lower than this value.
     /// </summary>
-    public double MarketCapAbove { get; init; }
+    public double MarketCapAbove { get; init; } = double.MaxValue;
 
     /// <summary>
     /// Filter out contracts with a market cap above this value.
     /// </summary>
-    public double MarketCapBelow { get; init; }
+    public double MarketCapBelow { get; init; } = double.MaxValue;
 
     /// <summary>
     /// Filter out contracts with a Moody rating below this value.
@@ -79,12 +79,12 @@ public sealed class ScannerSubscription
     /// <summary>
     /// Filter out contracts with a coupon rate lower than this value.
     /// </summary>
-    public double CouponRateAbove { get; init; }
+    public double CouponRateAbove { get; init; } = double.MaxValue;
 
     /// <summary>
     /// Filter out contracts with a coupon rate higher than this value.
     /// </summary>
-    public double CouponRateBelow { get; init; }
+    public double CouponRateBelow { get; init; } = double.MaxValue;
 
     /// <summary>
     /// Filter out convertible bonds.

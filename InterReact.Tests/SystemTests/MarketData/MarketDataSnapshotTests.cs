@@ -1,20 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace InterReact.SystemTests.MarketData;
+namespace MarketData;
 
-public class MarketDataSnapshotTests : TestCollectionBase
+public class MarketDataSnapshot : TestCollectionBase
 {
-    public MarketDataSnapshotTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+    public MarketDataSnapshot(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
     private async Task<IList<IHasRequestId>> MakeRequest(Contract contract)
     {
-        int requestId = Client.Request.GetNextRequestId();
+        int requestId = Client.Request.GetNextId();
 
         var task = Client
             .Response
@@ -39,7 +34,7 @@ public class MarketDataSnapshotTests : TestCollectionBase
     }
 
     [Fact]
-    public async Task TestTickSnapshot()
+    public async Task TickSnapshotTest()
     {
         Contract contract = new()
         { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
@@ -50,7 +45,7 @@ public class MarketDataSnapshotTests : TestCollectionBase
     }
 
     [Fact]
-    public async Task TestTickSnapshotInvalid()
+    public async Task TickSnapshotInvalidTest()
     {
         Contract contract = new()
         { SecurityType = SecurityType.Stock, Symbol = "InvalidSymbol", Currency = "USD", Exchange = "SMART" };

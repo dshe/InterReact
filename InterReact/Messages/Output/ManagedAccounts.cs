@@ -8,7 +8,7 @@ public sealed class ManagedAccounts
 
     internal ManagedAccounts(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         Accounts = r.ReadString();
     }
 }

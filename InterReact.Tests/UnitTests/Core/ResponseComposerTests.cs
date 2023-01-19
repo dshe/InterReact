@@ -1,30 +1,25 @@
-﻿using System;
-using System.IO;
-using Xunit;
-using Xunit.Abstractions;
+﻿namespace Core;
 
-namespace InterReact.UnitTests.Core;
-
-public class ResponseComposerTests : UnitTestsBase
+public class ResponseComposerTests : UnitTestBase
 {
-    internal ResponseComposer Composer;
+    internal ResponseMessageComposer Composer;
 
     public ResponseComposerTests(ITestOutputHelper output) : base(output) =>
-        Composer = new ResponseComposer(new InterReactClientConnector());
+        Composer = new ResponseMessageComposer(new InterReactClientConnector());
 
     [Fact]
     public void T00_Null()
     {
-        Assert.Throws<ArgumentNullException>(() => Composer.Compose(null!));
+        Assert.Throws<ArgumentNullException>(() => Composer.ComposeMessage(null!));
     }
 
     [Fact]
     public void T01_Short_Message()
     {
-        var e = Assert.Throws<InvalidDataException>(() => Composer.Compose(Array.Empty<string>()));
+        var e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(Array.Empty<string>()));
         Assert.IsType<InvalidDataException>(e.InnerException);
 
-        e = Assert.Throws<InvalidDataException>(() => Composer.Compose(new[] { "2", "2" })); // short
+        e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(new[] { "2", "2" })); // short
         Assert.IsType<InvalidDataException>(e.InnerException);
     }
 
@@ -41,23 +36,23 @@ public class ResponseComposerTests : UnitTestsBase
                 "1", // AutoExec, true
                 "too long", // extra, to make it too long
             };
-        Assert.Throws<InvalidDataException>(() => Composer.Compose(longMessage));
+        Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(longMessage));
     }
 
     [Fact]
     public void T03_Undefined_Code()
     {
-        var e = Assert.Throws<InvalidDataException>(() => Composer.Compose(new string[] { "" }));
+        var e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(new string[] { "" }));
         Assert.Equal("Undefined code ''.", e.InnerException?.Message);
 
-        e = Assert.Throws<InvalidDataException>(() => Composer.Compose(new string[] { "notInSwitch" }));
+        e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(new string[] { "notInSwitch" }));
         Assert.Equal("Undefined code 'notInSwitch'.", e.InnerException?.Message);
     }
 
     [Fact]
     public void T04_ParseError()
     {
-        var e = Assert.Throws<InvalidDataException>(() => Composer.Compose(new[] { "1", "version", "cannotParseInt" }));
+        var e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(new[] { "1", "version", "cannotParseInt" }));
         Assert.IsType<ArgumentException>(e.InnerException);
         Assert.StartsWith("Parse", e.InnerException?.Message);
     }
@@ -65,7 +60,7 @@ public class ResponseComposerTests : UnitTestsBase
     [Fact]
     public void T03_Ok()
     {
-        var message = Composer.Compose(new[] {
+        var message = Composer.ComposeMessage(new[] {
                 "2",  // code = size
                 "99", // version
                 "2",  // requestId

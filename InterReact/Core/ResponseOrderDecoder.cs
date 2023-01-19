@@ -331,7 +331,7 @@ internal sealed class OrderDecoder
             if (n > 0)
             {
                 for (int i = 0; i < n; ++i)
-                    Order.ComboLegs.Add(new OrderComboLeg(R.ReadDoubleNullable()));
+                    Order.ComboLegs.Add(new OrderComboLeg(R.ReadDouble()));
             }
         }
     }

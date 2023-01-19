@@ -1,16 +1,11 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace InterReact.UnitTests.Utility;
+namespace Utility;
 
-public class ToObservableSingleWithIdTest : UnitTestsBase
+public class ToObservableSingleWithId : UnitTestBase
 {
     private const int Id = 42;
     private int subscribeCalls, unsubscribeCalls;
@@ -27,10 +22,10 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
         public int RequestId { get; } = Id;
     }
 
-    public ToObservableSingleWithIdTest(ITestOutputHelper output) : base(output) { }
+    public ToObservableSingleWithId(ITestOutputHelper output) : base(output) { }
 
     [Fact]
-    public async Task Test_Ok()
+    public async Task OkTest()
     {
         var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
@@ -63,7 +58,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     }
 
     [Fact]
-    public async Task Test_Fatal_Alert()
+    public async Task FatalAlertTest()
     {
         var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
@@ -89,7 +84,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     }
 
     [Fact]
-    public async Task Test_NonFatal_Alert()
+    public async Task NonFatalAlertTest()
     {
         var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
@@ -117,7 +112,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     }
 
     [Fact]
-    public async Task Test_Subscribe_Error()
+    public async Task SubscribeErrorTest()
     {
         var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
@@ -128,7 +123,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     }
 
     [Fact]
-    public async Task Test_Source_Error()
+    public async Task SourceErrorTest()
     {
         var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
@@ -139,7 +134,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     }
 
     [Fact]
-    public async Task Test_Source_Completed()
+    public async Task SourceCompletedTest()
     {
         var observable = subject.ToObservableSingleWithRequestId(
             () => Id,
@@ -155,7 +150,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     InlineData(1),
     InlineData(10),
     InlineData(100)]
-    public async Task Test_Timeout(int ticks)
+    public async Task TimeoutTest(int ticks)
     {
         var ts = ticks == -1 ? TimeSpan.Zero : TimeSpan.FromTicks(ticks);
 
@@ -171,7 +166,7 @@ public class ToObservableSingleWithIdTest : UnitTestsBase
     }
 
     [Fact]
-    public void Test_Unsubscribe_Error()
+    public void UnsubscribeErrorTest()
     {
         var observable = subject.ToObservableSingleWithRequestId(
             () => Id,

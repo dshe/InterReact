@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace InterReact;
 
@@ -86,7 +85,7 @@ public sealed class ContractDetails : IHasRequestId // output
     /// </summary>
     public double EconomicValueMultiplier { get; }
 
-    public int MdSizeMultiplier { get; }
+    //public int MdSizeMultiplier { get; }
 
     public int AggGroup { get; }
 
@@ -132,14 +131,19 @@ public sealed class ContractDetails : IHasRequestId // output
 
     public string Notes { get; } = "";
 
-    internal ContractDetails() { }
+    public decimal MinSize { get; } = decimal.MaxValue;
+    public decimal SizeIncrement { get; } = decimal.MaxValue;
+    public decimal SuggestedSizeIncrement { get; } = decimal.MaxValue;
 
+
+    internal ContractDetails() { }
     internal ContractDetails(ResponseReader r, ContractDetailsType type)
     {
         switch (type)
         {
             case ContractDetailsType.GeneralContractType:
-                r.RequireVersion(8);
+                if (!r.Connector.SupportsServerVersion(ServerVersion.SIZE_RULES))
+                    r.IgnoreMessageVersion(); // not used
                 RequestId = r.ReadInt();
                 Contract.Symbol = r.ReadString();
                 Contract.SecurityType = r.ReadStringEnum<SecurityType>();
@@ -153,14 +157,17 @@ public sealed class ContractDetails : IHasRequestId // output
                 Contract.TradingClass = r.ReadString();
                 Contract.ContractId = r.ReadInt();
                 MinimumTick = r.ReadDouble();
-                if (r.Connector.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER))
-                    MdSizeMultiplier = r.ReadInt();
+                if (r.Connector.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER) &&
+                    r.Connector.ServerVersionCurrent < ServerVersion.SIZE_RULES)
+                        r.ReadString(); // MdSizeMultiplier not used
                 Contract.Multiplier = r.ReadString();
                 OrderTypes = r.ReadString();
                 ValidExchanges = r.ReadString();
                 PriceMagnifier = r.ReadInt();
                 UnderlyingContractId = r.ReadInt();
                 LongName = r.ReadString();
+                if (r.Connector.SupportsServerVersion(ServerVersion.ENCODE_MSG_ASCII7))
+                    LongName = Regex.Unescape(LongName);
                 Contract.PrimaryExchange = r.ReadString();
                 ContractMonth = r.ReadString();
                 Industry = r.ReadString();
@@ -185,10 +192,19 @@ public sealed class ContractDetails : IHasRequestId // output
                     RealExpirationDate = r.ReadString();
                 if (r.Connector.SupportsServerVersion(ServerVersion.STOCK_TYPE))
                     StockType = r.ReadString();
+                if (r.Connector.SupportsServerVersion(ServerVersion.FRACTIONAL_SIZE_SUPPORT) && !r.Connector.SupportsServerVersion(ServerVersion.SIZE_RULES))
+                    r.ReadDecimal(); // SizeMinTick is not used
+                if (r.Connector.SupportsServerVersion(ServerVersion.SIZE_RULES))
+                {
+                    MinSize = r.ReadDecimal();
+                    SizeIncrement = r.ReadDecimal();
+                    SuggestedSizeIncrement = r.ReadDecimal();
+                }
                 break;
 
             case ContractDetailsType.BondContractType:
-                r.RequireVersion(6);
+                if (!r.Connector.SupportsServerVersion(ServerVersion.SIZE_RULES))
+                    r.IgnoreMessageVersion(); // not used
                 RequestId = r.ReadInt();
                 Contract.Symbol = r.ReadString();
                 Contract.SecurityType = r.ReadStringEnum<SecurityType>();
@@ -211,8 +227,8 @@ public sealed class ContractDetails : IHasRequestId // output
                 Contract.TradingClass = r.ReadString();
                 Contract.ContractId = r.ReadInt();
                 MinimumTick = r.ReadDouble();
-                if (r.Connector.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER))
-                    MdSizeMultiplier = r.ReadInt();
+                if (r.Connector.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER) && !r.Connector.SupportsServerVersion(ServerVersion.SIZE_RULES))
+                    r.ReadString(); // MdSizeMultiplier not used
                 OrderTypes = r.ReadString();
                 ValidExchanges = r.ReadString();
                 NextOptionDate = r.ReadString();
@@ -227,6 +243,12 @@ public sealed class ContractDetails : IHasRequestId // output
                     AggGroup = r.ReadInt();
                 if (r.Connector.SupportsServerVersion(ServerVersion.MARKET_RULES))
                     MarketRuleIds = r.ReadString();
+                if (r.Connector.SupportsServerVersion(ServerVersion.SIZE_RULES))
+                {
+                    MinSize = r.ReadDecimal();
+                    SizeIncrement = r.ReadDecimal();
+                    SuggestedSizeIncrement = r.ReadDecimal();
+                }
                 break;
 
             case ContractDetailsType.ScannerContractType:
@@ -244,7 +266,7 @@ public sealed class ContractDetails : IHasRequestId // output
                 break;
         }
         if (RequestId == int.MaxValue)
-            throw new InvalidDataException("Test Exception!");
+            throw new InvalidDataException("Test Exception!!");
     }
 
     private void ReadLastTradeDate(string lastTradeDateOrContractMonth, bool isBond)
@@ -271,7 +293,7 @@ public sealed class ContractDetailsEnd : IHasRequestId
     public int RequestId { get; }
     internal ContractDetailsEnd(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
     }
 }

@@ -14,8 +14,9 @@ public partial class Service
     {
         return Response
             .ToObservableContinuousWithRequestId(
-                Request.GetNextRequestId,
-                requestId => Request.RequestAccountSummary(requestId), Request.CancelAccountSummary)
+                Request.GetNextId,
+                requestId => Request.RequestAccountSummary(requestId),
+                Request.CancelAccountSummary)
             .CacheSource(GetAccountSummaryCacheKey);
     }
 

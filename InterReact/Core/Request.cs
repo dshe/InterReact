@@ -13,29 +13,22 @@ namespace InterReact;
 /// </summary>
 public sealed class Request
 {
-    public InterReactClientConnector Connector { get; }
+    private readonly InterReactClientConnector Connector;
     private readonly Func<RequestMessage> CreateMessage;
-    private int NextRequestId;
-    internal int NextOrderId; // updated by Services.NextOrderIdObservable
 
     public Request(InterReactClientConnector connector, Func<RequestMessage> requestMessageFactory)
     {
+        ArgumentNullException.ThrowIfNull(connector);
         Connector = connector!;
         CreateMessage = requestMessageFactory;
-        NextOrderId = Connector.InitialNextOrderId - 1;
     }
 
     /// <summary>
-    /// Returns successive ids to uniquely identify requests.
-    /// </summary>
-    public int GetNextRequestId() => Interlocked.Increment(ref NextRequestId);
-
-    /// <summary>
-    /// Returns successive ids used to uniquely identify orders.
+    /// Returns successive ids to uniquely identify requests and orders.
     /// The initial value is set during connection and may start with greater than 0 in case there are previous orders.
     /// </summary>
-    public int GetNextOrderId() => Interlocked.Increment(ref NextOrderId);
-
+    public int GetNextId() => Interlocked.Increment(ref Connector.Id);
+   
     /// <summary>
     /// Call this method to request market data, streaming or snapshot.
     /// Returns market data for an instrument either in real time or 10-15 minutes delayed (depending on the market data type specified)
@@ -287,8 +280,8 @@ public sealed class Request
     /// Updates for all accounts are returned when accountCode is null(?).
     /// This information is updated every three minutes.
     /// </summary>
-    public void RequestAccountUpdates(bool subscribe, string? accountCode = null) => // ???
-        CreateMessage().Write(RequestCode.RequestAccountData, "2", subscribe, accountCode).Send();
+    public void RequestAccountUpdates(bool start, string? accountCode = null) =>
+        CreateMessage().Write(RequestCode.RequestAccountData, "2", start, accountCode).Send();
 
     /// <summary>
     /// When this method is called, execution reports from the last 24 hours that meet the filter criteria are retrieved.
@@ -635,6 +628,8 @@ public sealed class Request
 
     public void CancelPositions() => CreateMessage().Write(RequestCode.CancelPositions, "1").Send();
 
+    // 65, 66: For IB internal use
+
     public void QueryDisplayGroups(int requestId) =>
         CreateMessage().Write(RequestCode.QueryDisplayGroups, "1", requestId).Send();
 
@@ -646,6 +641,9 @@ public sealed class Request
 
     public void UnsubscribeFromGroupEvents(int requestId) =>
         CreateMessage().Write(RequestCode.UnsubscribeFromGroupEvents, "1", requestId).Send();
+
+    // 71: StartApi
+    // 72, 73: for IB internal use
 
     /**
     * Requests position subscription for account and/or model
@@ -891,5 +889,11 @@ public sealed class Request
     {
         Connector.RequireServerVersion(ServerVersion.WSHE_CALENDAR);
         CreateMessage().Write(RequestCode.CancelWshEventData, requestId).Send();
+    }
+
+    public void RequestUserInformation(int requestId)
+    {
+        Connector.RequireServerVersion(ServerVersion.USER_INFO);
+        CreateMessage().Write(RequestCode.RequestUserInfo, requestId).Send();
     }
 }

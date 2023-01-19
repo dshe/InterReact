@@ -1,18 +1,14 @@
 ﻿using Microsoft.Extensions.Logging;
-using System;
-using Xunit;
-using Xunit.Abstractions;
 
-namespace InterReact.UnitTests;
+namespace UnitTests;
 
-[Trait("Category", "UnitTests")]
-public abstract class UnitTestsBase
+public abstract class UnitTestBase
 {
     protected readonly Action<string> Write;
     protected readonly ILoggerFactory LoggerFactory;
     protected readonly ILogger Logger;
 
-    public UnitTestsBase(ITestOutputHelper output)
+    public UnitTestBase(ITestOutputHelper output)
     {
         Write = output.WriteLine;
         LoggerFactory = new LoggerFactory().AddMXLogger(Write, LogLevel.Debug);

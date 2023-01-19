@@ -49,21 +49,23 @@ public sealed class RequestMessage
 
     private static string GetString(object? o)
     {
-        if (o is null)
-            return "";
-
         switch (o)
         {
+            case null: // includes nullable
+                return "";
             case string s:
                 return s;
             case bool b:
                 return b ? "1" : "0";
-            case Enum e:
-                Type ut = Enum.GetUnderlyingType(e.GetType());
-                return Convert.ChangeType(e, ut, CultureInfo.InvariantCulture).ToString() ?? "";
         }
 
         Type type = o.GetType();
+
+        if (o is Enum e)
+        {
+            Type ut = Enum.GetUnderlyingType(type);
+            return Convert.ChangeType(e, ut, CultureInfo.InvariantCulture).ToString() ?? "";
+        }
 
         if (type.IsStringEnum())
             return o.ToString() ?? "";
@@ -82,6 +84,8 @@ public sealed class RequestMessage
             int i => i.ToString(NumberFormatInfo.InvariantInfo),
             long l => l.ToString(NumberFormatInfo.InvariantInfo),
             double d => d.ToString(NumberFormatInfo.InvariantInfo),
+            decimal m =>
+                m is decimal.MaxValue ? "" : m.ToString(NumberFormatInfo.InvariantInfo),
             _ => throw new InvalidDataException($"RequestMessage: unsupported data type = {o.GetType().Name}."),
         };
     }

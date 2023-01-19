@@ -10,11 +10,8 @@ public sealed class TickAttrib
     public bool AskPastHigh { get; }
 
     internal TickAttrib() { }
-
-    internal TickAttrib(ResponseReader? r = null)
+    internal TickAttrib(ResponseReader r)
     {
-        if (r is null)
-            return;
         int value = r.ReadInt();
         CanAutoExecute = value == 1;
         if (!r.Connector.SupportsServerVersion(ServerVersion.PAST_LIMIT))

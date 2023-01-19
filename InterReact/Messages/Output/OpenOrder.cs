@@ -88,5 +88,5 @@ public sealed class OpenOrder : IHasOrderId
 
 public sealed class OpenOrderEnd
 {
-    internal OpenOrderEnd(ResponseReader r) => r.IgnoreVersion();
+    internal OpenOrderEnd(ResponseReader r) => r.IgnoreMessageVersion();
 }

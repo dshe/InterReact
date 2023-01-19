@@ -5,9 +5,9 @@ using System.Reactive.Linq;
 namespace InterReact;
 
 // Usage: for requests that use RequestId.
-public static partial class Ext
+public static partial class Extensionz
 {
-    // Usage: Single result: FundamentalData, SymbolSamples.
+    // Usage: Single result: SymbolSamples.
     // may also return alerts(s)
     internal static IObservable<IHasRequestId> ToObservableSingleWithRequestId(this IObservable<object> source,
         Func<int> getRequestId, Action<int> startRequest, Action<int>? stopRequest = null)
@@ -24,15 +24,9 @@ public static partial class Ext
                     onNext: m =>
                     {
                         cancelable = false;
-                        if (m is Alert alert)
-                        {
-                            if (alert.IsFatal)
-                                observer.OnError(alert.ToException()); // IMPORTANT!
-                            else
-                                observer.OnNext(m);
-                            return;
-                        }
                         observer.OnNext(m);
+                        if (m is Alert alert && !alert.IsFatal)
+                            return;
                         observer.OnCompleted();
                     },
                     onError: e =>
@@ -60,7 +54,7 @@ public static partial class Ext
     }
 
 
-    // Usage: Multiple results: TickSnapshot, Executions.
+    // Usage: Multiple results: TickSnapshot
     internal static IObservable<IHasRequestId> ToObservableMultipleWithRequestId<TEnd>(
         this IObservable<object> source, Func<int> getRequestId, Action<int> startRequest)
             where TEnd : IHasRequestId
@@ -76,11 +70,13 @@ public static partial class Ext
                     onNext: m =>
                     {
                         if (m is TEnd)
+                        {
                             observer.OnCompleted();
-                        else if (m is Alert alert && alert.IsFatal) // IMPORTANT!
-                            observer.OnError(alert.ToException());
-                        else
-                            observer.OnNext(m);
+                            return;
+                        }
+                        observer.OnNext(m);
+                        if (m is Alert alert && alert.IsFatal) // IMPORTANT!
+                            observer.OnCompleted();
                     },
                     onError: observer.OnError,
                     onCompleted: observer.OnCompleted));
@@ -92,7 +88,7 @@ public static partial class Ext
     }
 
 
-    // Usage: Continuous results: AccountSummary, Tick, MarketDepth.
+    // Usage: Continuous results: AccountSummary, Tick.
     internal static IObservable<IHasRequestId> ToObservableContinuousWithRequestId(this IObservable<object> source,
         Func<int> getRequestId, Action<int> startRequest, Action<int> stopRequest)
     {
@@ -107,10 +103,9 @@ public static partial class Ext
                 .SubscribeSafe(Observer.Create<IHasRequestId>(
                     onNext: m =>
                     {
+                        observer.OnNext(m);
                         if (m is Alert alert && alert.IsFatal)
-                            observer.OnError(alert.ToException());
-                        else
-                            observer.OnNext(m);
+                            observer.OnCompleted();
                     },
                     onError: e =>
                     {

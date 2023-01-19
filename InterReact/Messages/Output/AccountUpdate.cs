@@ -11,7 +11,7 @@ public sealed class AccountValue
     public AccountValue() { } // testing
     internal AccountValue(ResponseReader r)
     {
-        int version = r.GetVersion();
+        int version = r.GetMessageVersion();
         Key = r.ReadString();
         Value = r.ReadString();
         Currency = r.ReadString();
@@ -32,7 +32,7 @@ public sealed class PortfolioValue
     public PortfolioValue() { } // testing
     internal PortfolioValue(ResponseReader r)
     {
-        r.RequireVersion(8);
+        r.RequireMessageVersion(8);
         Contract.ContractId = r.ReadInt();
         Contract.Symbol = r.ReadString();
         Contract.SecurityType = r.ReadStringEnum<SecurityType>();
@@ -61,7 +61,7 @@ public sealed class AccountUpdateTime
     public AccountUpdateTime(LocalTime time) => Time = time; // testing
     internal AccountUpdateTime(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         Time = r.ReadLocalTime(TimePattern);
     }
 }
@@ -75,7 +75,7 @@ public sealed class AccountUpdateEnd
     public AccountUpdateEnd(string account) => AccountName = account;  // testing
     internal AccountUpdateEnd(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         AccountName = r.ReadString();
     }
 }

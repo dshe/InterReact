@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.Extensions.Logging;
+using System.Collections.Generic;
 
 namespace InterReact;
 
 public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
 {
-    // Store executions by executionId so that they can be associated with CommissionReport (above).
-    // This assumes that CommissionReport always follows Execution.
-    internal static Dictionary<string, Execution> Executions = new();
+    // associate OrderIds with ExecutionIds
+    internal readonly static Dictionary<string, int> ExecutionIds = new();
 
     /// <summary>
     /// RequestId will be -1 if this object sent due to an execution rather than a request for executions.
@@ -42,7 +42,7 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
     /// <summary>
     /// The number of shares filled.
     /// </summary>
-    public double Shares { get; }
+    public decimal Shares { get; }
 
     /// <summary>
     /// The order execution price, not including commissions.
@@ -58,7 +58,7 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
     /// Identifies the position as one to be liquidated last should the need arise.
     /// </summary>
     public int Liquidation { get; }
-    public double CumulativeQuantity { get; }
+    public decimal CumulativeQuantity { get; }
 
     /// <summary>
     /// The average price, which includes commissions.
@@ -86,8 +86,8 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
 
     internal Execution(ResponseReader r)
     {
-        if (r.Connector.ServerVersionCurrent < ServerVersion.LAST_LIQUIDITY)
-            r.RequireVersion(10);
+        if (!r.Connector.SupportsServerVersion(ServerVersion.LAST_LIQUIDITY))
+            r.RequireMessageVersion(10);
         RequestId = r.ReadInt();
         OrderId = r.ReadInt();
         Contract.ContractId = r.ReadInt();
@@ -106,12 +106,12 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
         Account = r.ReadString();
         Exchange = r.ReadString();
         Side = r.ReadStringEnum<ExecutionSide>();
-        Shares = r.ReadDouble();
+        Shares = r.ReadDecimal();
         Price = r.ReadDouble();
         PermanentId = r.ReadInt();
         ClientId = r.ReadInt();
         Liquidation = r.ReadInt();
-        CumulativeQuantity = r.ReadDouble();
+        CumulativeQuantity = r.ReadDecimal();
         AveragePrice = r.ReadDouble();
         OrderReference = r.ReadString();
         EconomicValueRule = r.ReadString();
@@ -120,7 +120,19 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
             ModelCode = r.ReadString();
         if (r.Connector.SupportsServerVersion(ServerVersion.LAST_LIQUIDITY))
             LastLiquidity = r.ReadEnum<Liquidity>();
-        Executions[ExecutionId] = this;
+
+        AssociateThisExecutionIdWithOrderId(r.Logger);
+    }
+
+    private void AssociateThisExecutionIdWithOrderId(ILogger logger)
+    {
+        if (ExecutionIds.TryAdd(ExecutionId, OrderId))
+            return;
+        int orderId = ExecutionIds[ExecutionId];
+        if (orderId == OrderId)
+            logger.LogDebug("Execution: executionId already exists with same OrderId.");
+        else
+            logger.LogWarning("Execution: executionId already exists with different OrderId: {OrderId1}, {OrderId2}.", orderId, OrderId);
     }
 }
 
@@ -129,7 +141,7 @@ public sealed class ExecutionEnd : IHasRequestId
     public int RequestId { get; }
     internal ExecutionEnd(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
     }
 }

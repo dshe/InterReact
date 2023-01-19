@@ -4,9 +4,10 @@ using System.Linq;
 using System.Reactive.Linq;
 using Xunit;
 using Xunit.Abstractions;
-namespace InterReact.UnitTests.Extensions;
 
-public sealed class ToShareSourceTests : ReactiveTestsBase
+namespace Reactive;
+
+public sealed class ToShareSourceTests : ReactiveTestBase
 {
     public ToShareSourceTests(ITestOutputHelper output) : base(output) { }
 

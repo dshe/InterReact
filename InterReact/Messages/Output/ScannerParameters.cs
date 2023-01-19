@@ -8,7 +8,7 @@ public sealed class ScannerParameters
 
     internal ScannerParameters(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         Parameters = r.ReadString();
     }
 }

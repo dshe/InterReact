@@ -10,14 +10,14 @@ public partial class Service
     /// Creates an observable which emits a snapshot of market data ticks, then completes.
     /// Tick class may be selected by using the OfTickClass extension method.
     /// </summary>
-    public IObservable<ITick> CreateTickSnapshotObservable(
+    public IObservable<IHasRequestId> CreateTickSnapshotObservable(
         Contract contract, IEnumerable<GenericTickType>? genericTickTypes = null, bool isRegulatorySnapshot = false, IEnumerable<Tag>? options = null)
     {
         return Response
             .ToObservableMultipleWithRequestId<SnapshotEndTick>(
-                Request.GetNextRequestId,
+                Request.GetNextId,
                 requestId => Request.RequestMarketData(requestId, contract, genericTickTypes, true, isRegulatorySnapshot, options))
-            .Cast<ITick>()
+            .Cast<IHasRequestId>()
             .ShareSource();
     }
 
@@ -28,24 +28,24 @@ public partial class Service
     /// to cache the latest values for replay to new subscribers.
     /// Tick class may be selected by using the OfTickClass extension method.
     /// </summary>
-    public IObservable<ITick> CreateTickObservable(Contract contract,
+    public IObservable<IHasRequestId> CreateTickObservable(Contract contract,
         IEnumerable<GenericTickType>? genericTickTypes = null, IEnumerable<Tag>? options = null)
     {
         return Response
             .ToObservableContinuousWithRequestId(
-                Request.GetNextRequestId,
+                Request.GetNextId,
                 requestId => Request.RequestMarketData(requestId, contract, genericTickTypes, false, false, options),
                 requestId => Request.CancelMarketData(requestId))
-            .Cast<ITick>();
+            .Cast<IHasRequestId>();
     }
 
     public static string GetTickCacheKey(IHasRequestId t) => t is Tick tick ? tick.TickType.ToStringFast() : "";
 }
 
-public class TickClassSelector
+public sealed class TickClassSelector
 {
-    private readonly IObservable<ITick> Source;
-    public TickClassSelector(IObservable<ITick> source) => Source = source;
+    private readonly IObservable<IHasRequestId> Source;
+    public TickClassSelector(IObservable<IHasRequestId> source) => Source = source;
     public IObservable<PriceTick> PriceTick => Source.OfType<PriceTick>();
     public IObservable<SizeTick> SizeTick => Source.OfType<SizeTick>();
     public IObservable<StringTick> StringTick => Source.OfType<StringTick>();
@@ -60,16 +60,16 @@ public class TickClassSelector
     public IObservable<Alert> Alert => Source.OfType<Alert>();
 }
 
-public static partial class Ext
+public static partial class Extensionz
 {
-    public static IObservable<T> OfTickClass<T>(this IObservable<ITick> source, Func<TickClassSelector, IObservable<T>> selector)
+    public static IObservable<T> OfTickClass<T>(this IObservable<IHasRequestId> source, Func<TickClassSelector, IObservable<T>> selector)
     {
         ArgumentNullException.ThrowIfNull(selector);
         return selector(new TickClassSelector(source));
     }
 
     // If tick is delayed, substitute the corresponding 
-    public static IObservable<ITick> UndelayTicks(this IObservable<ITick> source) =>
+    public static IObservable<IHasRequestId> UndelayTicks(this IObservable<IHasRequestId> source) =>
         source.Do(x =>
         {
             if (x is Tick tick)

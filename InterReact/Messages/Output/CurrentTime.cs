@@ -8,7 +8,7 @@ public sealed class CurrentTime
     internal CurrentTime() { }
     internal CurrentTime(ResponseReader r)
     {
-        r.IgnoreVersion();
+        r.IgnoreMessageVersion();
         Time = Instant.FromUnixTimeSeconds(long.Parse(r.ReadString(), NumberFormatInfo.InvariantInfo));
     }
 }

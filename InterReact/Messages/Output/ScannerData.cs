@@ -11,7 +11,7 @@ public sealed class ScannerData : IHasRequestId
 
     internal ScannerData(ResponseReader r)
     {
-        r.RequireVersion(3);
+        r.RequireMessageVersion(3);
         RequestId = r.ReadInt();
         int n = r.ReadInt();
         for (int i = 0; i < n; i++)

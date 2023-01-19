@@ -1,14 +1,10 @@
-﻿using System;
-using System.Reactive.Linq;
-using System.Threading.Tasks;
-using Xunit;
+﻿using System.Reactive.Linq;
 /*
 * Be sure that Trader Workstation (TWS) is running on your machine and that the following is set:
 * File / GlobalConfiguration / API / Settings/ "Enable ActiveX and Socket Clients".
 */
-namespace InterReact.SystemTests.Other;
+namespace Example;
 
-[Trait("Category", "Examples")]
 public class SimplestExample
 {
     [Fact]
@@ -36,9 +32,6 @@ public class SimplestExample
         //Console.WriteLine(Environment.NewLine + "press a key to exit...");
         //Console.ReadKey();
         //Console.Clear();
-
-        // Dispose the subscription to stop receiving ticks.
-        subscription.Dispose();
 
         // Disconnect from TWS/Gateway.
         await interReact.DisposeAsync();
