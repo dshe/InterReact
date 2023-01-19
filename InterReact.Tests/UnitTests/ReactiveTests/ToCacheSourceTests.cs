@@ -1,12 +1,6 @@
 ﻿using Microsoft.Reactive.Testing;
-using System;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Reactive;
 

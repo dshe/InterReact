@@ -1,27 +1,29 @@
 ﻿using Stringification;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
+using System.Threading.Tasks;
 
 namespace InterReact;
 
 public partial class Service
 {
-    private readonly Dictionary<string, ContractDetails[]> ContractsCache = new();
+    private readonly Dictionary<string, Task<IList<IHasRequestId>>> ContractDetailsCache = new();
 
     /// <summary>
-    /// Returns an observable which emits a list of objects using the supplied 
-    /// contract as selector, then completes. Results are cached. 
-    /// The list contains one or more ContractDetail objects or an Alert message.
+    /// Returns a list of one or more contract details list objects using the supplied 
+    /// contract as selector. Results are cached. 
     /// If expiry is not specified, ContractDetails objects are retrieved for all expiries.
     /// If strike is not specified, ContractDetails objects are retrieved for all strikes.
     /// And so on. So beware that calling this method may result in attempting to retrieve a large number of contracts.
     /// This operation may take a long time and is subject to usage limiting, 
     /// so the Timeout() operator may be useful.
     /// </summary>
-    public IObservable<IHasRequestId> CreateContractDetailsObservable(Contract contract)
+    public async Task<List<ContractDetails>> GetContractDetailsAsync(Contract contract)
     {
         ArgumentNullException.ThrowIfNull(contract);
 
@@ -31,58 +33,51 @@ public partial class Service
             throw new ArgumentException("Contract must not include ComboLegsDescription.");
         if (contract.DeltaNeutralContract is not null)
             throw new ArgumentException("Contract must not include DeltaNeutralValidation.");
-        if ((contract.SecurityIdType is null || contract.SecurityIdType == SecurityIdType.Undefined) ^ string.IsNullOrEmpty(contract.SecurityId))
+        if (contract.SecurityIdType == SecurityIdType.Undefined ^ string.IsNullOrEmpty(contract.SecurityId))
             throw new ArgumentException("Invalid SecurityId/SecurityIdType combination.");
 
         string key = contract.Stringify();
-
-        return Observable.Create<IHasRequestId>(observer =>
+        
+        Task<IList<IHasRequestId>>? task;
+        lock (ContractDetailsCache)
         {
-            if (ContractsCache.TryGetValue(key, out ContractDetails[]? cds))
+            if (!ContractDetailsCache.TryGetValue(key, out task))
             {
-                foreach (ContractDetails cd in cds)
-                    observer.OnNext(cd);
-                observer.OnCompleted();
-                return Disposable.Empty;
+                task = GetContractDetailsTask(contract); // start task
+                ContractDetailsCache[key] = task;
             }
+        }
 
-            int requestId = Request.GetNextId();
-            List<ContractDetails> cdList = new();
+        // await task outside lock
+        var result = await task.ConfigureAwait(false);
 
-            IDisposable subscription = Response
-                .OfType<IHasRequestId>() // IMPORTANT!
-                .Where(m => m.RequestId == requestId)
-                .SubscribeSafe(Observer.Create<IHasRequestId>(
-                    onNext: m =>
-                    {
-                        if (m is Alert alert)
-                        {
-                            observer.OnNext(alert);
-                            observer.OnCompleted(); // take first alert and abandon request 
-                        }
-                        else if (m is ContractDetails cd)
-                        {
-                            cdList.Add(cd);
-                            observer.OnNext(cd);
-                        }
-                        else if (m is ContractDetailsEnd)
-                        {
-                            ContractsCache.Add(key, cdList.ToArray());
-                            observer.OnCompleted();
-                        }
-                        else
-                            observer.OnError(new InvalidCastException($"ContractDetailsObservable: Invalid Type = {m.GetType().Name}."));
-                    },
-                    onError: observer.OnError,
-                    onCompleted: observer.OnCompleted));
+        lock (ContractDetailsCache)
+        {
+            Alert? alert = result.OfType<Alert>().FirstOrDefault();
+            if (alert == null)
+                return result.Cast<ContractDetails>().ToList();
+            ContractDetailsCache.Remove(key); // try
 
-            Request.RequestContractDetails(requestId, contract);
-
-            return subscription;
-
-        }).ShareSource();
+            throw new Alert().ToException();       
+        }
     }
 
+    private Task<IList<IHasRequestId>> GetContractDetailsTask(Contract contract)
+    {
+        int requestId = Request.GetNextId();
+
+        Task<IList<IHasRequestId>> task = Response
+            .OfType<IHasRequestId>() // IMPORTANT!
+            .Where(m => m.RequestId == requestId)
+            .TakeUntil(m => m is ContractDetailsEnd || m is Alert)
+            .Where(m => m is ContractDetails || m is Alert)
+            .ToList()
+            .ToTask();
+
+        Request.RequestContractDetails(requestId, contract);
+
+        return task;
+    }
 
     /// <summary>
     /// Creates an observable which emits matching symbols for the pattern, then completes.

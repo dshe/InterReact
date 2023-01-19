@@ -55,7 +55,7 @@ public sealed class Alert : IHasRequestId, IHasOrderId
         return true;
     }
 
-    internal AlertException ToException() => new(this);
+    public AlertException ToException() => new(this);
 }
 
 [SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "<Pending>")]

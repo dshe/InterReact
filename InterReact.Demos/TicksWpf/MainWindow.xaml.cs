@@ -1,6 +1,7 @@
 ﻿using InterReact;
 using Stringification;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
@@ -158,11 +159,12 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         try
         {
-            ContractDetails cd = await Client!
+            List<ContractDetails> cds = await Client!
                 .Service
-                .CreateContractDetailsObservable(contract)
-                .Timeout(TimeSpan.FromSeconds(2))
-                .FirstAsync(); // Multiple may be returned. Take the first one.
+                .GetContractDetailsAsync(contract)
+                .WaitAsync(TimeSpan.FromSeconds(2));
+
+            ContractDetails cd = cds.First(); 
 
             // Display the stock name.
             Description = cd.LongName;

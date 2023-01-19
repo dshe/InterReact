@@ -1,8 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Reactive.Testing;
-using System;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace UnitTests;
 

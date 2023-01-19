@@ -1,6 +1,4 @@
-﻿using NodaTime;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
+﻿using System.Reactive.Linq;
 
 namespace Orders;
 
@@ -11,6 +9,9 @@ public class Monitor : TestCollectionBase
     [Fact]
     public async Task Test()
     {
+        if (!Client.RemoteIPEndPoint.Port.IsIBDemoPort())
+            throw new Exception("Cannot place order. Not the demo account");
+
         var contract = new Contract();
         var order = new Order();
 
@@ -22,8 +23,6 @@ public class Monitor : TestCollectionBase
 
         orderMonitor.Cancel();
 
-        ((IDisposable)orderMonitor).Dispose();
+        orderMonitor.Dispose();
     }
-
-
 }

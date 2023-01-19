@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.Net;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 
 namespace Other;
 

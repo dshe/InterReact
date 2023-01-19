@@ -1,5 +1,4 @@
 ﻿using RxSockets;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -40,6 +39,4 @@ public static partial class Extensionz
 {
     public static bool IsIBDemoPort(this int port) =>
         port == (int)IBDefaultPort.TwsDemoAccount || port == (int)IBDefaultPort.GatewayDemoAccount;
-    public static IBDefaultPort GetIBDefaultPort(this int port) =>
-        Enum.GetValues<IBDefaultPort>().Where(v => (int)v == port).SingleOrDefault(IBDefaultPort.Other);
 }

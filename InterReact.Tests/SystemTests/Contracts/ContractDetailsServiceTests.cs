@@ -17,13 +17,11 @@ public class ContractDetailService : TestCollectionBase
             Exchange = "SMART" 
         };
 
-        IList<IHasRequestId> messages = await Client
+        List<ContractDetails> cds = await Client
             .Service
-            .CreateContractDetailsObservable(contract)
-            .ToList();
+            .GetContractDetailsAsync(contract);
 
-        IHasRequestId message = Assert.Single(messages);
-        ContractDetails cd = Assert.IsType<ContractDetails>(message);
+        ContractDetails cd = Assert.Single(cds);
         Assert.Equal("IBM", cd.Contract.Symbol);
     }
 
@@ -37,14 +35,12 @@ public class ContractDetailService : TestCollectionBase
             Currency = "USD" 
         };
 
-        IList<IHasRequestId> messages = await Client
+        List<ContractDetails> cds = await Client
             .Service
-            .CreateContractDetailsObservable(contract)
-            .ToList();
+            .GetContractDetailsAsync(contract);
 
-        Assert.True(messages.All(x => x is ContractDetails)); // no Alerts
-
-        Assert.True(messages.Count > 1); // multiple exchanges
+        Assert.True(cds.All(cd => cd is ContractDetails)); // no Alerts
+        Assert.True(cds.Count > 1); // multiple exchanges
     }
 
     [Fact]
@@ -55,14 +51,10 @@ public class ContractDetailService : TestCollectionBase
             ContractId = 99999
         };
 
-        IList<IHasRequestId> messages = await Client
+        await Assert.ThrowsAsync<AlertException>(async () =>
+            await Client
              .Service
-             .CreateContractDetailsObservable(contract)
-             .ToList();
-
-        IHasRequestId message = Assert.Single(messages);
-        Alert alert = Assert.IsType<Alert>(message);
-        Assert.Equal(200, alert.Code);
+             .GetContractDetailsAsync(contract));
     }
 
     [Fact]
@@ -77,7 +69,7 @@ public class ContractDetailService : TestCollectionBase
 
         await Assert.ThrowsAsync<TimeoutException>(async () => await Client
             .Service
-            .CreateContractDetailsObservable(contract)
-            .Timeout(TimeSpan.Zero));
+            .GetContractDetailsAsync(contract)
+            .WaitAsync(TimeSpan.FromMilliseconds(1)));
     }
 }

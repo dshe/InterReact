@@ -1,9 +1,6 @@
 ﻿using Microsoft.Reactive.Testing;
 using Stringification;
-using System.Linq;
 using System.Reactive.Linq;
-using Xunit;
-using Xunit.Abstractions;
 
 namespace Reactive;
 
