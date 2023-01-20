@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 
 namespace InterReact;
@@ -13,7 +12,7 @@ public partial class Service
     /// Returns a snapshot of market data ticks.
     /// Tick class may be selected by using the OfTickClass extension method.
     /// </summary>
-    public async Task<IList<ITick>> GetTickSnapshotAsync(
+    public async Task<IList<IHasRequestId>> GetTickSnapshotAsync(
         Contract contract, IEnumerable<GenericTickType>? genericTickTypes = null, bool isRegulatorySnapshot = false, IEnumerable<Tag>? options = null)
     {
         int requestId = Request.GetNextId();
@@ -21,7 +20,7 @@ public partial class Service
         Task<IList<IHasRequestId>> task = Response
             .OfType<IHasRequestId>()
             .Where(x => x.RequestId == requestId)
-            .TakeUntil(x => x is SnapshotEndTick || x is Alert)
+            .TakeUntil(x => x is SnapshotEndTick || (x is Alert alert && alert.IsFatal))
             .Where(m => m is not SnapshotEndTick)
             .ToList()
             .ToTask();
@@ -30,10 +29,6 @@ public partial class Service
 
         IList<IHasRequestId> list = await task.ConfigureAwait(false);
 
-        Alert? alert = list.OfType<Alert>().FirstOrDefault();
-        if (alert != null)
-            throw new Alert().ToException();
-
-        return list.Cast<ITick>().ToList();
+        return list;
     }
 }

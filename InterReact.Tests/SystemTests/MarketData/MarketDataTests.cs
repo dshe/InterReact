@@ -6,23 +6,26 @@ public class MarketData : TestCollectionBase
 {
     public MarketData(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    private async Task<List<IHasRequestId>> MakeRequest(Contract contract)
+    private async Task<List<IHasRequestId>> MakeMarketDataRequest(Contract contract)
     {
         int requestId = Client.Request.GetNextId();
 
         List<IHasRequestId> messages = new();
 
-        var subscription = Client
+        IDisposable subscription = Client
             .Response
             .OfType<IHasRequestId>()
             .Where(x => x.RequestId == requestId)
-            .Subscribe(m => messages.Add(m));
+            .Subscribe(m =>
+            {
+                messages.Add(m);
+            });
 
         Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
         Client.Request.RequestMarketData(requestId, contract, isSnapshot: false);
 
-        await Task.Delay(2000);
+        await Task.Delay(5000);
 
         subscription.Dispose();
 
@@ -33,24 +36,38 @@ public class MarketData : TestCollectionBase
     public async Task TicksTest()
     {
         Contract contract = new()
-        { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
+        { 
+            SecurityType = SecurityType.Stock, 
+            Symbol = "X", 
+            Currency = "USD", 
+            Exchange = "SMART" 
+        };
 
-        List<IHasRequestId> messages = await MakeRequest(contract);
+        List<IHasRequestId> messages = await MakeMarketDataRequest(contract);
 
-        Assert.NotEmpty(messages);
-        Alert alert = messages.OfType<Alert>().Single();
-        Write(alert.Message);
-        Assert.False(alert.IsFatal);
-        Assert.Equal(messages.Count() - 1, messages.OfType<Tick>().Count());
+        Assert.Empty(messages.OfType<Alert>().Where(a => a.IsFatal));
+
+        double? lastPrice = messages
+                  .OfType<PriceTick>()
+                  .Where(x => x.TickType == TickType.DelayedLastPrice)
+                  .FirstOrDefault()
+                  ?.Price;
+
+        Assert.True(lastPrice != null && lastPrice > 0);
     }
 
     [Fact]
     public async Task TicksInvalidTest()
     {
         Contract contract = new()
-        { SecurityType = SecurityType.Stock, Symbol = "InvalidSymbol", Currency = "USD", Exchange = "SMART" };
+        { 
+            SecurityType = SecurityType.Stock, 
+            Symbol = "InvalidSymbol", 
+            Currency = "USD", 
+            Exchange = "SMART" 
+        };
 
-        List<IHasRequestId> messages = await MakeRequest(contract);
+        List<IHasRequestId> messages = await MakeMarketDataRequest(contract);
 
         var m = messages.Single();
 

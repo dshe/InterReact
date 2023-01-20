@@ -24,7 +24,7 @@ public partial class Service
             .Cast<IHasRequestId>();
     }
 
-    public static string GetTickCacheKey(IHasRequestId t) => t is Tick tick ? tick.TickType.ToStringFast() : "";
+    public static string GetTickCacheKey(IHasRequestId t) => t is Tick tick ? tick.TickType.ToString() : "";
 }
 
 public sealed class TickClassSelector
@@ -54,7 +54,15 @@ public static partial class Extensionz
     }
 
     // If tick is delayed, substitute the corresponding 
-    public static IObservable<IHasRequestId> UndelayTicks(this IObservable<IHasRequestId> source) =>
+    public static IEnumerable<T> UndelayTicks<T>(this IEnumerable<T> source) =>
+        source.Select(x =>
+        {
+            if (x is Tick tick)
+                tick.Undelay();
+            return x;
+        });
+
+    public static IObservable<T> UndelayTicks<T>(this IObservable<T> source) =>
         source.Do(x =>
         {
             if (x is Tick tick)

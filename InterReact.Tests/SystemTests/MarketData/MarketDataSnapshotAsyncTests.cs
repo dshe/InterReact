@@ -14,16 +14,24 @@ public class MarketDataSnapshotAsync : TestCollectionBase
         Contract contract = new()
         { 
             SecurityType = SecurityType.Stock, 
-            Symbol = "IBM", 
+            Symbol = "A", 
             Currency = "USD", 
             Exchange = "SMART" 
         };
 
-        IList<ITick> ticks = await Client
+        IList<IHasRequestId> messages = await Client
             .Service
             .GetTickSnapshotAsync(contract);
 
-        Assert.NotEmpty(ticks);
+        Assert.Empty(messages.OfType<Alert>().Where(a => a.IsFatal));
+
+        double? lastPrice = messages
+             .OfType<PriceTick>()
+             .Where(x => x.TickType == TickType.DelayedLastPrice)
+             .FirstOrDefault()
+             ?.Price;
+
+        Assert.True(lastPrice != null && lastPrice > 0);
     }
 
     [Fact]
@@ -39,9 +47,15 @@ public class MarketDataSnapshotAsync : TestCollectionBase
             Exchange = "SMART" 
         };
 
-        AlertException akert = await
-            Assert.ThrowsAsync<AlertException>(async () => await Client
-                .Service
-                .GetTickSnapshotAsync(contract));
+        IList<IHasRequestId> messages = await Client
+            .Service
+            .GetTickSnapshotAsync(contract);
+
+        Alert fatalAlert = messages
+            .OfType<Alert>()
+            .Where(alert => alert.IsFatal)
+            .First();
+
+        Assert.True(fatalAlert.Message.StartsWith("No security definition"));
     }
 }

@@ -14,7 +14,7 @@ public partial class Service
 }
 
 /// <summary>
-/// This object is returned from Services.PlaceOrder(...).
+/// This object is returned from Services.PlaceOrder().
 /// It provides an observable which relays order messages (OpenOrder, OrderStatusReport, Execution, CommissionReport and possibly, Alerts).
 /// Results are cached and replayed to subscribers.
 /// This observable completes only when the object is disposed.
@@ -23,11 +23,11 @@ public partial class Service
 public sealed class OrderMonitor : IDisposable
 {
     private readonly Request Request;
-    private readonly ReplaySubject<IHasOrderId> subject = new();
-    private readonly Order Order;
+    private readonly ReplaySubject<object> subject = new();
     private readonly Contract Contract;
+    public Order Order { get; private set; }
     public int OrderId { get; }
-    public IObservable<IHasOrderId> MessagesObservable => subject.AsObservable();
+    public IObservable<object> Messages => subject.AsObservable();
 
     internal OrderMonitor(Request request, IObservable<object> response, Order order, Contract contract)
     {
@@ -35,15 +35,22 @@ public sealed class OrderMonitor : IDisposable
         Order = order;
         Contract = contract;
         OrderId = Request.GetNextId();
-        
+
         response
             .OfType<IHasOrderId>()
             .Where(m => m.OrderId == OrderId)
             .Subscribe(subject);
-        
-        request.PlaceOrder(OrderId, Order, Contract);
+
+        Request.PlaceOrder(OrderId, Order, Contract);
     }
 
-    public void Cancel() => Request.CancelOrder(OrderId);
+    public void ModifyOrder(Order order)
+    {
+        Order = order;
+        Request.PlaceOrder(OrderId, Order, Contract);
+    }
+ 
+    public void CancelOrder() => Request.CancelOrder(OrderId);
+ 
     public void Dispose() => subject.Dispose();
 }

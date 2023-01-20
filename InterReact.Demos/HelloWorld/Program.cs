@@ -10,11 +10,7 @@ using System;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-
-if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-    Console.BufferWidth = 2000;
 
 // Create a logger which will log messages to the console.
 ILogger Logger = LoggerFactory
@@ -36,12 +32,6 @@ if (!client.RemoteIPEndPoint.Port.IsIBDemoPort())
 
 Contract contract = new()
 {
-    /*
-    SecurityType = SecurityType.Cash,
-    Symbol = "EUR",
-    Currency = "USD",
-    Exchange = "IDEALPRO"
-    */
     SecurityType = SecurityType.Stock,
     Symbol = "IBKR",
     Currency = "USD",

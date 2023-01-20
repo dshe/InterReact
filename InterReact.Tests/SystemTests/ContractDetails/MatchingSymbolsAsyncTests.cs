@@ -1,7 +1,4 @@
-﻿using System.Reactive.Joins;
-using System.Reactive.Linq;
-
-namespace Contracts;
+﻿namespace Contracts;
 
 public class MatchingSymbolsAsync : TestCollectionBase
 {
@@ -10,7 +7,7 @@ public class MatchingSymbolsAsync : TestCollectionBase
     [Fact]
     public async Task Test()
     {
-        string pattern = "IBM";
+        string pattern = "X";
 
         SymbolSamples samples = await Client
             .Service

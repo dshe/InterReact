@@ -12,7 +12,7 @@ public class ContractDetailsAsync : TestCollectionBase
         Contract contract = new() 
         { 
             SecurityType = SecurityType.Stock, 
-            Symbol = "IBM", 
+            Symbol = "MSFT", 
             Currency = "USD", 
             Exchange = "SMART" 
         };
@@ -22,7 +22,7 @@ public class ContractDetailsAsync : TestCollectionBase
             .GetContractDetailsAsync(contract);
 
         ContractDetails cd = Assert.Single(cds);
-        Assert.Equal("IBM", cd.Contract.Symbol);
+        Assert.Equal("MSFT", cd.Contract.Symbol);
     }
 
     [Fact]
@@ -31,7 +31,7 @@ public class ContractDetailsAsync : TestCollectionBase
         Contract contract = new() 
         { 
             SecurityType = SecurityType.Stock, 
-            Symbol = "IBM", 
+            Symbol = "MSFT", 
             Currency = "USD" 
         };
 

@@ -1,6 +1,4 @@
 ﻿using Stringification;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 
 namespace Orders;
 
@@ -11,9 +9,12 @@ public class Open : TestCollectionBase
     [Fact]
     public async Task OpenOrdersAsyncTest()
     {
+        await Task.Delay(3000);
+
         IList<object> list = await Client
             .Service
-            .GetOpenOrdersAsync(OpenOrdersRequestType.OpenOrders);
+            .GetOpenOrdersAsync(OpenOrdersRequestType.OpenOrders)
+            .WaitAsync(TimeSpan.FromSeconds(6));
 
         Write($"Open orders found: {list.Count}.");
 
