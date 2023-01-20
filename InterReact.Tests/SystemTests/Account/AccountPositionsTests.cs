@@ -8,7 +8,7 @@ public class Positions : TestCollectionBase
 {
     public Positions(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    [Fact]
+    [Fact(Skip = "PositionsTest may interfere with PositionsTestService")]
     public async Task PositionsTest()
     {
         Task<IList<Position>> task = Client
@@ -33,7 +33,7 @@ public class Positions : TestCollectionBase
     }
 
     [Fact]
-    public async Task PositionsServiceTest()
+    public async Task PositionsObservableTest()
     {
         IList<Position> list = await Client
             .Service

@@ -2,9 +2,9 @@
 
 namespace Contracts;
 
-public class ContractDetailService : TestCollectionBase
+public class ContractDetailsAsync : TestCollectionBase
 {
-    public ContractDetailService(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+    public ContractDetailsAsync(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
  
     [Fact]
     public async Task SingleTest()

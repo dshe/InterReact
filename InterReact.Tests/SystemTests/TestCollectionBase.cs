@@ -39,7 +39,7 @@ public class TestCollectionBase
 
     public TestCollectionBase(ITestOutputHelper output, TestFixture fixture)
     {
-        Write = output.WriteLine;
+        Write = (s) => output.WriteLine(s + "\n");
 
         Logger = new LoggerFactory().AddMXLogger(Write, LogLevel.Debug).CreateLogger("Test");
         fixture.DynamicLogger.Add(Logger, true);
@@ -48,8 +48,18 @@ public class TestCollectionBase
     }
 
     protected Contract StockContract1 { get; } = new()
-    { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
+    { 
+        SecurityType = SecurityType.Stock, 
+        Symbol = "IBM", 
+        Currency = "USD", 
+        Exchange = "SMART" 
+    };
 
     protected Contract ForexContract1 { get; } = new()
-    { SecurityType = SecurityType.Cash, Symbol = "EUR", Currency = "USD", Exchange = "IDEALPRO" };
+    { 
+        SecurityType = SecurityType.Cash, 
+        Symbol = "EUR", 
+        Currency = "USD", 
+        Exchange = "IDEALPRO" 
+    };
 }

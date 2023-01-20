@@ -18,7 +18,7 @@ public abstract class ConnectTestBase
 
     protected async Task TestClient(IInterReactClient client)
     {
-        var instant = await client.Service.CurrentTimeObservable;
+        var instant = await client.Service.GetCurrentTimeAsync();
         Write($"Test received time from CurrentTimeObservable: {instant}");
     }
 

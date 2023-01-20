@@ -19,6 +19,7 @@ public class AllArgs : ConnectTestBase
         IInterReactClient client = await connector.ConnectAsync();
      
         await TestClient(client);
+
         Assert.Equal(IPAddress.IPv6Loopback, client.RemoteIPEndPoint.Address);
         Assert.Equal(111, connector.ClientId);
         Assert.Equal(ServerVersion.CASH_QTY, connector.ServerVersionMax);

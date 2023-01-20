@@ -54,7 +54,7 @@ internal static class ResponseExtensions
         return source.Do(msg =>
         {
             LogLevel logLevel = msg is Alert ? LogLevel.Information : LogLevel.Debug;
-            logger.Log(logLevel, "Incoming: {Message}", stringifier.Stringify(msg));
+            logger.Log(logLevel, "Msg: {Message}", stringifier.Stringify(msg));
         });
     }
 }

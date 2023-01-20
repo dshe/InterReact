@@ -34,7 +34,7 @@ public class Summary : TestCollectionBase
     }
 
     [Fact]
-    public async Task AccountSummaryServiceTest()
+    public async Task AccountSummaryObservableTest()
     {
         IList<IHasRequestId> list = await Client
             .Service

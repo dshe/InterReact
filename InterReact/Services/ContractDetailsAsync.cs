@@ -15,8 +15,9 @@ public partial class Service
     private readonly Dictionary<string, Task<IList<IHasRequestId>>> ContractDetailsCache = new();
 
     /// <summary>
-    /// Returns a list of one or more contract details list objects using the supplied 
+    /// Returns a list of one or more contract details objects using the supplied 
     /// contract as selector. Results are cached. 
+    /// For options or futures:
     /// If expiry is not specified, ContractDetails objects are retrieved for all expiries.
     /// If strike is not specified, ContractDetails objects are retrieved for all strikes.
     /// And so on. So beware that calling this method may result in attempting to retrieve a large number of contracts.
@@ -67,7 +68,7 @@ public partial class Service
         int requestId = Request.GetNextId();
 
         Task<IList<IHasRequestId>> task = Response
-            .OfType<IHasRequestId>() // IMPORTANT!
+            .OfType<IHasRequestId>()
             .Where(m => m.RequestId == requestId)
             .TakeUntil(m => m is ContractDetailsEnd || m is Alert)
             .Where(m => m is ContractDetails || m is Alert)
@@ -79,13 +80,4 @@ public partial class Service
         return task;
     }
 
-    /// <summary>
-    /// Creates an observable which emits matching symbols for the pattern, then completes.
-    /// Each subscription makes a separate request.
-    /// </summary>
-    public IObservable<SymbolSamples> CreateMatchingSymbolsObservable(string pattern) =>
-        Response
-            .ToObservableSingleWithRequestId(
-                Request.GetNextId, requestId => Request.RequestMatchingSymbols(requestId, pattern))
-        .Cast<SymbolSamples>();
 }

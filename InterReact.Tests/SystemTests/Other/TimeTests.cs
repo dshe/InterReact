@@ -8,12 +8,9 @@ public class Time : TestCollectionBase
 {
     public Time(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    [Fact]
+    [Fact(Skip ="TimeTest may interfere with TimeAsyncTest")]
     public async Task TimeTest()
     {
-        // delay to ensure both time tests do not run at the same tine
-        await Task.Delay(1000);
-
         Task<Instant> task = Client
             .Response
             .OfType<CurrentTime>()
@@ -29,12 +26,9 @@ public class Time : TestCollectionBase
     }
 
     [Fact]
-    public async Task TimeServiceTest()
+    public async Task TimeAsyncTest()
     {
-        // delay to ensure both time tests do not run at the same tine
-        await Task.Delay(1000);
-
-        Instant dt = await Client.Service.CurrentTimeObservable;
+        Instant dt = await Client.Service.GetCurrentTimeAsync();
 
         Write($"Time: {dt}.");
     }

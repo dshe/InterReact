@@ -1,24 +1,24 @@
-﻿using System.Reactive.Linq;
+﻿using Stringification;
+using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 
 namespace Orders;
 
-public class OpenOrders : TestCollectionBase
+public class Open : TestCollectionBase
 {
-    public OpenOrders(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+    public Open(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
     [Fact]
-    public async Task OpenOrdersTest()
+    public async Task OpenOrdersAsyncTest()
     {
-        var task = Client.Response
-            .OfType<OpenOrderEnd>()
-            .FirstAsync()
-            .Timeout(TimeSpan.FromSeconds(3))
-            .ToTask();
+        IList<object> list = await Client
+            .Service
+            .GetOpenOrdersAsync(OpenOrdersRequestType.OpenOrders);
 
-        Client.Request.RequestOpenOrders();
+        Write($"Open orders found: {list.Count}.");
 
-        await task;
+        foreach (var item in list)
+            Write(item.Stringify());
     }
 }
 

@@ -12,6 +12,6 @@ public class Disposal : ConnectTestBase
         var client = await new InterReactClientConnector().WithLogger(Logger).ConnectAsync();
         await client.DisposeAsync();
         Assert.ThrowsAny<Exception>(() => client.Request.RequestCurrentTime());
-        await Assert.ThrowsAnyAsync<Exception>(async () => await client.Service.CurrentTimeObservable);
+        await Assert.ThrowsAnyAsync<Exception>(async () => await client.Service.GetCurrentTimeAsync());
     }
 }

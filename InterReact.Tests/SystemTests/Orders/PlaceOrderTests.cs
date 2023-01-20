@@ -1,28 +1,31 @@
-﻿using System.Reactive.Linq;
+﻿using NodaTime;
+using Stringification;
+using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 
 namespace Orders;
 
-public class PlaceOrders : TestCollectionBase
+public class Place : TestCollectionBase
 {
-    public PlaceOrders(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+    public Place(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
     [Fact]
     public async Task PlaceMarketOrderTest()
     {
         if (!Client.RemoteIPEndPoint.Port.IsIBDemoPort())
-            throw new Exception("Cannot place order. Not the demo account");
+            throw new Exception("Use demo account to place order.");
 
-        var orderId = Client.Request.GetNextId();
+        Contract contract = new()
+        {
+            SecurityType = SecurityType.Stock,
+            Symbol = "IBM",
+            Currency = "USD",
+            Exchange = "SMART"
+        };
 
-        var task = Client.Response
-            .OfType<Execution>()
-            .Where(x => x.OrderId == orderId)
-            .FirstAsync()
-            .Timeout(TimeSpan.FromSeconds(5))
-            .ToTask();
+        int orderId = Client.Request.GetNextId();
 
-        var order = new Order
+        Order order = new()
         {
             OrderId = orderId,
             OrderAction = OrderAction.Buy,
@@ -30,16 +33,25 @@ public class PlaceOrders : TestCollectionBase
             OrderType = OrderType.Market
         };
 
-        Client.Request.PlaceOrder(orderId, order, StockContract1);
+        Task<IHasOrderId> task = Client.Response
+            .OfType<IHasOrderId>()
+            .Where(x => x.OrderId == orderId)
+            .Where(m => m is OrderStatusReport || m is Alert)
+            .FirstAsync() // Get the first message.
+            .ToTask();
 
-        await task;
+        Client.Request.PlaceOrder(orderId, order, contract);
+
+        IHasOrderId message = await task;
+
+        Write("First Message: " + message.Stringify());
     }
 
     [Fact]
     public async Task PlaceLimitOrderTest()
     {
         if (!Client.RemoteIPEndPoint.Port.IsIBDemoPort())
-            throw new Exception("Cannot place order. Not the demo account");
+            throw new Exception("Use demo account to place order.");
 
         int orderId = Client.Request.GetNextId();
         int requestId = Client.Request.GetNextId();
@@ -65,7 +77,6 @@ public class PlaceOrders : TestCollectionBase
             return;
         }
 
-        // place the order
         var taskOpenOrder = Client.Response
             .OfType<OpenOrder>()
             .Where(x => x.OrderId == orderId)
@@ -99,6 +110,5 @@ public class PlaceOrders : TestCollectionBase
 
         await taskCancelled;
     }
-
 }
 

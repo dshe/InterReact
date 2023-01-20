@@ -7,21 +7,6 @@ namespace InterReact;
 public partial class Service
 {
     /// <summary>
-    /// Creates an observable which emits a snapshot of market data ticks, then completes.
-    /// Tick class may be selected by using the OfTickClass extension method.
-    /// </summary>
-    public IObservable<IHasRequestId> CreateTickSnapshotObservable(
-        Contract contract, IEnumerable<GenericTickType>? genericTickTypes = null, bool isRegulatorySnapshot = false, IEnumerable<Tag>? options = null)
-    {
-        return Response
-            .ToObservableMultipleWithRequestId<SnapshotEndTick>(
-                Request.GetNextId,
-                requestId => Request.RequestMarketData(requestId, contract, genericTickTypes, true, isRegulatorySnapshot, options))
-            .Cast<IHasRequestId>()
-            .ShareSource();
-    }
-
-    /// <summary>
     /// Creates an observable which continually emits market data ticks for the specified contract.
     /// Use CreateTickObservable(...).Publish()[.RefCount() | .AutoConnect()] to share the subscription.
     /// Or use CreateTickObservable(...).CacheSource(InterReact.Services.GetTickCacheKey)

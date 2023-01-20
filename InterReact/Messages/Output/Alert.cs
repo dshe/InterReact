@@ -9,7 +9,7 @@ namespace InterReact;
 /// For messages which are not associated with a particular request or order, the Id is -1.
 /// In order to be compatible with the IHasRequestId and IHasOrderId interfaces, both requestId and orderId properties are included in Alert.
 /// </summary>
-public sealed class Alert : IHasRequestId, IHasOrderId
+public sealed class Alert : IHasRequestId, IHasOrderId, ITick
 {
     public int RequestId { get; }
     public int OrderId { get; }

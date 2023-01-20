@@ -2,9 +2,9 @@
 
 namespace MarketData;
 
-public class MarketDataService : TestCollectionBase
+public class MarketDataObservable : TestCollectionBase
 {
-    public MarketDataService(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
+    public MarketDataObservable(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
     private async Task<IList<IHasRequestId>> MakeRequest(Contract contract)
     {

@@ -17,6 +17,6 @@ public partial class Service
         Task<NextOrderId> task = Response.OfType<NextOrderId>().FirstAsync().ToTask();
         Request.RequestNextOrderId();
         await task.ConfigureAwait(false);
-        // The result is updated in the NextOrderId response object constructor
+        // The result is updated in the NextOrderId response object constructor.
     }
 }

@@ -9,7 +9,6 @@ public partial class Service
     {
         Request = request;
         Response = response;
-        CurrentTimeObservable = CreateCurrentTimeObservable();
         AccountUpdatesObservable = CreateAccountUpdatesObservable();
         PositionsObservable = CreatePositionsObservable();
         AccountSummaryObservable = CreateAccountSummaryObservable();

@@ -7,10 +7,10 @@ public class Monitor : TestCollectionBase
     public Monitor(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
     [Fact]
-    public async Task Test()
+    public async Task OrderMonitorTest()
     {
         if (!Client.RemoteIPEndPoint.Port.IsIBDemoPort())
-            throw new Exception("Cannot place order. Not the demo account");
+            throw new Exception("Use demo account to place order.");
 
         var contract = new Contract();
         var order = new Order();
