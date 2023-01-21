@@ -46,20 +46,4 @@ public class TestCollectionBase
 
         Client = fixture.Client ?? throw new Exception("Client");
     }
-
-    protected Contract StockContract1 { get; } = new()
-    { 
-        SecurityType = SecurityType.Stock, 
-        Symbol = "IBM", 
-        Currency = "USD", 
-        Exchange = "SMART" 
-    };
-
-    protected Contract ForexContract1 { get; } = new()
-    { 
-        SecurityType = SecurityType.Cash, 
-        Symbol = "EUR", 
-        Currency = "USD", 
-        Exchange = "IDEALPRO" 
-    };
 }

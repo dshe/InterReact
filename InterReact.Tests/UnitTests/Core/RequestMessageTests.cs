@@ -22,7 +22,7 @@ public class RequestMessageTests : UnitTestBase
     {
         List<string> messageStrings = requestMessage.Strings;
         Assert.Equal(messageStrings.Count, strings.Length);
-        for (var i = 0; i < messageStrings.Count; i++)
+        for (int i = 0; i < messageStrings.Count; i++)
             Assert.Equal(messageStrings[i], strings[i]);
         messageStrings.Clear();
     }

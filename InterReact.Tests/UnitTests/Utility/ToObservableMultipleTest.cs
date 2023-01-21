@@ -22,7 +22,7 @@ public class ToObservableMultiple : UnitTestBase
     [Fact]
     public async Task MultiOkTest()
     {
-        var observable = subject.ToObservableMultiple<object, SomeClassEnd>(
+        IObservable<object> observable = subject.ToObservableMultiple<object, SomeClassEnd>(
             () =>
             {
                 Interlocked.Increment(ref subscribeCalls);
@@ -30,7 +30,7 @@ public class ToObservableMultiple : UnitTestBase
                 subject.OnNext(new SomeClass());
                 subject.OnNext(new SomeClassEnd());
             });
-        var list = await observable.ToList();
+        IList<object> list = await observable.ToList();
         Assert.Equal(2, list.Count);
         Assert.Equal(1, subscribeCalls);
     }

@@ -101,7 +101,7 @@ public sealed class HistoricalBidAskTicks : IHasRequestId
 public sealed class HistoricalBidAskTick
 {
     public long Time { get; }
-    public TickAttribBidAsk TickAttribBidAsk { get; } = new TickAttribBidAsk();
+    public TickAttribBidAsk TickAttribBidAsk { get; } = new();
     public double PriceBid { get; }
     public double PriceAsk { get; }
     public long SizeBid { get; }

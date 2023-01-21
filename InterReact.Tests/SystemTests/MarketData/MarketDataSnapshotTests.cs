@@ -11,7 +11,7 @@ public class MarketDataSnapshot : TestCollectionBase
     {
         int requestId = Client.Request.GetNextId();
 
-        var task = Client
+        Task<IList<IHasRequestId>> task = Client
             .Response
             .OfType<IHasRequestId>()
             .Where(x => x.RequestId == requestId)

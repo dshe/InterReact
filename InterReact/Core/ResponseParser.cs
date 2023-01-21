@@ -91,7 +91,7 @@ internal sealed class ResponseParser
     internal T ParseEnum<T>(string numberString) where T : Enum
     {
         Type type = typeof(T);
-        if (!EnumCache.TryGetValue(type, out var enumValues))
+        if (!EnumCache.TryGetValue(type, out Dictionary<string, object>? enumValues))
         {
             enumValues = Enum
                 .GetValues(type)

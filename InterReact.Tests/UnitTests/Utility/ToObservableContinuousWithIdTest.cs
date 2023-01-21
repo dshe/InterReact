@@ -27,7 +27,7 @@ public class ToObservableContinuousWithId : UnitTestBase
     [Fact]
     public async Task OkTest()
     {
-        var observable = subject.ToObservableSingleWithRequestId(
+        IObservable<SomeClass> observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId =>
             {
@@ -42,12 +42,12 @@ public class ToObservableContinuousWithId : UnitTestBase
             })
             .Cast<SomeClass>();
 
-        var n1 = await observable.Materialize().ToList();
+        IList<Notification<SomeClass>> n1 = await observable.Materialize().ToList();
         Assert.Equal(2, n1.Count);
         Assert.Equal(NotificationKind.OnNext, n1[0].Kind);
         Assert.Equal(NotificationKind.OnCompleted, n1[1].Kind);
 
-        var n2 = await observable.Materialize().ToList();
+        IList<Notification<SomeClass>> n2 = await observable.Materialize().ToList();
         Assert.Equal(2, n2.Count);
         Assert.Equal(NotificationKind.OnNext, n2[0].Kind);
         Assert.Equal(NotificationKind.OnCompleted, n2[1].Kind);

@@ -24,8 +24,8 @@ public class ToObservableContinuous : UnitTestBase
     InlineData(100)]
     public async Task TimeoutTest(int ticks)
     {
-        var ts = ticks == -1 ? TimeSpan.Zero : TimeSpan.FromTicks(ticks);
-        var observable = subject.ToObservableContinuous(() => Interlocked.Increment(ref subscribeCalls), () => Interlocked.Increment(ref unsubscribeCalls));
+        TimeSpan ts = ticks == -1 ? TimeSpan.Zero : TimeSpan.FromTicks(ticks);
+        IObservable<object> observable = subject.ToObservableContinuous(() => Interlocked.Increment(ref subscribeCalls), () => Interlocked.Increment(ref unsubscribeCalls));
         await Assert.ThrowsAsync<TimeoutException>(async () => await observable.Timeout(ts));
         await Task.Delay(1);
         Assert.Equal(1, subscribeCalls);

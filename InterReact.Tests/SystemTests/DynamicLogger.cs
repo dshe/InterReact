@@ -40,14 +40,16 @@ public class DynamicLogger : ILogger
     {
         lock (Loggers)
         {
-            return Loggers.Where(l => l.IsEnabled(logLevel)).Any();
+            return Loggers
+                .Where(l => l.IsEnabled(logLevel))
+                .Any();
         }
     }
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
         lock (Loggers)
         {
-            foreach (var logger in Loggers)
+            foreach (ILogger logger in Loggers)
                 logger.Log(logLevel, eventId, state, exception, formatter);
         }
     }

@@ -69,7 +69,7 @@ public class MarketData : TestCollectionBase
 
         List<IHasRequestId> messages = await MakeMarketDataRequest(contract);
 
-        var m = messages.Single();
+        IHasRequestId m = messages.Single();
 
         Alert alert = messages.OfType<Alert>().Single();
         Assert.True(alert.IsFatal);

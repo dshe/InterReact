@@ -36,6 +36,14 @@ public class BadData : ConnectTestBase
     [Fact]
     public async Task BadResponseTest()
     {
+        Contract StockContract1 = new()
+        {
+            SecurityType = SecurityType.Stock,
+            Symbol = "IBM",
+            Currency = "USD",
+            Exchange = "SMART"
+        };
+
         IInterReactClient client = await new InterReactClientConnector()
              .WithLogger(Logger)
              .ConnectAsync();

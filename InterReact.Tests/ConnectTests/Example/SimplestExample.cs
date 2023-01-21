@@ -11,7 +11,8 @@ public class SimplestExample
     public async Task Test()
     {
         // Create the InterReact client by first connecting to TWS/Gateway on the local host.
-        IInterReactClient interReact = await new InterReactClientConnector().ConnectAsync();
+        IInterReactClient interReact = await new InterReactClientConnector()
+            .ConnectAsync();
 
         // Create a contract object.
         Contract contract = new()
@@ -27,7 +28,8 @@ public class SimplestExample
             .Service
             .CreateTickObservable(contract)
             .OfTickClass(selector => selector.PriceTick)
-            .Subscribe(onNext: priceTick => Console.WriteLine($"Price = {priceTick.Price}"));
+            .Where(tick => tick.TickType == TickType.LastPrice)
+            .Subscribe(onNext: priceTick => Console.WriteLine($"Last Price = {priceTick.Price}"));
 
         //Console.WriteLine(Environment.NewLine + "press a key to exit...");
         //Console.ReadKey();

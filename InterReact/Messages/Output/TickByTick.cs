@@ -42,7 +42,7 @@ public sealed class TickByTickAllLast : TickByTick
 {
     public double Price { get; }
     public long Size { get; }
-    public TickAttribLast TickAttribLast { get; } = new TickAttribLast();
+    public TickAttribLast TickAttribLast { get; } = new();
     public string Exchange { get; } = "";
     public string SpecialConditions { get; } = "";
 
@@ -65,7 +65,7 @@ public sealed class TickByTickBidAsk : TickByTick
     public double AskPrice { get; }
     public long BidSize { get; }
     public long AskSize { get; }
-    public TickAttribBidAsk TickAttribBidAsk { get; } = new TickAttribBidAsk();
+    public TickAttribBidAsk TickAttribBidAsk { get; } = new();
 
     internal TickByTickBidAsk() { }
 

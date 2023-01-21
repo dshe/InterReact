@@ -7,28 +7,28 @@ public class NoConnect : ConnectTestBase
     [Fact]
     public async Task CancelTest()
     {
-        var ct = new CancellationToken(true);
+        CancellationToken ct = new(true);
 
         var task = new InterReactClientConnector()
             .WithPort(999)
             .WithLogger(Logger)
             .ConnectAsync(ct);
 
-        var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await task);
+        OperationCanceledException ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await task);
         Write(ex.ToString());
     }
 
     [Fact]
     public async Task TimeoutTest()
     {
-        var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        CancellationTokenSource cts = new(TimeSpan.FromMilliseconds(100));
  
         var task = new InterReactClientConnector()
             .WithPort(999)
             .WithLogger(Logger)
             .ConnectAsync(cts.Token);
- 
-        var ex = await Assert.ThrowsAsync<OperationCanceledException>(async () => await task);
+
+        OperationCanceledException ex = await Assert.ThrowsAsync<OperationCanceledException>(async () => await task);
         Write(ex.ToString());
     }
 
@@ -39,8 +39,8 @@ public class NoConnect : ConnectTestBase
             .WithLogger(Logger)
             .WithPort(999)
             .ConnectAsync();
- 
-        var ex = await Assert.ThrowsAsync<ArgumentException>(async () => await task);
+
+        ArgumentException ex = await Assert.ThrowsAsync<ArgumentException>(async () => await task);
         Write("Exception: " + ex.ToString());
     }
 }

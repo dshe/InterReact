@@ -19,7 +19,7 @@ public partial class Service
 
         Request.RequestMatchingSymbols(requestId, pattern);
 
-        var message = await task.ConfigureAwait(false);
+        IHasRequestId message = await task.ConfigureAwait(false);
 
         if (message is Alert alert)
             throw new Alert().ToException();

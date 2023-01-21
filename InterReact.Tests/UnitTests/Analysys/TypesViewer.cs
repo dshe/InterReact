@@ -64,9 +64,9 @@ public class Types_Viewer : UnitTestBase
     {
         Stringifier s = new(Logger);
 
-        var type = typeof(PriceCondition).GetTypeInfo();
+        TypeInfo type = typeof(PriceCondition).GetTypeInfo();
 
-        var instance = s.CreateInstance(type);
+        object instance = s.CreateInstance(type);
 
         Assert.NotNull(instance);
         Write(s.Stringify(instance));
@@ -77,7 +77,7 @@ public class Types_Viewer : UnitTestBase
     {
         Stringifier stringifier = new(Logger);
 
-        foreach (var type in Types.Where(t =>
+        foreach (TypeInfo? type in Types.Where(t =>
             t.IsClass && t.IsPublic && t.IsSealed && !t.IsAbstract && !t.ContainsGenericParameters &&
             t.Namespace == "InterReact").ToList())
         {
@@ -85,7 +85,7 @@ public class Types_Viewer : UnitTestBase
                 return;
             try
             {
-                var instance = stringifier.CreateInstance(type);
+                object instance = stringifier.CreateInstance(type);
                 Assert.NotNull(instance);
                 string str = stringifier.Stringify(instance);
                 Write($"Type: {str}");

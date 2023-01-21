@@ -22,7 +22,7 @@ public sealed class AccountValue
 public sealed class PortfolioValue
 {
     public string AccountName { get; init; } = "";
-    public Contract Contract { get; } = new Contract();
+    public Contract Contract { get; } = new();
     public double Position { get; init; }
     public double MarketPrice { get; init; }
     public double MarketValue { get; init; }

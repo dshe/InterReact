@@ -27,7 +27,7 @@ public class ToObservableSingleWithId : UnitTestBase
     [Fact]
     public async Task OkTest()
     {
-        var observable = subject.ToObservableSingleWithRequestId(
+        IObservable<SomeClass> observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId =>
             {
@@ -42,12 +42,12 @@ public class ToObservableSingleWithId : UnitTestBase
             })
             .Cast<SomeClass>();
 
-        var n1 = await observable.Materialize().ToList();
+        IList<Notification<SomeClass>> n1 = await observable.Materialize().ToList();
         Assert.Equal(2, n1.Count);
         Assert.Equal(NotificationKind.OnNext, n1[0].Kind);
         Assert.Equal(NotificationKind.OnCompleted, n1[1].Kind);
 
-        var n2 = await observable.Materialize().ToList();
+        IList<Notification<SomeClass>> n2 = await observable.Materialize().ToList();
         Assert.Equal(2, n2.Count);
         Assert.Equal(NotificationKind.OnNext, n2[0].Kind);
         Assert.Equal(NotificationKind.OnCompleted, n2[1].Kind);
@@ -60,7 +60,7 @@ public class ToObservableSingleWithId : UnitTestBase
     [Fact]
     public async Task FatalAlertTest()
     {
-        var observable = subject.ToObservableSingleWithRequestId(
+        IObservable<IHasRequestId> observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId =>
             {
@@ -74,7 +74,7 @@ public class ToObservableSingleWithId : UnitTestBase
                 Interlocked.Increment(ref unsubscribeCalls);
             });
 
-        var alertException = await Assert.ThrowsAsync<AlertException>(async () => await observable);
+        AlertException alertException = await Assert.ThrowsAsync<AlertException>(async () => await observable);
 
         Assert.IsType<Alert>(alertException.Alert);
         Assert.Equal(Id, alertException.Alert.RequestId);
@@ -86,7 +86,7 @@ public class ToObservableSingleWithId : UnitTestBase
     [Fact]
     public async Task NonFatalAlertTest()
     {
-        var observable = subject.ToObservableSingleWithRequestId(
+        IObservable<IHasRequestId> observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId =>
             {
@@ -101,7 +101,7 @@ public class ToObservableSingleWithId : UnitTestBase
                 Interlocked.Increment(ref unsubscribeCalls);
             });
 
-        var n1 = await observable.Materialize().ToList();
+        IList<Notification<IHasRequestId>> n1 = await observable.Materialize().ToList();
         Assert.Equal(3, n1.Count);
         Assert.Equal(NotificationKind.OnNext, n1[0].Kind);
         Assert.Equal(NotificationKind.OnNext, n1[1].Kind);
@@ -114,7 +114,7 @@ public class ToObservableSingleWithId : UnitTestBase
     [Fact]
     public async Task SubscribeErrorTest()
     {
-        var observable = subject.ToObservableSingleWithRequestId(
+        IObservable<IHasRequestId> observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId => { throw new BarrierPostPhaseException(); },
             requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -125,7 +125,7 @@ public class ToObservableSingleWithId : UnitTestBase
     [Fact]
     public async Task SourceErrorTest()
     {
-        var observable = subject.ToObservableSingleWithRequestId(
+        IObservable<IHasRequestId> observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId => subject.OnError(new BarrierPostPhaseException()),
             requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -136,7 +136,7 @@ public class ToObservableSingleWithId : UnitTestBase
     [Fact]
     public async Task SourceCompletedTest()
     {
-        var observable = subject.ToObservableSingleWithRequestId(
+        IObservable<IHasRequestId> observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId => subject.OnCompleted(),
             requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -152,9 +152,9 @@ public class ToObservableSingleWithId : UnitTestBase
     InlineData(100)]
     public async Task TimeoutTest(int ticks)
     {
-        var ts = ticks == -1 ? TimeSpan.Zero : TimeSpan.FromTicks(ticks);
+        TimeSpan ts = ticks == -1 ? TimeSpan.Zero : TimeSpan.FromTicks(ticks);
 
-        var observable = subject.ToObservableSingleWithRequestId(
+        IObservable<IHasRequestId> observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId => Interlocked.Increment(ref subscribeCalls),
             requestId => Interlocked.Increment(ref unsubscribeCalls));
@@ -168,7 +168,7 @@ public class ToObservableSingleWithId : UnitTestBase
     [Fact]
     public void UnsubscribeErrorTest()
     {
-        var observable = subject.ToObservableSingleWithRequestId(
+        IObservable<IHasRequestId> observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId => Interlocked.Increment(ref subscribeCalls),
             requestId => { throw new BarrierPostPhaseException(); });

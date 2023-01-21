@@ -17,7 +17,7 @@ public class Completed : TestCollectionBase
 
         Write($"Complete orders found: {orders.Count}.");
 
-        foreach (var order in orders)
+        foreach (CompletedOrder order in orders)
             Write(order.Stringify());
     }
 }

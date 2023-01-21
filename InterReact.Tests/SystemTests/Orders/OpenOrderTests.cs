@@ -18,7 +18,7 @@ public class Open : TestCollectionBase
 
         Write($"Open orders found: {list.Count}.");
 
-        foreach (var item in list)
+        foreach (object item in list)
             Write(item.Stringify());
     }
 }

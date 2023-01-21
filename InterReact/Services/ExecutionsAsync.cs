@@ -10,9 +10,9 @@ public partial class Service
 {
     public async Task<IList<IHasRequestId>> GetExecutionsAsync()
     {
-        var requestId = Request.GetNextId();
+        int requestId = Request.GetNextId();
 
-        var task = Response
+        Task<IList<IHasRequestId>> task = Response
             .OfType<IHasRequestId>()
             .Where(x => x.RequestId == requestId)
             .TakeUntil(m => m is ExecutionEnd || m is Alert)

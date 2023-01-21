@@ -11,44 +11,44 @@ public class Type_Viewer : UnitTestBase
     [Fact]
     public void View_Interfaces()
     {
-        foreach (var type in Assembly.DefinedTypes.Where(t => t.IsInterface).OrderBy(x => x.FullName))
+        foreach (TypeInfo type in Assembly.DefinedTypes.Where(t => t.IsInterface).OrderBy(x => x.FullName))
             Write(type.FullName!);
     }
 
     [Fact]
     public void View_Abstract()
     {
-        foreach (var type in Assembly.DefinedTypes.Where(t => t.IsAbstract && !t.IsSealed && !t.IsInterface).OrderBy(x => x.FullName))
+        foreach (TypeInfo type in Assembly.DefinedTypes.Where(t => t.IsAbstract && !t.IsSealed && !t.IsInterface).OrderBy(x => x.FullName))
             Write(type.FullName!);
     }
 
     [Fact]
     public void View_Static_Types()
     {
-        foreach (var type in Assembly.DefinedTypes.Where(t => t.IsAbstract && t.IsSealed).OrderBy(x => x.FullName))
+        foreach (TypeInfo type in Assembly.DefinedTypes.Where(t => t.IsAbstract && t.IsSealed).OrderBy(x => x.FullName))
             Write(type.FullName!);
     }
 
     [Fact]
     public void View_NonSealed_Types()
     {
-        foreach (var type in Assembly.DefinedTypes.Where(t => !t.IsSealed && !t.IsInterface && !t.IsAbstract).OrderBy(x => x.FullName))
+        foreach (TypeInfo type in Assembly.DefinedTypes.Where(t => !t.IsSealed && !t.IsInterface && !t.IsAbstract).OrderBy(x => x.FullName))
             Write(type.FullName!);
     }
 
     [Fact]
     public void View_Exported_Types()
     {
-        foreach (var type in Assembly.ExportedTypes.OrderBy(x => x.FullName))
+        foreach (TypeInfo type in Assembly.ExportedTypes.OrderBy(x => x.FullName))
             Write(type.FullName!);
     }
 
     [Fact]
     public void View_Public_Methods()
     {
-        var objectMethodNames = typeof(object).GetTypeInfo().DeclaredMethods.Select(method => method.Name).ToList();
+        List<string> objectMethodNames = typeof(object).GetTypeInfo().DeclaredMethods.Select(method => method.Name).ToList();
 
-        foreach (var type in Assembly.ExportedTypes.OrderBy(type => type.Name))
+        foreach (TypeInfo type in Assembly.ExportedTypes.OrderBy(type => type.Name))
         {
             type.GetTypeInfo().DeclaredMethods
                 .Where(method => method.IsPublic)

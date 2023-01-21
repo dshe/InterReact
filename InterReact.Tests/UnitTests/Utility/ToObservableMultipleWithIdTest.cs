@@ -27,7 +27,7 @@ public class ToObservableMultipleWithId : UnitTestBase
     [Fact]
     public async Task MultiOkTest()
     {
-        var observable = subject.ToObservableMultipleWithRequestId<SomeClassEnd>(
+        IObservable<IHasRequestId> observable = subject.ToObservableMultipleWithRequestId<SomeClassEnd>(
             () => Id,
             requestId =>
             {
@@ -37,7 +37,7 @@ public class ToObservableMultipleWithId : UnitTestBase
                 subject.OnNext(new SomeClass());
                 subject.OnNext(new SomeClassEnd());
             });
-        var list = await observable.ToList();
+        IList<IHasRequestId> list = await observable.ToList();
         Assert.Equal(2, list.Count);
         Assert.Equal(1, subscribeCalls);
     }
@@ -45,7 +45,7 @@ public class ToObservableMultipleWithId : UnitTestBase
     [Fact]
     public async Task NonFatalAlertMultiTest()
     {
-        var observable = subject.ToObservableMultipleWithRequestId<SomeClassEnd>(
+        IObservable<IHasRequestId> observable = subject.ToObservableMultipleWithRequestId<SomeClassEnd>(
             () => Id,
             requestId =>
             {
@@ -56,7 +56,7 @@ public class ToObservableMultipleWithId : UnitTestBase
                 subject.OnNext(new SomeClass());
                 subject.OnNext(new SomeClassEnd());
             });
-        var list = await observable.ToList();
+        IList<IHasRequestId> list = await observable.ToList();
         Assert.Equal(3, list.Count);
         Assert.Equal(1, subscribeCalls);
     }
@@ -64,7 +64,7 @@ public class ToObservableMultipleWithId : UnitTestBase
     [Fact]
     public async Task FatalAlertMultiTest()
     {
-        var observable = subject.ToObservableMultipleWithRequestId<SomeClassEnd>(
+        IObservable<IHasRequestId> observable = subject.ToObservableMultipleWithRequestId<SomeClassEnd>(
             () => Id,
             requestId =>
             {
@@ -74,14 +74,14 @@ public class ToObservableMultipleWithId : UnitTestBase
                 subject.OnError(new Alert(requestId, 1, "some error", true).ToException());
             });
 
-        var alertException = await Assert.ThrowsAsync<AlertException>(async () => await observable);
+        AlertException alertException = await Assert.ThrowsAsync<AlertException>(async () => await observable);
         Assert.Equal(1, subscribeCalls);
     }
 
     [Fact]
     public void UnsubscribeErrorTest()
     {
-        var observable = subject.ToObservableSingleWithRequestId(
+        IObservable<IHasRequestId> observable = subject.ToObservableSingleWithRequestId(
             () => Id,
             requestId => Interlocked.Increment(ref subscribeCalls),
             requestId => { throw new BarrierPostPhaseException(); });

@@ -11,25 +11,25 @@ public class ToCacheSourceTests : ReactiveTestBase
     [Fact]
     public void T00_Test()
     {
-        var scheduler = new TestScheduler();
-        var observer1 = scheduler.CreateObserver<string>();
-        var observer2 = scheduler.CreateObserver<string>();
+        TestScheduler scheduler = new();
+        ITestableObserver<string> observer1 = scheduler.CreateObserver<string>();
+        ITestableObserver<string> observer2 = scheduler.CreateObserver<string>();
 
-        var source = scheduler.CreateHotObservable(
+        ITestableObservable<string> source = scheduler.CreateHotObservable(
             OnNext(100, "one"),
             OnNext(200, "two"),
             OnNext(300, "three"));
 
-        var published = source.CacheSource(x => x);
-        var observable = published;
+        IObservable<string> published = source.CacheSource(x => x);
+        IObservable<string> observable = published;
 
         observable.Subscribe(observer1);
         scheduler.AdvanceBy(150);
         observable.Subscribe(observer2);
 
-        var expected1 = new[] { OnNext(100, "one") };
+        Recorded<System.Reactive.Notification<string>>[] expected1 = new[] { OnNext(100, "one") };
         Assert.Equal(expected1.ToList(), observer1.Messages);
-        var expected2 = new[] { OnNext(150, "one") };
+        Recorded<System.Reactive.Notification<string>>[] expected2 = new[] { OnNext(150, "one") };
         Assert.Equal(expected2.ToList(), observer2.Messages);
 
         scheduler.Start();
@@ -40,8 +40,8 @@ public class ToCacheSourceTests : ReactiveTestBase
     [Fact]
     public async Task T01_Empty()
     {
-        var observable = Observable.Empty<string>().CacheSource(x => x); // completes
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => await observable);
+        IObservable<string> observable = Observable.Empty<string>().CacheSource(x => x); // completes
+        InvalidOperationException ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => await observable);
         Assert.Equal("Sequence contains no elements.", ex.Message);
     }
 
@@ -66,8 +66,8 @@ public class ToCacheSourceTests : ReactiveTestBase
     [Fact]
     public async Task T03_Cache()
     {
-        var source = new Subject<string>();
-        var observable = source.CacheSource(x => x);
+        Subject<string> source = new();
+        IObservable<string> observable = source.CacheSource(x => x);
 
         observable.Subscribe(); // start cache
 
@@ -76,13 +76,11 @@ public class ToCacheSourceTests : ReactiveTestBase
         source.OnNext("3");
         source.OnNext("2"); // duplicate key
 
-        var first = await observable.FirstAsync();
+        string first = await observable.FirstAsync();
 
-        var list1 = await observable.Take(1).ToList();
+        IList<string> list1 = await observable.Take(1).ToList();
 
-        ;
-
-        var list = await observable.Take(TimeSpan.FromMilliseconds(10)).ToList();
+        IList<string> list = await observable.Take(TimeSpan.FromMilliseconds(10)).ToList();
         Assert.Equal(3, list.Count);
 
         //source.OnNext("10");
@@ -93,8 +91,8 @@ public class ToCacheSourceTests : ReactiveTestBase
     [Fact]
     public void T04_Throw_In_OnNext()
     {
-        var source = new Subject<string>();
-        var observable = source.CacheSource(x => x);
+        Subject<string> source = new();
+        IObservable<string> observable = source.CacheSource(x => x);
 
         observable.Subscribe(x =>
             throw new BarrierPostPhaseException("some exception"));

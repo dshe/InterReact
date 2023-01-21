@@ -9,11 +9,13 @@ public class MessageSendRate : ConnectTestBase
     [Fact]
     public async Task SendRateDefaultTest()
     {
-        var count = 0;
-        var client = await new InterReactClientConnector().WithLogger(Logger).ConnectAsync();
+        int count = 0;
+        IInterReactClient client = await new InterReactClientConnector()
+            .WithLogger(Logger)
+            .ConnectAsync();
         await Task.Delay(100);
 
-        var start = Stopwatch.GetTimestamp();
+        long start = Stopwatch.GetTimestamp();
         while (Stopwatch.GetTimestamp() - start < Stopwatch.Frequency)
         {
             client.Request.RequestGlobalCancel();
@@ -28,11 +30,14 @@ public class MessageSendRate : ConnectTestBase
     [Fact]
     public async Task SendRateChangeTest()
     {
-        var count = 0;
-        var client = await new InterReactClientConnector().WithLogger(Logger).WithMaxRequestsPerSecond(100).ConnectAsync();
+        int count = 0;
+        var client = await new InterReactClientConnector()
+            .WithLogger(Logger)
+            .WithMaxRequestsPerSecond(100)
+            .ConnectAsync();
         await Task.Delay(100);
 
-        var start = Stopwatch.GetTimestamp();
+        long start = Stopwatch.GetTimestamp();
         while (Stopwatch.GetTimestamp() - start < Stopwatch.Frequency)
         {
             client.Request.RequestGlobalCancel();

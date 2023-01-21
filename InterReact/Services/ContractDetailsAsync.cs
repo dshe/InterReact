@@ -47,7 +47,7 @@ public partial class Service
         }
 
         // await task outside lock
-        var result = await task.ConfigureAwait(false);
+        IList<IHasRequestId> result = await task.ConfigureAwait(false);
 
         lock (ContractDetailsCache)
         {

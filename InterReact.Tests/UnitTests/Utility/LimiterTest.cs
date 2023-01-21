@@ -9,16 +9,16 @@ public sealed class Limiter : UnitTestBase
 
     public double Limit(int rate, double duration)
     {
-        var limiter = new RingLimiter(Logger, rate);
-        var count = 0;
-        var start = Stopwatch.GetTimestamp();
+        RingLimiter limiter = new(Logger, rate);
+        int count = 0;
+        long start = Stopwatch.GetTimestamp();
         while ((Stopwatch.GetTimestamp() - start) / (double)Stopwatch.Frequency < duration)
         {
             limiter.Limit(() => Thread.Sleep(0));
             count++;
         }
-        var time = (Stopwatch.GetTimestamp() - start) / (double)Stopwatch.Frequency;
-        var freq = count / time;
+        double time = (Stopwatch.GetTimestamp() - start) / (double)Stopwatch.Frequency;
+        double freq = count / time;
         Logger.LogInformation("{Count} / {Time} => {Freq} ({Rate})", count, time, freq, rate);
         return freq;
     }

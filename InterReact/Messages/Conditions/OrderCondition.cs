@@ -1,6 +1,7 @@
 ﻿/* Copyright (C) 2019 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
  * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
 
+using System.Collections.Generic;
 using System.Linq;
 
 #pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
@@ -65,7 +66,7 @@ public abstract class OrderCondition
 
     public static OrderCondition? Parse(string cond)
     {
-        var conditions = Enum.GetValues(typeof(OrderConditionType)).OfType<OrderConditionType>().Select(t => Create(t)).ToList();
+        List<OrderCondition> conditions = Enum.GetValues(typeof(OrderConditionType)).OfType<OrderConditionType>().Select(t => Create(t)).ToList();
 
         return conditions.FirstOrDefault(c => c.TryParse(cond));
     }

@@ -13,6 +13,7 @@ public abstract class SystemTestsBase : IAsyncLifetime, IDisposable
     static SystemTestsBase()
     {
         ClientTask = new InterReactClientConnector().ConnectAsync();
+ 
         AppDomain.CurrentDomain.DomainUnload += async (sender, e) =>
         {
             if (!ClientTask.IsCompletedSuccessfully)
@@ -24,16 +25,17 @@ public abstract class SystemTestsBase : IAsyncLifetime, IDisposable
     protected SystemTestsBase(ITestOutputHelper output)
     {
         Write = output.WriteLine;
-        Logger = new LoggerFactory().AddMXLogger(Write, LogLevel.Debug).CreateLogger("Test");
+  
+        Logger = new LoggerFactory()
+            .AddMXLogger(Write, LogLevel.Debug)
+            .CreateLogger("Test");
+ 
         DynamicLogger.Add(Logger);
     }
 
     public async Task InitializeAsync()
     {
         await ClientTask.ConfigureAwait(false);
-        //if (Client.Config.IsDemoAccount)
-        //    Client.Request.RequestMarketDataType(MarketDataType.Delayed);
-        //subscription = Client.Response.Spy(Logger).Subscribe(Responses.Add);
     }
 
     public Task DisposeAsync() => Task.CompletedTask;
@@ -48,14 +50,4 @@ public abstract class SystemTestsBase : IAsyncLifetime, IDisposable
         if (disposing)
             DynamicLogger.Remove(Logger);
     }
-
-
-    protected readonly Contract Stock1 =
-        new() { SecurityType = SecurityType.Stock, Symbol = "IBM", Currency = "USD", Exchange = "SMART" };
-
-    protected readonly Contract Stock2 =
-        new() { SecurityType = SecurityType.Stock, Symbol = "AAPL", Currency = "USD", Exchange = "SMART" };
-
-    protected readonly Contract Forex1 =
-        new() { SecurityType = SecurityType.Cash, Symbol = "EUR", Currency = "USD", Exchange = "IDEALPRO" };
 }

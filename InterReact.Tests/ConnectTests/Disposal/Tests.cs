@@ -9,8 +9,12 @@ public class Disposal : ConnectTestBase
     [Fact]
     public async Task DisposalTest()
     {
-        var client = await new InterReactClientConnector().WithLogger(Logger).ConnectAsync();
+        var client = await new InterReactClientConnector()
+            .WithLogger(Logger)
+            .ConnectAsync();
+        
         await client.DisposeAsync();
+        
         Assert.ThrowsAny<Exception>(() => client.Request.RequestCurrentTime());
         await Assert.ThrowsAnyAsync<Exception>(async () => await client.Service.GetCurrentTimeAsync());
     }

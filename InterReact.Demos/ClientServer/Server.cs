@@ -28,15 +28,6 @@ internal class Server
         IRxSocketClient accept = await SocketServer.AcceptAllAsync().FirstAsync();
         Logger.LogCritical("Client connection accepted.");
 
-        //await Task.Delay(1000);
-
-        //var timer = Stopwatch.StartNew();
-        //List<byte> list = await accept.ReceiveAllAsync().TakeWhile(b => timer.ElapsedMilliseconds < 1000).ToListAsync();
-        //List<string> list = await accept.ReceiveAllAsync().ToStrings().TakeWhile(b => timer.ElapsedMilliseconds < 1000).ToListAsync();
-
-        //List<byte[]> list = await accept.ReceiveAllAsync().ToArraysFromBytesWithLengthPrefix().TakeWhile(b => timer.ElapsedMilliseconds < 1000).ToListAsync();
-        //List<string[]> list = await accept.ReceiveAllAsync().ToArraysFromBytesWithLengthPrefix().ToStringArrays().TakeWhile(b => timer.ElapsedMilliseconds < 1000).ToListAsync();
-
         string firstString = await accept.ReceiveAllAsync().ToStrings().FirstAsync();  
 
         if (firstString != "API")

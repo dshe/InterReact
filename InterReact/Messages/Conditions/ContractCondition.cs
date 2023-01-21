@@ -26,7 +26,7 @@ public abstract class ContractCondition : OperatorCondition
 
     public override bool Equals(object? obj)
     {
-        var other = obj as ContractCondition;
+        ContractCondition? other = obj as ContractCondition;
 
         if (other is null)
             return false;

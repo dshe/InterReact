@@ -3,7 +3,7 @@ namespace InterReact;
 
 public sealed class OrderState
 {
-    public OrderStatus Status { get; set; } = new OrderStatus();
+    public OrderStatus Status { get; set; } = new();
 
     /// <summary>
     /// Initial margin requirement for the order.

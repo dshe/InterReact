@@ -15,7 +15,7 @@ public class Executions : TestCollectionBase
            
         Write($"Executions found: {list.Count}.");
 
-        foreach (var item in list)
+        foreach (IHasRequestId item in list)
             Write(item.Stringify());
     }
 }

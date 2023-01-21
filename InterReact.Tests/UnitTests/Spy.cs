@@ -14,7 +14,7 @@ public static class SpyEx
         {
             Write("Subscribe.");
 
-            var sub = source.Subscribe(
+            IDisposable sub = source.Subscribe(
 
                 onNext: message =>
                 {

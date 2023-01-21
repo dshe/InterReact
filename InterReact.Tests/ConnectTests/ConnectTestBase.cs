@@ -11,21 +11,22 @@ public abstract class ConnectTestBase
     public ConnectTestBase(ITestOutputHelper output)
     {
         Write = output.WriteLine;
-        LoggerFactory = new LoggerFactory().AddMXLogger(Write, LogLevel.Debug);
-        Logger = LoggerFactory.CreateLogger("InterReact");
+        
+        LoggerFactory = new LoggerFactory()
+            .AddMXLogger(Write, LogLevel.Debug);
+        
+        Logger = LoggerFactory
+            .CreateLogger("InterReact");
     }
 
     protected async Task TestClient(IInterReactClient client)
     {
-        var instant = await client.Service.GetCurrentTimeAsync();
+        Instant instant = await client
+            .Service
+            .GetCurrentTimeAsync()
+            .WaitAsync(TimeSpan.FromSeconds(6));
+
         Write($"Test received time from CurrentTimeObservable: {instant}");
     }
 
-    protected Contract StockContract1 { get; } = new()
-    { 
-        SecurityType = SecurityType.Stock, 
-        Symbol = "IBM", 
-        Currency = "USD", 
-        Exchange = "SMART" 
-    };
 }

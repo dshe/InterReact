@@ -1,5 +1,6 @@
 ﻿using Microsoft.Reactive.Testing;
 using Stringification;
+using System.Reactive;
 using System.Reactive.Linq;
 
 namespace Reactive;
@@ -11,14 +12,14 @@ public sealed class ToShareSourceTests : ReactiveTestBase
     [Fact]
     public void T01_Consecutive()
     {
-        var testScheduler = new TestScheduler();
-        var observer1 = testScheduler.CreateObserver<string>();
-        var observer2 = testScheduler.CreateObserver<string>();
-        var observable = testScheduler.CreateColdObservable(
+        TestScheduler testScheduler = new();
+        ITestableObserver<string> observer1 = testScheduler.CreateObserver<string>();
+        ITestableObserver<string> observer2 = testScheduler.CreateObserver<string>();
+        ITestableObservable<string> observable = testScheduler.CreateColdObservable(
             OnNext(100, "1"),
             OnCompleted<string>(1000)
         );
-        var sharedObservable = observable.ShareSource();
+        IObservable<string> sharedObservable = observable.ShareSource();
 
         sharedObservable.SubscribeOn(testScheduler).Subscribe(observer1);
 
@@ -28,7 +29,7 @@ public sealed class ToShareSourceTests : ReactiveTestBase
 
         testScheduler.Start();
 
-        var expected = new[]
+        Recorded<Notification<string>>[] expected = new[]
         {
                 OnNext(101, "1"),
                 OnCompleted<string>(1001)
@@ -49,17 +50,17 @@ public sealed class ToShareSourceTests : ReactiveTestBase
     [Fact]
     public void T02_Overlapping()
     {
-        var testScheduler = new TestScheduler();
-        var observer1 = testScheduler.CreateObserver<string>();
-        var observer2 = testScheduler.CreateObserver<string>();
-        var observable = testScheduler.CreateColdObservable(
+        TestScheduler testScheduler = new();
+        ITestableObserver<string> observer1 = testScheduler.CreateObserver<string>();
+        ITestableObserver<string> observer2 = testScheduler.CreateObserver<string>();
+        ITestableObservable<string> observable = testScheduler.CreateColdObservable(
             OnNext(100, "1"),
             OnNext(200, "2"),
             OnNext(300, "3"),
             OnNext(400, "4"),
             OnNext(500, "5"),
             OnCompleted<string>(600));
-        var sharedObservable = observable.ShareSource();
+        IObservable<string> sharedObservable = observable.ShareSource();
 
         sharedObservable.SubscribeOn(testScheduler).Subscribe(observer1);
 
@@ -69,7 +70,7 @@ public sealed class ToShareSourceTests : ReactiveTestBase
 
         testScheduler.Start();
 
-        var expected = new[]
+        Recorded<Notification<string>>[] expected = new[]
         {
                 OnNext(101, "1"),
                 OnNext(201, "2"),
@@ -96,24 +97,24 @@ public sealed class ToShareSourceTests : ReactiveTestBase
     [Fact]
     public void T03_Concurrent()
     {
-        var testScheduler = new TestScheduler();
-        var observer1 = testScheduler.CreateObserver<string>();
-        var observer2 = testScheduler.CreateObserver<string>();
-        var observable = testScheduler.CreateColdObservable(
+        TestScheduler testScheduler = new();
+        ITestableObserver<string> observer1 = testScheduler.CreateObserver<string>();
+        ITestableObserver<string> observer2 = testScheduler.CreateObserver<string>();
+        ITestableObservable<string> observable = testScheduler.CreateColdObservable(
             OnNext(100, "1"),
             OnNext(200, "2"),
             OnNext(300, "3"),
             OnNext(400, "4"),
             OnNext(500, "5"),
             OnCompleted<string>(600));
-        var sharedObservable = observable.ShareSource();
+        IObservable<string> sharedObservable = observable.ShareSource();
 
         sharedObservable.SubscribeOn(testScheduler).Subscribe(observer1);
         sharedObservable.SubscribeOn(testScheduler).Subscribe(observer2);
 
         testScheduler.Start();
 
-        var expected = new[]
+        Recorded<Notification<string>>[] expected = new[]
         {
                 OnNext(101, "1"),
                 OnNext(201, "2"),
