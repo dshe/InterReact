@@ -40,8 +40,8 @@ IDisposable subscription = client
     .Service
     .CreateTickObservable(contract)
     .OfTickClass(selector => selector.PriceTick)
-    .Subscribe(onNext: priceTick => 
-        Console.WriteLine($"Price = {priceTick.Price}"));
+    .Where(tick => tick.TickType == TickType.LastPrice)
+    .Subscribe(onNext: priceTick => Console.WriteLine($"Last Price = {priceTick.Price}"));
 
 Console.WriteLine(Environment.NewLine + "press a key to exit...");
 Console.ReadKey();
