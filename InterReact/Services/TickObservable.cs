@@ -13,15 +13,14 @@ public partial class Service
     /// to cache the latest values for replay to new subscribers.
     /// Tick class may be selected by using the OfTickClass extension method.
     /// </summary>
-    public IObservable<IHasRequestId> CreateTickObservable(Contract contract,
+    public IObservable<object> CreateTickObservable(Contract contract,
         IEnumerable<GenericTickType>? genericTickTypes = null, IEnumerable<Tag>? options = null)
     {
         return Response
-            .ToObservableContinuousWithRequestId(
+            .ToObservableContinuousWithId(
                 Request.GetNextId,
-                requestId => Request.RequestMarketData(requestId, contract, genericTickTypes, false, false, options),
-                requestId => Request.CancelMarketData(requestId))
-            .Cast<IHasRequestId>();
+                id => Request.RequestMarketData(id, contract, genericTickTypes, false, false, options),
+                Request.CancelMarketData);
     }
 
     public static string GetTickCacheKey(IHasRequestId t) => t is Tick tick ? tick.TickType.ToString() : "";
@@ -29,8 +28,8 @@ public partial class Service
 
 public sealed class TickClassSelector
 {
-    private readonly IObservable<IHasRequestId> Source;
-    public TickClassSelector(IObservable<IHasRequestId> source) => Source = source;
+    private readonly IObservable<object> Source;
+    public TickClassSelector(IObservable<object> source) => Source = source;
     public IObservable<PriceTick> PriceTick => Source.OfType<PriceTick>();
     public IObservable<SizeTick> SizeTick => Source.OfType<SizeTick>();
     public IObservable<StringTick> StringTick => Source.OfType<StringTick>();
@@ -45,9 +44,9 @@ public sealed class TickClassSelector
     public IObservable<Alert> Alert => Source.OfType<Alert>();
 }
 
-public static partial class Extensionz
+public static partial class Extension
 {
-    public static IObservable<T> OfTickClass<T>(this IObservable<IHasRequestId> source, Func<TickClassSelector, IObservable<T>> selector)
+    public static IObservable<T> OfTickClass<T>(this IObservable<object> source, Func<TickClassSelector, IObservable<T>> selector)
     {
         ArgumentNullException.ThrowIfNull(selector);
         return selector(new TickClassSelector(source));

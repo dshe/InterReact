@@ -35,7 +35,7 @@ public sealed class InterReactClient : IInterReactClient
         await RxSocketClient!.DisposeAsync().ConfigureAwait(false);
 }
 
-public static partial class Extensionz
+public static partial class Extension
 {
     public static bool IsIBDemoPort(this int port) =>
         port == (int)IBDefaultPort.TwsDemoAccount || port == (int)IBDefaultPort.GatewayDemoAccount;

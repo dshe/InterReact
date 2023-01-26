@@ -1,4 +1,5 @@
-﻿using Stringification;
+﻿using InterReact;
+using Stringification;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 
@@ -15,22 +16,24 @@ public class BadData : ConnectTestBase
             .WithLogger(Logger)
             .ConnectAsync();
 
-        int requestId = client.Request.GetNextId();
+        int id = client.Request.GetNextId();
 
-        Task<IHasRequestId> task = client
+        Task<object> task = client
             .Response
-            .OfType<IHasRequestId>()
-            .Where(r => r.RequestId == requestId)
-            .Timeout(TimeSpan.FromSeconds(5))
+            .WithRequestId(id)
             .FirstAsync()
+            .Timeout(TimeSpan.FromSeconds(10))
             .ToTask();
 
-        client.Request.RequestMarketData(requestId, new Contract());
+        client.Request.RequestMarketData(id, new Contract() { Symbol = "InvalidSymbol" });
 
-        IHasRequestId message = await task;
-        Assert.IsType<Alert>(message);
-        
-        Write(message.Stringify());
+        object message = await task;
+
+        Write("Message: " + message.Stringify());
+
+        Alert alert = Assert.IsType<Alert>(message);
+
+        Assert.StartsWith("Error validating request", alert.Message);
     }
 
     [Fact]
@@ -49,16 +52,16 @@ public class BadData : ConnectTestBase
              .ConnectAsync();
 
         // this particular value will trigger a receive parse error
-        int requestId = int.MaxValue; 
+        int id = int.MaxValue; 
 
         Task<ContractDetails> task = client
             .Response
+            .WithRequestId(id)
             .OfType<ContractDetails>()
-            .Where(x => x.RequestId == requestId)
             .FirstAsync()
             .ToTask();
 
-        client.Request.RequestContractDetails(requestId, StockContract1);
+        client.Request.RequestContractDetails(id, StockContract1);
 
         await Assert.ThrowsAnyAsync<Exception>(async () => await task);
     }

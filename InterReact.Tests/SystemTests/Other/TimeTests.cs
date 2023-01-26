@@ -28,7 +28,10 @@ public class Time : TestCollectionBase
     [Fact]
     public async Task TimeAsyncTest()
     {
-        Instant dt = await Client.Service.GetCurrentTimeAsync();
+        Instant dt = await Client
+            .Service
+            .GetCurrentTimeAsync()
+            .WaitAsync(TimeSpan.FromSeconds(1));
 
         Write($"Time: {dt}.");
     }

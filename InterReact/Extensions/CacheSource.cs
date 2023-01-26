@@ -6,7 +6,7 @@ using System.Reactive.Subjects;
 
 namespace InterReact;
 
-public static partial class Extensionz
+public static partial class Extension
 {
     /// <summary>
     /// Returns an observable which shares a single subscription to the source observable.

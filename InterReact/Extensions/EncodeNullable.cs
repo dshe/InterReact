@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-public static partial class Extensionz
+public static partial class Extension
 {
     internal static int EncodeNullable(this int? i) => i ?? int.MaxValue;
     internal static int? DecodeNullable(this int i) => i is int.MaxValue ? null : i;

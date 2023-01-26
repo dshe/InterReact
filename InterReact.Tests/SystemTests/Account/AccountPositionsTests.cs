@@ -8,7 +8,7 @@ public class Positions : TestCollectionBase
 {
     public Positions(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    [Fact(Skip = "PositionsTest may interfere with PositionsTestService")]
+    [Fact(Skip = "PositionsTest may interfere with PositionsObservableTest")]
     public async Task PositionsTest()
     {
         Task<IList<Position>> task = Client

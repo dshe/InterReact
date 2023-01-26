@@ -40,6 +40,7 @@ public sealed class Request
         ArgumentNullException.ThrowIfNull(contract);
  
         RequestMessage m = CreateMessage();
+
         m.Write(RequestCode.RequestMarketData, "11", requestId,
             contract.ContractId, contract.Symbol, contract.SecurityType, contract.LastTradeDateOrContractMonth,
             contract.Strike, contract.Right, contract.Multiplier, contract.Exchange,

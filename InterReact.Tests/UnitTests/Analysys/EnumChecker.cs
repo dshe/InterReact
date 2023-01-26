@@ -6,8 +6,7 @@ public class Enum_Checker : UnitTestBase
 {
     public Enum_Checker(ITestOutputHelper output) : base(output) { }
 
-    private static readonly List<TypeInfo> EnumTypes =
-        typeof(InterReactClient)
+    private static readonly List<TypeInfo> EnumTypes = typeof(InterReactClient)
         .Assembly
         .DefinedTypes
         .Where(type => type.IsEnum)

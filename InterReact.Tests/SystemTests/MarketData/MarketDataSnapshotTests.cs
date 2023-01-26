@@ -7,55 +7,40 @@ public class MarketDataSnapshot : TestCollectionBase
 {
     public MarketDataSnapshot(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    private async Task<IList<IHasRequestId>> MakeSnapshotRequest(Contract contract)
-    {
-        int requestId = Client.Request.GetNextId();
-
-        Task<IList<IHasRequestId>> task = Client
-            .Response
-            .OfType<IHasRequestId>()
-            .Where(x => x.RequestId == requestId)
-            .TakeUntil(x => x is SnapshotEndTick || (x is Alert alert && alert.IsFatal))
-            .Where(x => x is not SnapshotEndTick)
-            .UndelayTicks()
-            .ToList()
-            .ToTask(); // start task
-
-        // Since the demo account does not have data subscriptions, use delayed data.
-        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
-
-        Client.Request.RequestMarketData(requestId, contract, isSnapshot: true);
-
-        IList<IHasRequestId> messages = await task;
-
-        // With delayed data, TickTypes will be delayed: 
-        // TickType.BidPrice => TickType.DelayedBidPrice.
-        // We can change them back to undelayed using UndelayTicks() operator:
-        IList<IHasRequestId> m = messages.UndelayTicks().ToList();
-
-        return messages;
-    }
-
     [Fact]
     public async Task TickSnapshotTest()
     {
         Contract contract = new()
         { 
             SecurityType = SecurityType.Stock, 
-            Symbol = "C", 
+            Symbol = "AMD", 
             Currency = "USD", 
             Exchange = "SMART" 
         };
 
-        IList<IHasRequestId> messages = await MakeSnapshotRequest(contract);
+        int id = Client.Request.GetNextId();
+
+        Task<IList<object>> task = Client
+            .Response
+            .WithRequestId(id)
+            .TakeUntil(x => x is SnapshotEndTick || (x is Alert alert && alert.IsFatal))
+            .Where(x => x is not SnapshotEndTick)
+            .ToList()
+            .ToTask(); // start task
+
+        Client.Request.RequestMarketData(id, contract, isSnapshot: true);
+
+        IList<object> messages = await task;
 
         Assert.Empty(messages.OfType<Alert>().Where(a => a.IsFatal));
 
         double? lastPrice = messages
             .OfType<PriceTick>()
-            .Where(x => x.TickType == TickType.LastPrice)
+            .Where(x => x.TickType == TickType.DelayedLastPrice)
             .FirstOrDefault()
             ?.Price;
+
+        Write("LastPrice: " + lastPrice);
 
         Assert.True(lastPrice != null && lastPrice > 0);
     }
@@ -66,17 +51,24 @@ public class MarketDataSnapshot : TestCollectionBase
         Contract contract = new()
         { 
             SecurityType = SecurityType.Stock, 
-            Symbol = "InvalidSymbol", 
-            Currency = "USD", 
-            Exchange = "SMART" 
+            Symbol = "InvalidSymbol",
+            Currency = "USD",
+            Exchange = "SMART"
         };
 
-        IList<IHasRequestId> messages = await MakeSnapshotRequest(contract);
- 
-        Alert fatalAlert = messages
+        int id = Client.Request.GetNextId();
+
+        Task<Alert> task = Client
+            .Response
+            .WithRequestId(id)
             .OfType<Alert>()
-            .Where(alert => alert.IsFatal)
-            .First();
+            .Where(x => x.IsFatal)
+            .FirstAsync()
+            .ToTask(); // start task
+
+        Client.Request.RequestMarketData(id, contract, isSnapshot: true);
+
+        Alert fatalAlert = await task;
  
         Assert.True(fatalAlert.Message.StartsWith("No security definition"));
     }

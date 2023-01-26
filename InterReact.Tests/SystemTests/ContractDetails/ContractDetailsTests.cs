@@ -7,22 +7,21 @@ public class ContractDetail : TestCollectionBase
 {
     public ContractDetail(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    private async Task<IList<IHasRequestId>> MakeContractDetailsRequest(Contract contract)
+    private async Task<IList<object>> MakeContractDetailsRequest(Contract contract)
     {
-        int requestId = Client.Request.GetNextId();
+        int id = Client.Request.GetNextId();
 
-        Task<IList<IHasRequestId>> task = Client
+        Task<IList<object>> task = Client
             .Response
-            .OfType<IHasRequestId>()
-            .Where(x => x.RequestId == requestId)
+            .WithRequestId(id)
             .TakeUntil(x => x is Alert || x is ContractDetailsEnd)
             .Where(x => x is not ContractDetailsEnd)
             .ToList()
             .ToTask(); // start task
 
-        Client.Request.RequestContractDetails(requestId, contract);
+        Client.Request.RequestContractDetails(id, contract);
 
-        IList<IHasRequestId> messages = await task;
+        IList<object> messages = await task;
 
         return messages;
     }
@@ -38,9 +37,9 @@ public class ContractDetail : TestCollectionBase
             Exchange = "SMART" 
         };
 
-        IList<IHasRequestId> messages = await MakeContractDetailsRequest(contract);
+        IList<object> messages = await MakeContractDetailsRequest(contract);
 
-        IHasRequestId message = messages.Single();
+        object message = messages.Single();
         Assert.IsType<ContractDetails>(message);
     }
 
@@ -54,7 +53,7 @@ public class ContractDetail : TestCollectionBase
             Currency = "USD" 
         };
 
-        IList<IHasRequestId> messages = await MakeContractDetailsRequest(contract);
+        IList<object> messages = await MakeContractDetailsRequest(contract);
 
         Assert.True(messages.Count > 1);
         Assert.True(messages.All(x => x is ContractDetails));
@@ -71,7 +70,7 @@ public class ContractDetail : TestCollectionBase
             Exchange = "SMART" 
         };
 
-        IList<IHasRequestId> messages = await MakeContractDetailsRequest(contract);
+        IList<object> messages = await MakeContractDetailsRequest(contract);
 
         Assert.Single(messages);
         Alert alert = Assert.IsType<Alert>(messages.Single());

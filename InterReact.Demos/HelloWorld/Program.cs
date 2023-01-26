@@ -40,15 +40,15 @@ Contract contract = new()
 
 client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
-int requestId = client.Request.GetNextId();
+int id = client.Request.GetNextId();
 
-client.Request.RequestMarketData(requestId, contract);
+client.Request.RequestMarketData(id, contract);
 
 // Find the latest ask price for the security.
 PriceTick askPriceTick = await client
     .Response
     .OfType<PriceTick>()
-    .Where(t => t.RequestId == requestId)
+    .Where(t => t.RequestId == id)
     .Where(x => x.TickType == TickType.AskPrice || x.TickType == TickType.DelayedAskPrice)
     .Timeout(TimeSpan.FromSeconds(30)) // max time to wait for an ask price
     .FirstAsync();
@@ -98,6 +98,6 @@ catch (TimeoutException)
     Console.WriteLine("\nTimeout! Order cancelled. Perhaps try again.\n");
 }
 
-client.Request.CancelMarketData(requestId);
+client.Request.CancelMarketData(id);
 await Task.Delay(2000);
 await client.DisposeAsync();

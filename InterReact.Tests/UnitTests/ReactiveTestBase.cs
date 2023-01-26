@@ -3,17 +3,22 @@ using Microsoft.Reactive.Testing;
 
 namespace UnitTests;
 
-public class ReactiveTestBase : ReactiveTest
+public class ReactiveUnitTestBase : ReactiveTest
 {
     protected readonly Action<string> Write;
+    protected readonly ILoggerFactory LoggerFactory;
     protected readonly ILogger Logger;
+    protected readonly TestScheduler testScheduler = new();
+    protected int start = 0, stop = 0;
 
-    public ReactiveTestBase(ITestOutputHelper output)
+    public ReactiveUnitTestBase(ITestOutputHelper output)
     {
         Write = output.WriteLine;
 
-        Logger = new LoggerFactory()
-            .AddMXLogger(Write, LogLevel.Debug)
+        LoggerFactory = new LoggerFactory()
+            .AddMXLogger(Write, LogLevel.Debug);
+
+        Logger = LoggerFactory
             .CreateLogger("ReactiveTest");
     }
 }

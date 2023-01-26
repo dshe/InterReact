@@ -1,4 +1,7 @@
-﻿using System.Reactive.Linq;
+﻿using InterReact;
+using System;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 
 namespace MarketData;
 
@@ -6,44 +9,29 @@ public class MarketData : TestCollectionBase
 {
     public MarketData(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    private async Task<List<IHasRequestId>> MakeMarketDataRequest(Contract contract)
-    {
-        int requestId = Client.Request.GetNextId();
-
-        List<IHasRequestId> messages = new();
-
-        IDisposable subscription = Client
-            .Response
-            .OfType<IHasRequestId>()
-            .Where(x => x.RequestId == requestId)
-            .Subscribe(m =>
-            {
-                messages.Add(m);
-            });
-
-        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
-
-        Client.Request.RequestMarketData(requestId, contract, isSnapshot: false);
-
-        await Task.Delay(5000);
-
-        subscription.Dispose();
-
-        return messages;
-    }
-
     [Fact]
     public async Task TicksTest()
     {
         Contract contract = new()
         { 
             SecurityType = SecurityType.Stock, 
-            Symbol = "X", 
+            Symbol = "SPY", 
             Currency = "USD", 
             Exchange = "SMART" 
         };
 
-        List<IHasRequestId> messages = await MakeMarketDataRequest(contract);
+        int id = Client.Request.GetNextId();
+
+        Task<IList<object>> task = Client
+            .Response
+            .WithRequestId(id)
+            .Take(TimeSpan.FromSeconds(3))
+            .ToList()
+            .ToTask();
+
+        Client.Request.RequestMarketData(id, contract, isSnapshot: false);
+
+        IList<object> messages = await task;
 
         Assert.Empty(messages.OfType<Alert>().Where(a => a.IsFatal));
 
@@ -52,6 +40,8 @@ public class MarketData : TestCollectionBase
                   .Where(x => x.TickType == TickType.DelayedLastPrice)
                   .FirstOrDefault()
                   ?.Price;
+        
+        Write("LastPrice: " + lastPrice);
 
         Assert.True(lastPrice != null && lastPrice > 0);
     }
@@ -67,12 +57,23 @@ public class MarketData : TestCollectionBase
             Exchange = "SMART" 
         };
 
-        List<IHasRequestId> messages = await MakeMarketDataRequest(contract);
+        int id = Client.Request.GetNextId();
 
-        IHasRequestId m = messages.Single();
+        Task<IList<object>> task = Client
+            .Response
+            .WithRequestId(id)
+            .Take(TimeSpan.FromSeconds(2))
+            .ToList()
+            .ToTask();
 
+        Client.Request.RequestMarketData(id, contract, isSnapshot: false);
+
+        IList<object> messages = await task;
+ 
         Alert alert = messages.OfType<Alert>().Single();
         Assert.True(alert.IsFatal);
         Write(alert.Message);
+
+        Assert.StartsWith("No security definition has been found", alert.Message);
     }
 }

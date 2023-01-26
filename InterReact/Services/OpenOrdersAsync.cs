@@ -8,7 +8,7 @@ namespace InterReact;
 public partial class Service
 {
     /// <summary>
-    /// Rreturns open orders and order status reports.
+    /// Returns open orders and order status reports.
     /// https://interactivebrokers.github.io/tws-api/open_orders.html
     /// </summary>
     public async Task<IList<object>> GetOpenOrdersAsync(OpenOrdersRequestType type = OpenOrdersRequestType.AllOpenOrders)
@@ -18,7 +18,7 @@ public partial class Service
                         m is OrderStatusReport ||
                         m is OrderBound ||
                         m is OpenOrderEnd)
-            .TakeWhile(m => m is not OpenOrderEnd)
+            .TakeWhile(m => m is not OpenOrderEnd) // exclusive
             .ToList()
             .ToTask();
 

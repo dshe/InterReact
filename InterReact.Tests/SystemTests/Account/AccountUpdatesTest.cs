@@ -8,7 +8,7 @@ public class Updates : TestCollectionBase
 {
     public Updates(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    [Fact(Skip ="AccountUpdates may interfere with AccountUpdatesService")]
+    [Fact(Skip ="AccountUpdates may interfere with AccountUpdatesObservableTest")]
     public async Task AccountUpdatesTest()
     {
         Task<IList<object>> task = Client

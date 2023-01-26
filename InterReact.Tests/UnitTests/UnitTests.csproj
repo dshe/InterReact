@@ -18,7 +18,6 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-	 <Folder Include="Extensions\" />
   </ItemGroup>
 
 </Project>

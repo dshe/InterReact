@@ -7,9 +7,10 @@ public partial class Service
 {
     /// <summary>
     /// An observable which, upon subscription, continually emits account update objects for all accounts:
-    /// AccountValue, PortfolioValue, AccountUpdateTime and AccountUpdateEnd.
+    /// Objects: AccountValue, PortfolioValue, AccountUpdateTime and AccountUpdateEnd.
     /// AccountUpdateEnd is emitted after the initial values for each account have been emitted.
-    /// Multiple subscribers are supported. The latest values are cached for replay to new subscribers.
+    /// The latest values are cached for replay to new subscribers.
+    /// Multiple subscribers are supported. 
     /// </summary>
     public IObservable<object> AccountUpdatesObservable { get; }
 

@@ -11,21 +11,20 @@ public class Summary : TestCollectionBase
     [Fact]
     public async Task AccountSummaryTest()
     {
-        int requestId = Client.Request.GetNextId();
+        int id = Client.Request.GetNextId();
 
-        Task<IList<IHasRequestId>> task = Client
+        Task<IList<object>> task = Client
             .Response
-            .OfType<IHasRequestId>()
-            .Where(t => t.RequestId == requestId)
+            .WithRequestId(id)
             .TakeWhile(o => o is not AccountSummaryEnd)
             .ToList()
             .ToTask();
 
-        Client.Request.RequestAccountSummary(requestId);
+        Client.Request.RequestAccountSummary(id);
 
-        IList<IHasRequestId> list = await task; 
+        IList<object> list = await task; 
 
-        Client.Request.CancelAccountSummary(requestId);
+        Client.Request.CancelAccountSummary(id);
 
         Assert.NotEmpty(list);
 
@@ -36,7 +35,7 @@ public class Summary : TestCollectionBase
     [Fact]
     public async Task AccountSummaryObservableTest()
     {
-        IList<IHasRequestId> list = await Client
+        IList<object> list = await Client
             .Service
             .AccountSummaryObservable
             .TakeWhile(o => o is not AccountSummaryEnd)

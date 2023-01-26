@@ -7,7 +7,7 @@ namespace InterReact;
 public partial class Service
 {
     /// <summary>
-    /// Places an order and returns an object which can be used to monitor the order.
+    /// Places an order and returns an OrderMonitor object which can be used to monitor the order.
     /// </summary>
     public OrderMonitor PlaceOrder(Order order, Contract contract) =>
         new(Request, Response, order, contract);

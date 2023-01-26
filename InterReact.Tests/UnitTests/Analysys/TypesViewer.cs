@@ -10,8 +10,7 @@ public class Types_Viewer : UnitTestBase
 {
     public Types_Viewer(ITestOutputHelper output) : base(output) { }
 
-    private static readonly List<TypeInfo> Types =
-        typeof(InterReactClient)
+    private static readonly List<TypeInfo> Types = typeof(InterReactClient)
         .Assembly
         .DefinedTypes
         .Where(t => !t.Name.Contains("<>"))
@@ -23,9 +22,7 @@ public class Types_Viewer : UnitTestBase
         foreach (var group in Types
             .Select(ti => ti.GetCustomAttributes(true).Select(a => new { a, ti }))
             .SelectMany(x => x)
-            .Where(x =>
-                !(x.a is CompilerGeneratedAttribute) &&
-                !(x.a is ExtensionAttribute))
+            .Where(x => !(x.a is CompilerGeneratedAttribute || x.a is ExtensionAttribute))
             .GroupBy(x => x.a))
         {
             Write(group.Key.ToString()!);
@@ -38,11 +35,14 @@ public class Types_Viewer : UnitTestBase
     public void List_Member_Attributes()
     {
         foreach (var group in Types
-            .Select(t => t.DeclaredMembers.Where(m => !m.Name.StartsWith("<")).OfType<MemberInfo>().Select(m => (t, m)))
+            .Select(t => t.DeclaredMembers
+                .Where(m => !m.Name.StartsWith("<"))
+                .OfType<MemberInfo>().Select(m => (t, m)))
             .SelectMany(x => x)
             //.Where(x => x.m is not null) //.OfType<(TypeInfo, MemberInfo)>()
 
-            .Select(x => x.m.GetCustomAttributes(false).Select(q => new { type = x.t, method = x.m, attr = q }))
+            .Select(x => x.m.GetCustomAttributes(false)
+                .Select(q => new { type = x.t, method = x.m, attr = q }))
             .SelectMany(x => x)
             .Where(x => !(
                     x.attr is CompilerGeneratedAttribute ||
@@ -57,7 +57,6 @@ public class Types_Viewer : UnitTestBase
                 Write($"     {a.type?.FullName}  {a.method?.Name}");
         }
     }
-
 
     [Fact]
     public void Auto_Type_And_Stringify_One()
@@ -78,7 +77,11 @@ public class Types_Viewer : UnitTestBase
         Stringifier stringifier = new(Logger);
 
         foreach (TypeInfo? type in Types.Where(t =>
-            t.IsClass && t.IsPublic && t.IsSealed && !t.IsAbstract && !t.ContainsGenericParameters &&
+            t.IsClass && 
+            t.IsPublic && 
+            t.IsSealed && 
+            !t.IsAbstract && 
+            !t.ContainsGenericParameters &&
             t.Namespace == "InterReact").ToList())
         {
             if (type == typeof(OrderMonitor))
@@ -98,5 +101,4 @@ public class Types_Viewer : UnitTestBase
             }
         }
     }
-
 }

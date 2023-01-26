@@ -9,7 +9,7 @@ namespace InterReact;
 
 public partial class Service
 {
-    private readonly Dictionary<string, Task<IList<IHasRequestId>>> ContractDetailsCache = new();
+    private readonly Dictionary<string, Task<IList<object>>> ContractDetailsCache = new();
 
     /// <summary>
     /// Returns a list of one or more contract details objects using the supplied 
@@ -36,7 +36,7 @@ public partial class Service
 
         string key = contract.Stringify();
         
-        Task<IList<IHasRequestId>>? task;
+        Task<IList<object>>? task;
         lock (ContractDetailsCache)
         {
             if (!ContractDetailsCache.TryGetValue(key, out task))
@@ -47,7 +47,7 @@ public partial class Service
         }
 
         // await task outside lock
-        IList<IHasRequestId> result = await task.ConfigureAwait(false);
+        IList<object> result = await task.ConfigureAwait(false);
 
         lock (ContractDetailsCache)
         {
@@ -60,21 +60,19 @@ public partial class Service
         }
     }
 
-    private Task<IList<IHasRequestId>> GetContractDetailsTask(Contract contract)
+    private Task<IList<object>> GetContractDetailsTask(Contract contract)
     {
-        int requestId = Request.GetNextId();
+        int id = Request.GetNextId();
 
-        Task<IList<IHasRequestId>> task = Response
-            .OfType<IHasRequestId>()
-            .Where(m => m.RequestId == requestId)
+        Task<IList<object>> task = Response
+            .WithRequestId(id)
             .TakeUntil(m => m is ContractDetailsEnd || m is Alert)
             .Where(m => m is ContractDetails || m is Alert)
             .ToList()
             .ToTask();
 
-        Request.RequestContractDetails(requestId, contract);
+        Request.RequestContractDetails(id, contract);
 
         return task;
     }
-
 }

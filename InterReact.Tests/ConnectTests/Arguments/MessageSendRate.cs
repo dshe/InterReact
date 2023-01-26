@@ -18,7 +18,7 @@ public class MessageSendRate : ConnectTestBase
         long start = Stopwatch.GetTimestamp();
         while (Stopwatch.GetTimestamp() - start < Stopwatch.Frequency)
         {
-            client.Request.RequestGlobalCancel();
+            client.Request.RequestGlobalCancel(); // arbitrary
             count++;
         }
         Write($"message send rate: {count:0} messages/second.");
@@ -35,12 +35,13 @@ public class MessageSendRate : ConnectTestBase
             .WithLogger(Logger)
             .WithMaxRequestsPerSecond(100)
             .ConnectAsync();
+
         await Task.Delay(100);
 
         long start = Stopwatch.GetTimestamp();
         while (Stopwatch.GetTimestamp() - start < Stopwatch.Frequency)
         {
-            client.Request.RequestGlobalCancel();
+            client.Request.CancelNewsBulletins(); // arbitrary
             count++;
         }
 

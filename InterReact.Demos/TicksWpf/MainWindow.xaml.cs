@@ -186,7 +186,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private void SubscribeToTicks(Contract contract)
     {
         // Create the observable which will emit realtime updates.
-        IConnectableObservable<IHasRequestId> ticks = Client!
+        IConnectableObservable<object> ticks = Client!
             .Service
             .CreateTickObservable(contract)
             .UndelayTicks()
@@ -198,7 +198,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         TicksConnection = ticks.Connect();
     }
 
-    private void SubscribeToTicks(IObservable<IHasRequestId> ticks)
+    private void SubscribeToTicks(IObservable<object> ticks)
     {
         ticks.Subscribe(onNext: _ => { }, onError: exception => MessageBox.Show($"Fatal: {exception.Message}"));
         ticks.OfTickClass(t => t.Alert).Subscribe(alert => MessageBox.Show($"{alert.Message}"));

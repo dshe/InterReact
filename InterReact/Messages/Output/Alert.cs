@@ -9,20 +9,22 @@ namespace InterReact;
 /// For messages which are not associated with a particular request or order, the Id is -1.
 /// In order to be compatible with the IHasRequestId and IHasOrderId interfaces, both requestId and orderId properties are included in Alert.
 /// </summary>
-public sealed class Alert : IHasRequestId, IHasOrderId, ITick
+public sealed class Alert : IHasRequestId, IHasOrderId
 {
     public int RequestId { get; }
     public int OrderId { get; }
     public string Message { get; } = "";
     public int Code { get; }
     public bool IsFatal { get; }
+    public Instant Time { get; }
     internal Alert() { }
-    internal Alert(int id, int code, string message, bool isFatal)
+    internal Alert(int id, int code, string message, bool isFatal, Instant time)
     {
         RequestId = OrderId = id;
         Code = code;
         Message = message;
         IsFatal = isFatal;
+        Time = time;
     }
 
     internal static Alert Create(ResponseReader r)
@@ -33,7 +35,8 @@ public sealed class Alert : IHasRequestId, IHasOrderId, ITick
         string msg = r.ReadString();
         if (r.Connector.SupportsServerVersion(ServerVersion.ENCODE_MSG_ASCII7))
             msg = Regex.Unescape(msg);
-        return new Alert(id, code, msg, IsFatalCode(id, code));
+        Instant time = r.Connector.Clock.GetCurrentInstant();
+        return new Alert(id, code, msg, IsFatalCode(id, code), time);
     }
 
     // https://interactivebrokers.github.io/tws-api/message_codes.html

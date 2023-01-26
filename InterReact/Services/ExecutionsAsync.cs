@@ -8,30 +8,24 @@ namespace InterReact;
 
 public partial class Service
 {
-    public async Task<IList<IHasRequestId>> GetExecutionsAsync()
+    /// <summary>
+    /// Returns Execution, CommissionReport, and possibly Alert objects. 
+    /// </summary>
+    public async Task<IList<object>> GetExecutionsAsync()
     {
-        int requestId = Request.GetNextId();
+        int id = Request.GetNextId();
 
-        Task<IList<IHasRequestId>> task = Response
-            .OfType<IHasRequestId>()
-            .Where(x => x.RequestId == requestId)
-            .TakeUntil(m => m is ExecutionEnd || m is Alert)
-            .Where(m => m is not ExecutionEnd)
+        Task<IList<object>> task = Response
+            .WithRequestId(id)
+            .TakeWhile(m => m is not ExecutionEnd)
             .ToList()
             .ToTask();
 
-        // may return Execution, CommissionReport, ExecutionEnd and/or Alert objects.
-        Request.RequestExecutions(requestId);
+        Request.RequestExecutions(id);
 
-        IList<IHasRequestId> list = await task.ConfigureAwait(false);
-
-        Alert? alert = list.OfType<Alert>().FirstOrDefault();
-        if (alert != null)
-            throw new Alert().ToException();
-
+        IList<object> list = await task.ConfigureAwait(false);
+ 
         return list;
     }
-
-
 }
 

@@ -36,7 +36,7 @@ public sealed record InterReactClientConnector
     /// </summary>
     public InterReactClientConnector WithPort(int port) => this with { Ports = new[] { port } };
 
-    public int ClientId { get; private set; } = RandomNumberGenerator.GetInt32(100000, 999999);
+    public int ClientId { get; private set; } = RandomNumberGenerator.GetInt32(100000, 1000000);
     /// <summary>
     /// Specify a client id.
     /// Up to 8 clients can attach to TWS/Gateway. Each client requires a unique Id. The default Id is random.

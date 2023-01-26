@@ -30,7 +30,7 @@ public class ContractDetailsAsync : TestCollectionBase
     {
         Contract contract = new() 
         { 
-            SecurityType = SecurityType.Stock, 
+            SecurityType = SecurityType.Stock,
             Symbol = "MSFT", 
             Currency = "USD" 
         };
@@ -63,8 +63,8 @@ public class ContractDetailsAsync : TestCollectionBase
         Contract contract = new()
         {
             SecurityType = SecurityType.Stock, 
-            Symbol = "IBM", 
-            Currency = "EUR" 
+            Symbol = "X", 
+            Currency = "USD" 
         };
 
         await Assert.ThrowsAsync<TimeoutException>(async () => await Client

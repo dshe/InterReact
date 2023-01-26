@@ -3,22 +3,23 @@ using Stringification;
 using System.Reactive;
 using System.Reactive.Linq;
 
-namespace Reactive;
+namespace Extension;
 
-public sealed class ToShareSourceTests : ReactiveTestBase
+public sealed class ShareSourceTests : ReactiveUnitTestBase
 {
-    public ToShareSourceTests(ITestOutputHelper output) : base(output) { }
+    public ShareSourceTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public void T01_Consecutive()
     {
-        TestScheduler testScheduler = new();
         ITestableObserver<string> observer1 = testScheduler.CreateObserver<string>();
         ITestableObserver<string> observer2 = testScheduler.CreateObserver<string>();
+
         ITestableObservable<string> observable = testScheduler.CreateColdObservable(
             OnNext(100, "1"),
             OnCompleted<string>(1000)
         );
+
         IObservable<string> sharedObservable = observable.ShareSource();
 
         sharedObservable.SubscribeOn(testScheduler).Subscribe(observer1);
@@ -50,9 +51,9 @@ public sealed class ToShareSourceTests : ReactiveTestBase
     [Fact]
     public void T02_Overlapping()
     {
-        TestScheduler testScheduler = new();
         ITestableObserver<string> observer1 = testScheduler.CreateObserver<string>();
         ITestableObserver<string> observer2 = testScheduler.CreateObserver<string>();
+
         ITestableObservable<string> observable = testScheduler.CreateColdObservable(
             OnNext(100, "1"),
             OnNext(200, "2"),
@@ -60,6 +61,7 @@ public sealed class ToShareSourceTests : ReactiveTestBase
             OnNext(400, "4"),
             OnNext(500, "5"),
             OnCompleted<string>(600));
+
         IObservable<string> sharedObservable = observable.ShareSource();
 
         sharedObservable.SubscribeOn(testScheduler).Subscribe(observer1);
@@ -97,9 +99,9 @@ public sealed class ToShareSourceTests : ReactiveTestBase
     [Fact]
     public void T03_Concurrent()
     {
-        TestScheduler testScheduler = new();
         ITestableObserver<string> observer1 = testScheduler.CreateObserver<string>();
         ITestableObserver<string> observer2 = testScheduler.CreateObserver<string>();
+
         ITestableObservable<string> observable = testScheduler.CreateColdObservable(
             OnNext(100, "1"),
             OnNext(200, "2"),
@@ -107,6 +109,7 @@ public sealed class ToShareSourceTests : ReactiveTestBase
             OnNext(400, "4"),
             OnNext(500, "5"),
             OnCompleted<string>(600));
+
         IObservable<string> sharedObservable = observable.ShareSource();
 
         sharedObservable.SubscribeOn(testScheduler).Subscribe(observer1);
@@ -123,9 +126,9 @@ public sealed class ToShareSourceTests : ReactiveTestBase
                 OnNext(501, "5"),
                 OnCompleted<string>(601)
             };
+
         Assert.Equal(expected.ToList(), observer1.Messages);
         Assert.Equal(expected.ToList(), observer2.Messages);
         Assert.Equal(1, observable.Subscriptions.Count);
     }
-
 }

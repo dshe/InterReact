@@ -25,7 +25,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UnitTests", "InterReact.Tes
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SystemTests", "InterReact.Tests\SystemTests\SystemTests.csproj", "{E69CA930-ED39-47BD-9750-20CF13CA0C07}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConnectTests", "InterReact.Tests\ConnectTests\ConnectTests.csproj", "{712988FA-680F-4443-AEFA-DB1186902F1C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConnectTests", "InterReact.Tests\ConnectTests\ConnectTests.csproj", "{712988FA-680F-4443-AEFA-DB1186902F1C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

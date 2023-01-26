@@ -9,17 +9,15 @@ public class MarketDataSnapshotAsync : TestCollectionBase
     [Fact]
     public async Task TickSnapshotAsyncTest()
     {
-        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
-
         Contract contract = new()
         { 
             SecurityType = SecurityType.Stock, 
-            Symbol = "A", 
+            Symbol = "NVDA", 
             Currency = "USD", 
             Exchange = "SMART" 
         };
 
-        IList<IHasRequestId> messages = await Client
+        IList<object> messages = await Client
             .Service
             .GetTickSnapshotAsync(contract);
 
@@ -37,8 +35,6 @@ public class MarketDataSnapshotAsync : TestCollectionBase
     [Fact]
     public async Task TickSnapshotAsyncInvalidTest()
     {
-        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
-
         Contract contract = new()
         { 
             SecurityType = SecurityType.Stock, 
@@ -47,7 +43,7 @@ public class MarketDataSnapshotAsync : TestCollectionBase
             Exchange = "SMART" 
         };
 
-        IList<IHasRequestId> messages = await Client
+        IList<object> messages = await Client
             .Service
             .GetTickSnapshotAsync(contract);
 

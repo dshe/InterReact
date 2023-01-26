@@ -12,22 +12,21 @@ public partial class Service
     /// Returns a snapshot of market data ticks.
     /// Tick class may be selected by using the OfTickClass extension method.
     /// </summary>
-    public async Task<IList<IHasRequestId>> GetTickSnapshotAsync(
+    public async Task<IList<object>> GetTickSnapshotAsync(
         Contract contract, IEnumerable<GenericTickType>? genericTickTypes = null, bool isRegulatorySnapshot = false, IEnumerable<Tag>? options = null)
     {
-        int requestId = Request.GetNextId();
+        int id = Request.GetNextId();
 
-        Task<IList<IHasRequestId>> task = Response
-            .OfType<IHasRequestId>()
-            .Where(x => x.RequestId == requestId)
+        Task<IList<object>> task = Response
+            .WithRequestId(id)
             .TakeUntil(x => x is SnapshotEndTick || (x is Alert alert && alert.IsFatal))
             .Where(m => m is not SnapshotEndTick)
             .ToList()
             .ToTask();
 
-        Request.RequestMarketData(requestId, contract, genericTickTypes, true, isRegulatorySnapshot, options);
+        Request.RequestMarketData(id, contract, genericTickTypes, true, isRegulatorySnapshot, options);
 
-        IList<IHasRequestId> list = await task.ConfigureAwait(false);
+        IList<object> list = await task.ConfigureAwait(false);
 
         return list;
     }

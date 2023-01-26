@@ -5,7 +5,8 @@ using System.Runtime.CompilerServices;
 
 [assembly: CLSCompliant(true)]
 
-[assembly: InternalsVisibleTo("InterReact.Tests")]
-[assembly: InternalsVisibleTo("UnitTests")]
+[assembly: InternalsVisibleTo("ConnectTests")]
 [assembly: InternalsVisibleTo("SystemTests")]
+[assembly: InternalsVisibleTo("UnitTests")]
+
 [assembly: InternalsVisibleTo("ClientServer")]

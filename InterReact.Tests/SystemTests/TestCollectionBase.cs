@@ -45,5 +45,12 @@ public class TestCollectionBase
         fixture.DynamicLogger.Add(Logger, true);
 
         Client = fixture.Client ?? throw new Exception("Client");
+
+        // Tests should run with the demo account since orders are submitted.
+        // The demo account does not have data subscriptions, so use delayed data.
+        // With delayed data, TickTypes will be delayed: 
+        // TickType.BidPrice => TickType.DelayedBidPrice.
+        // We can change them back to undelayed using UndelayTicks() operator.
+        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
     }
 }

@@ -17,8 +17,6 @@ public class MarketDataObservable : TestCollectionBase
             Exchange = "SMART" 
         };
 
-        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
-
         List<object> messages = new();
 
         IDisposable subscription = Client
@@ -47,8 +45,6 @@ public class MarketDataObservable : TestCollectionBase
     [Fact]
     public async Task TicksInvalidTest()
     {
-        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
-
         Contract contract = new()
         { 
             SecurityType = SecurityType.Stock, 

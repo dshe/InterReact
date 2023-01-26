@@ -19,10 +19,11 @@ public sealed class ContractDetailsTime
     private readonly ContractDetails ContractDetails;
     private readonly IScheduler TheScheduler;
     public DateTimeZone TimeZone { get; } // null if not available
-    public IReadOnlyList<ContractDetailsTimeEvent> Events { get; } = new List<ContractDetailsTimeEvent>();
     // empty if no hours or timeZone
-    public IObservable<ContractDetailsTimePeriod> ContractTimeObservable { get; } // completes immediately if no timeZone or hours
-
+    public IReadOnlyList<ContractDetailsTimeEvent> Events { get; } = new List<ContractDetailsTimeEvent>();
+    // completes immediately if no timeZone or hours
+    public IObservable<ContractDetailsTimePeriod> ContractTimeObservable { get; }
+ 
     public ContractDetailsTime(ContractDetails contractDetails, IScheduler? scheduler = null)
     {
         ArgumentNullException.ThrowIfNull(contractDetails);
@@ -31,7 +32,8 @@ public sealed class ContractDetailsTime
         ContractTimeObservable = CreateContractTimeObservable();
 
         string tzi = contractDetails.TimeZoneId;
-        if (string.IsNullOrEmpty(tzi)) // for expired Future Options there is no TimeZoneId(?)
+        // for expired Future Options there is no TimeZoneId(?)
+        if (string.IsNullOrEmpty(tzi))
             tzi = "Etc/GMT";
         TimeZone = DateTimeZoneProviders.Tzdb.GetZoneOrNull(tzi) ?? throw new ArgumentException($"TimeZoneId '{tzi}' not found.");
         Events = GetList();
