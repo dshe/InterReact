@@ -2,7 +2,6 @@
 
 public sealed class OrderComboLeg // input + output
 {
-    public double Price { get; } = double.MaxValue;
-    internal OrderComboLeg() { }
+    public double Price { get; }
     public OrderComboLeg(double price) => Price = price;
 }

@@ -7,7 +7,6 @@ public sealed class SoftDollarTiers : IHasRequestId
     public int RequestId { get; }
     public IList<SoftDollarTier> Tiers { get; } = new List<SoftDollarTier>();
 
-    internal SoftDollarTiers() { }
     internal SoftDollarTiers(ResponseReader r)
     {
         RequestId = r.ReadInt();

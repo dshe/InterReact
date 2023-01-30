@@ -6,8 +6,6 @@ public sealed class RerouteMktData : IHasRequestId
     public int ContractId { get; }
     public string Exchange { get; } = "";
 
-    internal RerouteMktData() { }
-
     internal RerouteMktData(ResponseReader r)
     {
         RequestId = r.ReadInt();

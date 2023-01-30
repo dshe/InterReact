@@ -7,8 +7,6 @@ public sealed class PnL : IHasRequestId
     public double? UnrealizedPnL { get; }
     public double? RealizedPnL { get; }
 
-    internal PnL() { }
-
     internal PnL(ResponseReader r)
     {
         RequestId = r.ReadInt();
@@ -28,8 +26,6 @@ public sealed class PnLSingle : IHasRequestId
     public double? UnrealizedPnL { get; }
     public double? RealizedPnL { get; }
     public double Value { get; }
-
-    internal PnLSingle() { }
 
     internal PnLSingle(ResponseReader r)
     {

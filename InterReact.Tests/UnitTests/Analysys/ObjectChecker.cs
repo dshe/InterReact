@@ -35,4 +35,20 @@ public class Interface_Checker : UnitTestBase
                 t.GetProperty("ExecutionId") is not null &&
                 t.GetInterface("IHasExecutionId") is null));
     }
+
+    [Fact]
+    public void Find_Classes_With_Tick_But_Not_Interface()
+    {
+        Assert.Empty(Types.Where(t =>
+                t.GetProperty("TickType") is not null &&
+                t.GetInterface("ITick") is null));
+    }
+
+    [Fact]
+    public void Find_Classes_With_TickByTick_But_Not_Interface()
+    {
+        Assert.Empty(Types.Where(t =>
+                t.GetProperty("TickByTickType") is not null &&
+                t.GetInterface("ITickByTick") is null));
+    }
 }

@@ -2,21 +2,22 @@
 
 namespace InterReact;
 
+// some of these properties require public setter to allow changing orders.
 public sealed class Order : IHasOrderId  // input + output
 {
     /// <summary>
     /// The OrderId property identifies the order.
     /// </summary>
-    public int OrderId { get; internal set; } // output
+    public int OrderId { get; set; } // output
 
     public bool Solicited { get; set; }
 
     /// <summary>
     /// The ClientId of the API client which places the order.
     /// </summary>
-    public int ClientId { get; internal set; } // output
+    public int ClientId { get; set; } // output
 
-    public int PermanentId { get; internal set; } // output
+    public int PermanentId { get; set; } // output
 
     // Primary attributes
 

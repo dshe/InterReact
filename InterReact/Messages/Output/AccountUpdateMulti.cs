@@ -3,12 +3,11 @@
 public sealed class AccountUpdateMulti : IHasRequestId
 {
     public int RequestId { get; }
-    public string Account { get; } = "";
-    public string ModelCode { get; } = "";
-    public string Key { get; } = "";
-    public string Value { get; } = "";
-    public string Currency { get; } = "";
-    internal AccountUpdateMulti() { }
+    public string Account { get; }
+    public string ModelCode { get; }
+    public string Key { get; }
+    public string Value { get; }
+    public string Currency { get; }
     internal AccountUpdateMulti(ResponseReader r)
     {
         r.IgnoreMessageVersion();

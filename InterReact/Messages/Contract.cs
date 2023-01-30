@@ -69,7 +69,7 @@ public sealed class Contract // input + output
     public string Description { get; set; } = "";
     public string IssuerId { get; set; } = "";
 
-    public string ComboLegsDescription { get; internal set; } = "";
+    public string ComboLegsDescription { get; set; } = "";
 
     /// <summary>
     /// The legs of a combined contract definition.
@@ -80,4 +80,21 @@ public sealed class Contract // input + output
     /// Delta and underlying price for Delta-Neutral combo orders.
     /// </summary>
     public DeltaNeutralContract? DeltaNeutralContract { get; set; }
+
+    public Contract() {}
+    internal Contract(ResponseReader r)
+    {
+        ContractId = r.ReadInt();
+        Symbol = r.ReadString();
+        SecurityType = r.ReadStringEnum<SecurityType>();
+        LastTradeDateOrContractMonth = r.ReadString();
+        Strike = r.ReadDouble();
+        Right = r.ReadStringEnum<OptionRightType>();
+        Multiplier = r.ReadString();
+        Exchange = r.ReadString();
+        Currency = r.ReadString();
+        LocalSymbol = r.ReadString();
+        TradingClass = r.ReadString();
+    }
+
 }

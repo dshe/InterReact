@@ -12,8 +12,6 @@ public sealed class HistoricalData : IHasRequestId
     public LocalDateTime End { get; }
     public IList<HistoricalDataBar> Bars { get; } = new List<HistoricalDataBar>();
 
-    internal HistoricalData() { }
-
     internal HistoricalData(ResponseReader r) // a one-shot deal
     {
         if (!r.Connector.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
@@ -39,7 +37,6 @@ public sealed class HistoricalDataBar
     public decimal WeightedAveragePrice { get; }
     public int Count { get; }
 
-    internal HistoricalDataBar() { }
     internal HistoricalDataBar(ResponseReader r)
     {
         Date = r.ReadLocalDateTime(HistoricalData.DateTimePattern);

@@ -2,21 +2,19 @@
 
 public sealed class WshEventDataIn
 {
-    public int ContractId { get; set; }
+    public int ContractId { get; init; }
 
-    public string Filter { get; set; } = "";
+    public string Filter { get; init; } = "";
 
-    public bool FillWatchlist { get; set; }
+    public bool FillWatchlist { get; init; }
 
-    public bool FillPortfolio { get; set; }
+    public bool FillPortfolio { get; init; }
 
-    public bool FillCompetitors { get; set; }
+    public bool FillCompetitors { get; init; }
 
-    public string StartDate { get; set; } = "";
+    public string StartDate { get; init; } = "";
 
-    public string EndDate { get; set; } = "";
+    public string EndDate { get; init; } = "";
 
-    public int TotalLimit { get; set; }
-
-    public WshEventDataIn() { }
+    public int TotalLimit { get; init; }
 }

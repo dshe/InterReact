@@ -18,9 +18,8 @@ public sealed class DeltaNeutralContract : IHasRequestId  // input + output
     /// The price of the underlying.
     /// </summary>
     public double Price { get; init; }
-
+    
     public DeltaNeutralContract() { }
-
     internal DeltaNeutralContract(ResponseReader r, bool independent)
     {
         if (independent)

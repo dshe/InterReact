@@ -1,9 +1,5 @@
 ﻿using Microsoft.Reactive.Testing;
 using System.Diagnostics;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 
 namespace Extension;
 
@@ -31,8 +27,8 @@ public class ToObservableContinuousWithId : ReactiveUnitTestBase
 
         var o1 = new SomeClass(42);
         var o2 = new SomeClass(100);
-        var o3 = new Alert(42, 0, "", false, now);
-        var o4 = new Alert(42, 0, "", true, now);
+        var o3 = new Alert { Id = 42, Time = now };
+        var o4 = new Alert { Id = 42, Time = now };
         var o5 = new SomeClass(42);
         var o6 = new SomeClass(99);
 

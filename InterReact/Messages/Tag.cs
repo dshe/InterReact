@@ -6,14 +6,13 @@ namespace InterReact;
 
 public sealed class Tag // input + output
 {
-    ///nint xx;
-    public string Name { get; } = "";
-    public string Value { get; } = "";
-    internal Tag() { }
-    public Tag(string name, string value)
+    public string Name { get; init; } = "";
+    public string Value { get; init; } = "";
+    public Tag() { }
+    internal Tag(ResponseReader r)
     {
-        Name = name;
-        Value = value;
+        Name = r.ReadString();
+        Value = r.ReadString();
     }
 
     internal static string Combine(IEnumerable<Tag>? tags)

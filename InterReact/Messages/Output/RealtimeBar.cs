@@ -14,8 +14,6 @@ public sealed class RealtimeBar : IHasRequestId
     public double Wap { get; }
     public int Count { get; }
 
-    internal RealtimeBar() { }
-
     internal RealtimeBar(ResponseReader r)
     {
         r.IgnoreMessageVersion();

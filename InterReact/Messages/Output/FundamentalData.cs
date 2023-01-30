@@ -6,8 +6,6 @@ public sealed class FundamentalData : IHasRequestId
 
     public string Data { get; } = "";
 
-    internal FundamentalData() { }
-
     internal FundamentalData(ResponseReader r)
     {
         r.IgnoreMessageVersion();

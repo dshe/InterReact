@@ -6,8 +6,6 @@ public sealed class NewsArticle : IHasRequestId
     public int ArticleType { get; }
     public string ArticleText { get; } = "";
 
-    internal NewsArticle() { }
-
     internal NewsArticle(ResponseReader r)
     {
         RequestId = r.ReadInt();

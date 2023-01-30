@@ -8,8 +8,6 @@ public sealed class HistoricalNews : IHasRequestId
     public string ArticleId { get; } = "";
     public string Headline { get; } = "";
 
-    internal HistoricalNews() { }
-
     internal HistoricalNews(ResponseReader r)
     {
         RequestId = r.ReadInt();

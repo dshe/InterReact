@@ -6,8 +6,6 @@ public sealed class MarketDepthExchanges
 {
     public IList<MarketDepthExchange> Exchanges { get; } = new List<MarketDepthExchange>();
 
-    internal MarketDepthExchanges() { }
-
     internal MarketDepthExchanges(ResponseReader r)
     {
         int n = r.ReadInt();
@@ -23,8 +21,6 @@ public sealed class MarketDepthExchange
     public string ListingExch { get; } = "";
     public string ServiceDataTyp { get; } = "";
     public int? AggGroup { get; } // The aggregated group
-
-    internal MarketDepthExchange() { }
 
     internal MarketDepthExchange(ResponseReader r)
     {

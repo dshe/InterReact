@@ -39,7 +39,6 @@ public sealed class ContractComboLeg // input + output
     public int ExemptCode { get; init; } = -1;
 
     public ContractComboLeg() { }
-
     internal ContractComboLeg(ResponseReader r)
     {
         ContractId = r.ReadInt();

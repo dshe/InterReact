@@ -189,7 +189,6 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         IConnectableObservable<object> ticks = Client!
             .Service
             .CreateTickObservable(contract)
-            .UndelayTicks()
             .ObserveOnDispatcher()
             .Publish();
 
@@ -204,10 +203,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         ticks.OfTickClass(t => t.Alert).Subscribe(alert => MessageBox.Show($"{alert.Message}"));
 
         IObservable<PriceTick> priceTicks = ticks.OfTickClass(t => t.PriceTick);
-        priceTicks.Where(t => t.TickType == TickType.BidPrice).Select(t => t.Price).Subscribe(p => BidPrice = p);
-        priceTicks.Where(t => t.TickType == TickType.AskPrice).Select(t => t.Price).Subscribe(p => AskPrice = p);
+        priceTicks.Where(t => t.TickType == TickType.BidPrice || t.TickType == TickType.DelayedBidPrice)
+            .Select(t => t.Price).Subscribe(p => BidPrice = p);
+        priceTicks.Where(t => t.TickType == TickType.AskPrice || t.TickType == TickType.DelayedAskPrice)
+            .Select(t => t.Price).Subscribe(p => AskPrice = p);
 
-        IObservable<double> lastPrices = priceTicks.Where(t => t.TickType == TickType.LastPrice).Select(t => t.Price);
+        IObservable<double> lastPrices = priceTicks.Where(t => t.TickType == TickType.LastPrice || t.TickType == TickType.DelayedLastPrice)
+            .Select(t => t.Price);
         lastPrices.Subscribe(p => LastPrice = p);
 
         IObservable<double> changes = lastPrices.Changes();

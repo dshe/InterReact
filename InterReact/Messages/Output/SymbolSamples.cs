@@ -7,7 +7,6 @@ public sealed class SymbolSamples : IHasRequestId
     public int RequestId { get; }
     public IList<ContractDescription> Descriptions { get; } = new List<ContractDescription>();
 
-    internal SymbolSamples() { }
     internal SymbolSamples(ResponseReader r)
     {
         RequestId = r.ReadInt();

@@ -3,22 +3,13 @@
 public sealed class MarketDepth : IHasRequestId
 {
     public int RequestId { get; }
-
     public int Position { get; } = -1; // stringify always
-
     public string MarketMaker { get; } = "";
-
     public MarketDepthOperation Operation { get; } = MarketDepthOperation.Undefined;
-
     public MarketDepthSide Side { get; } = MarketDepthSide.Undefined;
-
     public double Price { get; }
-
     public long Size { get; }
-
     public bool IsSmartDepth { get; }
-
-    internal MarketDepth() { }
 
     internal MarketDepth(ResponseReader r, bool isLevel2)
     {

@@ -1,6 +1,6 @@
 ﻿/*
-* Be sure that Trader Workstation (TWS) or Gateway is running on your computer.
-* Then ensure the following is set:
+* Be sure that Trader Workstation / Gateway (TWS) is running on your computer.
+* Then, in TWS, ensure the following is set:
 * File / GlobalConfiguration / API / Settings/ "Enable ActiveX and Socket Clients".
 */
 

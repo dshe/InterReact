@@ -9,8 +9,6 @@ public sealed class TickNews : IHasRequestId
     public string Headline { get; } = "";
     public string ExtraData { get; } = "";
 
-    internal TickNews() { }
-
     internal TickNews(ResponseReader r)
     {
         RequestId = r.ReadInt();

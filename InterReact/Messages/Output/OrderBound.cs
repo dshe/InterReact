@@ -6,8 +6,6 @@ public sealed class OrderBound : IHasOrderId
     public int ClientId { get; }
     public int OrderId { get; }
 
-    internal OrderBound() { }
-
     internal OrderBound(ResponseReader r)
     {
         OrderBoundId = r.ReadLong(); // was OrderId, but is a long here! ???

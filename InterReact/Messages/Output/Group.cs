@@ -4,8 +4,6 @@ public sealed class DisplayGroupUpdate : IHasRequestId
 {
     public int RequestId { get; }
     public string ContractInfo { get; } = "";
-
-    internal DisplayGroupUpdate() { }
     internal DisplayGroupUpdate(ResponseReader r)
     {
         r.IgnoreMessageVersion();

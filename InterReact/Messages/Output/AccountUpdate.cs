@@ -4,11 +4,10 @@ namespace InterReact;
 
 public sealed class AccountValue
 {
-    public string Key { get; init; } = "";
-    public string Value { get; init; } = "";
-    public string Currency { get; init; } = "";
-    public string AccountName { get; init; } = "";
-    public AccountValue() { } // testing
+    public string Key { get; }
+    public string Value { get; }
+    public string Currency { get; }
+    public string AccountName { get; }
     internal AccountValue(ResponseReader r)
     {
         int version = r.GetMessageVersion();
@@ -21,29 +20,18 @@ public sealed class AccountValue
 
 public sealed class PortfolioValue
 {
-    public string AccountName { get; init; } = "";
-    public Contract Contract { get; } = new();
+    public string AccountName { get; init; }
+    public Contract Contract { get; }
     public double Position { get; init; }
     public double MarketPrice { get; init; }
     public double MarketValue { get; init; }
     public double AverageCost { get; init; }
     public double UnrealizedPnl { get; init; }
     public double RealizedPnl { get; init; }
-    public PortfolioValue() { } // testing
     internal PortfolioValue(ResponseReader r)
     {
         r.RequireMessageVersion(8);
-        Contract.ContractId = r.ReadInt();
-        Contract.Symbol = r.ReadString();
-        Contract.SecurityType = r.ReadStringEnum<SecurityType>();
-        Contract.LastTradeDateOrContractMonth = r.ReadString();
-        Contract.Strike = r.ReadDouble();
-        Contract.Right = r.ReadStringEnum<OptionRightType>();
-        Contract.Multiplier = r.ReadString();
-        Contract.PrimaryExchange = r.ReadString();
-        Contract.Currency = r.ReadString();
-        Contract.LocalSymbol = r.ReadString();
-        Contract.TradingClass = r.ReadString();
+        Contract = new(r);
         Position = r.ReadDouble();
         MarketPrice = r.ReadDouble();
         MarketValue = r.ReadDouble();
@@ -58,7 +46,6 @@ public sealed class AccountUpdateTime
 {
     private static readonly LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HH:mm");
     public LocalTime Time { get; }
-    public AccountUpdateTime(LocalTime time) => Time = time; // testing
     internal AccountUpdateTime(ResponseReader r)
     {
         r.IgnoreMessageVersion();
@@ -72,7 +59,6 @@ public sealed class AccountUpdateTime
 public sealed class AccountUpdateEnd
 {
     public string AccountName { get; }
-    public AccountUpdateEnd(string account) => AccountName = account;  // testing
     internal AccountUpdateEnd(ResponseReader r)
     {
         r.IgnoreMessageVersion();

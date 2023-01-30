@@ -1,14 +1,12 @@
 ﻿namespace InterReact;
 
-public sealed class ReqParamsTick : Tick
+public sealed class TickRequestParams : IHasRequestId
 {
+    public int RequestId { get; }
     public double MinTick { get; }
     public string BboExchange { get; } = "";
     public int SnapshotPermissions { get; }
-
-    internal ReqParamsTick() { }
-
-    internal ReqParamsTick(ResponseReader r)
+    internal TickRequestParams(ResponseReader r)
     {
         RequestId = r.ReadInt();
         MinTick = r.ReadDouble();

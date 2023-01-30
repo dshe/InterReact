@@ -56,7 +56,7 @@ public partial class Service
                 return result.Cast<ContractDetails>().ToList();
             ContractDetailsCache.Remove(key); // try
 
-            throw new Alert().ToException();       
+            throw alert.ToException();       
         }
     }
 

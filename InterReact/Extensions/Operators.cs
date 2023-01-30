@@ -1,11 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Disposables;
+﻿using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
 
 namespace InterReact;
 
@@ -15,7 +9,12 @@ public static partial class Extension
     {
         return source
             .OfType<IHasRequestId>()
-            .Where(x => x.RequestId == id)
-            .Cast<object>();
+            .Where(x => x.RequestId == id);
+    }
+    internal static IObservable<object> WithOrderId(this IObservable<object> source, int id)
+    {
+        return source
+            .OfType<IHasOrderId>()
+            .Where(x => x.OrderId == id);
     }
 }

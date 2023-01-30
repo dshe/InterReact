@@ -7,17 +7,15 @@ namespace InterReact;
 /// </summary>
 public sealed class CommissionReport : IHasExecutionId, IHasOrderId
 {
-    public string ExecutionId { get; } = "";
+    public string ExecutionId { get; }
     /// OrderId is determined using the executionId from Execution.
     public int OrderId { get; }
     public double Commission { get; }
-    public string Currency { get; } = "";
+    public string Currency { get; }
     public double RealizedPnl { get; }
     public double Yield { get; }
     // Yet another date format: YYYYMMDD as integer.
     public int YieldRedemptionDate { get; }
-
-    internal CommissionReport() { }
     internal CommissionReport(ResponseReader r)
     {
         r.IgnoreMessageVersion();

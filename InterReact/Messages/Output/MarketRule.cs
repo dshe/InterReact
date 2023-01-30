@@ -7,8 +7,6 @@ public sealed class MarketRule
     public int MarketRuleId { get; }
     public IList<PriceIncrement> PriceIncrements { get; } = new List<PriceIncrement>();
 
-    internal MarketRule() { }
-
     internal MarketRule(ResponseReader r)
     {
         MarketRuleId = r.ReadInt();
@@ -22,8 +20,6 @@ public sealed class PriceIncrement
 {
     public double LowEdge { get; }
     public double Increment { get; }
-
-    public PriceIncrement() { }
 
     internal PriceIncrement(ResponseReader r)
     {

@@ -25,27 +25,20 @@ internal static class ResponseExtensions
                     observer.OnNext(message);
                     if (message is not PriceTick priceTick)
                         return;
-                    TickType type = GetSizeTickType(priceTick.TickType);
+                    TickType type = priceTick.GetSizeTickType();
                     if (type == TickType.Undefined)
                         return;
-                    SizeTick sizeTick = new(priceTick.RequestId, type, priceTick.Size);
+                    SizeTick sizeTick = new()
+                    {
+                        RequestId = priceTick.RequestId,
+                        TickType = type,
+                        Size = priceTick.Size
+                    };
                     observer.OnNext(sizeTick);
                 },
-                e => observer.OnError(e),
+                observer.OnError,
                 observer.OnCompleted);
         });
-
-        // local
-        static TickType GetSizeTickType(TickType tickType) => tickType switch
-        {
-            TickType.BidPrice => TickType.BidSize,
-            TickType.AskPrice => TickType.AskSize,
-            TickType.LastPrice => TickType.LastSize,
-            TickType.DelayedBidPrice => TickType.DelayedBidSize,
-            TickType.DelayedAskPrice => TickType.DelayedAskSize,
-            TickType.DelayedLastPrice => TickType.DelayedLastSize,
-            _ => TickType.Undefined
-        };
     }
 
     internal static IObservable<object> LogMessages(this IObservable<object> source, ILogger logger)

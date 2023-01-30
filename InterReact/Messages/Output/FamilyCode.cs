@@ -5,7 +5,6 @@ namespace InterReact;
 public sealed class FamilyCodes
 {
     public IList<FamilyCode> Codes { get; } = new List<FamilyCode>();
-    internal FamilyCodes() { }
     internal FamilyCodes(ResponseReader r)
     {
         int n = r.ReadInt();
@@ -18,7 +17,6 @@ public sealed class FamilyCode
 {
     public string AccountId { get; } = "";
     public string FamilyCodeStr { get; } = "";
-    internal FamilyCode() { }
     internal FamilyCode(ResponseReader r)
     {
         AccountId = r.ReadString();

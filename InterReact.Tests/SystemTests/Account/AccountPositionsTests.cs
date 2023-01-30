@@ -8,8 +8,26 @@ public class Positions : TestCollectionBase
 {
     public Positions(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
+    [Fact]
+    public async Task PositionsObservableTest()
+    {
+        IList<Position> list = await Client
+            .Service
+            .PositionsObservable
+            .TakeWhile(o => o is not PositionEnd)
+            .Cast<Position>()
+            .ToList();
+
+        // The account may or may not have positions.
+        if (!list.Any())
+            Write("no positions!");
+
+        foreach (object o in list)
+            Write(o.Stringify());
+    }
+
     [Fact(Skip = "PositionsTest may interfere with PositionsObservableTest")]
-    public async Task PositionsTest()
+    internal async Task PositionsTest()
     {
         Task<IList<Position>> task = Client
             .Response
@@ -32,20 +50,4 @@ public class Positions : TestCollectionBase
             Write(o.Stringify());
     }
 
-    [Fact]
-    public async Task PositionsObservableTest()
-    {
-        IList<Position> list = await Client
-            .Service
-            .PositionsObservable
-            .TakeWhile(o => o is not PositionEnd)
-            .Cast<Position>()
-            .ToList();
- 
-        // The account may or may not have positions.
-        if (!list.Any())
-            Write("no positions!");
-        foreach (object o in list)
-            Write(o.Stringify());
-    }
 }

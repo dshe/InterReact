@@ -1,6 +1,5 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Linq;
 
 namespace InterReact;
 
@@ -22,8 +21,8 @@ public partial class Service
 /// </summary>
 public sealed class OrderMonitor : IDisposable
 {
-    private readonly Request Request;
     private readonly ReplaySubject<object> subject = new();
+    private readonly Request Request;
     private readonly Contract Contract;
     public Order Order { get; private set; }
     public int OrderId { get; }
@@ -37,10 +36,10 @@ public sealed class OrderMonitor : IDisposable
         OrderId = Request.GetNextId();
 
         response
-            .OfType<IHasOrderId>()
-            .Where(m => m.OrderId == OrderId)
+            .WithOrderId(OrderId)
             .Subscribe(subject);
 
+        Order.OrderId = OrderId;
         Request.PlaceOrder(OrderId, Order, Contract);
     }
 

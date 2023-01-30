@@ -12,8 +12,6 @@ public sealed class SecurityDefinitionOptionParameter : IHasRequestId
     public IList<string> Expirations { get; } = new List<string>();
     public IList<double> Strikes { get; } = new List<double>();
 
-    internal SecurityDefinitionOptionParameter() { }
-
     internal SecurityDefinitionOptionParameter(ResponseReader r)
     {
         RequestId = r.ReadInt();

@@ -13,8 +13,6 @@ public sealed class NewsBulletin
     /// </summary>
     public string Origin { get; } = "";
 
-    internal NewsBulletin() { }
-
     internal NewsBulletin(ResponseReader r)
     {
         r.IgnoreMessageVersion();

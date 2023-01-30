@@ -7,12 +7,7 @@ public enum TickType
     /// <summary> 
     /// This value is used as the default to distinguish it from BidSize = 0
     /// </summary>
-    Undefined = -2,
-
-    /// <summary> 
-    /// from TickMarketDataType. This value is used internally.
-    /// </summary>
-    MarketDataType = -1,
+    Undefined = -1,
 
     /// <summary>
     /// Bid Size, from TickSize
@@ -348,4 +343,48 @@ public enum TickType
     SOCIAL_MARKET_ANALYTICS = 100,
     ESTIMATED_IPO_MIDPOINT = 101,
     FINAL_IPO_LAST = 102
+}
+
+public static partial class Extension
+{
+    internal static TickType GetSizeTickType(this PriceTick priceTick)
+    {
+        return priceTick.TickType switch
+        {
+            TickType.BidPrice => TickType.BidSize,
+            TickType.AskPrice => TickType.AskSize,
+            TickType.LastPrice => TickType.LastSize,
+            TickType.DelayedBidPrice => TickType.DelayedBidSize,
+            TickType.DelayedAskPrice => TickType.DelayedAskSize,
+            TickType.DelayedLastPrice => TickType.DelayedLastSize,
+            _ => TickType.Undefined
+        };
+    }
+
+    internal static TickType UndelayTick(this TickType tickType, bool doit)
+    {
+        if (!doit)
+            return tickType;
+  
+        return tickType switch
+        {
+            TickType.DelayedBidPrice => TickType.BidPrice,
+            TickType.DelayedAskPrice => TickType.AskPrice,
+            TickType.DelayedLastPrice => TickType.LastPrice,
+            TickType.DelayedBidSize => TickType.BidSize,
+            TickType.DelayedAskSize => TickType.AskSize,
+            TickType.DelayedLastSize => TickType.LastSize,
+            TickType.DelayedHighPrice => TickType.HighPrice,
+            TickType.DelayedLowPrice => TickType.LowPrice,
+            TickType.DelayedVolume => TickType.Volume,
+            TickType.DelayedClosePrice => TickType.ClosePrice,
+            TickType.DelayedOpenPrice => TickType.OpenPrice,
+            TickType.DelayedBidOptionComputation => TickType.BidOptionComputation,
+            TickType.DelayedAskOptionComputation => TickType.AskOptionComputation,
+            TickType.DelayedLastOptionComputation => TickType.LastOptionComputation,
+            TickType.DelayedModelOptionComputation => TickType.ModelOptionComputation,
+            TickType.DelayedLastTimeStamp => TickType.LastTimeStamp,
+            _ => tickType
+        };
+    }
 }

@@ -28,9 +28,13 @@ public class Monitor : TestCollectionBase
             OrderType = OrderType.Market
         };
 
-        OrderMonitor orderMonitor = Client.Service.PlaceOrder(order, contract);
+        OrderMonitor orderMonitor = Client
+            .Service
+            .PlaceOrder(order, contract);
   
-        orderMonitor.Messages.Subscribe(m => Write(m.Stringify()));
+        orderMonitor
+            .Messages
+            .Subscribe(m => Write(m.Stringify()));
 
         await Task.Delay(TimeSpan.FromSeconds(3));
 
@@ -58,7 +62,9 @@ public class Monitor : TestCollectionBase
             OrderType = OrderType.Market
         };
 
-        OrderMonitor orderMonitor = Client.Service.PlaceOrder(order, contract);
+        OrderMonitor orderMonitor = Client
+            .Service
+            .PlaceOrder(order, contract);
 
         orderMonitor.CancelOrder();
 
@@ -68,9 +74,9 @@ public class Monitor : TestCollectionBase
             .Take(TimeSpan.FromSeconds(2))
             .ToList();
 
-        Assert.True(reports.Where(x => 
-            x.Status == OrderStatus.Cancelled || x.Status == OrderStatus.ApiCancelled)
-                .Any());
+        Assert.True(reports
+            .Where(x => x.Status == OrderStatus.Cancelled || x.Status == OrderStatus.ApiCancelled)
+            .Any());
       
         orderMonitor.Dispose();
     }

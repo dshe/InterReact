@@ -7,8 +7,6 @@ public sealed class ScannerData : IHasRequestId
     public int RequestId { get; }
     public IList<ScannerDataItem> Items { get; } = new List<ScannerDataItem>();
 
-    internal ScannerData() { }
-
     internal ScannerData(ResponseReader r)
     {
         r.RequireMessageVersion(3);
@@ -27,8 +25,6 @@ public sealed class ScannerDataItem
     public string Benchmark { get; } = "";
     public string Projection { get; } = "";
     public string ComboLegs { get; } = "";
-
-    internal ScannerDataItem() { ContractDetails = new(); }
 
     internal ScannerDataItem(ResponseReader r)
     {

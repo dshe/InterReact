@@ -2,37 +2,6 @@
 
 namespace InterReact;
 
-public abstract class Tick : IHasRequestId
-{
-    public int RequestId { get; protected set; } = -1;
-    public TickType TickType { get; protected set; } = TickType.Undefined;
-    internal void Undelay()
-    {
-        TickType = TickType switch
-        {
-            TickType.DelayedBidPrice => TickType.BidPrice,
-            TickType.DelayedAskPrice => TickType.AskPrice,
-            TickType.DelayedLastPrice => TickType.LastPrice,
-            TickType.DelayedBidSize => TickType.BidSize,
-            TickType.DelayedAskSize => TickType.AskSize,
-            TickType.DelayedLastSize => TickType.LastSize,
-            TickType.DelayedHighPrice => TickType.HighPrice,
-            TickType.DelayedLowPrice => TickType.LowPrice,
-            TickType.DelayedVolume => TickType.Volume,
-            TickType.DelayedClosePrice => TickType.ClosePrice,
-            TickType.DelayedOpenPrice => TickType.OpenPrice,
-            TickType.DelayedBidOptionComputation => TickType.BidOptionComputation,
-            TickType.DelayedAskOptionComputation => TickType.AskOptionComputation,
-            TickType.DelayedLastOptionComputation => TickType.LastOptionComputation,
-            TickType.DelayedModelOptionComputation => TickType.ModelOptionComputation,
-            TickType.DelayedLastTimeStamp => TickType.LastTimeStamp,
-            _ => TickType
-        };
-    }
-}
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 // There are many tick types, as identified by the enum TickType. For example: TickType.BidSize.
 // Each tick type maps to one of the classes below. For example, TickType.BidSize is represented by objects of class type TickSize.
 // https://www.interactivebrokers.com/en/software/api/apiguide/tables/tick_types.htm
@@ -40,17 +9,23 @@ public abstract class Tick : IHasRequestId
 /// <summary>
 /// A trade/bid/ask at a price which is different from the previous trade/bid/ask price.
 /// </summary>
-public sealed class PriceTick : Tick
+public sealed class PriceTick : ITick
 {
+    public int RequestId { get; }
+    public TickType TickType { get; }
     public double Price { get; }
     public long Size { get; }
     public TickAttrib TickAttrib { get; }
-    internal PriceTick() { TickAttrib = new TickAttrib(); }
+    internal PriceTick() 
+    {
+        TickType = TickType.Undefined;
+        TickAttrib = new TickAttrib();
+    }
     internal PriceTick(ResponseReader r)
     {
         r.RequireMessageVersion(3);
         RequestId = r.ReadInt();
-        TickType = r.ReadEnum<TickType>();
+        TickType = r.ReadTickTypeEnum();
         Price = r.ReadDouble();
         Size = r.ReadLong();
         TickAttrib = new TickAttrib(r);
@@ -60,62 +35,82 @@ public sealed class PriceTick : Tick
 /// <summary>
 /// Size only. For example, a trade/bid/ask at the previous trade/bid/ask price.
 /// </summary>
-public sealed class SizeTick : Tick
+public sealed class SizeTick : ITick
 {
-    public long Size { get; }
-    internal SizeTick() { }
-    internal SizeTick(int requestId, TickType tickType, long size)
-    {
-        RequestId = requestId;
-        TickType = tickType;
-        Size = size;
+    public int RequestId { get; init; }
+    public TickType TickType { get; init; }
+    public long Size { get; init; }
+    internal SizeTick() 
+    { 
+        TickType = TickType.Undefined;
     }
     internal SizeTick(ResponseReader r)
     {
         r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
-        TickType = r.ReadEnum<TickType>();
+        TickType = r.ReadTickTypeEnum();
         Size = r.ReadLong();
     }
 }
 
-public sealed class StringTick : Tick
+public sealed class StringTick : ITick
 {
-    public string Value { get; } = "";
-    internal StringTick() { }
-    internal StringTick(int requestId, TickType tickType, string value)
+    public int RequestId { get; init; }
+    public TickType TickType { get; init; }
+    public string Value { get; init; } = "";
+    internal StringTick() 
     {
-        RequestId = requestId;
-        TickType = tickType;
-        Value = value;
+        TickType = TickType.Undefined;
     }
-    internal static Tick Create(ResponseReader r)
+    internal static ITick Create(ResponseReader r)
     {
         r.IgnoreMessageVersion();
         int requestId = r.ReadInt();
-        TickType tickType = r.ReadEnum<TickType>();
+        TickType tickType = r.ReadTickTypeEnum();
         string str = r.ReadString();
-        if (tickType == TickType.RealtimeVolume)
-            return new RealtimeVolumeTick(requestId, str, r.Parser);
-        if (tickType == TickType.LastTimeStamp)
-            return new TimeTick(requestId, str);
-        return new StringTick(requestId, tickType, str);
+        if (tickType == TickType.LastTimeStamp || tickType == TickType.DelayedLastTimeStamp)
+        {
+            return new TimeTick()
+            {
+                RequestId = requestId,
+                TickType = tickType,
+                Time = Instant.FromUnixTimeSeconds(long.Parse(str, NumberFormatInfo.InvariantInfo))
+            };
+        }
+        if (tickType == TickType.RealtimeVolume) // there is no delayed RealTimeVolue
+        {
+            ResponseParser parser = r.Parser;
+            string[] parts = str.Split(';');
+            return new RealtimeVolumeTick
+            {
+                RequestId = requestId,
+                TickType = tickType,
+                Price = parser.ParseDouble(parts[0]),
+                Size = parser.ParseLong(parts[1]),
+                Instant = Instant.FromUnixTimeMilliseconds(long.Parse(parts[2], NumberFormatInfo.InvariantInfo)),
+                Volume = parser.ParseLong(parts[3]),
+                Vwap = parser.ParseDouble(parts[4]),
+                SingleTrade = parser.ParseBool(parts[5])
+            };
+        }
+        return new StringTick()
+        {
+            RequestId = requestId,
+            TickType = tickType,
+            Value = str
+        };
     }
 }
 
-public sealed class TimeTick : Tick // from TickString
+public sealed class TimeTick : ITick // from TickString
 {
+    public int RequestId { get; init; }
+    public TickType TickType { get; init; } = TickType.Undefined;
     /// <summary>
     /// Seconds precision.
     /// </summary>
-    public Instant Time { get; }
+    public Instant Time { get; init; }
     internal TimeTick() { }
-    internal TimeTick(int requestId, string str)
-    {
-        RequestId = requestId;
-        TickType = TickType.LastTimeStamp;
-        Time = Instant.FromUnixTimeSeconds(long.Parse(str, NumberFormatInfo.InvariantInfo));
-    }
 }
 
 /// <summary>
@@ -124,61 +119,73 @@ public sealed class TimeTick : Tick // from TickString
 /// TickRealtimeVolume ticks are obtained by parsing TickString.
 /// When TickRealtimeVolume is used, redundant Tick messages (above) can be removed using the TickRedundantRealtimeVolumeFilter.
 /// </summary>
-public sealed class RealtimeVolumeTick : Tick // from TickString
+public sealed class RealtimeVolumeTick : ITick // from TickString
 {
-    public double Price { get; }
-    public long Size { get; }
-    public long Volume { get; }
-    public double Vwap { get; }
+    public int RequestId { get; init; }
+    public TickType TickType { get; init; } = TickType.Undefined;
+    public double Price { get; init; }
+    public long Size { get; init; }
+    public long Volume { get; init; }
+    public double Vwap { get; init; }
     /// <summary>
     /// Indicates whether the trade was filled by a single market-maker.
     /// </summary>
-    public bool SingleTrade { get; }
+    public bool SingleTrade { get; init; }
     /// <summary>
     /// Milliseconds precision.
     /// </summary>
-    public Instant Instant { get; }
-
+    public Instant Instant { get; init; }
     internal RealtimeVolumeTick() { }
+ };
 
-    internal RealtimeVolumeTick(int requestId, string str, ResponseParser parser)
-    {
-        RequestId = requestId;
-        TickType = TickType.RealtimeVolume;
-        string[] parts = str.Split(';');
-        Price = parser.ParseDouble(parts[0]);
-        Size = parser.ParseLong(parts[1]);
-        Instant = Instant.FromUnixTimeMilliseconds(long.Parse(parts[2], NumberFormatInfo.InvariantInfo));
-        Volume = parser.ParseLong(parts[3]);
-        Vwap = parser.ParseDouble(parts[4]);
-        SingleTrade = parser.ParseBool(parts[5]);
-    }
-};
-
-public sealed class GenericTick : Tick
+public sealed class GenericTick : ITick
 {
-    public double Value { get; }
-    internal GenericTick() { }
-    internal GenericTick(int requestId, TickType tickType, double value)
+    public int RequestId { get; init; }
+    public TickType TickType { get; init; }
+    public double Value { get; init; }
+    internal GenericTick() 
     {
-        RequestId = requestId;
-        TickType = tickType;
-        Value = value;
+        TickType = TickType.Undefined;
     }
-    internal static Tick Create(ResponseReader r)
+    internal static ITick Create(ResponseReader r)
     {
         r.IgnoreMessageVersion();
         int requestId = r.ReadInt();
-        TickType tickType = r.ReadEnum<TickType>();
+        TickType tickType = r.ReadTickTypeEnum();
         double value = r.ReadDouble();
-        if (tickType == TickType.Halted)
-            return new HaltedTick(requestId, tickType, value == 0 ? HaltType.NotHalted : HaltType.GeneralHalt);
-        return new GenericTick(requestId, tickType, value);
+        if (tickType == TickType.Halted || tickType == TickType.DelayedHalted)
+        {
+            return new HaltedTick()
+            {
+                RequestId = requestId,
+                TickType = tickType,
+                HaltType = value == 0 ? HaltType.NotHalted : HaltType.GeneralHalt
+            };
+        }
+        return new GenericTick()
+        {
+            RequestId = requestId,
+            TickType = tickType,
+            Value = value
+        };
     }
 };
 
-public sealed class ExchangeForPhysicalTick : Tick
+/// <summary>
+/// TickHalted is obtained from from TickGeneric.
+/// </summary>
+public sealed class HaltedTick : ITick
 {
+    public int RequestId { get; init; }
+    public TickType TickType { get; init; } = TickType.Undefined;
+    public HaltType HaltType { get; init; } = HaltType.Undefined;
+    internal HaltedTick() { }
+};
+
+public sealed class ExchangeForPhysicalTick : ITick
+{
+    public int RequestId { get; }
+    public TickType TickType { get; }
     public double BasisPoints { get; }
     public string FormattedBasisPoints { get; } = "";
     public double ImpliedFuturesPrice { get; }
@@ -186,12 +193,12 @@ public sealed class ExchangeForPhysicalTick : Tick
     public string FutureLastTradeDate { get; } = "";
     public double DividendImpact { get; }
     public double DividendsToLastTradeDate { get; }
-    internal ExchangeForPhysicalTick() { }
+    internal ExchangeForPhysicalTick() { TickType = TickType.Undefined; }
     internal ExchangeForPhysicalTick(ResponseReader r)
     {
         r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
-        TickType = r.ReadEnum<TickType>();
+        TickType = r.ReadTickTypeEnum();
         BasisPoints = r.ReadDouble();
         FormattedBasisPoints = r.ReadString();
         ImpliedFuturesPrice = r.ReadDouble();
@@ -206,8 +213,10 @@ public sealed class ExchangeForPhysicalTick : Tick
 /// Missing Values are indicated with null.
 /// IB's Java client indicates missing Values using DOUBLE_MAX.
 /// </summary>
-public sealed class OptionComputationTick : Tick
+public sealed class OptionComputationTick : ITick
 {
+    public int RequestId { get; }
+    public TickType TickType { get; }
     public int? TickAttrib { get; }
     public double? ImpliedVolatility { get; }
     public double? Delta { get; }
@@ -217,14 +226,14 @@ public sealed class OptionComputationTick : Tick
     public double? Vega { get; }
     public double? Theta { get; }
     public double? UndPrice { get; }
-    internal OptionComputationTick() { }
+    internal OptionComputationTick() { TickType = TickType.Undefined; }
     internal OptionComputationTick(ResponseReader r)
     {
         if (!r.Connector.SupportsServerVersion(ServerVersion.PRICE_BASED_VOLATILITY))
             r.RequireMessageVersion(6);
 
         RequestId = r.ReadInt();
-        TickType = r.ReadEnum<TickType>();
+        TickType = r.ReadTickTypeEnum();
         if (r.Connector.SupportsServerVersion(ServerVersion.PRICE_BASED_VOLATILITY))
             TickAttrib = r.ReadInt();
 
@@ -261,46 +270,3 @@ public sealed class OptionComputationTick : Tick
             UndPrice = null;
     }
 }
-
-/// <summary>
-/// TickHalted is obtained from from TickGeneric.
-/// </summary>
-public sealed class HaltedTick : Tick
-{
-    public HaltType HaltType { get; } = HaltType.Undefined;
-    internal HaltedTick() { }
-    internal HaltedTick(int requestId, TickType tickType, HaltType haltType)
-    {
-        RequestId = requestId;
-        TickType = tickType;
-        HaltType = haltType;
-    }
-};
-
-/// <summary>
-/// This message indicates a change in MarketDataType. 
-/// Tws sends this message to announce that market data has been switched between frozen and real-time.
-/// This response could also result from calling: RequestMarketData(returns Tick),
-/// </summary>
-public sealed class MarketDataTypeTick : Tick
-{
-    public MarketDataType MarketDataType { get; } = MarketDataType.Undefined;
-    internal MarketDataTypeTick() { }
-    internal MarketDataTypeTick(ResponseReader r)
-    {
-        r.IgnoreMessageVersion();
-        RequestId = r.ReadInt();
-        TickType = TickType.MarketDataType;
-        MarketDataType = r.ReadEnum<MarketDataType>();
-    }
-}
-
-public sealed class SnapshotEndTick : IHasRequestId
-{
-    public int RequestId { get; }
-    internal SnapshotEndTick(ResponseReader r)
-    {
-        r.IgnoreMessageVersion();
-        RequestId = r.ReadInt();
-    }
-};

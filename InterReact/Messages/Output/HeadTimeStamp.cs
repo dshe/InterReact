@@ -1,11 +1,9 @@
 ﻿namespace InterReact;
 
-public sealed class HeadTimestamp : IHasRequestId // output
+public sealed class HeadTimestamp : IHasRequestId
 {
     public int RequestId { get; }
     public string HeadTimeStamp { get; } = "";
-
-    internal HeadTimestamp() { }
 
     internal HeadTimestamp(ResponseReader r)
     {

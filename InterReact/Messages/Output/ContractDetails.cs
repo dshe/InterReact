@@ -4,9 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace InterReact;
 
-internal enum ContractDetailsType { GeneralContractType, BondContractType, ScannerContractType }
-
-public sealed class ContractDetails : IHasRequestId // output
+public sealed class ContractDetails : IHasRequestId
 {
     /// <summary>
     /// The Id that was used to make the request to receive this ContractDetails.
@@ -135,8 +133,6 @@ public sealed class ContractDetails : IHasRequestId // output
     public decimal SizeIncrement { get; } = decimal.MaxValue;
     public decimal SuggestedSizeIncrement { get; } = decimal.MaxValue;
 
-
-    internal ContractDetails() { }
     internal ContractDetails(ResponseReader r, ContractDetailsType type)
     {
         switch (type)

@@ -3,11 +3,10 @@
 public sealed class AccountSummary : IHasRequestId
 {
     public int RequestId { get; }
-    public string Account { get; } = "";
-    public string Tag { get; } = "";
-    public string Currency { get; } = "";
-    public string Value { get; } = "";
-    internal AccountSummary() { }
+    public string Account { get; }
+    public string Tag { get; }
+    public string Currency { get; } 
+    public string Value { get; }
     internal AccountSummary(ResponseReader r)
     {
         r.IgnoreMessageVersion();

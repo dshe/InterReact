@@ -11,32 +11,24 @@ namespace InterReact;
 /// </summary>
 public sealed class Alert : IHasRequestId, IHasOrderId
 {
-    public int RequestId { get; }
-    public int OrderId { get; }
-    public string Message { get; } = "";
-    public int Code { get; }
-    public bool IsFatal { get; }
-    public Instant Time { get; }
-    internal Alert() { }
-    internal Alert(int id, int code, string message, bool isFatal, Instant time)
-    {
-        RequestId = OrderId = id;
-        Code = code;
-        Message = message;
-        IsFatal = isFatal;
-        Time = time;
-    }
-
-    internal static Alert Create(ResponseReader r)
+    internal int Id { get; init; }
+    public int RequestId => Id;
+    public int OrderId => Id;
+    public string Message { get; init; }
+    public int Code { get; init; }
+    public bool IsFatal { get; init; }
+    public Instant Time { get; init; }
+    internal Alert() { Message = ""; }
+    internal Alert(ResponseReader r)
     {
         r.RequireMessageVersion(2);
-        int id = r.ReadInt();
-        int code = r.ReadInt();
-        string msg = r.ReadString();
+        Id = r.ReadInt();
+        Code = r.ReadInt();
+        Message = r.ReadString();
         if (r.Connector.SupportsServerVersion(ServerVersion.ENCODE_MSG_ASCII7))
-            msg = Regex.Unescape(msg);
-        Instant time = r.Connector.Clock.GetCurrentInstant();
-        return new Alert(id, code, msg, IsFatalCode(id, code), time);
+            Message = Regex.Unescape(Message);
+        Time = r.Connector.Clock.GetCurrentInstant();
+        IsFatal = IsFatalCode(Id, Code);
     }
 
     // https://interactivebrokers.github.io/tws-api/message_codes.html

@@ -23,7 +23,7 @@ public partial class Service
                 Request.CancelMarketData);
     }
 
-    public static string GetTickCacheKey(IHasRequestId t) => t is Tick tick ? tick.TickType.ToString() : "";
+    public static string GetTickCacheKey(IHasRequestId t) => t is ITick tick ? tick.TickType.ToString() : "";
 }
 
 public sealed class TickClassSelector
@@ -39,8 +39,6 @@ public sealed class TickClassSelector
     public IObservable<ExchangeForPhysicalTick> ExchangeForPhysicalTick => Source.OfType<ExchangeForPhysicalTick>();
     public IObservable<OptionComputationTick> OptionComputationTick => Source.OfType<OptionComputationTick>();
     public IObservable<HaltedTick> HaltedTick => Source.OfType<HaltedTick>();
-    public IObservable<MarketDataTypeTick> MarketDataTypeTick => Source.OfType<MarketDataTypeTick>();
-    public IObservable<ReqParamsTick> ReqParamsTick => Source.OfType<ReqParamsTick>();
     public IObservable<Alert> Alert => Source.OfType<Alert>();
 }
 
@@ -51,20 +49,4 @@ public static partial class Extension
         ArgumentNullException.ThrowIfNull(selector);
         return selector(new TickClassSelector(source));
     }
-
-    // If tick is delayed, substitute the corresponding 
-    public static IEnumerable<T> UndelayTicks<T>(this IEnumerable<T> source) =>
-        source.Select(x =>
-        {
-            if (x is Tick tick)
-                tick.Undelay();
-            return x;
-        });
-
-    public static IObservable<T> UndelayTicks<T>(this IObservable<T> source) =>
-        source.Do(x =>
-        {
-            if (x is Tick tick)
-                tick.Undelay();
-        });
 }

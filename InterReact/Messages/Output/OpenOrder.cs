@@ -7,8 +7,6 @@ public sealed class OpenOrder : IHasOrderId
     public Contract Contract { get; } = new();
     public OrderState OrderState { get; } = new();
 
-    internal OpenOrder() { }
-
     internal OpenOrder(ResponseReader r)
     {
         int messageVersion = r.Connector.SupportsServerVersion(ServerVersion.ORDER_CONTAINER) ? (int)r.Connector.ServerVersionCurrent : r.ReadInt();

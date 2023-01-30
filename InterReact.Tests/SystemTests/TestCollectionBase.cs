@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
 namespace SystemTests;
-// CollectionDefinition - tests do not run in parallel, which keeps logging relevent!
 
 public class TestFixture : IAsyncLifetime
 {
@@ -25,8 +24,9 @@ public class TestFixture : IAsyncLifetime
 [CollectionDefinition("Test Collection")]
 public class TestCollection : ICollectionFixture<TestFixture>
 {
+    // CollectionDefinition - tests do not run in parallel, which keeps logging relevent.
     // This class has no code, and is never created.
-    // Its purpose is simply to be the place to apply [CollectionDefinition]
+    // Its purpose is simply as a placeholder to apply [CollectionDefinition]
     // and all the ICollectionFixture<> interfaces.
 }
 
@@ -48,9 +48,8 @@ public class TestCollectionBase
 
         // Tests should run with the demo account since orders are submitted.
         // The demo account does not have data subscriptions, so use delayed data.
-        // With delayed data, TickTypes will be delayed: 
+        // Note that delayed data produces delayed tick types: 
         // TickType.BidPrice => TickType.DelayedBidPrice.
-        // We can change them back to undelayed using UndelayTicks() operator.
         Client.Request.RequestMarketDataType(MarketDataType.Delayed);
     }
 }

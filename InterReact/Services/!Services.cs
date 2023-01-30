@@ -10,7 +10,7 @@ public partial class Service
         Request = request;
         Response = response;
         AccountUpdatesObservable = CreateAccountUpdatesObservable();
-        PositionsObservable = CreatePositionsObservable();
         AccountSummaryObservable = CreateAccountSummaryObservable();
+        PositionsObservable = CreatePositionsObservable();
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace InterReact;
 
@@ -8,8 +7,6 @@ public sealed class HistoricalTicks : IHasRequestId
     public int RequestId { get; }
     public IList<HistoricalTick> Ticks { get; } = new List<HistoricalTick>();
     public bool Done { get; }
-
-    internal HistoricalTicks() { }
 
     internal HistoricalTicks(ResponseReader r)
     {
@@ -28,8 +25,6 @@ public sealed class HistoricalTick
     public double Price { get; }
     public long Size { get; }
 
-    internal HistoricalTick() { }
-
     internal HistoricalTick(ResponseReader r)
     {
         Time = r.ReadLong();
@@ -45,16 +40,14 @@ public sealed class HistoricalLastTicks : IHasRequestId
     public IList<HistoricalLastTick> Ticks { get; } = new List<HistoricalLastTick>();
     public bool Done { get; }
 
-    internal HistoricalLastTicks() { }
     internal HistoricalLastTicks(ResponseReader r)
     {
         RequestId = r.ReadInt();
         int n = r.ReadInt();
-
-        Ticks = Enumerable.Repeat(new HistoricalLastTick(r), n).ToList();
+        for (int i = 0; i < n; i++)
+            Ticks.Add(new HistoricalLastTick(r));
         Done = r.ReadBool();
     }
-
 }
 
 public sealed class HistoricalLastTick
@@ -65,8 +58,6 @@ public sealed class HistoricalLastTick
     public long Size { get; }
     public string Exchange { get; } = "";
     public string SpecialConditions { get; } = "";
-
-    internal HistoricalLastTick() { }
 
     internal HistoricalLastTick(ResponseReader r)
     {
@@ -84,8 +75,6 @@ public sealed class HistoricalBidAskTicks : IHasRequestId
     public int RequestId { get; }
     public IList<HistoricalBidAskTick> Ticks { get; } = new List<HistoricalBidAskTick>();
     public bool Done { get; }
-
-    internal HistoricalBidAskTicks() { }
 
     internal HistoricalBidAskTicks(ResponseReader r)
     {
@@ -106,8 +95,6 @@ public sealed class HistoricalBidAskTick
     public double PriceAsk { get; }
     public long SizeBid { get; }
     public long SizeAsk { get; }
-
-    internal HistoricalBidAskTick() { }
 
     internal HistoricalBidAskTick(ResponseReader r)
     {

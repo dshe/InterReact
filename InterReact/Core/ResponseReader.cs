@@ -54,6 +54,7 @@ public sealed class ResponseReader
     internal LocalDateTime ReadLocalDateTime(LocalDateTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
     
     internal T ReadEnum<T>() where T : Enum => Parser.ParseEnum<T>(ReadString());
+    internal TickType ReadTickTypeEnum() => ReadEnum<TickType>().UndelayTick(Connector.UndelayTicks);
     internal T ReadStringEnum<T>() where T : StringEnum<T>, new() => Parser.ParseStringEnum<T>(ReadString());
 
     internal void IgnoreMessageVersion() => ReadString();
@@ -76,6 +77,6 @@ public sealed class ResponseReader
     {
         int n = ReadInt();
         for (int i = 0; i < n; i++)
-            list.Add(new Tag(ReadString(), ReadString()));
+            list.Add(new Tag(this));
     }
 }

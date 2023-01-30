@@ -85,7 +85,7 @@ public abstract class OrderCondition
     }
 }
 
-class StringSuffixParser
+public sealed class StringSuffixParser
 {
     public StringSuffixParser(string str)
     {
@@ -99,6 +99,7 @@ class StringSuffixParser
 
     public string GetNextSuffixedValue(string perfix)
     {
+        ArgumentNullException.ThrowIfNull(perfix);
         var rval = Rest.Substring(0, Rest.IndexOf(perfix));
         Rest = SkipSuffix(perfix);
 

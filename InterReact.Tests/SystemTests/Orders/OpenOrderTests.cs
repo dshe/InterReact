@@ -6,7 +6,7 @@ public class Open : TestCollectionBase
 {
     public Open(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    [Fact]
+    [Fact(Skip = "Test may conflict when run together with order placement tests")]
     public async Task OpenOrdersAsyncTest()
     {
         await Task.Delay(3000);
@@ -14,7 +14,7 @@ public class Open : TestCollectionBase
         IList<object> list = await Client
             .Service
             .GetOpenOrdersAsync(OpenOrdersRequestType.OpenOrders)
-            .WaitAsync(TimeSpan.FromSeconds(6));
+            .WaitAsync(TimeSpan.FromSeconds(10));
 
         Write($"Open orders found: {list.Count}.");
 

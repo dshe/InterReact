@@ -19,16 +19,16 @@ namespace InterReact;
 
 public sealed record InterReactClientConnector
 {
-    internal IClock Clock { get; private set; } = SystemClock.Instance;
+    internal IClock Clock { get; private init; } = SystemClock.Instance;
     internal InterReactClientConnector WithClock(IClock clock) => this with { Clock = clock };
 
-    internal ILogger Logger { get; private set; } = NullLogger.Instance;
+    internal ILogger Logger { get; private init; } = NullLogger.Instance;
     public InterReactClientConnector WithLogger(ILogger logger) => this with { Logger = logger };
 
-    internal IPAddress IPAddress { get; private set; } = IPAddress.IPv6Loopback;
+    internal IPAddress IPAddress { get; private init; } = IPAddress.IPv6Loopback;
     public InterReactClientConnector WithIpAddress(IPAddress address) => this with { IPAddress = address };
 
-    internal IReadOnlyList<int> Ports { get; private set; } =
+    internal IReadOnlyList<int> Ports { get; private init; } =
         new[] { (int)IBDefaultPort.TwsRegularAccount, (int)IBDefaultPort.TwsDemoAccount, (int)IBDefaultPort.GatewayRegularAccount, (int)IBDefaultPort.GatewayDemoAccount };
     /// <summary>
     /// Specify the port used to attempt connection to TWS/Gateway.
@@ -36,7 +36,7 @@ public sealed record InterReactClientConnector
     /// </summary>
     public InterReactClientConnector WithPort(int port) => this with { Ports = new[] { port } };
 
-    public int ClientId { get; private set; } = RandomNumberGenerator.GetInt32(100000, 1000000);
+    public int ClientId { get; private init; } = RandomNumberGenerator.GetInt32(100000, 1000000);
     /// <summary>
     /// Specify a client id.
     /// Up to 8 clients can attach to TWS/Gateway. Each client requires a unique Id. The default Id is random.
@@ -44,21 +44,25 @@ public sealed record InterReactClientConnector
     public InterReactClientConnector WithClientId(int id) =>
         this with { ClientId = id >= 0 ? id : throw new ArgumentException("Invalid ClientId", nameof(id)) };
 
-    public int MaxRequestsPerSecond { get; private set; } = 50;
+    public int MaxRequestsPerSecond { get; private init; } = 50;
     /// <summary>
     /// Specify the maximum number of requests per second sent to to TWS/Gateway.
     /// </summary>
     public InterReactClientConnector WithMaxRequestsPerSecond(int requests) =>
         this with { MaxRequestsPerSecond = requests > 0 ? requests : throw new ArgumentException("invalid", nameof(requests)) };
 
-    internal string OptionalCapabilities { get; private set; } = "";
+    internal string OptionalCapabilities { get; private init; } = "";
     public InterReactClientConnector WithOptionalCapabilities(string capabilities) => this with { OptionalCapabilities = capabilities };
 
-    internal bool FollowPriceTickWithSizeTick { get; private set; }
+    internal bool FollowPriceTickWithSizeTick { get; private init; }
     public InterReactClientConnector WithFollowPriceTickWithSizeTick() => this with { FollowPriceTickWithSizeTick = true };
 
+    // If tick is delayed, substitute with the corresponding undelayed tick. 
+    internal bool UndelayTicks { get; private init; }
+    public InterReactClientConnector WithUndelayedTicks() => this with { UndelayTicks = true }; 
+
     public const ServerVersion ServerVersionMin = ServerVersion.FRACTIONAL_POSITIONS;
-    public ServerVersion ServerVersionMax { get; private set; } = ServerVersion.WSHE_CALENDAR;
+    public ServerVersion ServerVersionMax { get; private init; } = ServerVersion.WSHE_CALENDAR;
     public InterReactClientConnector WithMaxServerVersion(ServerVersion maxServerVersion) => this with { ServerVersionMax = maxServerVersion };
 
     /////////////////////////////////////////////////////////////

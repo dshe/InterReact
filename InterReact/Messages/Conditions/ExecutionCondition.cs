@@ -39,12 +39,12 @@ public sealed class ExecutionCondition : OrderCondition
 
     protected override bool TryParse(string cond)
     {
-        if (!cond.StartsWith(header, System.StringComparison.Ordinal))
+        if (!cond.StartsWith(header, StringComparison.Ordinal))
             return false;
 
         try
         {
-            var parser = new StringSuffixParser(cond.Replace(header, "", System.StringComparison.Ordinal));
+            var parser = new StringSuffixParser(cond.Replace(header, "", StringComparison.Ordinal));
 
             Symbol = parser.GetNextSuffixedValue(symbolSuffix);
             Exchange = parser.GetNextSuffixedValue(exchangeSuffix);
@@ -82,9 +82,9 @@ public sealed class ExecutionCondition : OrderCondition
             return false;
 
         return base.Equals(obj)
-            && Exchange.Equals(other.Exchange, System.StringComparison.Ordinal)
-            && SecType.Equals(other.SecType, System.StringComparison.Ordinal)
-            && Symbol.Equals(other.Symbol, System.StringComparison.Ordinal);
+            && Exchange.Equals(other.Exchange, StringComparison.Ordinal)
+            && SecType.Equals(other.SecType, StringComparison.Ordinal)
+            && Symbol.Equals(other.Symbol, StringComparison.Ordinal);
     }
 
     public override int GetHashCode()

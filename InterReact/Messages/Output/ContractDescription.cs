@@ -2,12 +2,10 @@
 
 namespace InterReact;
 
-public sealed class ContractDescription // output
+public sealed class ContractDescription
 {
-    public Contract Contract { get; } = new();
-    public IList<string> DerivativeSecTypes { get; } = new List<string>();
- 
-    internal ContractDescription() { }
+    public Contract Contract { get; } = new Contract();
+    public IList<string> DerivativeSecTypes { get; } = new List<string>(); 
     internal ContractDescription(ResponseReader r)
     {
         Contract.ContractId = r.ReadInt();

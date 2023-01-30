@@ -2,7 +2,6 @@
 
 namespace InterReact;
 
-// output
 /// <summary>
 /// A response to RequestSmartComponents.
 /// The tick types 'bidExch', 'askExch', 'lastExch' are used to identify the source of a quote.
@@ -13,7 +12,6 @@ public sealed class SmartComponents : IHasRequestId
     public int RequestId { get; }
     public Dictionary<int, KeyValuePair<string, char>> Map { get; } = new();
 
-    internal SmartComponents() { }
     internal SmartComponents(ResponseReader r)
     {
         RequestId = r.ReadInt();

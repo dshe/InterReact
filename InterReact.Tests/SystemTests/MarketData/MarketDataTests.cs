@@ -1,6 +1,4 @@
-﻿using InterReact;
-using System;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 
 namespace MarketData;

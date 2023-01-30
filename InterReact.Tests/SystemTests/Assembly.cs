@@ -3,3 +3,5 @@ global using NodaTime;
 global using SystemTests;
 global using Xunit;
 global using Xunit.Abstractions;
+
+[assembly:CollectionBehavior(CollectionBehavior.CollectionPerAssembly)]

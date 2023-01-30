@@ -8,7 +8,7 @@ public sealed class TickAttrib
     public bool Unreported { get; }
     public bool BidPastLow { get; }
     public bool AskPastHigh { get; }
-
+ 
     internal TickAttrib() { }
     internal TickAttrib(ResponseReader r)
     {
@@ -30,7 +30,6 @@ public sealed class TickAttribBidAsk
     public bool AskPastHigh { get; internal set; }
 
     internal TickAttribBidAsk() { }
-
     internal void Set(int value)
     {
         BitMask mask = new(value);
@@ -45,12 +44,10 @@ public sealed class TickAttribLast
     public bool Unreported { get; internal set; }
 
     internal TickAttribLast() { }
-
     internal void Set(int value)
     {
         BitMask mask = new(value);
         PastLimit = mask[0];
         Unreported = mask[1];
     }
-
 }

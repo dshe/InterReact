@@ -12,8 +12,6 @@ public sealed class HistoricalDataUpdate : IHasRequestId
     public double WAP { get; }
     public long Volume { get; }
 
-    internal HistoricalDataUpdate() { }
-
     internal HistoricalDataUpdate(ResponseReader r)
     {
         RequestId = r.ReadInt();

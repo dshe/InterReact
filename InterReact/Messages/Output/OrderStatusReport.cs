@@ -56,8 +56,6 @@ public sealed class OrderStatusReport : IHasOrderId
 
     public double? MktCapPrice { get; }
 
-    internal OrderStatusReport() { }
-
     internal OrderStatusReport(ResponseReader r)
     {
         if (!r.Connector.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE))

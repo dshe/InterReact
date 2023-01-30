@@ -76,16 +76,23 @@ public class Types_Viewer : UnitTestBase
     {
         Stringifier stringifier = new(Logger);
 
-        foreach (TypeInfo? type in Types.Where(t =>
-            t.IsClass && 
-            t.IsPublic && 
-            t.IsSealed && 
-            !t.IsAbstract && 
+        List<TypeInfo> types = Types.Where(t =>
+            t.IsClass &&
+            t.IsPublic &&
+            t.IsSealed &&
+            !t.IsAbstract &&
             !t.ContainsGenericParameters &&
-            t.Namespace == "InterReact").ToList())
+            t.Namespace == "InterReact")
+            .OrderBy(x => x.Name)
+            .ToList();
+
+        foreach (TypeInfo type in types)
         {
-            if (type == typeof(OrderMonitor))
-                return;
+            if (type == typeof(OrderMonitor) ||
+                type == typeof(TickClassSelector) ||
+                type == typeof(InterReactClientConnector) ||
+                type == typeof(InterReactClient))
+                    continue; ;
             try
             {
                 object instance = stringifier.CreateInstance(type);
@@ -96,8 +103,7 @@ public class Types_Viewer : UnitTestBase
             catch (Exception e)
             {
                 Write($"Type: {type.Name} EXCEPTION: {e.Message}");
-                if (type.Name != "InterReactClientConnector" && type.Name != "InterReactClient")
-                    throw;
+                throw;
             }
         }
     }
