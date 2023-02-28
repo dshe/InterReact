@@ -1,7 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
 using System.Diagnostics;
-using System.Threading;
 
 namespace InterReact;
 
@@ -16,7 +14,7 @@ public sealed class RingLimiter
     internal RingLimiter(int rate = 0) : this(NullLogger.Instance, rate) { }
     internal RingLimiter(ILogger logger, int rate = 0)
     {
-        Logger = logger ?? NullLogger.Instance;
+        Logger = logger;
         if (rate < 0)
             throw new ArgumentOutOfRangeException(nameof(rate));
         Rate = rate;

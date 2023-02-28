@@ -1,17 +1,19 @@
-﻿namespace Other;
+﻿using Microsoft.Extensions.Logging;
+
+namespace Other;
 
 public class NoConnect : ConnectTestBase
 {
-    public NoConnect(ITestOutputHelper output) : base(output) { }
+    public NoConnect(ITestOutputHelper output) : base(output, LogLevel.Debug) { }
 
     [Fact]
     public async Task CancelTest()
     {
         CancellationToken ct = new(true);
 
-        var task = new InterReactClientConnector()
+        Task<IInterReactClient> task = new InterReactClientConnector()
             .WithPort(999)
-            .WithLogger(Logger)
+            .WithLoggerFactory(LogFactory)
             .ConnectAsync(ct);
 
         OperationCanceledException ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await task);
@@ -22,10 +24,10 @@ public class NoConnect : ConnectTestBase
     public async Task TimeoutTest()
     {
         CancellationTokenSource cts = new(TimeSpan.FromMilliseconds(100));
- 
-        var task = new InterReactClientConnector()
+
+        Task<IInterReactClient> task = new InterReactClientConnector()
             .WithPort(999)
-            .WithLogger(Logger)
+            .WithLoggerFactory(LogFactory)
             .ConnectAsync(cts.Token);
 
         OperationCanceledException ex = await Assert.ThrowsAsync<OperationCanceledException>(async () => await task);
@@ -35,8 +37,8 @@ public class NoConnect : ConnectTestBase
     [Fact]
     public async Task ConnectionRefusedTest()
     {
-        var task = new InterReactClientConnector()
-            .WithLogger(Logger)
+        Task<IInterReactClient> task = new InterReactClientConnector()
+            .WithLoggerFactory(LogFactory)
             .WithPort(999)
             .ConnectAsync();
 

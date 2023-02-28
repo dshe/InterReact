@@ -5,13 +5,9 @@ namespace InterReact;
 public sealed class OrderType : StringEnum<OrderType>
 {
     public static OrderType Undefined { get; } = Create("");
-
     public static OrderType Limit { get; } = Create("LMT");
-
     public static OrderType MarketToLimit { get; } = Create("MTL");
-
     public static OrderType MarketWithProtection { get; } = Create("MKT PRT");
-
     public static OrderType RequestForQuote { get; } = Create("QUOTE");
 
     /// <summary>
@@ -98,4 +94,5 @@ public sealed class OrderType : StringEnum<OrderType>
     public static OrderType Volatility { get; } = Create("VOL");
 
     public static OrderType PeggedToBenchmark { get; } = Create("PEG BENCH");
+    public static OrderType PeggedToBest { get; } = Create("PEG BEST");
 }

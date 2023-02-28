@@ -29,7 +29,7 @@ public class Interface_Checker : UnitTestBase
     }
 
     [Fact]
-    public void Find_Classes_With_ExecutioinId_But_Not_Interface()
+    public void Find_Classes_With_ExecutionId_But_Not_Interface()
     {
         Assert.Empty(Types.Where(t =>
                 t.GetProperty("ExecutionId") is not null &&

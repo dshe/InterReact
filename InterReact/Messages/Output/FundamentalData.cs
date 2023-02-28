@@ -4,7 +4,7 @@ public sealed class FundamentalData : IHasRequestId
 {
     public int RequestId { get; }
 
-    public string Data { get; } = "";
+    public string Data { get; }
 
     internal FundamentalData(ResponseReader r)
     {

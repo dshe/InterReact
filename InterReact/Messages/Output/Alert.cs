@@ -9,26 +9,25 @@ namespace InterReact;
 /// For messages which are not associated with a particular request or order, the Id is -1.
 /// In order to be compatible with the IHasRequestId and IHasOrderId interfaces, both requestId and orderId properties are included in Alert.
 /// </summary>
-public sealed class Alert : IHasRequestId, IHasOrderId
+public sealed class AlertMessage : IHasRequestId, IHasOrderId
 {
-    internal int Id { get; init; }
-    public int RequestId => Id;
-    public int OrderId => Id;
-    public string Message { get; init; }
+    public int RequestId { get; init; } = -1;
+    public int OrderId { get; init; } = -1;
     public int Code { get; init; }
+    public string Message { get; init; } = "";
+    public string AdvancedOrderRejectJson { get; } = "";
     public bool IsFatal { get; init; }
-    public Instant Time { get; init; }
-    internal Alert() { Message = ""; }
-    internal Alert(ResponseReader r)
+    internal Instant Time { get; init; }
+    internal AlertMessage() { }
+    internal AlertMessage(ResponseReader r)
     {
         r.RequireMessageVersion(2);
-        Id = r.ReadInt();
+        RequestId = OrderId = r.ReadInt();
         Code = r.ReadInt();
-        Message = r.ReadString();
-        if (r.Connector.SupportsServerVersion(ServerVersion.ENCODE_MSG_ASCII7))
-            Message = Regex.Unescape(Message);
-        Time = r.Connector.Clock.GetCurrentInstant();
-        IsFatal = IsFatalCode(Id, Code);
+        Message = Regex.Unescape(r.ReadString());
+        AdvancedOrderRejectJson = Regex.Unescape(r.ReadString());
+        Time = r.Connection.Clock.GetCurrentInstant();
+        IsFatal = IsFatalCode(RequestId, Code);
     }
 
     // https://interactivebrokers.github.io/tws-api/message_codes.html
@@ -56,6 +55,6 @@ public sealed class Alert : IHasRequestId, IHasOrderId
 [SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "<Pending>")]
 public sealed class AlertException : Exception
 {
-    public Alert Alert { get; }
-    internal AlertException(Alert alert) : base(alert.Message) => Alert = alert;
+    public AlertMessage Alert { get; }
+    internal AlertException(AlertMessage alert) : base(alert.Message) => Alert = alert;
 }

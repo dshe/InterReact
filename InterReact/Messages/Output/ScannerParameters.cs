@@ -2,7 +2,7 @@
 
 public sealed class ScannerParameters
 {
-    public string Parameters { get; } = "";
+    public string Parameters { get; }
 
     internal ScannerParameters(ResponseReader r)
     {

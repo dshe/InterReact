@@ -10,7 +10,7 @@ public class ToObservableContinuousWithId : ReactiveUnitTestBase
     public interface ISomeClass : IHasRequestId { }
     public class SomeClass : ISomeClass
     {
-        public SomeClass(int id) {  RequestId= id; }
+        public SomeClass(int id) { RequestId= id; }
         public int RequestId { get; }
         public long Ticks { get; } = Stopwatch.GetTimestamp();
     }
@@ -23,14 +23,18 @@ public class ToObservableContinuousWithId : ReactiveUnitTestBase
     [Fact]
     public void OnNextTest()
     {
-        var now = SystemClock.Instance.GetCurrentInstant();
+        TestScheduler testScheduler = new();
 
-        var o1 = new SomeClass(42);
-        var o2 = new SomeClass(100);
-        var o3 = new Alert { Id = 42, Time = now };
-        var o4 = new Alert { Id = 42, Time = now };
-        var o5 = new SomeClass(42);
-        var o6 = new SomeClass(99);
+        int start = 0, stop = 0;
+
+        Instant now = SystemClock.Instance.GetCurrentInstant();
+
+        SomeClass o1 = new(42);
+        SomeClass o2 = new(100);
+        AlertMessage o3 = new() { RequestId = 42, Time = now };
+        AlertMessage o4 = new() { RequestId = 42, Time = now };
+        SomeClass o5 = new(42);
+        SomeClass o6 = new(99);
 
         ITestableObservable<object> source =
             testScheduler.CreateHotObservable(
@@ -43,7 +47,7 @@ public class ToObservableContinuousWithId : ReactiveUnitTestBase
 
         ITestableObserver<object> observer = testScheduler.CreateObserver<object>();
 
-        var subscription = source.ToObservableContinuousWithId(() => 42, id => start++, id => stop++)
+        IDisposable subscription = source.ToObservableContinuousWithId(() => 42, id => start++, id => stop++)
             .Subscribe(observer);
 
         testScheduler.Start();

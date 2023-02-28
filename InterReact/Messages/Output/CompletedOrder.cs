@@ -7,15 +7,16 @@ public sealed class CompletedOrder // does not have OrderId!
     public OrderState OrderState { get; } = new();
     internal CompletedOrder(ResponseReader reader)
     {
-        OrderDecoder decoder = new(reader, Contract, Order, OrderState, int.MaxValue);
+        OrderDecoder decoder = new(reader, Contract, Order, OrderState);
 
         decoder.ReadContract();
+
         decoder.ReadAction();
         decoder.ReadTotalQuantity();
         decoder.ReadOrderType();
         decoder.ReadLmtPrice();
         decoder.ReadAuxPrice();
-        decoder.ReadTIF();
+        decoder.ReadTif();
         decoder.ReadOcaGroup();
         decoder.ReadAccount();
         decoder.ReadOpenClose();
@@ -26,7 +27,7 @@ public sealed class CompletedOrder // does not have OrderId!
         decoder.ReadHidden();
         decoder.ReadDiscretionaryAmount();
         decoder.ReadGoodAfterTime();
-        decoder.ReadFAParams();
+        decoder.ReadFaParams();
         decoder.ReadModelCode();
         decoder.ReadGoodTillDate();
         decoder.ReadRule80A();
@@ -70,6 +71,7 @@ public sealed class CompletedOrder // does not have OrderId!
         decoder.ReadParentPermId();
         decoder.ReadCompletedTime();
         decoder.ReadCompletedStatus();
+        decoder.ReadPegBestPegMidOrderAttributes();
     }
 }
 

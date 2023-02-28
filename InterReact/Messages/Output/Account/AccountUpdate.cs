@@ -20,19 +20,32 @@ public sealed class AccountValue
 
 public sealed class PortfolioValue
 {
-    public string AccountName { get; init; }
+    public string AccountName { get; }
     public Contract Contract { get; }
-    public double Position { get; init; }
-    public double MarketPrice { get; init; }
-    public double MarketValue { get; init; }
-    public double AverageCost { get; init; }
-    public double UnrealizedPnl { get; init; }
-    public double RealizedPnl { get; init; }
+    public decimal Position { get;}
+    public double MarketPrice { get; }
+    public double MarketValue { get; }
+    public double AverageCost { get; }
+    public double UnrealizedPnl { get; }
+    public double RealizedPnl { get; }
     internal PortfolioValue(ResponseReader r)
     {
         r.RequireMessageVersion(8);
-        Contract = new(r);
-        Position = r.ReadDouble();
+        Contract = new()
+        {
+            ContractId = r.ReadInt(),
+            Symbol = r.ReadString(),
+            SecurityType = r.ReadStringEnum<SecurityType>(),
+            LastTradeDateOrContractMonth = r.ReadString(),
+            Strike = r.ReadDouble(),
+            Right = r.ReadStringEnum<OptionRightType>(),
+            Multiplier = r.ReadString(),
+            PrimaryExchange = r.ReadString(), // note
+            Currency = r.ReadString(),
+            LocalSymbol = r.ReadString(),
+            TradingClass = r.ReadString()
+        };
+        Position = r.ReadDecimal();
         MarketPrice = r.ReadDouble();
         MarketValue = r.ReadDouble();
         AverageCost = r.ReadDouble();

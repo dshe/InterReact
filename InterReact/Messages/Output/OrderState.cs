@@ -27,15 +27,15 @@ public sealed class OrderState
     public string MaintMarginAfter { get; internal set; } = "";
     public string EquityWithLoanAfter { get; internal set; } = "";
 
-    public double? Commission { get; internal set; }
+    public double Commission { get; internal set; }
     /// <summary>
     /// Used in conjunction with the maxCommission field, this defines the lowest end of the possible range into which the actual order commission will fall.
     /// </summary>
-    public double? MinimumCommission { get; internal set; }
+    public double MinimumCommission { get; internal set; }
     /// <summary>
     /// Used in conjunction with the minCommission field, this defines the highest end of the possible range into which the actual order commission will fall.
     /// </summary>
-    public double? MaximumCommission { get; internal set; }
+    public double MaximumCommission { get; internal set; }
 
     public string CommissionCurrency { get; internal set; } = "";
 

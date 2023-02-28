@@ -7,13 +7,10 @@ public class IpAddress : ConnectTestBase
     public IpAddress(ITestOutputHelper output) : base(output) { }
 
     [Fact]
-    public async Task DefaultsTest()
+    public async Task AllDefaultsTest()
     {
-        var client = await new InterReactClientConnector()
-            .WithLogger(Logger)
+        IInterReactClient client = await new InterReactClientConnector()
             .ConnectAsync();
-
-        await TestClient(client);
 
         await client.DisposeAsync();
     }
@@ -21,12 +18,10 @@ public class IpAddress : ConnectTestBase
     [Fact]
     public async Task IPv4Test()
     {
-        var client = await new InterReactClientConnector()
-            .WithLogger(Logger)
+        IInterReactClient client = await new InterReactClientConnector()
+            .WithLoggerFactory(LogFactory)
             .WithIpAddress(IPAddress.Loopback)
             .ConnectAsync();
-
-        await TestClient(client);
 
         await client.DisposeAsync();
     }
@@ -34,12 +29,10 @@ public class IpAddress : ConnectTestBase
     [Fact]
     public async Task IPv6Test()
     {
-        var client = await new InterReactClientConnector()
-            .WithLogger(Logger)
+        IInterReactClient client = await new InterReactClientConnector()
+            .WithLoggerFactory(LogFactory)
             .WithIpAddress(IPAddress.IPv6Loopback)
             .ConnectAsync();
-
-        await TestClient(client);
 
         await client.DisposeAsync();
     }

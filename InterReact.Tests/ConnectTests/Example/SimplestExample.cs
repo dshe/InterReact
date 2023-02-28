@@ -35,6 +35,9 @@ public class SimplestExample
         //Console.ReadKey();
         //Console.Clear();
 
+        // Dispose the subscription to stop receiving ticks.
+        subscription.Dispose();
+
         // Disconnect from TWS/Gateway.
         await interReact.DisposeAsync();
     }

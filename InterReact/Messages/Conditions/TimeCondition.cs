@@ -1,14 +1,8 @@
-﻿/* Copyright (C) 2019 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
- * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
-
-#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
+﻿#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
 
 namespace InterReact;
 
-/**
-* @brief Time condition used in conditional orders to submit or cancel orders at specified time. 
-*/
-public sealed class TimeCondition : OperatorCondition
+public class TimeCondition : OperatorCondition
 {
     const string header = "time";
 
@@ -37,6 +31,8 @@ public sealed class TimeCondition : OperatorCondition
 
     protected override bool TryParse(string cond)
     {
+        ArgumentNullException.ThrowIfNull(cond);
+
         if (!cond.StartsWith(header))
             return false;
 

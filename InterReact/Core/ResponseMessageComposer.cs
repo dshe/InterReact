@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Stringification;
+﻿using Stringification;
 using System.IO;
 
 namespace InterReact;
@@ -9,10 +8,10 @@ internal sealed class ResponseMessageComposer
     private ILogger Logger { get; }
     private ResponseReader Reader { get; }
 
-    internal ResponseMessageComposer(InterReactClientConnector connector)
+    internal ResponseMessageComposer(Connection connection, ILoggerFactory loggerFactory)
     {
-        Logger = connector.Logger;
-        Reader = new ResponseReader(connector);
+        Logger = loggerFactory.CreateLogger("InterReact.ResponseMessageComposer");
+        Reader = new ResponseReader(connection, loggerFactory);
     }
 
     internal object ComposeMessage(string[] strings)
@@ -29,17 +28,19 @@ internal sealed class ResponseMessageComposer
         catch (Exception e)
         {
             string m = $"ResponseComposer error: [{code} => {strings.JoinStrings(", ")}].";
+            //return new MessageError(code, e, m);
             Logger.LogError(e, "{Message}", m);
+            //Observable.Throw(m);
             throw new InvalidDataException(m, e);
         }
     }
 
     private static object GetResponseMessage(string code, ResponseReader reader) => code switch
     {
-        "1" => new PriceTick(reader),
+        "1" => PriceTick.Create(reader),
         "2" => new SizeTick(reader),
         "3" => new OrderStatusReport(reader),
-        "4" => new Alert(reader),
+        "4" => new AlertMessage(reader),
         "5" => new OpenOrder(reader),
         "6" => new AccountValue(reader),
         "7" => new PortfolioValue(reader),
@@ -58,7 +59,7 @@ internal sealed class ResponseMessageComposer
         "20" => new ScannerData(reader),
         "21" => new OptionComputationTick(reader),
 
-        "45" => GenericTick.Create(reader),
+        "45" => new GenericTick(reader),
         "46" => StringTick.Create(reader),
         "47" => new ExchangeForPhysicalTick(reader),
 
@@ -118,7 +119,9 @@ internal sealed class ResponseMessageComposer
         "102" => new CompletedOrdersEnd(),
         "103" => new ReplaceFAEnd(reader),
         "104" => new WshMetaData(reader),
-        "105" => new WshEventData(reader),
+        "105" => new WshEventDataReceived(reader),
+        "106" => new HistoricalSchedule(reader),
+        "107" => new UserInfo(reader),
         _ => throw new InvalidDataException($"Undefined code '{code}'.")
     };
 }

@@ -1,26 +1,23 @@
-﻿using Microsoft.Extensions.Logging;
-using NodaTime.Text;
+﻿using NodaTime.Text;
 using StringEnums;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace InterReact;
 
 public sealed class ResponseReader
 {
-    internal InterReactClientConnector Connector { get; }
+    internal Connection Connection { get; }
     internal ResponseParser Parser { get; }
     internal ILogger Logger { get; }
-    internal ResponseReader(InterReactClientConnector connector)
+    internal ResponseReader(Connection connection, ILoggerFactory loggerFactory)
     {
-        Connector = connector;
-        Logger = connector.Logger;
-        Parser = new ResponseParser(Logger);
+        Connection = connection;
+        Logger = loggerFactory.CreateLogger("InterReact.ResponseReader");
+        Parser = new ResponseParser(loggerFactory);
     }
 
     private IEnumerator<string> Enumerator = Enumerable.Empty<string>().GetEnumerator();
-    internal void SetEnumerator(string[] strings) =>
+    internal void SetEnumerator(IEnumerable<string> strings) =>
         Enumerator = strings.AsEnumerable().GetEnumerator();
 
     internal string ReadString()
@@ -40,21 +37,26 @@ public sealed class ResponseReader
     internal char ReadChar() => Parser.ParseChar(ReadString());
 
     internal int ReadInt() => Parser.ParseInt(ReadString());
-    internal int? ReadIntNullable() => Parser.ParseIntNullable(ReadString());
+    internal int ReadIntMax() => Parser.ParseIntMax(ReadString());
 
     internal long ReadLong() => Parser.ParseLong(ReadString());
 
     internal double ReadDouble() => Parser.ParseDouble(ReadString());
     internal double ReadDoubleMax() => Parser.ParseDoubleMax(ReadString());
-    internal double? ReadDoubleNullable() => Parser.ParseDoubleNullable(ReadString());
 
     internal decimal ReadDecimal() => Parser.ParseDecimal(ReadString());
 
     internal LocalTime ReadLocalTime(LocalTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
     internal LocalDateTime ReadLocalDateTime(LocalDateTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
-    
-    internal T ReadEnum<T>() where T : Enum => Parser.ParseEnum<T>(ReadString());
-    internal TickType ReadTickTypeEnum() => ReadEnum<TickType>().UndelayTick(Connector.UndelayTicks);
+
+    internal T ReadEnum<T>() where T : Enum
+    {
+        T t = Parser.ParseEnum<T>(ReadString());
+        if (!Connection.UseDelayedTicks && t is TickType tickType)
+            return (T)(object)UndelayTick(tickType);
+        return t;
+    }
+
     internal T ReadStringEnum<T>() where T : StringEnum<T>, new() => Parser.ParseStringEnum<T>(ReadString());
 
     internal void IgnoreMessageVersion() => ReadString();
@@ -65,7 +67,7 @@ public sealed class ResponseReader
         if (v < minimumVersion)
             throw new InvalidDataException($"Invalid response version: {v} < {minimumVersion}.");
     }
-    
+
     internal void AddStringsToList(IList<string> list)
     {
         int n = ReadInt();
@@ -78,5 +80,29 @@ public sealed class ResponseReader
         int n = ReadInt();
         for (int i = 0; i < n; i++)
             list.Add(new Tag(this));
+    }
+
+    private static TickType UndelayTick(TickType tickType)
+    {
+        return tickType switch
+        {
+            TickType.DelayedBidPrice => TickType.BidPrice,
+            TickType.DelayedAskPrice => TickType.AskPrice,
+            TickType.DelayedLastPrice => TickType.LastPrice,
+            TickType.DelayedBidSize => TickType.BidSize,
+            TickType.DelayedAskSize => TickType.AskSize,
+            TickType.DelayedLastSize => TickType.LastSize,
+            TickType.DelayedHighPrice => TickType.HighPrice,
+            TickType.DelayedLowPrice => TickType.LowPrice,
+            TickType.DelayedVolume => TickType.Volume,
+            TickType.DelayedClosePrice => TickType.ClosePrice,
+            TickType.DelayedOpenPrice => TickType.OpenPrice,
+            TickType.DelayedBidOptionComputation => TickType.BidOptionComputation,
+            TickType.DelayedAskOptionComputation => TickType.AskOptionComputation,
+            TickType.DelayedLastOptionComputation => TickType.LastOptionComputation,
+            TickType.DelayedModelOptionComputation => TickType.ModelOptionComputation,
+            TickType.DelayedLastTimeStamp => TickType.LastTimeStamp,
+            _ => tickType
+        };
     }
 }

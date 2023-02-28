@@ -1,10 +1,8 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables;
 
-namespace CoreClientServer;
+namespace ClientServer;
 
-public class ConsoleLogger : ILogger
+public sealed class ConsoleLogger : ILogger
 {
     private readonly string CategoryName;
     private readonly LogLevel LogLevel;
@@ -21,10 +19,8 @@ public class ConsoleLogger : ILogger
     {
         if (!IsEnabled(logLevel))
             return;
-        ConsoleColor oldColor = Console.ForegroundColor;
         Console.ForegroundColor = Color;
         Console.WriteLine(CategoryName + formatter(state, exception));
-        Console.ForegroundColor = oldColor;
     }
 
     public bool IsEnabled(LogLevel logLevel)
@@ -36,5 +32,4 @@ public class ConsoleLogger : ILogger
 
     public IDisposable BeginScope<TState>(TState state) where TState : notnull
         => Disposable.Empty;
-
 }

@@ -1,5 +1,4 @@
 ﻿using Stringification;
-using System.Reactive.Linq;
 
 namespace InterReact;
 
@@ -17,10 +16,10 @@ public partial class Service
     private IObservable<object> CreateAccountUpdatesObservable()
     {
         return Response
-            .Where(m => m is AccountValue || m is PortfolioValue || m is AccountUpdateTime || m is AccountUpdateEnd)
+            .Where(m => m is AccountValue or PortfolioValue or AccountUpdateTime or AccountUpdateEnd)
             .ToObservableContinuous(
-                () => Request.RequestAccountUpdates(start: true),
-                () => Request.RequestAccountUpdates(start: false))
+                () => Request.RequestAccountUpdates(subscribe: true),
+                () => Request.RequestAccountUpdates(subscribe: false))
             .CacheSource(GetAccountUpdatesCacheKey);
     }
 

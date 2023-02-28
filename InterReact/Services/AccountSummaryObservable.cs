@@ -1,11 +1,9 @@
-﻿using NodaTime.Text;
+﻿using System.Globalization;
 
 namespace InterReact;
 
 public partial class Service
 {
-    private static readonly InstantPattern Pattern = InstantPattern.CreateWithInvariantCulture("S");
-
     /// <summary>
     /// Creates an observable which continually emits AccountSummary objects.
     /// Objects: AccountSummary, AccountSummaryEnd, Alert.
@@ -32,7 +30,7 @@ public partial class Service
         {
             AccountSummary a => $"{a.Account}+{a.Currency}+{a.Tag}",
             AccountSummaryEnd => "AccountSummaryEnd",
-            Alert alert => Pattern.Format(alert.Time),
+            AlertMessage alert => alert.Time.ToUnixTimeTicks().ToString(CultureInfo.InvariantCulture),
             _ => throw new ArgumentException($"Unhandled type: {m.GetType()}.")
         };
     }

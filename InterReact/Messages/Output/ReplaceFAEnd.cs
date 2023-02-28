@@ -3,7 +3,7 @@
 public sealed class ReplaceFAEnd : IHasRequestId
 {
     public int RequestId { get; }
-    public string Text { get; } = "";
+    public string Text { get; }
 
     internal ReplaceFAEnd(ResponseReader reader)
     {

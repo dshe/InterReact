@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
+﻿using System.Reactive.Threading.Tasks;
 
 namespace InterReact;
 
@@ -11,7 +7,7 @@ public partial class Service
     /// <summary>
     /// Returns Execution, CommissionReport, and possibly Alert objects. 
     /// </summary>
-    public async Task<IList<object>> GetExecutionsAsync()
+    public async Task<IList<object>> GetExecutionsAsync(CancellationToken ct = default)
     {
         int id = Request.GetNextId();
 
@@ -19,13 +15,14 @@ public partial class Service
             .WithRequestId(id)
             .TakeWhile(m => m is not ExecutionEnd)
             .ToList()
-            .ToTask();
+            .ToTask(ct);
 
-        Request.RequestExecutions(id);
+        var filter = new ExecutionFilter();
+        
+        Request.RequestExecutions(id , new ExecutionFilter());
 
         IList<object> list = await task.ConfigureAwait(false);
  
         return list;
     }
 }
-

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public sealed class ScannerData : IHasRequestId
 {
@@ -21,10 +19,10 @@ public sealed class ScannerDataItem
 {
     public int Rank { get; }
     public ContractDetails ContractDetails { get; }
-    public string Distance { get; } = "";
-    public string Benchmark { get; } = "";
-    public string Projection { get; } = "";
-    public string ComboLegs { get; } = "";
+    public string Distance { get; }
+    public string Benchmark { get; }
+    public string Projection { get; }
+    public string ComboLegs { get; }
 
     internal ScannerDataItem(ResponseReader r)
     {

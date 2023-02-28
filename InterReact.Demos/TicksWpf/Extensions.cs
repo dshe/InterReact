@@ -18,9 +18,8 @@ public static class Extensions
         {
             if (d > 0)
                 return Brushes.LightGreen;
-            else if (d < 0)
+            if (d < 0)
                 return Brushes.Red;
-            else
-                return Brushes.White;
+            return Brushes.White;
         });
 }

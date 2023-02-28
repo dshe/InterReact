@@ -4,13 +4,13 @@ public sealed class HistoricalDataUpdate : IHasRequestId
 {
     public int RequestId { get; }
     public int BarCount { get; }
-    public string Date { get; } = "";
+    public string Date { get; }
     public double Open { get; }
     public double Close { get; }
     public double High { get; }
     public double Low { get; }
-    public double WAP { get; }
-    public long Volume { get; }
+    public decimal WAP { get; }
+    public decimal Volume { get; }
 
     internal HistoricalDataUpdate(ResponseReader r)
     {
@@ -21,7 +21,7 @@ public sealed class HistoricalDataUpdate : IHasRequestId
         Close = r.ReadDouble();
         High = r.ReadDouble();
         Low = r.ReadDouble();
-        WAP = r.ReadDouble();
-        Volume = r.ReadLong();
+        WAP = r.ReadDecimal();
+        Volume = r.ReadDecimal();
     }
 }

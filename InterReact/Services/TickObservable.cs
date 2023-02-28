@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public partial class Service
 {
@@ -14,7 +10,7 @@ public partial class Service
     /// Tick class may be selected by using the OfTickClass extension method.
     /// </summary>
     public IObservable<object> CreateTickObservable(Contract contract,
-        IEnumerable<GenericTickType>? genericTickTypes = null, IEnumerable<Tag>? options = null)
+        IEnumerable<GenericTickType>? genericTickTypes = null, params Tag[] options)
     {
         return Response
             .ToObservableContinuousWithId(
@@ -38,8 +34,7 @@ public sealed class TickClassSelector
     public IObservable<GenericTick> GenericTick => Source.OfType<GenericTick>();
     public IObservable<ExchangeForPhysicalTick> ExchangeForPhysicalTick => Source.OfType<ExchangeForPhysicalTick>();
     public IObservable<OptionComputationTick> OptionComputationTick => Source.OfType<OptionComputationTick>();
-    public IObservable<HaltedTick> HaltedTick => Source.OfType<HaltedTick>();
-    public IObservable<Alert> Alert => Source.OfType<Alert>();
+    public IObservable<AlertMessage> Alert => Source.OfType<AlertMessage>();
 }
 
 public static partial class Extension

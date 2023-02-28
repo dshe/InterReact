@@ -12,19 +12,18 @@ using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 
-// Create a logger which will log messages to the console.
-ILogger Logger = LoggerFactory
+// Create a logger which will write messages to the console.
+ILoggerFactory loggerFactory = LoggerFactory
     .Create(builder => builder
         .AddSimpleConsole(c => c.SingleLine = true)
-        .SetMinimumLevel(LogLevel.Debug))
-    .CreateLogger("HelloWorld");
+        .SetMinimumLevel(LogLevel.Debug));
 
 // Create the InterReact client by connecting to TWS/Gateway on your local machine.
 IInterReactClient client = await new InterReactClientConnector()
-    .WithLogger(Logger)
+    .WithLoggerFactory(loggerFactory)
     .ConnectAsync();
 
-if (!client.RemoteIPEndPoint.Port.IsIBDemoPort())
+if (!client.RemoteIpEndPoint.Port.IsIBDemoPort())
 {
     Console.WriteLine("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
     return;
@@ -49,7 +48,7 @@ PriceTick askPriceTick = await client
     .Response
     .OfType<PriceTick>()
     .Where(t => t.RequestId == id)
-    .Where(x => x.TickType == TickType.AskPrice || x.TickType == TickType.DelayedAskPrice)
+    .Where(x => x.TickType is TickType.AskPrice or TickType.DelayedAskPrice)
     .Timeout(TimeSpan.FromSeconds(30)) // max time to wait for an ask price
     .FirstAsync();
 

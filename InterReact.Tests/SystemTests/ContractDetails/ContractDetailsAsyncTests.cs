@@ -39,7 +39,7 @@ public class ContractDetailsAsync : TestCollectionBase
             .Service
             .GetContractDetailsAsync(contract);
 
-        Assert.True(cds.All(cd => cd is ContractDetails)); // no Alerts
+        Assert.True(cds.All(cd => cd is not null)); // no Alerts
         Assert.True(cds.Count > 1); // multiple exchanges
     }
 

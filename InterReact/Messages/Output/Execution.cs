@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Collections.Generic;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
 {
@@ -34,9 +31,9 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
     /// <summary>
     /// Cusomer account number.
     /// </summary>
-    public string Account { get; }
+    public string Account { get; } = "";
 
-    public string Exchange { get; }
+    public string Exchange { get; } = "";
     public ExecutionSide Side { get; } = ExecutionSide.Undefined;
 
     /// <summary>
@@ -64,12 +61,12 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
     /// The average price, which includes commissions.
     /// </summary>
     public double AveragePrice { get; }
-    public string OrderReference { get; }
+    public string OrderReference { get; } = "";
 
     /// <summary>
     /// IncludeAll the Economic Value Rule name and the respective optional argument. The two Values should be separated by a colon. For example, aussieBond:YearsToExpiration=3. When the optional argument is not present, the first value will be followed by a colon.
     /// </summary>
-    public string EconomicValueRule { get; }
+    public string EconomicValueRule { get; } = "";
 
     /// <summary>
     /// Tells you approximately how much the market value of a contract would change if the price were to change by 1. It cannot be used to get market value by multiplying the price by the approximate multiplier.
@@ -84,11 +81,9 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
 
     internal Execution(ResponseReader r)
     {
-        if (!r.Connector.SupportsServerVersion(ServerVersion.LAST_LIQUIDITY))
-            r.RequireMessageVersion(10);
         RequestId = r.ReadInt();
         OrderId = r.ReadInt();
-        Contract = new(r);
+        Contract = new(r, false);
         ExecutionId = r.ReadString();
         Time = r.ReadString();
         Account = r.ReadString();
@@ -104,10 +99,8 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
         OrderReference = r.ReadString();
         EconomicValueRule = r.ReadString();
         EconomicValueMultiplier = r.ReadDouble();
-        if (r.Connector.SupportsServerVersion(ServerVersion.MODELS_SUPPORT))
-            ModelCode = r.ReadString();
-        if (r.Connector.SupportsServerVersion(ServerVersion.LAST_LIQUIDITY))
-            LastLiquidity = r.ReadEnum<Liquidity>();
+        ModelCode = r.ReadString();
+        LastLiquidity = r.ReadEnum<Liquidity>();
 
         AssociateThisExecutionIdWithOrderId(r.Logger);
     }

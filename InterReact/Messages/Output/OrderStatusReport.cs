@@ -12,12 +12,12 @@ public sealed class OrderStatusReport : IHasOrderId
     /// <summary>
     /// Specifies the number of shares that have been executed.
     /// </summary>
-    public double Filled { get; }
+    public decimal Filled { get; }
 
     /// <summary>
     /// Specifies the number of shares still outstanding.
     /// </summary>
-    public double Remaining { get; }
+    public decimal Remaining { get; }
 
     /// <summary>
     /// The average price of the shares that have been executed.
@@ -52,27 +52,22 @@ public sealed class OrderStatusReport : IHasOrderId
     /// This field is used to identify an order held when TWS is trying to locate shares for a short sell.
     /// The value used to indicate this is 'locate'.
     /// </summary>
-    public string WhyHeld { get; } = "";
+    public string WhyHeld { get; }
 
-    public double? MktCapPrice { get; }
+    public double MktCapPrice { get; }
 
     internal OrderStatusReport(ResponseReader r)
     {
-        if (!r.Connector.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE))
-            r.IgnoreMessageVersion();
-
         OrderId = r.ReadInt();
         Status = r.ReadStringEnum<OrderStatus>();
-        Filled = r.ReadDouble();
-        Remaining = r.ReadDouble();
+        Filled = r.ReadDecimal();
+        Remaining = r.ReadDecimal();
         AverageFillPrice = r.ReadDouble();
         PermanentId = r.ReadInt();
         ParentId = r.ReadInt();
         LastFillPrice = r.ReadDouble();
         ClientId = r.ReadInt();
         WhyHeld = r.ReadString();
-
-        if (r.Connector.SupportsServerVersion(ServerVersion.MARKET_CAP_PRICE))
-            MktCapPrice = r.ReadDouble();
+        MktCapPrice = r.ReadDouble();
     }
 }

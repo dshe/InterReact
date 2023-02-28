@@ -1,33 +1,35 @@
-﻿using RxSockets;
+﻿using Microsoft.VisualBasic;
+using RxSockets;
 using StringEnums;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace InterReact;
 
 public sealed class RequestMessage
 {
+    private readonly ILogger Logger;
     private readonly IRxSocketClient RxSocket;
     private readonly RingLimiter Limiter;
     internal readonly List<string> Strings = new(); // internal for testing
-    public RequestMessage(IRxSocketClient rxSocket, RingLimiter limiter)
+    public RequestMessage(IRxSocketClient rxSocket, RingLimiter limiter, ILoggerFactory loggerFactory)
     {
+        ArgumentNullException.ThrowIfNull(loggerFactory);
+        Logger = loggerFactory.CreateLogger("InterReact.RequestMessage");
         RxSocket = rxSocket;
         Limiter = limiter;
     }
- 
-    // V100Plus format: 4 byte message length prefix plus payload of null-terminated strings.
-    internal void Send()
+
+    internal void Send([CallerMemberName] string memberName = "")
     {
+        Logger.LogDebug("Request: {Method}", memberName);
         if (!Strings.Any())
             throw new InvalidOperationException("Empty send message.");
-
+        // V100Plus format: 4 byte message length prefix plus payload of null-terminated strings.
         byte[] bytes = Strings.ToByteArray().ToByteArrayWithLengthPrefix();
         Limiter.Limit(() => RxSocket.Send(bytes));
-   
-        Strings.Clear();
+        Strings.Clear(); // allows the message to be reused
     }
 
     /////////////////////////////////////////////////////
@@ -43,8 +45,8 @@ public sealed class RequestMessage
         if (objs is null)
             return new[] { string.Empty };
         if (objs.Length == 0)
-            throw new ArgumentException("invalid length", nameof(objs));
-        return objs.Select(o => GetString(o));
+            throw new ArgumentException("Invalid length", nameof(objs));
+        return objs.Select(GetString);
     }
 
     private static string GetString(object? o)
@@ -90,7 +92,43 @@ public sealed class RequestMessage
         };
     }
 
-    internal RequestMessage WriteContract(Contract c) =>
-        Write(c.ContractId, c.Symbol, c.SecurityType, c.LastTradeDateOrContractMonth, c.Strike, c.Right, c.Multiplier,
-            c.Exchange, c.PrimaryExchange, c.Currency, c.LocalSymbol, c.TradingClass, c.IncludeExpired);
+    internal RequestMessage WriteEnumValuesString<T>(IEnumerable<T>? enums) where T : Enum
+    {
+        if (enums is null)
+            return Write("");
+
+        List<string> list = enums.Select(GetEnumValueString).ToList();
+
+        return Write(string.Join(",", list));
+
+        // local
+        static string GetEnumValueString(T en)
+        {
+            Type underlyingType = Enum.GetUnderlyingType(typeof(T));
+            object o = Convert.ChangeType(en, underlyingType, CultureInfo.InvariantCulture)
+                ?? throw new ArgumentException("Could not get enum value.");
+            return o.ToString() ?? throw new ArgumentException("Could not get enum value.");
+        }
+    }
+
+    internal RequestMessage WriteContract(Contract contract, bool excludePrimaryExchange = false) =>
+        contract.Write(this, excludePrimaryExchange);
+}
+
+internal static class ResponseMessageExtensions
+{
+    internal static string ToMax(this double val)
+    {
+        if (val == double.MaxValue)
+            return "";
+        if (val == double.PositiveInfinity)
+            return ("Infinity");
+        return val.ToString(CultureInfo.InvariantCulture);
+    }
+    internal static string ToMax(this int val)
+    {
+        if (val == int.MaxValue)
+            return "";
+        return val.ToString(CultureInfo.InvariantCulture);
+    }
 }

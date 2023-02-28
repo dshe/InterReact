@@ -1,4 +1,4 @@
-﻿using Stringification;
+﻿using Microsoft.Extensions.Logging;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 
@@ -6,13 +6,13 @@ namespace Other;
 
 public class BadData : ConnectTestBase
 {
-    public BadData(ITestOutputHelper output) : base(output) { }
+    public BadData(ITestOutputHelper output) : base(output, LogLevel.Debug) { }
 
     [Fact]
     public async Task BadRequestTest()
     {
         IInterReactClient client = await new InterReactClientConnector()
-            .WithLogger(Logger)
+            .WithLoggerFactory(LogFactory)
             .ConnectAsync();
 
         int id = client.Request.GetNextId();
@@ -21,16 +21,14 @@ public class BadData : ConnectTestBase
             .Response
             .WithRequestId(id)
             .FirstAsync()
-            .Timeout(TimeSpan.FromSeconds(10))
+            .Timeout(TimeSpan.FromSeconds(6))
             .ToTask();
 
-        client.Request.RequestMarketData(id, new Contract() { Symbol = "InvalidSymbol" });
+        client.Request.RequestMarketData(id, new Contract { Symbol = "InvalidSymbol2" });
 
         object message = await task;
 
-        Write("Message: " + message.Stringify());
-
-        Alert alert = Assert.IsType<Alert>(message);
+        AlertMessage alert = Assert.IsType<AlertMessage>(message);
 
         Assert.StartsWith("Error validating request", alert.Message);
     }
@@ -38,7 +36,7 @@ public class BadData : ConnectTestBase
     [Fact]
     public async Task BadResponseTest()
     {
-        Contract StockContract1 = new()
+        Contract contract = new()
         {
             SecurityType = SecurityType.Stock,
             Symbol = "IBM",
@@ -47,20 +45,23 @@ public class BadData : ConnectTestBase
         };
 
         IInterReactClient client = await new InterReactClientConnector()
-             .WithLogger(Logger)
-             .ConnectAsync();
+            .WithLoggerFactory(LogFactory)
+            .ConnectAsync();
 
-        // this particular value will trigger a receive parse error
-        int id = int.MaxValue; 
+        // This particular Id value will trigger a receive parse error when reading ContractDetails.
+        int id = int.MaxValue;
+
+        client.Response.Subscribe(x => { }, e => throw e);
 
         Task<ContractDetails> task = client
             .Response
             .WithRequestId(id)
             .OfType<ContractDetails>()
             .FirstAsync()
+            .Timeout(TimeSpan.FromSeconds(6))
             .ToTask();
 
-        client.Request.RequestContractDetails(id, StockContract1);
+        client.Request.RequestContractDetails(id, contract);
 
         await Assert.ThrowsAnyAsync<Exception>(async () => await task);
     }

@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public sealed class RealtimeBar : IHasRequestId
 {
@@ -10,21 +8,21 @@ public sealed class RealtimeBar : IHasRequestId
     public double High { get; }
     public double Low { get; }
     public double Close { get; }
-    public long Volume { get; }
-    public double Wap { get; }
+    public decimal Volume { get; }
+    public decimal Wap { get; }
     public int Count { get; }
 
     internal RealtimeBar(ResponseReader r)
     {
         r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
-        Time = Instant.FromUnixTimeSeconds(long.Parse(r.ReadString(), NumberFormatInfo.InvariantInfo));
+        Time = Instant.FromUnixTimeSeconds(r.ReadLong());
         Open = r.ReadDouble();
         High = r.ReadDouble();
         Low = r.ReadDouble();
         Close = r.ReadDouble();
-        Volume = r.ReadLong();
-        Wap = r.ReadDouble();
+        Volume = r.ReadDecimal();
+        Wap = r.ReadDecimal();
         Count = r.ReadInt();
     }
 }

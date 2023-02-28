@@ -5,7 +5,7 @@ public class ResponseParserTests : UnitTestBase
     private readonly List<object> alerts = new();
     private readonly ResponseParser parser;
     public ResponseParserTests(ITestOutputHelper output) : base(output) =>
-        parser = new ResponseParser(Logger);
+        parser = new ResponseParser(Logger.ToLoggerFactory());
 
     [Fact]
     public void T04_Bool()
@@ -18,7 +18,6 @@ public class ResponseParserTests : UnitTestBase
         Assert.True(parser.ParseBool("1"));
         Assert.True(parser.ParseBool("2"));
         Assert.Throws<ArgumentException>(() => parser.ParseBool("invalid"));
-        //Assert.Throws<ArgumentException>(() => parser.ParseBool("true"));
         Assert.Empty(alerts);
     }
 
@@ -44,12 +43,10 @@ public class ResponseParserTests : UnitTestBase
         Assert.Throws<ArgumentException>(() => parser.ParseInt("1.5"));
         Assert.Equal(123, parser.ParseLong("123"));
         Assert.Equal(42.1, parser.ParseDouble("42.1"));
-        Assert.Equal(123, parser.ParseIntNullable("123"));
-        Assert.Null(parser.ParseIntNullable(""));
         Assert.Empty(alerts);
     }
 
-    public enum TestEnum { Two = 2 }
+    private enum TestEnum { Two = 2 }
 
     [Fact]
     public void T08_Enum()

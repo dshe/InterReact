@@ -1,11 +1,18 @@
-﻿namespace Core;
+﻿using Microsoft.Extensions.Logging.Abstractions;
+
+namespace Core;
 
 public class ResponseComposerTests : UnitTestBase
 {
-    internal ResponseMessageComposer Composer;
+    private readonly ResponseMessageComposer Composer;
 
-    public ResponseComposerTests(ITestOutputHelper output) : base(output) =>
-        Composer = new ResponseMessageComposer(new InterReactClientConnector());
+    public ResponseComposerTests(ITestOutputHelper output) : base(output)
+    {
+        //var connection = new Connection();
+        var connector = new InterReactClientConnector();
+        var connection = new Connection(connector);
+        Composer = new ResponseMessageComposer(connection, NullLoggerFactory.Instance);
+    }
 
     [Fact]
     public void T00_Null()

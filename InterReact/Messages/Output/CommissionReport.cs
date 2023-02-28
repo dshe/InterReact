@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 /// <summary>
 /// Sent after trades and also after calling RequestExecutions().

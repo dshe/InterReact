@@ -22,7 +22,7 @@ public class Positions : TestCollectionBase
         if (!list.Any())
             Write("no positions!");
 
-        foreach (object o in list)
+        foreach (var o in list)
             Write(o.Stringify());
     }
 
@@ -31,7 +31,7 @@ public class Positions : TestCollectionBase
     {
         Task<IList<Position>> task = Client
             .Response
-            .Where(x => x is Position || x is PositionEnd)
+            .Where(x => x is Position or PositionEnd)
             .TakeWhile(o => o is not PositionEnd)
             .Cast<Position>()
             .ToList()
@@ -46,7 +46,7 @@ public class Positions : TestCollectionBase
         // The account may or may not have positions.
         if (!list.Any())
             Write("no positions!");
-        foreach (object o in list)
+        foreach (var o in list)
             Write(o.Stringify());
     }
 

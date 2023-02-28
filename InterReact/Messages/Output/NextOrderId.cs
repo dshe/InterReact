@@ -1,18 +1,16 @@
-﻿using Microsoft.Extensions.Logging;
+﻿namespace InterReact;
 
-namespace InterReact;
-
-public sealed class NextOrderId : IHasOrderId
+public sealed class NextOrderId
 {
-    public int OrderId { get; }
+    public int NextId { get; }
 
     internal NextOrderId(ResponseReader r)
     {
         r.IgnoreMessageVersion();
-        OrderId = r.ReadInt();
- 
-        int id = r.Connector.Id;
-        r.Connector.Id = Math.Max(OrderId - 1, id);
-        r.Logger.LogDebug("Received NextOrderId = {OrderId}; Id = {Id1} => {Id2}", OrderId, id, r.Connector.Id);
+        NextId = r.ReadInt();
+
+        int oldId = r.Connection.Id;
+        r.Connection.Id = Math.Max(NextId - 1, oldId);
+        r.Logger.LogTrace("NextOrderId: {NextId}[{Id1}->{Id2}].", NextId, oldId, r.Connection.Id);
     }
 }

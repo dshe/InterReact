@@ -4,10 +4,10 @@ public sealed class TickNews : IHasRequestId
 {
     public int RequestId { get; }
     public long TimeStamp { get; }
-    public string ProviderCode { get; } = "";
-    public string ArticleId { get; } = "";
-    public string Headline { get; } = "";
-    public string ExtraData { get; } = "";
+    public string ProviderCode { get; }
+    public string ArticleId { get; }
+    public string Headline { get; }
+    public string ExtraData { get; }
 
     internal TickNews(ResponseReader r)
     {

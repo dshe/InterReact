@@ -1,12 +1,12 @@
-﻿using RxSockets;
-using System.Net;
-using System.Threading.Tasks;
+﻿using System.Net;
 
 namespace InterReact;
 
 public interface IInterReactClient : IAsyncDisposable
 {
-    IPEndPoint RemoteIPEndPoint { get; }
+    IPEndPoint RemoteIpEndPoint { get; }
+    public ServerVersion ServerVersion { get; }
+    int ClientId { get; }
     Request Request { get; }
     IObservable<object> Response { get; }
     Service Service { get; }
@@ -14,29 +14,25 @@ public interface IInterReactClient : IAsyncDisposable
 
 public sealed class InterReactClient : IInterReactClient
 {
-    private readonly IRxSocketClient RxSocketClient;
-    public IPEndPoint RemoteIPEndPoint { get; }
+    private readonly Connection Connection;
+    public IPEndPoint RemoteIpEndPoint { get; }
+    public ServerVersion ServerVersion { get; }
+    public int ClientId { get; }
     public Request Request { get; }
     public IObservable<object> Response { get; }
     public Service Service { get; }
 
-    // InterReactClientConnector.ConnectAsync() calls this constructor.
-    // The class must be public since it is resolved through Microsoft dependency injection.
-    public InterReactClient(IRxSocketClient rxSocketClient, Request request, IObservable<object> response, Service service)
+    public InterReactClient(Connection connection, Request request, Response response, Service service)
     {
-        RxSocketClient = rxSocketClient!;
-        RemoteIPEndPoint = RxSocketClient.RemoteIPEndPoint;
+        Connection = connection ?? throw new ArgumentNullException(nameof(connection));
+        RemoteIpEndPoint = connection.RemoteIpEndPoint;
+        ServerVersion = connection.ServerVersionCurrent;
+        ClientId = connection.ClientId;
         Request = request;
         Response = response;
         Service = service;
     }
 
     public async ValueTask DisposeAsync() =>
-        await RxSocketClient!.DisposeAsync().ConfigureAwait(false);
-}
-
-public static partial class Extension
-{
-    public static bool IsIBDemoPort(this int port) =>
-        port == (int)IBDefaultPort.TwsDemoAccount || port == (int)IBDefaultPort.GatewayDemoAccount;
+        await Connection.DisposeAsync().ConfigureAwait(false);
 }

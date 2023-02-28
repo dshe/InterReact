@@ -1,15 +1,15 @@
 ﻿namespace InterReact;
 
-public sealed class OrderBound : IHasOrderId
+public sealed class OrderBound
 {
-    public long OrderBoundId { get; }
-    public int ClientId { get; }
-    public int OrderId { get; }
+    public long PermId { get; }
+    public int ApiClientId { get; }
+    public int ApiOrderId { get; }
 
     internal OrderBound(ResponseReader r)
     {
-        OrderBoundId = r.ReadLong(); // was OrderId, but is a long here! ???
-        ClientId = r.ReadInt(); // was ApiClientId
-        OrderId = r.ReadInt(); // was ApiIOrderId
+        PermId = r.ReadLong(); // permId?
+        ApiClientId = r.ReadInt(); // ApiClientId
+        ApiOrderId = r.ReadInt(); // ApiOrderId
     }
 }

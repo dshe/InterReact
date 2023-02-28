@@ -14,7 +14,7 @@ public class ContractDetail : TestCollectionBase
         Task<IList<object>> task = Client
             .Response
             .WithRequestId(id)
-            .TakeUntil(x => x is Alert || x is ContractDetailsEnd)
+            .TakeUntil(x => x is AlertMessage or ContractDetailsEnd)
             .Where(x => x is not ContractDetailsEnd)
             .ToList()
             .ToTask(); // start task
@@ -73,7 +73,7 @@ public class ContractDetail : TestCollectionBase
         IList<object> messages = await MakeContractDetailsRequest(contract);
 
         Assert.Single(messages);
-        Alert alert = Assert.IsType<Alert>(messages.Single());
+        AlertMessage alert = Assert.IsType<AlertMessage>(messages.Single());
         Write(alert.Message);
     }
 }

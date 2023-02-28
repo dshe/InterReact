@@ -4,29 +4,16 @@ namespace ConnectTests;
 
 public abstract class ConnectTestBase
 {
+    protected readonly ILoggerFactory LogFactory;
     protected readonly Action<string> Write;
-    protected readonly ILoggerFactory LoggerFactory;
-    protected readonly ILogger Logger;
 
-    public ConnectTestBase(ITestOutputHelper output)
+    protected ConnectTestBase(ITestOutputHelper output, LogLevel logLevel = LogLevel.Debug)
     {
-        Write = output.WriteLine;
+        LogFactory = LoggerFactory
+            .Create(builder => builder
+                .AddMXLogger(output.WriteLine)
+                .SetMinimumLevel(logLevel));
         
-        LoggerFactory = new LoggerFactory()
-            .AddMXLogger(Write, LogLevel.Debug);
-        
-        Logger = LoggerFactory
-            .CreateLogger("InterReact");
+        Write = s => output.WriteLine(s + "\r\n");
     }
-
-    protected async Task TestClient(IInterReactClient client)
-    {
-        Instant instant = await client
-            .Service
-            .GetCurrentTimeAsync()
-            .WaitAsync(TimeSpan.FromSeconds(6));
-
-        Write($"Test received time from CurrentTimeObservable: {instant}");
-    }
-
 }

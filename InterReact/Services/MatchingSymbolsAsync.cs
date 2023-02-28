@@ -1,30 +1,36 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
+﻿using System.Reactive.Threading.Tasks;
 
 namespace InterReact;
 
 public partial class Service
-{    
+{
     /// <summary>
     /// Returns SymbolSamples and/or Alert objects.
+    /// TWS does not support more than one concurrent request.
     /// </summary>
-    public async Task<IList<object>> GetMatchingSymbolsAsync(string pattern)
+    public async Task<IList<object>> GetMatchingSymbolsAsync(string pattern, CancellationToken ct = default)
     {
-        int id = Request.GetNextId();
+        await MatchingSymbolsSemaphore.WaitAsync(ct).ConfigureAwait(false);
 
-        Task<IList<object>> task = Response
-            .WithRequestId(id)
-            .TakeUntil(x => x is SymbolSamples)
-            .ToList()
-            .ToTask();
+        try
+        {
+            int id = Request.GetNextId();
 
-        Request.RequestMatchingSymbols(id, pattern);
+            Task<IList<object>> task = Response
+                .WithRequestId(id)
+                .TakeUntil(x => x is SymbolSamples)
+                .ToList()
+                .ToTask(ct);
 
-        IList<object> list = await task.ConfigureAwait(false);
+            Request.RequestMatchingSymbols(id, pattern);
 
-        return list;
+            IList<object> list = await task.WaitAsync(ct).ConfigureAwait(false);
+
+            return list;
+        }
+        finally 
+        { 
+            MatchingSymbolsSemaphore.Release(); 
+        }
     }
 }

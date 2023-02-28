@@ -13,7 +13,7 @@ public class Updates : TestCollectionBase
     {
         Task<IList<object>> task = Client
             .Response
-            .Where(m => m is AccountValue || m is PortfolioValue || m is AccountUpdateTime || m is AccountUpdateEnd)
+            .Where(m => m is AccountValue or PortfolioValue or AccountUpdateTime or AccountUpdateEnd)
             .TakeWhile(o => o is not AccountUpdateEnd)
             .ToList()
             .ToTask();
@@ -24,7 +24,7 @@ public class Updates : TestCollectionBase
 
         Client.Request.RequestAccountUpdates(false);
 
-        foreach (object o in list)
+        foreach (var o in list)
             Write(o.Stringify());
     }
 
@@ -37,7 +37,7 @@ public class Updates : TestCollectionBase
             .TakeWhile(o => o is not AccountUpdateEnd)
             .ToList();
 
-        foreach (object o in list)
+        foreach (var o in list)
             Write(o.Stringify());
     }
 }

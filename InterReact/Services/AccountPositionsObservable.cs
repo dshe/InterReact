@@ -1,5 +1,4 @@
 ﻿using Stringification;
-using System.Reactive.Linq;
 
 namespace InterReact;
 
@@ -18,7 +17,7 @@ public partial class Service
     private IObservable<object> CreatePositionsObservable()
     {
         return Response
-            .Where(x => x is Position || x is PositionEnd)
+            .Where(x => x is Position or PositionEnd)
             .ToObservableContinuous(
                 Request.RequestPositions,
                 Request.CancelPositions)

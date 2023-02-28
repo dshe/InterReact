@@ -31,15 +31,14 @@ public class MarketDataObservable : TestCollectionBase
 
         subscription.Dispose();
 
-        Assert.Empty(messages.OfType<Alert>().Where(a => a.IsFatal));
+        Assert.Empty(messages.OfType<AlertMessage>().Where(a => a.IsFatal));
 
         double? lastPrice = messages
             .OfType<PriceTick>()
-            .Where(x => x.TickType == TickType.DelayedLastPrice)
-            .FirstOrDefault()
+            .FirstOrDefault(x => x.TickType == TickType.DelayedLastPrice)
             ?.Price;
 
-        Assert.True(lastPrice != null && lastPrice > 0);
+        Assert.True(lastPrice is > 0);
     }
 
     [Fact]
@@ -67,10 +66,9 @@ public class MarketDataObservable : TestCollectionBase
 
         subscription.Dispose();
 
-        Alert alert = messages
-            .OfType<Alert>()
-            .Where(a => a.IsFatal)
-            .First();
+        AlertMessage alert = messages
+            .OfType<AlertMessage>()
+            .First(a => a.IsFatal);
 
         Assert.True(alert.Message.StartsWith("No security definition"));
     }

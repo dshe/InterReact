@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using System.Reactive.Linq;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public static partial class Extension
 {

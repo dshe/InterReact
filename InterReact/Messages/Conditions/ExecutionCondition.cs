@@ -1,16 +1,8 @@
-﻿/* Copyright (C) 2019 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
- * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
-
-#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
+﻿#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
 
 namespace InterReact;
 
-/**
-* @class ExecutionCondition
-* @brief This class represents a condition requiring a specific execution event to be fulfilled.
-* Orders can be activated or canceled if a set of given conditions is met. An ExecutionCondition is met whenever a trade occurs on a certain product at the given exchange.
-*/
-public sealed class ExecutionCondition : OrderCondition
+public class ExecutionCondition : OrderCondition
 {
     /**
     * @brief Exchange where the symbol needs to be traded.
@@ -39,12 +31,12 @@ public sealed class ExecutionCondition : OrderCondition
 
     protected override bool TryParse(string cond)
     {
-        if (!cond.StartsWith(header, StringComparison.Ordinal))
+        ArgumentNullException.ThrowIfNull(cond);
+        if (!cond.StartsWith(header))
             return false;
-
         try
         {
-            var parser = new StringSuffixParser(cond.Replace(header, "", StringComparison.Ordinal));
+            var parser = new StringSuffixParser(cond.Replace(header, ""));
 
             Symbol = parser.GetNextSuffixedValue(symbolSuffix);
             Exchange = parser.GetNextSuffixedValue(exchangeSuffix);
@@ -61,30 +53,36 @@ public sealed class ExecutionCondition : OrderCondition
         return true;
     }
 
-    internal override void Deserialize(ResponseReader r)
+    public override void Deserialize(ResponseReader r)
     {
+        ArgumentNullException.ThrowIfNull(r);
         base.Deserialize(r);
+
         SecType = r.ReadString();
         Exchange = r.ReadString();
         Symbol = r.ReadString();
     }
 
-    internal override void Serialize(RequestMessage message)
+    public override void Serialize(RequestMessage message)
     {
+        ArgumentNullException.ThrowIfNull(message);
         base.Serialize(message);
-        message.Write(SecType, Exchange, Symbol);
+        message.Write(SecType);
+        message.Write(Exchange);
+        message.Write(Symbol);
     }
-
 
     public override bool Equals(object? obj)
     {
-        if (obj is not ExecutionCondition other)
+        var other = obj as ExecutionCondition;
+
+        if (other == null)
             return false;
 
-        return base.Equals(obj)
-            && Exchange.Equals(other.Exchange, StringComparison.Ordinal)
-            && SecType.Equals(other.SecType, StringComparison.Ordinal)
-            && Symbol.Equals(other.Symbol, StringComparison.Ordinal);
+        return base.Equals(obj) 
+            && Exchange.Equals(other.Exchange)
+            && SecType.Equals(other.SecType)
+            && Symbol.Equals(other.Symbol);
     }
 
     public override int GetHashCode()

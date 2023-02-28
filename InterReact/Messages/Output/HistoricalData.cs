@@ -1,5 +1,4 @@
 ﻿using NodaTime.Text;
-using System.Collections.Generic;
 
 namespace InterReact;
 
@@ -14,9 +13,6 @@ public sealed class HistoricalData : IHasRequestId
 
     internal HistoricalData(ResponseReader r) // a one-shot deal
     {
-        if (!r.Connector.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
-            r.RequireMessageVersion(3);
-
         RequestId = r.ReadInt();
         Start = r.ReadLocalDateTime(DateTimePattern);
         End = r.ReadLocalDateTime(DateTimePattern);
@@ -46,8 +42,7 @@ public sealed class HistoricalDataBar
         Close = r.ReadDouble();
         Volume = r.ReadDecimal();
         WeightedAveragePrice = r.ReadDecimal();
-        if (!r.Connector.SupportsServerVersion(ServerVersion.SYNT_REALTIME_BARS))
-            r.ReadString(); /* string hasGaps */
+        r.ReadString(); /* string hasGaps */
         Count = r.ReadInt();
     }
 }

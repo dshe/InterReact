@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 /// <summary>
 /// A response to RequestSmartComponents.

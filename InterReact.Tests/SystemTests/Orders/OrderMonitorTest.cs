@@ -10,7 +10,7 @@ public class Monitor : TestCollectionBase
     [Fact]
     public async Task OrderMonitorTest()
     {
-        if (!Client.RemoteIPEndPoint.Port.IsIBDemoPort())
+        if (!Client.RemoteIpEndPoint.Port.IsIBDemoPort())
             throw new Exception("Use demo account to place order.");
 
         Contract contract = new()
@@ -44,7 +44,7 @@ public class Monitor : TestCollectionBase
     [Fact]
     public async Task OrderMonitorCancellationTest()
     {
-        if (!Client.RemoteIPEndPoint.Port.IsIBDemoPort())
+        if (!Client.RemoteIpEndPoint.Port.IsIBDemoPort())
             throw new Exception("Use demo account to place order.");
 
         Contract contract = new()
@@ -75,8 +75,7 @@ public class Monitor : TestCollectionBase
             .ToList();
 
         Assert.True(reports
-            .Where(x => x.Status == OrderStatus.Cancelled || x.Status == OrderStatus.ApiCancelled)
-            .Any());
+            .Any(x => x.Status == OrderStatus.Cancelled || x.Status == OrderStatus.ApiCancelled));
       
         orderMonitor.Dispose();
     }

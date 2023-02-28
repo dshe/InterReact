@@ -1,5 +1,5 @@
 environment:
-  base_version: '0.2.1'
+  base_version: '0.3.0'
   version_suffix: ''
 version: $(base_version).{build}
 image: Visual Studio 2022

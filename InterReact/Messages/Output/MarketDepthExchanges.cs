@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public sealed class MarketDepthExchanges
 {
@@ -16,26 +14,18 @@ public sealed class MarketDepthExchanges
 
 public sealed class MarketDepthExchange
 {
-    public string Exchange { get; } = "";
-    public string SecType { get; } = "";
-    public string ListingExch { get; } = "";
-    public string ServiceDataTyp { get; } = "";
-    public int? AggGroup { get; } // The aggregated group
+    public string Exchange { get; }
+    public string SecType { get; }
+    public string ListingExch { get; }
+    public string ServiceDataTyp { get; }
+    public int AggGroup { get; } // The aggregated group
 
     internal MarketDepthExchange(ResponseReader r)
     {
         Exchange = r.ReadString();
         SecType = r.ReadString();
-        if (r.Connector.SupportsServerVersion(ServerVersion.SERVICE_DATA_TYPE))
-        {
-            ListingExch = r.ReadString();
-            ServiceDataTyp = r.ReadString();
-            AggGroup = r.ReadIntNullable();
-        }
-        else
-        {
-            ListingExch = "";
-            ServiceDataTyp = r.ReadBool() ? "Deep2" : "Deep";
-        }
+        ListingExch = r.ReadString();
+        ServiceDataTyp = r.ReadString();
+        AggGroup = r.ReadIntMax();
     }
 }

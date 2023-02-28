@@ -3,7 +3,7 @@
 public sealed class DisplayGroupUpdate : IHasRequestId
 {
     public int RequestId { get; }
-    public string ContractInfo { get; } = "";
+    public string ContractInfo { get; }
     internal DisplayGroupUpdate(ResponseReader r)
     {
         r.IgnoreMessageVersion();
@@ -15,9 +15,8 @@ public sealed class DisplayGroupUpdate : IHasRequestId
 public sealed class DisplayGroups : IHasRequestId
 {
     public int RequestId { get; }
-    public string Groups { get; } = "";
+    public string Groups { get; }
 
-    internal DisplayGroups() { }
     internal DisplayGroups(ResponseReader r)
     {
         r.IgnoreMessageVersion();

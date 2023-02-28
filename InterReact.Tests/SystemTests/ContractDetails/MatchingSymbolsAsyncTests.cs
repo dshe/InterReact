@@ -13,7 +13,7 @@ public class MatchingSymbolsAsync : TestCollectionBase
             .Service
             .GetMatchingSymbolsAsync(pattern);
 
-        Assert.Empty(messages.OfType<Alert>());
+        Assert.Empty(messages.OfType<AlertMessage>());
 
         SymbolSamples samples = messages.OfType<SymbolSamples>().Single();
 

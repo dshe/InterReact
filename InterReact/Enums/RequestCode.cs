@@ -2,6 +2,7 @@
 
 internal enum RequestCode
 {
+    Control = -1,
     Invalid = 0,
 
     RequestMarketData = 1,
@@ -11,18 +12,18 @@ internal enum RequestCode
     RequestOpenOrders = 5,
     RequestAccountData = 6,
     RequestExecutions = 7,
-    RequestNextOrderId = 8,
-    RequestContractDetails = 9,
+    RequestIds = 8,
+    RequestContractData = 9,
     RequestMarketDepth = 10,
     CancelMarketDepth = 11,
     RequestNewsBulletins = 12,
-    CancelNewsBulletins = 13,
-    ChangeServerLogLevel = 14,
+    CancelNewsBulletin = 13,
+    ChangeServerLog = 14,
     RequestAutoOpenOrders = 15,
     RequestAllOpenOrders = 16,
     RequestManagedAccounts = 17,
-    RequestFinancialAdvisorConfiguration = 18,
-    ReplaceFinancialAdvisorConfiguration = 19,
+    RequestFA = 18,
+    ReplaceFA = 19,
     RequestHistoricalData = 20,
     ExerciseOptions = 21,
     RequestScannerSubscription = 22,
@@ -31,14 +32,14 @@ internal enum RequestCode
     CancelHistoricalData = 25,
 
     RequestCurrentTime = 49,
-    RequestRealtimeBars = 50,
-    CancelRealtimeBars = 51,
+    RequestRealTimeBars = 50,
+    CancelRealTimeBars = 51,
     RequestFundamentalData = 52,
     CancelFundamentalData = 53,
-    RequestCalculatedImpliedVolatility = 54,
-    RequestCalculatedOptionPrice = 55,
-    CancelCalculatedImpliedVolatility = 56,
-    CancelCalculatedOptionPrice = 57,
+    ReqCalcImpliedVolat = 54,
+    ReqCalcOptionPrice = 55,
+    CancelImpliedVolatility = 56,
+    CancelOptionPrice = 57,
     RequestGlobalCancel = 58,
     RequestMarketDataType = 59,
 
@@ -55,8 +56,8 @@ internal enum RequestCode
     UpdateDisplayGroup = 69,
     UnsubscribeFromGroupEvents = 70,
     StartApi = 71,
-    VerifyAndAuthorizeRequest = 72,
-    VerifyAndAuthorizeMessage = 73,
+    VerifyAndAuthRequest = 72,
+    VerifyAndAuthMessage = 73,
     RequestPositionsMulti = 74,
     CancelPositionsMulti = 75,
     RequestAccountUpdatesMulti = 76,
@@ -87,5 +88,5 @@ internal enum RequestCode
     CancelWshMetaData = 101,
     ReqWshEventData = 102,
     CancelWshEventData = 103,
-    RequestUserInfo = 104
+    ReqUserInfo = 104
 }

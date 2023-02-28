@@ -1,21 +1,16 @@
-﻿using RxSockets;
-using System.Net;
+﻿using Microsoft.Extensions.Logging.Abstractions;
+using RxSockets;
+using Stringification;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
 
 namespace Core;
-
-public sealed class NullRxSocketClient : IRxSocketClient
-{
-    public IPEndPoint RemoteIPEndPoint => throw new NotImplementedException();
-    public bool Connected => throw new NotImplementedException();
-    public ValueTask DisposeAsync() => ValueTask.CompletedTask;
-    public IAsyncEnumerable<byte> ReceiveAllAsync() => throw new NotImplementedException();
-    public int Send(ReadOnlySpan<byte> buffer) => throw new NotImplementedException();
-}
 
 public class RequestMessageTests : UnitTestBase
 {
     private readonly RequestMessage requestMessage = 
-        new(new NullRxSocketClient(), new RingLimiter());
+        new(NullRxSocketClient.Instance, new RingLimiter(), NullLoggerFactory.Instance);
     public RequestMessageTests(ITestOutputHelper output) : base(output) {}
 
     private void AssertResult(params string[] strings)
@@ -70,10 +65,43 @@ public class RequestMessageTests : UnitTestBase
     }
 
     [Fact]
-    public void T07_NInt()
+    public void T08_Contract()
     {
-        int? nint = null;
-        requestMessage.Write(nint.EncodeNullable());
-        AssertResult(int.MaxValue.ToString());
+        var contract = new Contract();
+        Assert.ThrowsAny<Exception>(() => requestMessage.Write(1, "str", contract));
     }
+
+    [Fact]
+    public void T08_EnumsToNumbers()
+    {
+        DayOfWeek[] enums = new DayOfWeek[] { DayOfWeek.Saturday, DayOfWeek.Sunday };
+
+        var x2 = GetEnumValuesString(new DayOfWeek[] {});
+        Write(x2);
+
+    }
+
+    private string GetEnumValuesString<T>(IEnumerable<T>? enums) where T : Enum
+    {
+        if (enums == null)
+            return "";
+
+        List<string> list = enums.Select(enm =>
+            GetEnumValueString(enm))
+            .ToList();
+
+        return string.Join(",", list);
+
+        // local
+        static string GetEnumValueString(T en)
+        {
+            Type underlyingType = Enum.GetUnderlyingType(typeof(T));
+            object o = Convert.ChangeType(en, underlyingType, CultureInfo.InvariantCulture) 
+                ?? throw new ArgumentException("Could not get enum value.");
+            return o.ToString() ?? throw new ArgumentException("Could not get enum value.");
+        }
+    }
+
+
+
 }

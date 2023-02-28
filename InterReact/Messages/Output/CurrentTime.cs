@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public sealed class CurrentTime
 {
@@ -8,6 +6,6 @@ public sealed class CurrentTime
     internal CurrentTime(ResponseReader r)
     {
         r.IgnoreMessageVersion();
-        Time = Instant.FromUnixTimeSeconds(long.Parse(r.ReadString(), NumberFormatInfo.InvariantInfo));
+        Time = Instant.FromUnixTimeSeconds(r.ReadLong());
     }
 }

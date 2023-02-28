@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public sealed class FamilyCodes
 {

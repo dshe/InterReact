@@ -28,7 +28,7 @@ public class Summary : TestCollectionBase
 
         Assert.NotEmpty(list);
 
-        foreach (object o in list)
+        foreach (var o in list)
             Write(o.Stringify());
     }
 
@@ -43,7 +43,7 @@ public class Summary : TestCollectionBase
 
         Assert.NotEmpty(list);
 
-        foreach (object o in list)
+        foreach (var o in list)
             Write(o.Stringify());
     }
 }

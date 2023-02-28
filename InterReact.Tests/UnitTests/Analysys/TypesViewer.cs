@@ -22,7 +22,7 @@ public class Types_Viewer : UnitTestBase
         foreach (var group in Types
             .Select(ti => ti.GetCustomAttributes(true).Select(a => new { a, ti }))
             .SelectMany(x => x)
-            .Where(x => !(x.a is CompilerGeneratedAttribute || x.a is ExtensionAttribute))
+            .Where(x => x.a is not (CompilerGeneratedAttribute or ExtensionAttribute))
             .GroupBy(x => x.a))
         {
             Write(group.Key.ToString()!);
@@ -37,19 +37,19 @@ public class Types_Viewer : UnitTestBase
         foreach (var group in Types
             .Select(t => t.DeclaredMembers
                 .Where(m => !m.Name.StartsWith("<"))
-                .OfType<MemberInfo>().Select(m => (t, m)))
+                .Select(m => (t, m)))
             .SelectMany(x => x)
             //.Where(x => x.m is not null) //.OfType<(TypeInfo, MemberInfo)>()
 
             .Select(x => x.m.GetCustomAttributes(false)
                 .Select(q => new { type = x.t, method = x.m, attr = q }))
             .SelectMany(x => x)
-            .Where(x => !(
-                    x.attr is CompilerGeneratedAttribute ||
-                    x.attr is DebuggerHiddenAttribute ||
-                    x.attr is SecuritySafeCriticalAttribute ||
-                    x.attr is AsyncStateMachineAttribute ||
-                    x.attr is DebuggerStepThroughAttribute))
+            .Where(x => x.attr is not (
+                CompilerGeneratedAttribute or 
+                DebuggerHiddenAttribute or 
+                SecuritySafeCriticalAttribute or
+                AsyncStateMachineAttribute or
+                DebuggerStepThroughAttribute))
             .GroupBy(x => x.attr))
         {
             Write(group.Key.ToString()!);
@@ -63,26 +63,29 @@ public class Types_Viewer : UnitTestBase
     {
         Stringifier s = new(Logger);
 
-        TypeInfo type = typeof(PriceCondition).GetTypeInfo();
+        var tick = new PriceTick(0, TickType.Undefined, 0, new TickAttrib() );
+        Write(tick.Stringify());
 
-        object instance = s.CreateInstance(type);
-
-        Assert.NotNull(instance);
-        Write(s.Stringify(instance));
+        //TypeInfo type = typeof(PriceTick).GetTypeInfo();
+        //object instance = s.CreateInstance(type);
+        //Assert.NotNull(instance);
+        //Write(s.Stringify(instance));
     }
 
     [Fact]
     public void Auto_Type_And_Stringify_All() // sometimes fails?
     {
-        Stringifier stringifier = new(Logger);
-
-        List<TypeInfo> types = Types.Where(t =>
-            t.IsClass &&
-            t.IsPublic &&
-            t.IsSealed &&
-            !t.IsAbstract &&
-            !t.ContainsGenericParameters &&
-            t.Namespace == "InterReact")
+        List<TypeInfo> types = Types
+            .Where(t =>
+                t is
+                {
+                    IsClass: true, 
+                    IsPublic: true, 
+                    IsSealed: true, 
+                    IsAbstract: false, 
+                    ContainsGenericParameters: false, 
+                    Namespace: "InterReact"
+                })
             .OrderBy(x => x.Name)
             .ToList();
 
@@ -90,14 +93,14 @@ public class Types_Viewer : UnitTestBase
         {
             if (type == typeof(OrderMonitor) ||
                 type == typeof(TickClassSelector) ||
-                type == typeof(InterReactClientConnector) ||
-                type == typeof(InterReactClient))
-                    continue; ;
+                type == typeof(Connection) ||
+                type == typeof(InterReactClient)) 
+                continue;
             try
             {
-                object instance = stringifier.CreateInstance(type);
+                object instance = Stringifier.Instance.CreateInstance(type);
                 Assert.NotNull(instance);
-                string str = stringifier.Stringify(instance);
+                string str = Stringifier.Instance.Stringify(instance);
                 Write($"Type: {str}");
             }
             catch (Exception e)

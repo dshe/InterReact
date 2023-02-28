@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public sealed class ContractDescription
 {
@@ -14,10 +12,7 @@ public sealed class ContractDescription
         Contract.PrimaryExchange = r.ReadString();
         Contract.Currency = r.ReadString();
         r.AddStringsToList(DerivativeSecTypes);
-        if (r.Connector.SupportsServerVersion(ServerVersion.MIN_SERVER_VER_BOND_ISSUERID))
-        {
-            Contract.Description = r.ReadString();
-            Contract.IssuerId = r.ReadString();    
-        }
+        Contract.Description = r.ReadString();
+        Contract.IssuerId = r.ReadString();    
     }
 }

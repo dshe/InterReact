@@ -1,11 +1,9 @@
 ﻿using Stringification;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
 
 namespace InterReact;
+
+// add CancellationToken ct = default)
 
 public partial class Service
 {
@@ -51,7 +49,7 @@ public partial class Service
 
         lock (ContractDetailsCache)
         {
-            Alert? alert = result.OfType<Alert>().FirstOrDefault();
+            AlertMessage? alert = result.OfType<AlertMessage>().FirstOrDefault();
             if (alert == null)
                 return result.Cast<ContractDetails>().ToList();
             ContractDetailsCache.Remove(key); // try
@@ -66,8 +64,8 @@ public partial class Service
 
         Task<IList<object>> task = Response
             .WithRequestId(id)
-            .TakeUntil(m => m is ContractDetailsEnd || m is Alert)
-            .Where(m => m is ContractDetails || m is Alert)
+            .TakeUntil(m => m is ContractDetailsEnd or AlertMessage)
+            .Where(m => m is ContractDetails or AlertMessage)
             .ToList()
             .ToTask();
 

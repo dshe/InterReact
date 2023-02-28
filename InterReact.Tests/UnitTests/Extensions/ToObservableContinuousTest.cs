@@ -6,7 +6,9 @@ namespace Extension;
 
 public class ToObservableContinuous : ReactiveUnitTestBase
 {
-    public ToObservableContinuous(ITestOutputHelper output) : base(output) { }
+    private readonly TestScheduler TestScheduler = new();
+
+    public ToObservableContinuous(ITestOutputHelper output) : base(output) {}
 
     [Theory,
     InlineData(-1),
@@ -16,6 +18,8 @@ public class ToObservableContinuous : ReactiveUnitTestBase
     InlineData(100)]
     public async Task TimeoutTest(int ticks)
     {
+        int start = 0, stop = 0;
+
         TimeSpan ts = ticks == -1 ? TimeSpan.Zero : TimeSpan.FromTicks(ticks);
 
         Subject<object> subject = new();
@@ -31,17 +35,19 @@ public class ToObservableContinuous : ReactiveUnitTestBase
     [Fact]
     public void OnNextTest()
     {
+        int start = 0, stop = 0;
+
         ITestableObservable<int> source =
-            testScheduler.CreateHotObservable<int>(
+            TestScheduler.CreateHotObservable<int>(
                     OnNext(10, 1),
                     OnNext(20, 2));
 
-        ITestableObserver<int> observer = testScheduler.CreateObserver<int>();
+        ITestableObserver<int> observer = TestScheduler.CreateObserver<int>();
 
-       var subscription = source.ToObservableContinuous(() => start++, () => stop++)
+        IDisposable subscription = source.ToObservableContinuous(() => start++, () => stop++)
            .Subscribe(observer);
 
-        testScheduler.Start();
+        TestScheduler.Start();
         subscription.Dispose();
 
         observer.Messages.AssertEqual(

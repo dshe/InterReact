@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public sealed class NewsProviders
 {
@@ -16,8 +14,8 @@ public sealed class NewsProviders
 
 public sealed class NewsProvider
 {
-    public string Code { get; } = "";
-    public string Name { get; } = "";
+    public string Code { get; }
+    public string Name { get; }
 
     internal NewsProvider(ResponseReader r)
     {

@@ -1,7 +1,4 @@
-﻿/* Copyright (C) 2019 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
- * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
-
-#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305, CA1062
+﻿#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305, CA1062
 
 namespace InterReact;
 
@@ -19,7 +16,9 @@ public abstract class OperatorCondition : OrderCondition
 
     public override bool Equals(object? obj)
     {
-        if (obj is not OperatorCondition other)
+        var other = obj as OperatorCondition;
+
+        if (other == null)
             return false;
 
         return base.Equals(obj)
@@ -59,19 +58,20 @@ public abstract class OperatorCondition : OrderCondition
         return true;
     }
 
-    internal override void Deserialize(ResponseReader r)
+    public override void Deserialize(ResponseReader r)
     {
         base.Deserialize(r);
+
         IsMore = r.ReadBool();
         Value = r.ReadString();
     }
 
-    internal override void Serialize(RequestMessage message)
+    public override void Serialize(RequestMessage message)
     {
         base.Serialize(message);
-        message.Write(IsMore, Value);
+        message.Write(IsMore);
+        message.Write(Value);
     }
-
 }
 
 #pragma warning restore CA1012, CA1307, CA1309, CA1031, CA1310, CA1305, CA1062

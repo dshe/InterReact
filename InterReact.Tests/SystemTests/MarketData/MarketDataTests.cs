@@ -14,8 +14,8 @@ public class MarketData : TestCollectionBase
         { 
             SecurityType = SecurityType.Stock, 
             Symbol = "SPY", 
-            Currency = "USD", 
-            Exchange = "SMART" 
+            Currency = "USD",
+            Exchange = "SMART"
         };
 
         int id = Client.Request.GetNextId();
@@ -29,15 +29,14 @@ public class MarketData : TestCollectionBase
 
         Client.Request.RequestMarketData(id, contract, isSnapshot: false);
 
-        IList<object> messages = await task;
+        IList<object> messages = await task; // take 3 seconds of messages
 
-        Assert.Empty(messages.OfType<Alert>().Where(a => a.IsFatal));
+        Assert.Empty(messages.OfType<AlertMessage>().Where(a => a.IsFatal));
 
         double? lastPrice = messages
-                  .OfType<PriceTick>()
-                  .Where(x => x.TickType == TickType.DelayedLastPrice)
-                  .FirstOrDefault()
-                  ?.Price;
+            .OfType<PriceTick>()
+            .FirstOrDefault(x => x.TickType == TickType.DelayedLastPrice || x.TickType == TickType.LastPrice)
+            ?.Price;
         
         Write("LastPrice: " + lastPrice);
 
@@ -68,7 +67,7 @@ public class MarketData : TestCollectionBase
 
         IList<object> messages = await task;
  
-        Alert alert = messages.OfType<Alert>().Single();
+        AlertMessage alert = messages.OfType<AlertMessage>().Single();
         Assert.True(alert.IsFatal);
         Write(alert.Message);
 

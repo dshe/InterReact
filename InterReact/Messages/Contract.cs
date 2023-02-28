@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
+﻿namespace InterReact;
 
-namespace InterReact;
-
-public sealed class Contract // input + output
+public sealed class Contract // input + output OK
 {
     /// <summary>
     /// The unique contract identifier.
@@ -82,7 +80,7 @@ public sealed class Contract // input + output
     public DeltaNeutralContract? DeltaNeutralContract { get; set; }
 
     public Contract() {}
-    internal Contract(ResponseReader r)
+    internal Contract(ResponseReader r, bool includePrimaryExchange = true)
     {
         ContractId = r.ReadInt();
         Symbol = r.ReadString();
@@ -92,9 +90,31 @@ public sealed class Contract // input + output
         Right = r.ReadStringEnum<OptionRightType>();
         Multiplier = r.ReadString();
         Exchange = r.ReadString();
+        if (includePrimaryExchange)
+            PrimaryExchange = r.ReadString();
         Currency = r.ReadString();
         LocalSymbol = r.ReadString();
         TradingClass = r.ReadString();
     }
 
+    internal RequestMessage Write(RequestMessage m, bool excludePrimaryExchange)
+    {
+        m.Write(
+            ContractId,
+            Symbol,
+            SecurityType,
+            LastTradeDateOrContractMonth,
+            Strike,
+            Right,
+            Multiplier,
+            Exchange);
+
+        if (!excludePrimaryExchange)
+            m.Write(PrimaryExchange);
+
+        return m.Write(
+            Currency,
+            LocalSymbol,
+            TradingClass);
+    }
 }

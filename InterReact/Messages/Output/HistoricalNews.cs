@@ -3,10 +3,10 @@
 public sealed class HistoricalNews : IHasRequestId
 {
     public int RequestId { get; }
-    public string Time { get; } = "";
-    public string ProviderCode { get; } = "";
-    public string ArticleId { get; } = "";
-    public string Headline { get; } = "";
+    public string Time { get; }
+    public string ProviderCode { get; }
+    public string ArticleId { get; }
+    public string Headline { get; }
 
     internal HistoricalNews(ResponseReader r)
     {

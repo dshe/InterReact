@@ -7,28 +7,30 @@ namespace Extension;
 
 public sealed class ShareSourceTests : ReactiveUnitTestBase
 {
+    private readonly TestScheduler TestScheduler = new();
+
     public ShareSourceTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public void T01_Consecutive()
     {
-        ITestableObserver<string> observer1 = testScheduler.CreateObserver<string>();
-        ITestableObserver<string> observer2 = testScheduler.CreateObserver<string>();
+        ITestableObserver<string> observer1 = TestScheduler.CreateObserver<string>();
+        ITestableObserver<string> observer2 = TestScheduler.CreateObserver<string>();
 
-        ITestableObservable<string> observable = testScheduler.CreateColdObservable(
+        ITestableObservable<string> observable = TestScheduler.CreateColdObservable(
             OnNext(100, "1"),
             OnCompleted<string>(1000)
         );
 
         IObservable<string> sharedObservable = observable.ShareSource();
 
-        sharedObservable.SubscribeOn(testScheduler).Subscribe(observer1);
+        sharedObservable.SubscribeOn(TestScheduler).Subscribe(observer1);
 
-        testScheduler.AdvanceBy(1000);
+        TestScheduler.AdvanceBy(1000);
 
-        sharedObservable.SubscribeOn(testScheduler).Subscribe(observer2);
+        sharedObservable.SubscribeOn(TestScheduler).Subscribe(observer2);
 
-        testScheduler.Start();
+        TestScheduler.Start();
 
         Recorded<Notification<string>>[] expected = new[]
         {
@@ -51,10 +53,10 @@ public sealed class ShareSourceTests : ReactiveUnitTestBase
     [Fact]
     public void T02_Overlapping()
     {
-        ITestableObserver<string> observer1 = testScheduler.CreateObserver<string>();
-        ITestableObserver<string> observer2 = testScheduler.CreateObserver<string>();
+        ITestableObserver<string> observer1 = TestScheduler.CreateObserver<string>();
+        ITestableObserver<string> observer2 = TestScheduler.CreateObserver<string>();
 
-        ITestableObservable<string> observable = testScheduler.CreateColdObservable(
+        ITestableObservable<string> observable = TestScheduler.CreateColdObservable(
             OnNext(100, "1"),
             OnNext(200, "2"),
             OnNext(300, "3"),
@@ -64,13 +66,13 @@ public sealed class ShareSourceTests : ReactiveUnitTestBase
 
         IObservable<string> sharedObservable = observable.ShareSource();
 
-        sharedObservable.SubscribeOn(testScheduler).Subscribe(observer1);
+        sharedObservable.SubscribeOn(TestScheduler).Subscribe(observer1);
 
-        testScheduler.AdvanceBy(350);
+        TestScheduler.AdvanceBy(350);
 
-        sharedObservable.SubscribeOn(testScheduler).Subscribe(observer2);
+        sharedObservable.SubscribeOn(TestScheduler).Subscribe(observer2);
 
-        testScheduler.Start();
+        TestScheduler.Start();
 
         Recorded<Notification<string>>[] expected = new[]
         {
@@ -99,10 +101,10 @@ public sealed class ShareSourceTests : ReactiveUnitTestBase
     [Fact]
     public void T03_Concurrent()
     {
-        ITestableObserver<string> observer1 = testScheduler.CreateObserver<string>();
-        ITestableObserver<string> observer2 = testScheduler.CreateObserver<string>();
+        ITestableObserver<string> observer1 = TestScheduler.CreateObserver<string>();
+        ITestableObserver<string> observer2 = TestScheduler.CreateObserver<string>();
 
-        ITestableObservable<string> observable = testScheduler.CreateColdObservable(
+        ITestableObservable<string> observable = TestScheduler.CreateColdObservable(
             OnNext(100, "1"),
             OnNext(200, "2"),
             OnNext(300, "3"),
@@ -112,10 +114,10 @@ public sealed class ShareSourceTests : ReactiveUnitTestBase
 
         IObservable<string> sharedObservable = observable.ShareSource();
 
-        sharedObservable.SubscribeOn(testScheduler).Subscribe(observer1);
-        sharedObservable.SubscribeOn(testScheduler).Subscribe(observer2);
+        sharedObservable.SubscribeOn(TestScheduler).Subscribe(observer1);
+        sharedObservable.SubscribeOn(TestScheduler).Subscribe(observer2);
 
-        testScheduler.Start();
+        TestScheduler.Start();
 
         Recorded<Notification<string>>[] expected = new[]
         {

@@ -1,8 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.VisualBasic;
 using StringEnums;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 
 namespace InterReact;
 
@@ -16,7 +14,8 @@ internal sealed class ResponseParser
     private readonly Dictionary<Type, Dictionary<string, object>> EnumCache = new();
     private readonly ILogger Logger;
 
-    internal ResponseParser(ILogger logger) => Logger = logger;
+    internal ResponseParser(ILoggerFactory loggerFactory) =>
+        Logger = loggerFactory.CreateLogger("InterReact.ResponseParser");
 
     internal char ParseChar(string s)
     {
@@ -47,7 +46,6 @@ internal sealed class ResponseParser
         throw new ArgumentException($"ParseInt('{s}') failure.");
     }
     internal int ParseIntMax(string s) => s.Length == 0 ? int.MaxValue : ParseInt(s);
-    internal int? ParseIntNullable(string s) => (s.Length == 0 || s == MaxInt) ? null : ParseInt(s);
 
     internal long ParseLong(string s)
     {
@@ -74,8 +72,6 @@ internal sealed class ResponseParser
             return double.PositiveInfinity;
         return ParseDouble(s);
     }
-    internal double? ParseDoubleNullable(string s) =>
-        (s.Length == 0 || s == MaxDouble) ? null : ParseDouble(s);
 
     internal decimal ParseDecimal(string s)
     {
@@ -123,3 +119,5 @@ internal sealed class ResponseParser
         return e;
     }
 }
+
+#pragma warning restore CA1822

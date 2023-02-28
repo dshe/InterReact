@@ -21,13 +21,12 @@ public class MarketDataSnapshotAsync : TestCollectionBase
             .Service
             .GetTickSnapshotAsync(contract);
 
-        Assert.Empty(messages.OfType<Alert>().Where(a => a.IsFatal));
+        Assert.Empty(messages.OfType<AlertMessage>().Where(a => a.IsFatal));
 
         double? lastPrice = messages
-             .OfType<PriceTick>()
-             .Where(x => x.TickType == TickType.DelayedLastPrice)
-             .FirstOrDefault()
-             ?.Price;
+            .OfType<PriceTick>()
+            .FirstOrDefault(x => x.TickType == TickType.DelayedLastPrice || x.TickType == TickType.LastPrice)
+            ?.Price;
 
         Assert.True(lastPrice != null && lastPrice > 0);
     }
@@ -47,10 +46,9 @@ public class MarketDataSnapshotAsync : TestCollectionBase
             .Service
             .GetTickSnapshotAsync(contract);
 
-        Alert fatalAlert = messages
-            .OfType<Alert>()
-            .Where(alert => alert.IsFatal)
-            .First();
+        AlertMessage fatalAlert = messages
+            .OfType<AlertMessage>()
+            .First(alert => alert.IsFatal);
 
         Assert.True(fatalAlert.Message.StartsWith("No security definition"));
     }

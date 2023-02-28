@@ -6,12 +6,12 @@ public sealed class NewsBulletin
 
     public NewsBulletinType Type { get; } = NewsBulletinType.Undefined;
 
-    public string Message { get; } = "";
+    public string Message { get; }
 
     /// <summary>
     /// The exchange from which this message originated.
     /// </summary>
-    public string Origin { get; } = "";
+    public string Origin { get; }
 
     internal NewsBulletin(ResponseReader r)
     {

@@ -1,10 +1,6 @@
-﻿/* Copyright (C) 2019 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
- * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
+﻿#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
 
 using System.Globalization;
-using System.Linq;
-
-#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
 
 namespace InterReact;
 
@@ -25,16 +21,16 @@ public static class CTriggerMethod
 }
 
 /** 
- *  @brief Used with conditional orders to cancel or submit order based on price of an instrument. 
- */
+*  @brief Used with conditional orders to cancel or submit order based on price of an instrument. 
+*/
 
-public sealed class PriceCondition : ContractCondition
+public class PriceCondition : ContractCondition
 {
     protected override string Value
     {
         get
         {
-            return Price.ToString();
+            return Price.ToString(NumberFormatInfo.InvariantInfo);
         }
         set
         {
@@ -51,7 +47,7 @@ public sealed class PriceCondition : ContractCondition
     {
         var other = obj as PriceCondition;
 
-        if (other is null)
+        if (other == null)
             return false;
 
         return base.Equals(obj)
@@ -66,23 +62,27 @@ public sealed class PriceCondition : ContractCondition
     public double Price { get; set; }
     public TriggerMethod TriggerMethod { get; set; }
 
-    internal override void Deserialize(ResponseReader r)
+    public override void Deserialize(ResponseReader r)
     {
+        ArgumentNullException.ThrowIfNull(r);
         base.Deserialize(r);
         TriggerMethod = r.ReadEnum<TriggerMethod>();
     }
 
-    internal override void Serialize(RequestMessage message)
+    public override void Serialize(RequestMessage message)
     {
+        ArgumentNullException.ThrowIfNull(message);
         base.Serialize(message);
-        message.Write(TriggerMethod);
+        message.Write((int)TriggerMethod);
     }
 
     protected override bool TryParse(string cond)
     {
+        ArgumentNullException.ThrowIfNull(cond);
+
         var fName = CTriggerMethod.friendlyNames.Where(n => cond.StartsWith(n)).OrderByDescending(n => n.Length).FirstOrDefault();
 
-        if (fName is null)
+        if (fName == null)
             return false;
 
         try

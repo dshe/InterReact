@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
+﻿using System.Reactive.Threading.Tasks;
 
 namespace InterReact;
 
@@ -11,16 +8,13 @@ public partial class Service
     /// Returns open orders and order status reports.
     /// https://interactivebrokers.github.io/tws-api/open_orders.html
     /// </summary>
-    public async Task<IList<object>> GetOpenOrdersAsync(OpenOrdersRequestType type = OpenOrdersRequestType.AllOpenOrders)
+    public async Task<IList<object>> GetOpenOrdersAsync(OpenOrdersRequestType type = OpenOrdersRequestType.AllOpenOrders, CancellationToken ct = default)
     {
         Task<IList<object>> task = Response
-            .Where(m => m is OpenOrder ||
-                        m is OrderStatusReport ||
-                        m is OrderBound ||
-                        m is OpenOrderEnd)
+            .Where(m => m is OpenOrder or OrderStatusReport or OrderBound or OpenOrderEnd)
             .TakeWhile(m => m is not OpenOrderEnd) // exclusive
             .ToList()
-            .ToTask();
+            .ToTask(ct);
 
         switch (type)
         {

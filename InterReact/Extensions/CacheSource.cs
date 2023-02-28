@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Disposables;
-using System.Reactive.Linq;
+﻿using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 
 namespace InterReact;
@@ -26,25 +23,25 @@ public static partial class Extension
         {
             lock (cache)
             {
-                subject ??= new();
+                subject ??= new Subject<T>();
 
-                foreach (var value in cache.Values.OrderBy(v => v.Index))
+                foreach ((T Item, long Index) value in cache.Values.OrderBy(v => v.Index))
                     observer.OnNext(value.Item);
 
                 IDisposable subscription = subject.Subscribe(observer);
 
-                if (sourceSubscription == Disposable.Empty)
+                if (Equals(sourceSubscription, Disposable.Empty))
                 {
                     sourceSubscription = source.Subscribe(x =>
                     {
                         lock (cache)
                         {
-                            if (sourceSubscription == Disposable.Empty)
+                            if (Equals(sourceSubscription, Disposable.Empty))
                                 return;
                             string key = keySelector(x);
                             if (key.Length != 0)
                             {
-                                if (cache.TryGetValue(key, out var item))
+                                if (cache.TryGetValue(key, out (T Item, long Index) item))
                                     item.Item = x;
                                 else
                                     cache.Add(key, (x, index++));

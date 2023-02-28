@@ -1,10 +1,4 @@
-﻿/* Copyright (C) 2019 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
- * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
-
-using System.Collections.Generic;
-using System.Linq;
-
-#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
+﻿#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
 
 namespace InterReact;
 
@@ -45,17 +39,23 @@ public abstract class OrderCondition
                 break;
         }
 
-        if (rval is not null)
+        if (rval != null)
             rval.Type = type;
 
         return rval ?? throw new InvalidOperationException("Invalid OrderConditionType.");
     }
 
-    internal virtual void Serialize(RequestMessage message) =>
+    public virtual void Serialize(RequestMessage message)
+    {
+        ArgumentNullException.ThrowIfNull(message);
         message.Write(IsConjunctionConnection ? "a" : "o");
+    }
 
-    internal virtual void Deserialize(ResponseReader r) =>
+    public virtual void Deserialize(ResponseReader r)
+    {
+        ArgumentNullException.ThrowIfNull(r);
         IsConjunctionConnection = r.ReadString() == "a";
+    }
 
     virtual protected bool TryParse(string cond)
     {
@@ -66,14 +66,16 @@ public abstract class OrderCondition
 
     public static OrderCondition? Parse(string cond)
     {
-        List<OrderCondition> conditions = Enum.GetValues(typeof(OrderConditionType)).OfType<OrderConditionType>().Select(t => Create(t)).ToList();
-
+        ArgumentNullException.ThrowIfNull(cond);
+        var conditions = Enum.GetValues(typeof(OrderConditionType)).OfType<OrderConditionType>().Select(t => Create(t)).ToList();
         return conditions.FirstOrDefault(c => c.TryParse(cond));
     }
 
     public override bool Equals(object? obj)
     {
-        if (obj is not OrderCondition other)
+        var other = obj as OrderCondition;
+
+        if (other == null)
             return false;
 
         return IsConjunctionConnection == other.IsConjunctionConnection && Type == other.Type;
@@ -85,7 +87,7 @@ public abstract class OrderCondition
     }
 }
 
-public sealed class StringSuffixParser
+sealed class StringSuffixParser
 {
     public StringSuffixParser(string str)
     {
@@ -94,14 +96,13 @@ public sealed class StringSuffixParser
 
     string SkipSuffix(string perfix)
     {
-        return Rest[(Rest.IndexOf(perfix) + perfix.Length)..];
+        return Rest.Substring(Rest.IndexOf(perfix) + perfix.Length);
     }
 
-    public string GetNextSuffixedValue(string perfix)
+    public string GetNextSuffixedValue(string prefix)
     {
-        ArgumentNullException.ThrowIfNull(perfix);
-        var rval = Rest.Substring(0, Rest.IndexOf(perfix));
-        Rest = SkipSuffix(perfix);
+        var rval = Rest.Substring(0, Rest.IndexOf(prefix));
+        Rest = SkipSuffix(prefix);
 
         return rval;
     }

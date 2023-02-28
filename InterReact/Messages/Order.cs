@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 // some of these properties require public setter to allow changing orders.
 public sealed class Order : IHasOrderId  // input + output
@@ -29,7 +27,7 @@ public sealed class Order : IHasOrderId  // input + output
     /// <summary>
     /// The number of units to trade.
     /// </summary>
-    public double TotalQuantity { get; set; }
+    public decimal TotalQuantity { get; set; }
 
     /// <summary>
     /// The order type: Market, Limit...
@@ -39,13 +37,13 @@ public sealed class Order : IHasOrderId  // input + output
     /// <summary>
     /// The limit price, used for limit, stop-limit and relative orders.
     /// </summary>
-    public double? LimitPrice { get; set; }
+    public double LimitPrice { get; set; } = double.MaxValue;
 
     /// <summary>
     /// The aux price, used as STOP price for stop + stop-limit orders,
     /// and the offset amount for relative orders.
     /// </summary>
-    public double? AuxPrice { get; set; }
+    public double AuxPrice { get; set; } = double.MaxValue;
 
     /// <summary>
     /// The Time-In-Force. For example: GTC (good-till-cancelled).
@@ -89,7 +87,7 @@ public sealed class Order : IHasOrderId  // input + output
     /// <summary>
     /// The publicly disclosed order size, used when placing Iceberg orders.
     /// </summary>
-    public int? DisplaySize { get; set; }
+    public int DisplaySize { get; set; }
 
     public TriggerMethod TriggerMethod { get; set; } = TriggerMethod.Default;
 
@@ -130,24 +128,24 @@ public sealed class Order : IHasOrderId  // input + output
     /// </summary>
     public bool AllOrNone { get; set; }
 
-    public int? MinimumQuantity { get; set; }
+    public int MinQty { get; set; } = int.MaxValue;
 
     /// <summary>
     /// The percent offset amount for relative orders.
     /// Specify the decimal. For example: .04 not 4
     /// </summary>
-    public double? PercentOffset { get; set; }
+    public double PercentOffset { get; set; } = double.MaxValue;
 
     /// <summary>
     /// Trailing stop price for trailing limit orders.
     /// </summary>
-    public double? TrailingStopPrice { get; set; }
+    public double TrailingStopPrice { get; set; } = double.MaxValue;
 
     /// <summary>
     /// Specifies the trailing amount of a trailing stop order as a percentage.
     /// Specify the percentage. For example: 3, not .03
     /// </summary>
-    public double? TrailingStopPercent { get; set; }
+    public double TrailingStopPercent { get; set; } = double.MaxValue;
 
     public string FinancialAdvisorGroup { get; set; } = "";
     public string FinancialAdvisorProfile { get; set; } = "";
@@ -184,31 +182,31 @@ public sealed class Order : IHasOrderId  // input + output
     /// <summary>
     /// The auction's starting price.
     /// </summary>
-    public double? StartingPrice { get; set; }
+    public double StartingPrice { get; set; } = double.MaxValue;
 
     /// <summary>
     /// The stock's reference price.
     /// The reference price is used for VOL orders to compute the limit price sent to an exchange (whether or not Continuous Update is selected), and for price range monitoring.
     /// </summary>
-    public double? StockReferencePrice { get; set; }
-    public double? Delta { get; set; }
+    public double StockReferencePrice { get; set; } = double.MaxValue;
+    public double Delta { get; set; } = double.MaxValue;
 
     /// <summary>
     /// The lower value for the acceptable underlying stock price range.
     /// For price improvement option orders on BOX and VOL orders with dynamic management.
     /// </summary>
-    public double? StockRangeLower { get; set; }
+    public double StockRangeLower { get; set; } = double.MaxValue;
 
     /// <summary>
     /// The upper value for the acceptable underlying stock price range.
     /// For price improvement option orders on BOX and VOL orders with dynamic management.
     /// </summary>
-    public double? StockRangeUpper { get; set; }
+    public double StockRangeUpper { get; set; } = double.MaxValue;
 
     /// <summary>
     /// Enter percentage not decimal, e.g. 2 not .02
     /// </summary>
-    public double? Volatility { get; set; }
+    public double Volatility { get; set; } = double.MaxValue;
     public VolatilityType VolatilityType { get; set; } = VolatilityType.Undefined;
     public int ContinuousUpdate { get; set; }
 
@@ -219,7 +217,7 @@ public sealed class Order : IHasOrderId  // input + output
 
     public string DeltaNeutralOrderType { get; set; } = "";
 
-    public double? DeltaNeutralAuxPrice { get; set; }
+    public double DeltaNeutralAuxPrice { get; set; } = double.MaxValue;
     public int DeltaNeutralContractId { get; set; }
 
     /// <summary>
@@ -237,22 +235,22 @@ public sealed class Order : IHasOrderId  // input + output
     /// <summary>
     /// EFP orders only.
     /// </summary>
-    public double? BasisPoints { get; set; }
+    public double BasisPoints { get; set; } = double.MaxValue;
 
     /// <summary>
     /// EFP orders only.
     /// </summary>
-    public int? BasisPointsType { get; set; }
+    public int BasisPointsType { get; set; } = int.MaxValue;
 
-    public int? ScaleInitLevelSize { get; set; }
-    public int? ScaleSubsLevelSize { get; set; }
-    public double? ScalePriceIncrement { get; set; }
-    public double? ScalePriceAdjustValue { get; set; }
-    public int? ScalePriceAdjustInterval { get; set; }
-    public double? ScaleProfitOffset { get; set; }
+    public int ScaleInitLevelSize { get; set; } = int.MaxValue;
+    public int ScaleSubsLevelSize { get; set; } = int.MaxValue;
+    public double ScalePriceIncrement { get; set; } = double.MaxValue;
+    public double ScalePriceAdjustValue { get; set; } = double.MaxValue;
+    public int ScalePriceAdjustInterval { get; set; } = int.MaxValue;
+    public double ScaleProfitOffset { get; set; } = double.MaxValue;
     public bool ScaleAutoReset { get; set; }
-    public int? ScaleInitPosition { get; set; }
-    public int? ScaleInitFillQty { get; set; }
+    public int ScaleInitPosition { get; set; } = int.MaxValue;
+    public int ScaleInitFillQty { get; set; } = int.MaxValue;
     public bool ScaleRandomPercent { get; set; }
 
     public HedgeType HedgeType { get; set; } = HedgeType.Undefined;
@@ -283,8 +281,8 @@ public sealed class Order : IHasOrderId  // input + output
     public bool NotHeld { get; set; }
 
     public IList<Tag> SmartComboRoutingParams { get; } = new List<Tag>(); // input + output
-    public IList<OrderComboLeg> ComboLegs { get; } = new List<OrderComboLeg>(); // input + output
-    public IList<Tag> MiscOptions { get; } = new List<Tag>(); // input
+    public IList<OrderComboLeg> OrderComboLegs { get; } = new List<OrderComboLeg>(); // input + output
+    public IList<Tag> OrderMiscOptions { get; } = new List<Tag>(); // input
 
     /// <summary>
     /// For GTC(good-till cancelled) orders.
@@ -298,40 +296,36 @@ public sealed class Order : IHasOrderId  // input + output
     public string ScaleTable { get; set; } = "";
     public string ModelCode { get; set; } = "";
     public string ExtOperator { get; set; } = "";
-    public double? CashQty { get; set; }
+    public double CashQty { get; set; } = double.MaxValue;
     public string Mifid2DecisionMaker { get; set; } = "";
     public string Mifid2DecisionAlgo { get; set; } = "";
     public string Mifid2ExecutionTrader { get; set; } = "";
     public string Mifid2ExecutionAlgo { get; set; } = "";
     public bool DontUseAutoPriceForHedge { get; set; }
     public string AutoCancelDate { get; set; } = "";
-    public double? FilledQuantity { get; set; }
-    public int RefFuturesConId { get; set; }
+    public decimal FilledQuantity { get; set; } =  decimal.MaxValue;
+    public int RefFuturesConId { get; set; } = int.MaxValue;
 
     public bool AutoCancelParent { get; set; }
-
     public string Shareholder { get; set; } = "";
-
     public bool ImbalanceOnly { get; set; }
-
     public bool RouteMarketableToBbo { get; set; }
-
-    public long ParentPermId { get; set; }
+    public long ParentPermId { get; set; } = long.MaxValue;
 
 
     public bool RandomizeSize { get; set; }
     public bool RandomizePrice { get; set; }
     public int ReferenceContractId { get; set; }
     public bool IsPeggedChangeAmountDecrease { get; set; }
-    public double? PeggedChangeAmount { get; set; }
-    public double? ReferenceChangeAmount { get; set; }
+    public double PeggedChangeAmount { get; set; }
+    public double ReferenceChangeAmount { get; set; }
     public string ReferenceExchange { get; set; } = "";
     public string AdjustedOrderType { get; set; } = "";
-    public double? TriggerPrice { get; set; }
-    public double? LmtPriceOffset { get; set; }
-    public double? AdjustedStopPrice { get; set; }
-    public double? AdjustedStopLimitPrice { get; set; }
-    public double? AdjustedTrailingAmount { get; set; }
+    public double TriggerPrice { get; set; } = double.MaxValue;
+    public double LmtPriceOffset { get; set; } = double.MaxValue;
+    public double AdjustedStopPrice { get; set; } = double.MaxValue;
+    public double AdjustedStopLimitPrice { get; set; } = double.MaxValue;
+    public double AdjustedTrailingAmount { get; set; } = double.MaxValue;
     public int AdjustableTrailingUnit { get; set; }
     public IList<OrderCondition> Conditions { get; } = new List<OrderCondition>();
     public bool ConditionsIgnoreRegularTradingHours { get; set; }
@@ -340,6 +334,15 @@ public sealed class Order : IHasOrderId  // input + output
     public bool IsOmsContainer { get; set; }
     public bool DiscretionaryUpToLimitPrice { get; set; }
     public bool? UsePriceMgmtAlgo { get; set; }
-    public int? Duration { get; set; }
-    public int? PostToAts { get; set; }
+    public int Duration { get; set; } = int.MaxValue;
+    public int PostToAts { get; set; } = int.MaxValue;
+
+
+    public string AdvancedErrorOverride { get; set; } = "";
+    public string ManualOrderTime { get; set; } = "";
+    public int MinTradeQty { get; set; } = int.MaxValue;
+    public int MinCompeteSize { get; set; } = int.MaxValue;
+    public double CompeteAgainstBestOffset { get; set; } = double.MaxValue;
+    public double MidOffsetAtWhole { get; set; } = double.MaxValue;
+    public double MidOffsetAtHalf { get; set; } = double.MaxValue;
 }

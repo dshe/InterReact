@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Disposables;
-using System.Reactive.Linq;
 using System.Reactive.Subjects;
 
 namespace InterReact;
@@ -21,11 +20,11 @@ public static partial class Extension
         {
             lock (gate)
             {
-                subject ??= new();
+                subject ??= new ReplaySubject<T>();
 
                 IDisposable observerSubscription = subject.Subscribe(observer);
 
-                if (subjectSubscription == Disposable.Empty)
+                if (Equals(subjectSubscription, Disposable.Empty))
                     subjectSubscription = source.Subscribe(subject);
 
                 return Disposable.Create(() =>

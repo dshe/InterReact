@@ -10,7 +10,7 @@ public class Place : TestCollectionBase
     [Fact]
     public async Task PlaceOrderTest()
     {
-        if (!Client.RemoteIPEndPoint.Port.IsIBDemoPort())
+        if (!Client.RemoteIpEndPoint.Port.IsIBDemoPort())
             throw new Exception("Use demo account to place order.");
 
         Contract contract = new()

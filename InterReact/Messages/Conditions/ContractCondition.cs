@@ -1,9 +1,6 @@
-﻿/* Copyright (C) 2019 Interactive Brokers LLC. All rights reserved. This code is subject to the terms
- * and conditions of the IB API Non-Commercial License or the IB API Commercial License, as applicable. */
+﻿namespace InterReact;
 
-namespace InterReact;
-
-#pragma warning disable CA1012, CA1307, CA1309, CA1031
+#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1846
 
 public abstract class ContractCondition : OperatorCondition
 {
@@ -26,9 +23,9 @@ public abstract class ContractCondition : OperatorCondition
 
     public override bool Equals(object? obj)
     {
-        ContractCondition? other = obj as ContractCondition;
+        var other = obj as ContractCondition;
 
-        if (other is null)
+        if (other == null)
             return false;
 
         return base.Equals(obj)
@@ -47,19 +44,19 @@ public abstract class ContractCondition : OperatorCondition
 
         try
         {
-            if (cond.Substring(0, cond.IndexOf(delimiter, StringComparison.Ordinal)) != Type.ToString())
+            if (cond.Substring(0, cond.IndexOf(delimiter)) != Type.ToString())
                 return false;
 
-            cond = cond[(cond.IndexOf(delimiter, StringComparison.Ordinal) + delimiter.Length)..];
+            cond = cond.Substring(cond.IndexOf(delimiter) + delimiter.Length);
             int conid;
 
-            if (!int.TryParse(cond.AsSpan(0, cond.IndexOf("(", StringComparison.Ordinal)), out conid))
+            if (!int.TryParse(cond.Substring(0, cond.IndexOf("(")), out conid))
                 return false;
 
             ConId = conid;
-            cond = cond[(cond.IndexOf("(", StringComparison.Ordinal) + 1)..];
-            Exchange = cond[..cond.IndexOf(")", StringComparison.Ordinal)];
-            cond = cond[(cond.IndexOf(")", StringComparison.Ordinal) + 1)..];
+            cond = cond.Substring(cond.IndexOf("(") + 1);
+            Exchange = cond.Substring(0, cond.IndexOf(")"));
+            cond = cond.Substring(cond.IndexOf(")") + 1);
 
             return base.TryParse(cond);
         }
@@ -69,20 +66,21 @@ public abstract class ContractCondition : OperatorCondition
         }
     }
 
-    internal override void Deserialize(ResponseReader r)
+    public override void Deserialize(ResponseReader r)
     {
+        ArgumentNullException.ThrowIfNull(r);
         base.Deserialize(r);
         ConId = r.ReadInt();
         Exchange = r.ReadString();
     }
 
-    internal override void Serialize(RequestMessage message)
+    public override void Serialize(RequestMessage message)
     {
+        ArgumentNullException.ThrowIfNull(message);
         base.Serialize(message);
-        message.Write(ConId, Exchange);
+        message.Write(ConId);
+        message.Write(Exchange);
     }
-
-
 }
 
-#pragma warning restore CA1012, CA1307, CA1309, CA1031
+#pragma warning restore CA1012, CA1307, CA1309, CA1031, CA1310, CA1846

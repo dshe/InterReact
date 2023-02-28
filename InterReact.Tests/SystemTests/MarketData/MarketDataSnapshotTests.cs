@@ -23,8 +23,7 @@ public class MarketDataSnapshot : TestCollectionBase
         Task<IList<object>> task = Client
             .Response
             .WithRequestId(id)
-            .TakeUntil(x => x is SnapshotEndTick || (x is Alert alert && alert.IsFatal))
-            .Where(x => x is not SnapshotEndTick)
+            .TakeUntil(x => x is SnapshotEndTick || (x is AlertMessage alert && alert.IsFatal))
             .ToList()
             .ToTask(); // start task
 
@@ -32,12 +31,11 @@ public class MarketDataSnapshot : TestCollectionBase
 
         IList<object> messages = await task;
 
-        Assert.Empty(messages.OfType<Alert>().Where(a => a.IsFatal));
+        Assert.Empty(messages.OfType<AlertMessage>().Where(a => a.IsFatal));
 
         double? lastPrice = messages
             .OfType<PriceTick>()
-            .Where(x => x.TickType == TickType.DelayedLastPrice)
-            .FirstOrDefault()
+            .FirstOrDefault(x => x.TickType == TickType.DelayedLastPrice || x.TickType == TickType.LastPrice)
             ?.Price;
 
         Write("LastPrice: " + lastPrice);
@@ -58,17 +56,17 @@ public class MarketDataSnapshot : TestCollectionBase
 
         int id = Client.Request.GetNextId();
 
-        Task<Alert> task = Client
+        Task<AlertMessage> task = Client
             .Response
             .WithRequestId(id)
-            .OfType<Alert>()
+            .OfType<AlertMessage>()
             .Where(x => x.IsFatal)
             .FirstAsync()
             .ToTask(); // start task
 
         Client.Request.RequestMarketData(id, contract, isSnapshot: true);
 
-        Alert fatalAlert = await task;
+        AlertMessage fatalAlert = await task;
  
         Assert.True(fatalAlert.Message.StartsWith("No security definition"));
     }

@@ -6,6 +6,10 @@
     <Nullable>enable</Nullable>
     <DebugType>embedded</DebugType>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\InterReact\InterReact.csproj" />

@@ -1,6 +1,5 @@
 ﻿using System.Reactive;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
 
 namespace InterReact;
 
@@ -16,7 +15,7 @@ public static partial class Extension
 
             IDisposable subscription = filteredSource
                 .SubscribeSafe(Observer.Create<T>(
-                    onNext: m => observer.OnNext(m),
+                    onNext: observer.OnNext,
                     onError: e =>
                     {
                         cancelable = false;
@@ -53,10 +52,7 @@ public static partial class Extension
             IDisposable subscription = source
                 .WithRequestId(id)
                 .SubscribeSafe(Observer.Create<object>(
-                    onNext: m =>
-                    {
-                        observer.OnNext(m); // messages and possibly alert(s)
-                    },
+                    onNext: observer.OnNext,
                     onError: e =>
                     {
                         cancelable = false;

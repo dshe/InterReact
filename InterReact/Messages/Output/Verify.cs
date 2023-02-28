@@ -2,7 +2,7 @@
 
 public sealed class VerifyMessageApi
 {
-    public string Data { get; } = "";
+    public string Data { get; }
     internal VerifyMessageApi(ResponseReader r)
     {
         r.IgnoreMessageVersion();
@@ -13,7 +13,7 @@ public sealed class VerifyMessageApi
 public sealed class VerifyCompleted
 {
     public bool IsSuccessful { get; }
-    public string ErrorText { get; } = "";
+    public string ErrorText { get; }
     internal VerifyCompleted(ResponseReader r)
     {
         r.IgnoreMessageVersion();
@@ -24,8 +24,8 @@ public sealed class VerifyCompleted
 
 public sealed class VerifyAndAuthorizeMessageApi
 {
-    public string ApiData { get; } = "";
-    public string XyzChallenge { get; } = "";
+    public string ApiData { get; }
+    public string XyzChallenge { get; }
     internal VerifyAndAuthorizeMessageApi(ResponseReader r)
     {
         r.IgnoreMessageVersion();
@@ -37,7 +37,7 @@ public sealed class VerifyAndAuthorizeMessageApi
 public sealed class VerifyAndAuthorizeCompleted
 {
     public bool IsSuccessful { get; }
-    public string ErrorText { get; } = "";
+    public string ErrorText { get; }
     
     internal VerifyAndAuthorizeCompleted(ResponseReader r)
     {

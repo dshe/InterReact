@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
+﻿using System.Reactive.Threading.Tasks;
 
 namespace InterReact;
 
@@ -13,16 +9,17 @@ public partial class Service
     /// Tick class may be selected by using the OfTickClass extension method.
     /// </summary>
     public async Task<IList<object>> GetTickSnapshotAsync(
-        Contract contract, IEnumerable<GenericTickType>? genericTickTypes = null, bool isRegulatorySnapshot = false, IEnumerable<Tag>? options = null)
+        Contract contract, IEnumerable<GenericTickType>? genericTickTypes = null, bool isRegulatorySnapshot = false, Tag[]? options = null, CancellationToken ct = default)
     {
         int id = Request.GetNextId();
+        options ??= Array.Empty<Tag>();
 
         Task<IList<object>> task = Response
             .WithRequestId(id)
-            .TakeUntil(x => x is SnapshotEndTick || (x is Alert alert && alert.IsFatal))
+            .TakeUntil(x => x is SnapshotEndTick or AlertMessage { IsFatal: true })
             .Where(m => m is not SnapshotEndTick)
             .ToList()
-            .ToTask();
+            .ToTask(ct);
 
         Request.RequestMarketData(id, contract, genericTickTypes, true, isRegulatorySnapshot, options);
 

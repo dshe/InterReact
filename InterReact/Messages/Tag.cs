@@ -1,6 +1,4 @@
 ﻿using Stringification;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace InterReact;
 
@@ -17,10 +15,14 @@ public sealed class Tag // input + output
 
     internal static string Combine(IEnumerable<Tag>? tags)
     {
-        if (tags is null || !tags.Any())
+        if (tags is null)
             return "";
 
-        return tags
+        List<Tag> tagsList = tags.ToList();
+        if (!tagsList.Any())
+            return "";
+
+        return tagsList
             .Select(tag => $"{tag.Name}={tag.Value}")
             .JoinStrings(";");
     }

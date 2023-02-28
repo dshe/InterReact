@@ -12,6 +12,8 @@ public class CacheSourceTests : ReactiveUnitTestBase
     [Fact]
     public void T00_Test()
     {
+        TestScheduler testScheduler = new();
+
         ITestableObserver<string> observer1 = testScheduler.CreateObserver<string>();
         ITestableObserver<string> observer2 = testScheduler.CreateObserver<string>();
 

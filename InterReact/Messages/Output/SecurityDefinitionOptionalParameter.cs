@@ -1,14 +1,12 @@
-﻿using System.Collections.Generic;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public sealed class SecurityDefinitionOptionParameter : IHasRequestId
 {
     public int RequestId { get; }
-    public string Exchange { get; } = "";
+    public string Exchange { get; }
     public int UnderlyingContractId { get; }
-    public string TradingClass { get; } = "";
-    public string Multiplier { get; } = "";
+    public string TradingClass { get; }
+    public string Multiplier { get; }
     public IList<string> Expirations { get; } = new List<string>();
     public IList<double> Strikes { get; } = new List<double>();
 

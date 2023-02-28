@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Text.RegularExpressions;
 
 namespace InterReact;
@@ -138,8 +137,6 @@ public sealed class ContractDetails : IHasRequestId
         switch (type)
         {
             case ContractDetailsType.GeneralContractType:
-                if (!r.Connector.SupportsServerVersion(ServerVersion.SIZE_RULES))
-                    r.IgnoreMessageVersion(); // not used
                 RequestId = r.ReadInt();
                 Contract.Symbol = r.ReadString();
                 Contract.SecurityType = r.ReadStringEnum<SecurityType>();
@@ -153,17 +150,12 @@ public sealed class ContractDetails : IHasRequestId
                 Contract.TradingClass = r.ReadString();
                 Contract.ContractId = r.ReadInt();
                 MinimumTick = r.ReadDouble();
-                if (r.Connector.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER) &&
-                    r.Connector.ServerVersionCurrent < ServerVersion.SIZE_RULES)
-                        r.ReadString(); // MdSizeMultiplier not used
                 Contract.Multiplier = r.ReadString();
                 OrderTypes = r.ReadString();
                 ValidExchanges = r.ReadString();
                 PriceMagnifier = r.ReadInt();
                 UnderlyingContractId = r.ReadInt();
-                LongName = r.ReadString();
-                if (r.Connector.SupportsServerVersion(ServerVersion.ENCODE_MSG_ASCII7))
-                    LongName = Regex.Unescape(LongName);
+                LongName = Regex.Unescape(r.ReadString());
                 Contract.PrimaryExchange = r.ReadString();
                 ContractMonth = r.ReadString();
                 Industry = r.ReadString();
@@ -175,32 +167,18 @@ public sealed class ContractDetails : IHasRequestId
                 EconomicValueRule = r.ReadString();
                 EconomicValueMultiplier = r.ReadDouble();
                 r.AddTagsToList(SecurityIds);
-                if (r.Connector.SupportsServerVersion(ServerVersion.AGG_GROUP))
-                    AggGroup = r.ReadInt();
-                if (r.Connector.SupportsServerVersion(ServerVersion.UNDERLYING_INFO))
-                {
-                    UnderSymbol = r.ReadString();
-                    UnderSecType = r.ReadString();
-                }
-                if (r.Connector.SupportsServerVersion(ServerVersion.MARKET_RULES))
-                    MarketRuleIds = r.ReadString();
-                if (r.Connector.SupportsServerVersion(ServerVersion.REAL_EXPIRATION_DATE))
-                    RealExpirationDate = r.ReadString();
-                if (r.Connector.SupportsServerVersion(ServerVersion.STOCK_TYPE))
-                    StockType = r.ReadString();
-                if (r.Connector.SupportsServerVersion(ServerVersion.FRACTIONAL_SIZE_SUPPORT) && !r.Connector.SupportsServerVersion(ServerVersion.SIZE_RULES))
-                    r.ReadDecimal(); // SizeMinTick is not used
-                if (r.Connector.SupportsServerVersion(ServerVersion.SIZE_RULES))
-                {
-                    MinSize = r.ReadDecimal();
-                    SizeIncrement = r.ReadDecimal();
-                    SuggestedSizeIncrement = r.ReadDecimal();
-                }
+                AggGroup = r.ReadInt();
+                UnderSymbol = r.ReadString();
+                UnderSecType = r.ReadString();
+                MarketRuleIds = r.ReadString();
+                RealExpirationDate = r.ReadString();
+                StockType = r.ReadString();
+                MinSize = r.ReadDecimal();
+                SizeIncrement = r.ReadDecimal();
+                SuggestedSizeIncrement = r.ReadDecimal();
                 break;
 
             case ContractDetailsType.BondContractType:
-                if (!r.Connector.SupportsServerVersion(ServerVersion.SIZE_RULES))
-                    r.IgnoreMessageVersion(); // not used
                 RequestId = r.ReadInt();
                 Contract.Symbol = r.ReadString();
                 Contract.SecurityType = r.ReadStringEnum<SecurityType>();
@@ -223,8 +201,6 @@ public sealed class ContractDetails : IHasRequestId
                 Contract.TradingClass = r.ReadString();
                 Contract.ContractId = r.ReadInt();
                 MinimumTick = r.ReadDouble();
-                if (r.Connector.SupportsServerVersion(ServerVersion.MD_SIZE_MULTIPLIER) && !r.Connector.SupportsServerVersion(ServerVersion.SIZE_RULES))
-                    r.ReadString(); // MdSizeMultiplier not used
                 OrderTypes = r.ReadString();
                 ValidExchanges = r.ReadString();
                 NextOptionDate = r.ReadString();
@@ -235,16 +211,11 @@ public sealed class ContractDetails : IHasRequestId
                 EconomicValueRule = r.ReadString();
                 EconomicValueMultiplier = r.ReadDouble();
                 r.AddTagsToList(SecurityIds);
-                if (r.Connector.SupportsServerVersion(ServerVersion.AGG_GROUP))
-                    AggGroup = r.ReadInt();
-                if (r.Connector.SupportsServerVersion(ServerVersion.MARKET_RULES))
-                    MarketRuleIds = r.ReadString();
-                if (r.Connector.SupportsServerVersion(ServerVersion.SIZE_RULES))
-                {
-                    MinSize = r.ReadDecimal();
-                    SizeIncrement = r.ReadDecimal();
-                    SuggestedSizeIncrement = r.ReadDecimal();
-                }
+                AggGroup = r.ReadInt();
+                MarketRuleIds = r.ReadString();
+                MinSize = r.ReadDecimal();
+                SizeIncrement = r.ReadDecimal();
+                SuggestedSizeIncrement = r.ReadDecimal();
                 break;
 
             case ContractDetailsType.ScannerContractType:
@@ -269,7 +240,8 @@ public sealed class ContractDetails : IHasRequestId
     {
         if (lastTradeDateOrContractMonth.Length == 0)
             return;
-        string[] split = Regex.Split(lastTradeDateOrContractMonth, "\\s+");
+
+        string[] split = lastTradeDateOrContractMonth.Contains('-', StringComparison.Ordinal) ? Regex.Split(lastTradeDateOrContractMonth, "-") : Regex.Split(lastTradeDateOrContractMonth, "\\s+");
         if (split.Length > 0)
         {
             if (isBond)

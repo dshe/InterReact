@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
+﻿using System.Reactive.Threading.Tasks;
 
 namespace InterReact;
 
@@ -11,14 +8,14 @@ public partial class Service
     /// Returns CompletedOrder objects.
     /// Concurrent calls are not supported. 
     /// </summary>
-    public async Task<IList<CompletedOrder>> GetCompleteOrdersAsync(bool api)
+    public async Task<IList<CompletedOrder>> GetCompleteOrdersAsync(bool api, CancellationToken ct = default)
     {
         Task<IList<CompletedOrder>> task = Response
-            .Where(o => o is CompletedOrder || o is CompletedOrdersEnd)
+            .Where(o => o is CompletedOrder or CompletedOrdersEnd)
             .TakeWhile(o => o is not CompletedOrdersEnd)
             .OfType<CompletedOrder>()
             .ToList()
-            .ToTask();
+            .ToTask(ct);
         
         Request.RequestCompletedOrders(api);
 

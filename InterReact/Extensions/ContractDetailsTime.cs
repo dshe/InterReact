@@ -1,11 +1,8 @@
 ﻿using NodaTime.Text;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
-using System.Reactive.Linq;
 
 namespace InterReact;
 
@@ -20,7 +17,7 @@ public sealed class ContractDetailsTime
     private readonly IScheduler TheScheduler;
     public DateTimeZone TimeZone { get; } // null if not available
     // empty if no hours or timeZone
-    public IReadOnlyList<ContractDetailsTimeEvent> Events { get; } = new List<ContractDetailsTimeEvent>();
+    public IReadOnlyList<ContractDetailsTimeEvent> Events { get; }
     // completes immediately if no timeZone or hours
     public IObservable<ContractDetailsTimePeriod> ContractTimeObservable { get; }
  
@@ -51,7 +48,7 @@ public sealed class ContractDetailsTime
         }
         foreach ((LocalDateTime start, LocalDateTime end) in GetSessions(ContractDetails.LiquidHours))
         {
-            KeyValuePair<LocalDateTime, ContractTimeStatus> previous = list.Where(x => x.Key < end).LastOrDefault();
+            KeyValuePair<LocalDateTime, ContractTimeStatus> previous = list.LastOrDefault(x => x.Key < end);
             list.Add(start, ContractTimeStatus.Liquid);
             list.Add(end, previous.Value == ContractTimeStatus.Trading ? ContractTimeStatus.Trading : ContractTimeStatus.Closed);
         }
@@ -124,7 +121,9 @@ public sealed class ContractDetailsTime
                 return Disposable.Empty;
             }
 
-            void work(Action<DateTimeOffset> self)
+            return TheScheduler.Schedule(initialResult.Value.Next.Value.Time.ToDateTimeOffset(), Work);            
+            
+            void Work(Action<DateTimeOffset> self)
             {
                 try
                 {
@@ -143,8 +142,6 @@ public sealed class ContractDetailsTime
                     observer.OnError(e);
                 }
             }
-
-            return TheScheduler.Schedule(initialResult.Value.Next.Value.Time.ToDateTimeOffset(), work);
         });
     }
 }

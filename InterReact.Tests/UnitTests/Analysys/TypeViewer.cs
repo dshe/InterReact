@@ -13,35 +13,35 @@ public class Type_Viewer : UnitTestBase
     {
         foreach (TypeInfo type in Assembly.DefinedTypes
             .Where(t => t.IsInterface)
-            .OrderBy(x => x.FullName))
-                Write(type.FullName!);
+            .OrderBy(x => x.FullName)) 
+            Write(type.FullName!);
     }
 
     [Fact]
     public void View_Abstract()
     {
         foreach (TypeInfo type in Assembly.DefinedTypes
-            .Where(t => t.IsAbstract && !t.IsSealed && !t.IsInterface)
+            .Where(t => t is { IsAbstract: true, IsSealed: false, IsInterface: false })
             .OrderBy(x => x.FullName))
-                Write(type.FullName!);
+            Write(type.FullName!);
     }
 
     [Fact]
     public void View_Static_Types()
     {
         foreach (TypeInfo type in Assembly.DefinedTypes
-            .Where(t => t.IsAbstract && t.IsSealed)
+            .Where(t => t is { IsAbstract: true, IsSealed: true })
             .OrderBy(x => x.FullName))
-                Write(type.FullName!);
+            Write(type.FullName!);
     }
 
     [Fact]
     public void View_NonSealed_Types()
     {
         foreach (TypeInfo type in Assembly.DefinedTypes
-            .Where(t => !t.IsSealed && !t.IsInterface && !t.IsAbstract)
+            .Where(t => t is { IsSealed: false, IsInterface: false, IsAbstract: false })
             .OrderBy(x => x.FullName))
-                Write(type.FullName!);
+            Write(type.FullName!);
     }
 
     [Fact]
@@ -50,7 +50,7 @@ public class Type_Viewer : UnitTestBase
         foreach (TypeInfo type in Assembly
             .ExportedTypes
             .OrderBy(x => x.FullName))
-                Write(type.FullName!);
+            Write(type.FullName!);
     }
 
     [Fact]

@@ -1,19 +1,32 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 
 namespace SystemTests;
 
-public class TestFixture : IAsyncLifetime
+public sealed class TestFixture : IAsyncLifetime
 {
-    internal readonly DynamicLogger DynamicLogger = new();
+    internal readonly SharedWriter SharedWriter = new();
     internal IInterReactClient? Client;
-    public TestFixture() { }
+
     public async Task InitializeAsync()
     {
+        ILoggerFactory loggerFactory = LoggerFactory
+            .Create(builder => builder.AddMXLogger(SharedWriter.Write));
+
         Client = await new InterReactClientConnector()
-            .WithLogger(DynamicLogger)
+            .WithLoggerFactory(loggerFactory)
             .ConnectAsync()
             .ConfigureAwait(false);
+
+        // Tests should run with the demo account since orders are submitted.
+        // The demo account does not have data subscriptions, so use delayed data.
+        // Note that delayed data produces delayed tick types: 
+        // TickType.BidPrice => TickType.DelayedBidPrice.
+        await Task.Delay(500);
+        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
+        await Task.Delay(500);
     }
+
     public async Task DisposeAsync()
     {
         if (Client is not null)
@@ -22,7 +35,7 @@ public class TestFixture : IAsyncLifetime
 }
 
 [CollectionDefinition("Test Collection")]
-public class TestCollection : ICollectionFixture<TestFixture>
+public sealed class TestCollection : ICollectionFixture<TestFixture>
 {
     // CollectionDefinition - tests do not run in parallel, which keeps logging relevent.
     // This class has no code, and is never created.
@@ -31,25 +44,40 @@ public class TestCollection : ICollectionFixture<TestFixture>
 }
 
 [Collection("Test Collection")]
-public class TestCollectionBase
+public abstract class TestCollectionBase : IDisposable
 {
-    protected readonly Action<string?> Write;
-    protected readonly ILogger Logger;
+    private bool disposed;
+    private readonly Action RemoveWriter;
+    protected readonly Action<string> Write;
     protected readonly IInterReactClient Client;
 
-    public TestCollectionBase(ITestOutputHelper output, TestFixture fixture)
+    protected TestCollectionBase(ITestOutputHelper output, TestFixture fixture)
     {
-        Write = (s) => output.WriteLine(s + "\n");
+        fixture.SharedWriter.Add(output.WriteLine);
+        RemoveWriter = () => fixture.SharedWriter.Remove(output.WriteLine);
+        Write = (s) => output.WriteLine(s + "\r\n");
 
-        Logger = new LoggerFactory().AddMXLogger(Write, LogLevel.Debug).CreateLogger("Test");
-        fixture.DynamicLogger.Add(Logger, true);
+        Client = fixture.Client ?? throw new NullReferenceException("Client");
+    }
 
-        Client = fixture.Client ?? throw new Exception("Client");
+    protected virtual void Dispose(bool disposing)
+    {
+        if (disposed)
+            return;
+        disposed = true;
 
-        // Tests should run with the demo account since orders are submitted.
-        // The demo account does not have data subscriptions, so use delayed data.
-        // Note that delayed data produces delayed tick types: 
-        // TickType.BidPrice => TickType.DelayedBidPrice.
-        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
+        if (disposing)
+        {
+            // dispose managed objects
+            RemoveWriter();
+        }
+        // free unmanaged resources and override finalizer
+    }
+
+    public void Dispose()
+    {
+        // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
     }
 }
