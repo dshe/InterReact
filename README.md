@@ -10,7 +10,7 @@
 interface IInterReactClient : IAsyncDisposable
 {
     IPEndPoint RemoteIPEndPoint { get; }
-    public ServerVersion ServerVersion { get; }
+    ServerVersion ServerVersion { get; }
     int ClientId { get; }
     Request Request { get; }
     IObservable<object> Response { get; }
