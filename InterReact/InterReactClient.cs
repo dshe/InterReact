@@ -1,12 +1,8 @@
-﻿using System.Net;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public interface IInterReactClient : IAsyncDisposable
 {
-    IPEndPoint RemoteIpEndPoint { get; }
-    public ServerVersion ServerVersion { get; }
-    int ClientId { get; }
+    Connection Connection { get; }
     Request Request { get; }
     IObservable<object> Response { get; }
     Service Service { get; }
@@ -14,10 +10,7 @@ public interface IInterReactClient : IAsyncDisposable
 
 public sealed class InterReactClient : IInterReactClient
 {
-    private readonly Connection Connection;
-    public IPEndPoint RemoteIpEndPoint { get; }
-    public ServerVersion ServerVersion { get; }
-    public int ClientId { get; }
+    public Connection Connection { get; }
     public Request Request { get; }
     public IObservable<object> Response { get; }
     public Service Service { get; }
@@ -25,9 +18,6 @@ public sealed class InterReactClient : IInterReactClient
     public InterReactClient(Connection connection, Request request, Response response, Service service)
     {
         Connection = connection ?? throw new ArgumentNullException(nameof(connection));
-        RemoteIpEndPoint = connection.RemoteIpEndPoint;
-        ServerVersion = connection.ServerVersionCurrent;
-        ClientId = connection.ClientId;
         Request = request;
         Response = response;
         Service = service;

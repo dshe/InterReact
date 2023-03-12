@@ -14,18 +14,18 @@ public sealed class Connection : IAsyncDisposable
     private readonly ILoggerFactory LogFactory;
     private readonly ILogger Logger;
     private IRxSocketClient RxSocketClient = NullRxSocketClient.Instance;
-    internal IPEndPoint RemoteIpEndPoint => (IPEndPoint) RxSocketClient.RemoteEndPoint;
+    public IPEndPoint RemoteIpEndPoint => (IPEndPoint) RxSocketClient.RemoteEndPoint;
     internal IClock Clock { get; }
-    internal IPAddress IpAddress { get; }
-    internal IReadOnlyList<int> Ports { get; }
-    internal int ClientId { get; }
+    private IPAddress IpAddress { get; }
+    private IReadOnlyList<int> Ports { get; }
+    public int ClientId { get; }
     private int MaxRequestsPerSecond { get; }
-    internal string OptionalCapabilities { get; }
-    internal bool FollowPriceTickWithSize { get; }
+    private string OptionalCapabilities { get; }
     internal bool UseDelayedTicks { get; }
-    internal ServerVersion ServerVersionMin { get; } = InterReactClientConnector.ServerVersionMin;
-    internal ServerVersion ServerVersionMax { get; }
-    internal ServerVersion ServerVersionCurrent { get; private set; } = ServerVersion.NONE;
+
+    internal ServerVersion ServerVersionMin { get; } = ServerVersion.MIN_SERVER_VER_BOND_ISSUERID;
+    internal ServerVersion ServerVersionMax { get; } = ServerVersion.MIN_SERVER_VER_BOND_ISSUERID;
+    public ServerVersion ServerVersionCurrent { get; private set; } = ServerVersion.NONE;
     internal bool SupportsServerVersion(ServerVersion version) => version <= ServerVersionCurrent;
     internal void RequireServerVersion(ServerVersion version)
     {
@@ -38,18 +38,17 @@ public sealed class Connection : IAsyncDisposable
     // NextOrderId message is also received in response to Request.RequestNextOrderId().
     internal int Id;
     
-    internal Connection(InterReactClientConnector connection)
+    internal Connection(InterReactClientConnector connector)
     {
-        LogFactory = connection.LogFactory;
-        Logger = connection.LogFactory.CreateLogger("InterReact.Connection");
-        Clock = connection.Clock;
-        IpAddress= connection.IpAddress;
-        Ports = connection.Ports;
-        ClientId = connection.ClientId;
-        MaxRequestsPerSecond = connection.MaxRequestsPerSecond;
-        OptionalCapabilities= connection.OptionalCapabilities;
-        UseDelayedTicks = connection.UseDelayedTicks;
-        ServerVersionMax= connection.ServerVersionMax;
+        LogFactory = connector.LogFactory;
+        Logger = connector.LogFactory.CreateLogger("InterReact.Connection");
+        Clock = connector.Clock;
+        IpAddress = connector.IpAddress;
+        Ports = connector.Ports;
+        ClientId = connector.ClientId;
+        MaxRequestsPerSecond = connector.MaxRequestsPerSecond;
+        OptionalCapabilities= connector.OptionalCapabilities;
+        UseDelayedTicks = connector.UseDelayedTicks;
     }
 
     internal async Task<IInterReactClient> ConnectAsync(CancellationToken ct = default)

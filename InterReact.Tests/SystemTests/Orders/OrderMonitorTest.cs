@@ -10,7 +10,7 @@ public class Monitor : TestCollectionBase
     [Fact]
     public async Task OrderMonitorTest()
     {
-        if (!Client.RemoteIpEndPoint.Port.IsIBDemoPort())
+        if (!Client.Connection.RemoteIpEndPoint.Port.IsIBDemoPort())
             throw new Exception("Use demo account to place order.");
 
         Contract contract = new()
@@ -44,7 +44,7 @@ public class Monitor : TestCollectionBase
     [Fact]
     public async Task OrderMonitorCancellationTest()
     {
-        if (!Client.RemoteIpEndPoint.Port.IsIBDemoPort())
+        if (!Client.Connection.RemoteIpEndPoint.Port.IsIBDemoPort())
             throw new Exception("Use demo account to place order.");
 
         Contract contract = new()

@@ -50,15 +50,6 @@ public sealed record InterReactClientConnector
     public InterReactClientConnector DoNotUseDelayedTicks() => this with
         { UseDelayedTicks = false };
 
-    internal const ServerVersion ServerVersionMin = ServerVersion.MIN_SERVER_VER_BOND_ISSUERID;
-    internal ServerVersion ServerVersionMax { get; private init; } = ServerVersion.MIN_SERVER_VER_BOND_ISSUERID;
-    public InterReactClientConnector WithMaxServerVersion(ServerVersion maxServerVersion)
-    {
-        if (maxServerVersion < ServerVersionMin)
-            throw new ArgumentException("Invalid MaxServerVersion");
-        return this with { ServerVersionMax = maxServerVersion };
-    }
-
     /////////////////////////////////////////////////////////////
 
     public async Task<IInterReactClient> ConnectAsync(CancellationToken ct = default)

@@ -18,8 +18,8 @@ public class AllArgs : ConnectTestBase
 
         IInterReactClient client = await connector.ConnectAsync();
      
-        Assert.Equal(IPAddress.IPv6Loopback, client.RemoteIpEndPoint.Address);
-        Assert.Equal(1234, client.ClientId);
+        Assert.Equal(IPAddress.IPv6Loopback, client.Connection.RemoteIpEndPoint.Address);
+        Assert.Equal(1234, client.Connection.ClientId);
 
         await client.DisposeAsync();
     }
