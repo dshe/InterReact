@@ -1,8 +1,8 @@
 # InterReact&nbsp;&nbsp; [![Version](https://img.shields.io/badge/Version-0.3.1-blue)](../..) [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0) [![Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
-***Reactive C# API to Interactive Brokers Trader Workstation***
+***Reactive C# API to Interactive Brokers Trader Workstation (TWS)***
 - **.NET 6.0** library
-- compatible with Interactive Brokers API 10.19 (Nov 2022)
+- supports IB TWS API Stable **10.19** (Nov 16 2022)
 - dependencies: RxSockets, StringEnums, NodaTime
 - demo applications: Console, WPF
 
