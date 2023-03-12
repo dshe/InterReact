@@ -1,4 +1,4 @@
-# InterReact&nbsp;&nbsp; [![Version](https://img.shields.io/badge/Version-0.3.0-blue)](../..) [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0) [![Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
+# InterReact&nbsp;&nbsp; [![Version](https://img.shields.io/badge/Version-0.3.1-blue)](../..) [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0) [![Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
 ***Reactive C# API to Interactive Brokers Trader Workstation***
 - **.NET 6.0** library
@@ -9,9 +9,7 @@
 ```csharp
 interface IInterReactClient : IAsyncDisposable
 {
-    IPEndPoint RemoteIPEndPoint { get; }
-    ServerVersion ServerVersion { get; }
-    int ClientId { get; }
+    Connection Connection { get; }
     Request Request { get; }
     IObservable<object> Response { get; }
     Service Service { get; }
