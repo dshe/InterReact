@@ -11,20 +11,22 @@ namespace InterReact;
 
 public sealed class Connection : IAsyncDisposable
 {
+    private readonly IClock Clock;
     private readonly ILoggerFactory LogFactory;
     private readonly ILogger Logger;
-    private IRxSocketClient RxSocketClient = NullRxSocketClient.Instance;
-    public IPEndPoint RemoteIpEndPoint => (IPEndPoint) RxSocketClient.RemoteEndPoint;
-    internal IClock Clock { get; }
-    private IPAddress IpAddress { get; }
-    private IReadOnlyList<int> Ports { get; }
+    private readonly IPAddress IpAddress;
+    private readonly IReadOnlyList<int> Ports;
+    private readonly int MaxRequestsPerSecond;
+    private readonly string OptionalCapabilities;
     public int ClientId { get; }
-    private int MaxRequestsPerSecond { get; }
-    private string OptionalCapabilities { get; }
     internal bool UseDelayedTicks { get; }
 
-    internal ServerVersion ServerVersionMin { get; } = ServerVersion.MIN_SERVER_VER_BOND_ISSUERID;
-    internal ServerVersion ServerVersionMax { get; } = ServerVersion.MIN_SERVER_VER_BOND_ISSUERID;
+    private IRxSocketClient RxSocketClient = NullRxSocketClient.Instance;
+    public IPEndPoint RemoteIpEndPoint => (IPEndPoint) RxSocketClient.RemoteEndPoint;
+
+    // This build of InterReact supports ServerVersion.MIN_SERVER_VER_BOND_ISSUERID.
+    public const ServerVersion ServerVersionMin = ServerVersion.MIN_SERVER_VER_BOND_ISSUERID;
+    public const ServerVersion ServerVersionMax = ServerVersion.MIN_SERVER_VER_BOND_ISSUERID;
     public ServerVersion ServerVersionCurrent { get; private set; } = ServerVersion.NONE;
     internal bool SupportsServerVersion(ServerVersion version) => version <= ServerVersionCurrent;
     internal void RequireServerVersion(ServerVersion version)
@@ -40,14 +42,14 @@ public sealed class Connection : IAsyncDisposable
     
     internal Connection(InterReactClientConnector connector)
     {
+        Clock = connector.Clock;
         LogFactory = connector.LogFactory;
         Logger = connector.LogFactory.CreateLogger("InterReact.Connection");
-        Clock = connector.Clock;
         IpAddress = connector.IpAddress;
         Ports = connector.Ports;
-        ClientId = connector.ClientId;
         MaxRequestsPerSecond = connector.MaxRequestsPerSecond;
         OptionalCapabilities= connector.OptionalCapabilities;
+        ClientId = connector.ClientId;
         UseDelayedTicks = connector.UseDelayedTicks;
     }
 
@@ -56,13 +58,14 @@ public sealed class Connection : IAsyncDisposable
         AssemblyName name = GetType().Assembly.GetName();
         Logger.LogInformation("{Name} v{Version}.", name.Name, name.Version);
 
-        await ConnectSocketAsync(ct).ConfigureAwait(false);
+        RxSocketClient = await ConnectSocketAsync(ct).ConfigureAwait(false);
         await Login(ct).ConfigureAwait(false);
         Logger.LogInformation("Logged into Tws/Gateway using clientId: {ClientId} and server version: {ServerVersionCurrent}.",
             ClientId, (int)ServerVersionCurrent);
 
         return new ServiceCollection()
             .AddSingleton(this) // Connection
+            .AddSingleton(Clock)
             .AddSingleton(LogFactory)
             .AddSingleton(RxSocketClient) // instance
             .AddSingleton(new RingLimiter(MaxRequestsPerSecond))
@@ -77,17 +80,16 @@ public sealed class Connection : IAsyncDisposable
             .GetRequiredService<IInterReactClient>();
     }
 
-    private async Task ConnectSocketAsync(CancellationToken ct)
+    private async Task<IRxSocketClient> ConnectSocketAsync(CancellationToken ct)
     {
+        ILogger rxSocketLogger = LogFactory.CreateLogger("InterReact.RxSocketClient");
         IPEndPoint ipEndPoint = new(IpAddress, 0);
         foreach (int port in Ports)
         {
             ipEndPoint.Port = port;
             try
             {
-                ILogger rxSocketLogger = LogFactory.CreateLogger("InterReact.RxSocketClient");
-                RxSocketClient = await ipEndPoint.CreateRxSocketClientAsync(rxSocketLogger, ct).ConfigureAwait(false);
-                return;
+                return await ipEndPoint.CreateRxSocketClientAsync(rxSocketLogger, ct).ConfigureAwait(false);
             }
             catch (SocketException e) when (e.SocketErrorCode == SocketError.ConnectionRefused || e.SocketErrorCode == SocketError.TimedOut)
             {
@@ -130,6 +132,9 @@ public sealed class Connection : IAsyncDisposable
         if (!Enum.TryParse(message[0], out ServerVersion version))
             throw new InvalidDataException($"Could not parse server version '{message[0]}'.");
         ServerVersionCurrent = version;
+        if (ServerVersionCurrent < ServerVersionMin || ServerVersionCurrent > ServerVersionMax)
+            throw new InvalidDataException($"Invalid server version '{ServerVersionCurrent}'.");
+
         // message[1] is Date
 
         // local method

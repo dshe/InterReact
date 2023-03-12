@@ -19,14 +19,14 @@ public sealed class AlertMessage : IHasRequestId, IHasOrderId
     public bool IsFatal { get; init; }
     internal Instant Time { get; init; }
     internal AlertMessage() { }
-    internal AlertMessage(ResponseReader r)
+    internal AlertMessage(ResponseReader r, IClock clock)
     {
         r.RequireMessageVersion(2);
         RequestId = OrderId = r.ReadInt();
         Code = r.ReadInt();
         Message = Regex.Unescape(r.ReadString());
         AdvancedOrderRejectJson = Regex.Unescape(r.ReadString());
-        Time = r.Connection.Clock.GetCurrentInstant();
+        Time = clock.GetCurrentInstant();
         IsFatal = IsFatalCode(RequestId, Code);
     }
 

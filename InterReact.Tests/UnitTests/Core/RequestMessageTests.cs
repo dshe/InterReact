@@ -10,7 +10,7 @@ namespace Core;
 public class RequestMessageTests : UnitTestBase
 {
     private readonly RequestMessage requestMessage = 
-        new(NullRxSocketClient.Instance, new RingLimiter(), NullLoggerFactory.Instance);
+        new(NullLoggerFactory.Instance, NullRxSocketClient.Instance, new RingLimiter());
     public RequestMessageTests(ITestOutputHelper output) : base(output) {}
 
     private void AssertResult(params string[] strings)

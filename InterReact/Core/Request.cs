@@ -8,11 +8,13 @@ namespace InterReact;
 /// </summary>
 public sealed class Request
 {
+    private readonly IClock Clock;
     private readonly Connection Connection;
     private readonly Func<RequestMessage> CreateMessage;
 
-    public Request(Connection connection, Func<RequestMessage> requestMessageFactory)
+    public Request(IClock clock, Connection connection, Func<RequestMessage> requestMessageFactory)
     {
+        Clock = clock;
         Connection = connection;
         CreateMessage = requestMessageFactory;
     }
@@ -453,7 +455,7 @@ public sealed class Request
     {
         ArgumentNullException.ThrowIfNull(contract);
         if (endDate == default && !keepUpToDate)
-            endDate = Connection.Clock.GetCurrentInstant();
+            endDate = Clock.GetCurrentInstant();
         string endDateStr = requestHistoricalDataDatePattern.Format(endDate) + " GMT";
         barSize ??= HistoricalBarSize.OneHour;
         duration ??= HistoricalDuration.OneDay;

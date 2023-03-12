@@ -1,14 +1,13 @@
 ﻿using Stringification;
 using System.Diagnostics;
-using System.Globalization;
 
 namespace InterReact;
 
 internal static class ResponseExtensions
 {
-    internal static IObservable<object> ComposeMessages(this IObservable<string[]> source, Connection connection, ILoggerFactory loggerFactory)
+    internal static IObservable<object> ComposeMessages(this IObservable<string[]> source, IClock clock, ILoggerFactory loggerFactory, Connection connection)
     {
-        ResponseMessageComposer composer = new(connection, loggerFactory);
+        ResponseMessageComposer composer = new(clock, loggerFactory, connection);
 
         return Observable.Create<object>(observer =>
         {

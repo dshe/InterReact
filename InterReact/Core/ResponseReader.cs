@@ -6,14 +6,15 @@ namespace InterReact;
 
 public sealed class ResponseReader
 {
-    internal Connection Connection { get; }
-    internal ResponseParser Parser { get; }
     internal ILogger Logger { get; }
-    internal ResponseReader(Connection connection, ILoggerFactory loggerFactory)
+    internal ResponseParser Parser { get; }
+    internal Connection Connection { get; }
+
+    internal ResponseReader(ILoggerFactory loggerFactory, Connection connection)
     {
-        Connection = connection;
         Logger = loggerFactory.CreateLogger("InterReact.ResponseReader");
         Parser = new ResponseParser(loggerFactory);
+        Connection = connection;
     }
 
     private IEnumerator<string> Enumerator = Enumerable.Empty<string>().GetEnumerator();

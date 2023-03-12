@@ -6,18 +6,18 @@ public sealed class Response : IObservable<object>
 {
     private readonly IObservable<object> Observable;
 
-    public Response(Connection connection, IRxSocketClient socketClient, ILoggerFactory loggerFactory)
+    public Response(IClock clock, ILoggerFactory loggerFactory, IRxSocketClient socketClient, Connection connection)
     {
-        ArgumentNullException.ThrowIfNull(connection);
-        ArgumentNullException.ThrowIfNull(socketClient);
+        ArgumentNullException.ThrowIfNull(clock);
         ArgumentNullException.ThrowIfNull(loggerFactory);
+        ArgumentNullException.ThrowIfNull(socketClient);
 
         Observable = socketClient
             .ReceiveAllAsync
             .ToObservableFromAsyncEnumerable()
             .ToArraysFromBytesWithLengthPrefix()
             .ToStringArrays()
-            .ComposeMessages(connection, loggerFactory)
+            .ComposeMessages(clock, loggerFactory, connection)
             .LogMessages(loggerFactory)
             .Publish()
             .AutoConnect(); // connect on first observer

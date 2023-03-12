@@ -11,10 +11,10 @@ public sealed record InterReactClientConnector
     internal InterReactClientConnector WithClock(IClock clock) => this with { Clock = clock };
 
     internal ILoggerFactory LogFactory { get; private init; } = NullLoggerFactory.Instance;
+    public InterReactClientConnector WithLoggerFactory(ILoggerFactory loggerFactory) => this with
+        { LogFactory = loggerFactory }; // preferable
     public InterReactClientConnector WithLogger(ILogger logger) => this with
         { LogFactory = logger.ToLoggerFactory() };
-    public InterReactClientConnector WithLoggerFactory(ILoggerFactory loggerFactory) => this with 
-        { LogFactory = loggerFactory };
 
     internal IPAddress IpAddress { get; private init; } = IPAddress.Loopback;
     public InterReactClientConnector WithIpAddress(IPAddress address) => this with { IpAddress = address };

@@ -5,13 +5,15 @@ namespace InterReact;
 
 internal sealed class ResponseMessageComposer
 {
+    private IClock Clock { get; }
     private ILogger Logger { get; }
     private ResponseReader Reader { get; }
 
-    internal ResponseMessageComposer(Connection connection, ILoggerFactory loggerFactory)
+    internal ResponseMessageComposer(IClock clock, ILoggerFactory loggerFactory, Connection connection)
     {
+        Clock = clock;
         Logger = loggerFactory.CreateLogger("InterReact.ResponseMessageComposer");
-        Reader = new ResponseReader(connection, loggerFactory);
+        Reader = new ResponseReader(loggerFactory, connection);
     }
 
     internal object ComposeMessage(string[] strings)
@@ -21,7 +23,7 @@ internal sealed class ResponseMessageComposer
         {
             Reader.SetEnumerator(strings);
             code = Reader.ReadString();
-            object message = GetResponseMessage(code, Reader);
+            object message = GetResponseMessage(code);
             Reader.VerifyEnumerationEnd();
             return message;
         }
@@ -35,93 +37,93 @@ internal sealed class ResponseMessageComposer
         }
     }
 
-    private static object GetResponseMessage(string code, ResponseReader reader) => code switch
+    private object GetResponseMessage(string code) => code switch
     {
-        "1" => PriceTick.Create(reader),
-        "2" => new SizeTick(reader),
-        "3" => new OrderStatusReport(reader),
-        "4" => new AlertMessage(reader),
-        "5" => new OpenOrder(reader),
-        "6" => new AccountValue(reader),
-        "7" => new PortfolioValue(reader),
-        "8" => new AccountUpdateTime(reader),
-        "9" => new NextOrderId(reader),
-        "10" => new ContractDetails(reader, ContractDetailsType.GeneralContractType),
-        "11" => new Execution(reader),
-        "12" => new MarketDepth(reader, false),
-        "13" => new MarketDepth(reader, true),
-        "14" => new NewsBulletin(reader),
-        "15" => new ManagedAccounts(reader),
-        "16" => new FinancialAdvisor(reader),
-        "17" => new HistoricalData(reader),
-        "18" => new ContractDetails(reader, ContractDetailsType.BondContractType),
-        "19" => new ScannerParameters(reader),
-        "20" => new ScannerData(reader),
-        "21" => new OptionComputationTick(reader),
+        "1" => PriceTick.Create(Reader),
+        "2" => new SizeTick(Reader),
+        "3" => new OrderStatusReport(Reader),
+        "4" => new AlertMessage(Reader, Clock),
+        "5" => new OpenOrder(Reader),
+        "6" => new AccountValue(Reader),
+        "7" => new PortfolioValue(Reader),
+        "8" => new AccountUpdateTime(Reader),
+        "9" => new NextOrderId(Reader),
+        "10" => new ContractDetails(Reader, ContractDetailsType.GeneralContractType),
+        "11" => new Execution(Reader),
+        "12" => new MarketDepth(Reader, false),
+        "13" => new MarketDepth(Reader, true),
+        "14" => new NewsBulletin(Reader),
+        "15" => new ManagedAccounts(Reader),
+        "16" => new FinancialAdvisor(Reader),
+        "17" => new HistoricalData(Reader),
+        "18" => new ContractDetails(Reader, ContractDetailsType.BondContractType),
+        "19" => new ScannerParameters(Reader),
+        "20" => new ScannerData(Reader),
+        "21" => new OptionComputationTick(Reader),
 
-        "45" => new GenericTick(reader),
-        "46" => StringTick.Create(reader),
-        "47" => new ExchangeForPhysicalTick(reader),
+        "45" => new GenericTick(Reader),
+        "46" => StringTick.Create(Reader),
+        "47" => new ExchangeForPhysicalTick(Reader),
 
-        "49" => new CurrentTime(reader),
-        "50" => new RealtimeBar(reader),
-        "51" => new FundamentalData(reader),
-        "52" => new ContractDetailsEnd(reader),
-        "53" => new OpenOrderEnd(reader),
-        "54" => new AccountUpdateEnd(reader),
-        "55" => new ExecutionEnd(reader),
-        "56" => new DeltaNeutralContract(reader, true),
-        "57" => new SnapshotEndTick(reader),
-        "58" => new MarketDataTickType(reader),
-        "59" => new CommissionReport(reader),
+        "49" => new CurrentTime(Reader),
+        "50" => new RealtimeBar(Reader),
+        "51" => new FundamentalData(Reader),
+        "52" => new ContractDetailsEnd(Reader),
+        "53" => new OpenOrderEnd(Reader),
+        "54" => new AccountUpdateEnd(Reader),
+        "55" => new ExecutionEnd(Reader),
+        "56" => new DeltaNeutralContract(Reader, true),
+        "57" => new SnapshotEndTick(Reader),
+        "58" => new MarketDataTickType(Reader),
+        "59" => new CommissionReport(Reader),
 
-        "61" => new Position(reader),
-        "62" => new PositionEnd(reader),
-        "63" => new AccountSummary(reader),
-        "64" => new AccountSummaryEnd(reader),
-        "65" => new VerifyMessageApi(reader),
-        "66" => new VerifyCompleted(reader),
-        "67" => new DisplayGroups(reader),
-        "68" => new DisplayGroupUpdate(reader),
-        "69" => new VerifyAndAuthorizeMessageApi(reader),
-        "70" => new VerifyAndAuthorizeCompleted(reader),
-        "71" => new AccountPositionMulti(reader),
-        "72" => new AccountPositionMultiEnd(reader),
-        "73" => new AccountUpdateMulti(reader),
-        "74" => new AccountUpdateMultiEnd(reader),
-        "75" => new SecurityDefinitionOptionParameter(reader),
-        "76" => new SecurityDefinitionOptionParameterEnd(reader),
-        "77" => new SoftDollarTiers(reader),
-        "78" => new FamilyCodes(reader),
-        "79" => new SymbolSamples(reader),
-        "80" => new MarketDepthExchanges(reader),
-        "81" => new TickRequestParams(reader),
-        "82" => new SmartComponents(reader),
-        "83" => new NewsArticle(reader),
-        "84" => new TickNews(reader),
-        "85" => new NewsProviders(reader),
-        "86" => new HistoricalNews(reader),
-        "87" => new HistoricalNewsEnd(reader),
-        "88" => new HeadTimestamp(reader),
-        "89" => new HistogramData(reader),
-        "90" => new HistoricalDataUpdate(reader),
-        "91" => new RerouteMktData(reader),
-        "92" => new RerouteMktDepth(reader),
-        "93" => new MarketRule(reader),
-        "94" => new PnL(reader),
-        "95" => new PnLSingle(reader),
-        "96" => new HistoricalTicks(reader),
-        "97" => new HistoricalBidAskTicks(reader),
-        "98" => new HistoricalLastTicks(reader),
-        "99" => TickByTick.Create(reader),
-        "100" => new OrderBound(reader),
-        "101" => new CompletedOrder(reader),
+        "61" => new Position(Reader),
+        "62" => new PositionEnd(Reader),
+        "63" => new AccountSummary(Reader),
+        "64" => new AccountSummaryEnd(Reader),
+        "65" => new VerifyMessageApi(Reader),
+        "66" => new VerifyCompleted(Reader),
+        "67" => new DisplayGroups(Reader),
+        "68" => new DisplayGroupUpdate(Reader),
+        "69" => new VerifyAndAuthorizeMessageApi(Reader),
+        "70" => new VerifyAndAuthorizeCompleted(Reader),
+        "71" => new AccountPositionMulti(Reader),
+        "72" => new AccountPositionMultiEnd(Reader),
+        "73" => new AccountUpdateMulti(Reader),
+        "74" => new AccountUpdateMultiEnd(Reader),
+        "75" => new SecurityDefinitionOptionParameter(Reader),
+        "76" => new SecurityDefinitionOptionParameterEnd(Reader),
+        "77" => new SoftDollarTiers(Reader),
+        "78" => new FamilyCodes(Reader),
+        "79" => new SymbolSamples(Reader),
+        "80" => new MarketDepthExchanges(Reader),
+        "81" => new TickRequestParams(Reader),
+        "82" => new SmartComponents(Reader),
+        "83" => new NewsArticle(Reader),
+        "84" => new TickNews(Reader),
+        "85" => new NewsProviders(Reader),
+        "86" => new HistoricalNews(Reader),
+        "87" => new HistoricalNewsEnd(Reader),
+        "88" => new HeadTimestamp(Reader),
+        "89" => new HistogramData(Reader),
+        "90" => new HistoricalDataUpdate(Reader),
+        "91" => new RerouteMktData(Reader),
+        "92" => new RerouteMktDepth(Reader),
+        "93" => new MarketRule(Reader),
+        "94" => new PnL(Reader),
+        "95" => new PnLSingle(Reader),
+        "96" => new HistoricalTicks(Reader),
+        "97" => new HistoricalBidAskTicks(Reader),
+        "98" => new HistoricalLastTicks(Reader),
+        "99" => TickByTick.Create(Reader),
+        "100" => new OrderBound(Reader),
+        "101" => new CompletedOrder(Reader),
         "102" => new CompletedOrdersEnd(),
-        "103" => new ReplaceFAEnd(reader),
-        "104" => new WshMetaData(reader),
-        "105" => new WshEventDataReceived(reader),
-        "106" => new HistoricalSchedule(reader),
-        "107" => new UserInfo(reader),
+        "103" => new ReplaceFAEnd(Reader),
+        "104" => new WshMetaData(Reader),
+        "105" => new WshEventDataReceived(Reader),
+        "106" => new HistoricalSchedule(Reader),
+        "107" => new UserInfo(Reader),
         _ => throw new InvalidDataException($"Undefined code '{code}'.")
     };
 }

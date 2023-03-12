@@ -1,5 +1,4 @@
-﻿using Microsoft.VisualBasic;
-using RxSockets;
+﻿using RxSockets;
 using StringEnums;
 using System.Globalization;
 using System.IO;
@@ -13,7 +12,7 @@ public sealed class RequestMessage
     private readonly IRxSocketClient RxSocket;
     private readonly RingLimiter Limiter;
     internal readonly List<string> Strings = new(); // internal for testing
-    public RequestMessage(IRxSocketClient rxSocket, RingLimiter limiter, ILoggerFactory loggerFactory)
+    public RequestMessage(ILoggerFactory loggerFactory, IRxSocketClient rxSocket, RingLimiter limiter)
     {
         ArgumentNullException.ThrowIfNull(loggerFactory);
         Logger = loggerFactory.CreateLogger("InterReact.RequestMessage");
