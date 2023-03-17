@@ -19,12 +19,17 @@ public sealed class Server : IAsyncDisposable
         // The default EndPoint is type IPEndPoint.
         IPEndPoint = (IPEndPoint)SocketServer.LocalEndPoint;
 
-        SocketServer.AcceptAllAsync.ToObservableFromAsyncEnumerable().Subscribe(async socketClient =>
-        {
-            Logger.LogCritical("Client connection accepted.");
-            AcceptClient acceptClient = new(socketClient, Logger);
-            await acceptClient.Run();
-        });
+        SocketServer
+            .AcceptAllAsync
+            .ToObservableFromAsyncEnumerable()
+            .Select(socketClient => Observable.FromAsync(async ct =>
+            {
+                Logger.LogCritical("Client connection accepted.");
+                AcceptClient acceptClient = new(socketClient, Logger);
+                await acceptClient.Run();
+            }))
+            .Concat()
+            .Subscribe();
 
         Logger.LogCritical("Server Started.");
     }

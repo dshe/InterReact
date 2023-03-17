@@ -27,4 +27,20 @@ public partial class Service
 
         return list;
     }
+
+    /// <summary>
+    /// Creates an observable which emits a snapshot of market data ticks, then completes.
+    /// Tick class may be selected by using the OfTickClass extension method.
+    /// </summary>
+    public IObservable<IHasRequestId> CreateTickSnapshotObservable(
+        Contract contract, IEnumerable<GenericTickType>? genericTickTypes = null, bool isRegulatorySnapshot = false, params Tag[] options)
+    {
+        return Response
+            .ToObservableMultipleWithRequestId<SnapshotEndTick>(
+                Request.GetNextId,
+                requestId => Request.RequestMarketData(requestId, contract, genericTickTypes, true, isRegulatorySnapshot, options))
+            .Cast<IHasRequestId>()
+            .ShareSource();
+    }
+
 }

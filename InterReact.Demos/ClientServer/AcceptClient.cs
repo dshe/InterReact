@@ -31,24 +31,27 @@ public sealed class AcceptClient
     {
         await Login();
 
-        ServerRequestMessages.Subscribe(async message =>
-        {
-            if (message.RequestCode == RequestCode.Invalid)
-                throw new Exception("Invalid RequestCode.");
-
-            if (message.RequestCode == RequestCode.Control)
+        ServerRequestMessages
+            .Select(message => Observable.FromAsync(async ct =>
             {
-                string msg = message.Strings.Single();
-                if (msg == "Measure Performance")
-                    await MeasurePerformance();
-                else if (msg == "Throw")
-                    throw new InvalidOperationException("test");
-                else if (msg == "Dispose")
-                    await SocketClient.DisposeAsync();
-                else if (msg == "Test")
-                    ServerResponseMessage.Write("xxx").Send();
-            }
-        });
+                if (message.RequestCode == RequestCode.Invalid)
+                    throw new Exception("Invalid RequestCode.");
+
+                if (message.RequestCode == RequestCode.Control)
+                {
+                    string msg = message.Strings.Single();
+                    if (msg == "Measure Performance")
+                        await MeasurePerformance();
+                    else if (msg == "Throw")
+                        throw new InvalidOperationException("test");
+                    else if (msg == "Dispose")
+                        await SocketClient.DisposeAsync();
+                    else if (msg == "Test")
+                        ServerResponseMessage.Write("xxx").Send();
+                }
+            }))
+            .Concat()
+            .Subscribe();
     }
 
     private async Task Login()
@@ -114,6 +117,7 @@ public sealed class AcceptClient
         Stopwatch watch = new();
 
         watch.Start();
+
         int count = await ServerRequestMessages.TakeWhile(m => m.RequestCode != RequestCode.Control).Count();
         watch.Stop();
         long frequency = Stopwatch.Frequency * (count + 1) / watch.ElapsedTicks;

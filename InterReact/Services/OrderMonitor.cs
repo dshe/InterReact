@@ -20,12 +20,12 @@ public partial class Service
 /// </summary>
 public sealed class OrderMonitor : IDisposable
 {
-    private readonly ReplaySubject<object> subject = new();
+    private readonly ReplaySubject<IHasOrderId> subject = new();
     private readonly Request Request;
     private readonly Contract Contract;
     public Order Order { get; private set; }
     public int OrderId { get; }
-    public IObservable<object> Messages => subject.AsObservable();
+    public IObservable<IHasOrderId> Messages => subject.AsObservable();
 
     internal OrderMonitor(Request request, IObservable<object> response, Order order, Contract contract)
     {
@@ -35,18 +35,15 @@ public sealed class OrderMonitor : IDisposable
         OrderId = Request.GetNextId();
 
         response
-            .WithOrderId(OrderId)
+            .OfType<IHasOrderId>()
+            .Where(x => x.OrderId == OrderId)
             .Subscribe(subject);
 
         Order.OrderId = OrderId;
         Request.PlaceOrder(OrderId, Order, Contract);
     }
 
-    public void ModifyOrder(Order order)
-    {
-        Order = order;
-        Request.PlaceOrder(OrderId, Order, Contract);
-    }
+    public void ReplaceOrder() => Request.PlaceOrder(OrderId, Order, Contract);
  
     public void CancelOrder() => Request.CancelOrder(OrderId);
  

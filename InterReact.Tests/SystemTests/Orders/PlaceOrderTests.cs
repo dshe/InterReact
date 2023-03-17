@@ -1,4 +1,6 @@
-﻿using System.Reactive.Linq;
+﻿using Microsoft.Extensions.Logging;
+using Stringification;
+using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 
 namespace Orders;
@@ -50,4 +52,6 @@ public class Place : TestCollectionBase
         // sometimes the order will be filled
         Write("Order filled: " + filled);
     }
+
+
 }

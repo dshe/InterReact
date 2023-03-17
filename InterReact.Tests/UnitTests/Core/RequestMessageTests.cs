@@ -76,12 +76,11 @@ public class RequestMessageTests : UnitTestBase
     {
         DayOfWeek[] enums = new DayOfWeek[] { DayOfWeek.Saturday, DayOfWeek.Sunday };
 
-        var x2 = GetEnumValuesString(new DayOfWeek[] {});
+        var x2 = GetEnumValuesString(Array.Empty<DayOfWeek>());
         Write(x2);
-
     }
 
-    private string GetEnumValuesString<T>(IEnumerable<T>? enums) where T : Enum
+    private static string GetEnumValuesString<T>(IEnumerable<T>? enums) where T : Enum
     {
         if (enums == null)
             return "";
