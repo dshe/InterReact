@@ -20,7 +20,7 @@ public class MarketData : TestCollectionBase
 
         int id = Client.Request.GetNextId();
 
-        Task<IList<object>> task = Client
+        Task<IList<IHasRequestId>> task = Client
             .Response
             .WithRequestId(id)
             .Take(TimeSpan.FromSeconds(3))
@@ -29,7 +29,7 @@ public class MarketData : TestCollectionBase
 
         Client.Request.RequestMarketData(id, contract, isSnapshot: false);
 
-        IList<object> messages = await task; // take 3 seconds of messages
+        IList<IHasRequestId> messages = await task; // take 3 seconds of messages
 
         Assert.Empty(messages.OfType<AlertMessage>().Where(a => a.IsFatal));
 
@@ -56,7 +56,7 @@ public class MarketData : TestCollectionBase
 
         int id = Client.Request.GetNextId();
 
-        Task<IList<object>> task = Client
+        Task<IList<IHasRequestId>> task = Client
             .Response
             .WithRequestId(id)
             .Take(TimeSpan.FromSeconds(2))
@@ -65,7 +65,7 @@ public class MarketData : TestCollectionBase
 
         Client.Request.RequestMarketData(id, contract, isSnapshot: false);
 
-        IList<object> messages = await task;
+        IList<IHasRequestId> messages = await task;
  
         AlertMessage alert = messages.OfType<AlertMessage>().Single();
         Assert.True(alert.IsFatal);

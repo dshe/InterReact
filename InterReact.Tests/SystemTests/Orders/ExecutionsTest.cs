@@ -9,7 +9,7 @@ public class Executions : TestCollectionBase
     [Fact]
     public async Task RequestExecutionsAsyncTest()
     {
-        IList<object> list = await Client
+        IList<IHasRequestId> list = await Client
             .Service
             .GetExecutionsAsync();
            

@@ -433,7 +433,7 @@ public sealed class Request
         .Write(requestId)
         .Send();
 
-    private static readonly InstantPattern requestHistoricalDataDatePattern = InstantPattern.CreateWithInvariantCulture("yyyyMMdd HH:mm:ss");
+    private static readonly InstantPattern requestHistoricalDataDatePattern = InstantPattern.CreateWithInvariantCulture("yyyyMMdd-HH:mm:ss");
     /// <summary>
     /// Call this method to receive historical data.
     /// When the "end" argument is null, data up until the current time is returned.
@@ -454,9 +454,13 @@ public sealed class Request
         params Tag[] options)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        if (endDate == default && !keepUpToDate)
-            endDate = Clock.GetCurrentInstant();
-        string endDateStr = requestHistoricalDataDatePattern.Format(endDate) + " GMT";
+        string endDateStr = "";
+        if (endDate != default && !keepUpToDate)
+        {
+            if (keepUpToDate)
+                throw new InvalidOperationException("RequestHistoricalData: endDate many not be specified when keepUpToDate = true.");
+            endDateStr = requestHistoricalDataDatePattern.Format(endDate); // UTC
+        }
         barSize ??= HistoricalBarSize.OneHour;
         duration ??= HistoricalDuration.OneDay;
         dataType ??= HistoricalDataType.Trades;

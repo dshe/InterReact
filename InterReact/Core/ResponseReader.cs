@@ -48,7 +48,7 @@ public sealed class ResponseReader
     internal decimal ReadDecimal() => Parser.ParseDecimal(ReadString());
 
     internal LocalTime ReadLocalTime(LocalTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
-    internal LocalDateTime ReadLocalDateTime(LocalDateTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
+    internal ZonedDateTime ReadZonedDateTime(ZonedDateTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
 
     internal T ReadEnum<T>() where T : Enum
     {

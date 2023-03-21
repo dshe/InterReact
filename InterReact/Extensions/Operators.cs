@@ -2,16 +2,17 @@
 
 public static partial class Extension
 {
-    internal static IObservable<object> WithRequestId(this IObservable<object> source, int id)
+    internal static IObservable<IHasRequestId> WithRequestId(this IObservable<object> source, int requestId)
     {
         return source
             .OfType<IHasRequestId>()
-            .Where(x => x.RequestId == id);
+            .Where(x => x.RequestId == requestId);
     }
-    internal static IObservable<object> WithOrderId(this IObservable<object> source, int id)
+
+    internal static IObservable<IHasOrderId> WithOrderId(this IObservable<object> source, int orderId)
     {
         return source
             .OfType<IHasOrderId>()
-            .Where(x => x.OrderId == id);
+            .Where(x => x.OrderId == orderId);
     }
 }

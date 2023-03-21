@@ -7,7 +7,7 @@ public class MarketDataSnapshotAsync : TestCollectionBase
     public MarketDataSnapshotAsync(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
     [Fact]
-    public async Task TickSnapshotAsyncTest()
+    public async Task TickSnapshotObservableTest()
     {
         Contract contract = new()
         { 
@@ -17,9 +17,10 @@ public class MarketDataSnapshotAsync : TestCollectionBase
             Exchange = "SMART" 
         };
 
-        IList<object> messages = await Client
+        IList<IHasRequestId> messages = await Client
             .Service
-            .GetTickSnapshotAsync(contract);
+            .CreateTickSnapshotObservable(contract)
+            .ToList();
 
         Assert.Empty(messages.OfType<AlertMessage>().Where(a => a.IsFatal));
 
@@ -32,7 +33,7 @@ public class MarketDataSnapshotAsync : TestCollectionBase
     }
 
     [Fact]
-    public async Task TickSnapshotAsyncInvalidTest()
+    public async Task TickSnapshotObservableInvalidTest()
     {
         Contract contract = new()
         { 
@@ -42,14 +43,13 @@ public class MarketDataSnapshotAsync : TestCollectionBase
             Exchange = "SMART" 
         };
 
-        IList<object> messages = await Client
+        AlertMessage? fatalAlert = await Client
             .Service
-            .GetTickSnapshotAsync(contract);
-
-        AlertMessage fatalAlert = messages
+            .CreateTickSnapshotObservable(contract)
             .OfType<AlertMessage>()
-            .First(alert => alert.IsFatal);
+            .FirstOrDefaultAsync(alert => alert.IsFatal);
 
+        Assert.NotNull(fatalAlert);
         Assert.True(fatalAlert.Message.StartsWith("No security definition"));
     }
 }

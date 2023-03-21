@@ -13,7 +13,7 @@ public class Summary : TestCollectionBase
     {
         int id = Client.Request.GetNextId();
 
-        Task<IList<object>> task = Client
+        Task<IList<IHasRequestId>> task = Client
             .Response
             .WithRequestId(id)
             .TakeWhile(o => o is not AccountSummaryEnd)
@@ -22,7 +22,7 @@ public class Summary : TestCollectionBase
 
         Client.Request.RequestAccountSummary(id);
 
-        IList<object> list = await task; 
+        IList<IHasRequestId> list = await task; 
 
         Client.Request.CancelAccountSummary(id);
 

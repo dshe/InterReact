@@ -20,7 +20,7 @@ public class MarketDataSnapshot : TestCollectionBase
 
         int id = Client.Request.GetNextId();
 
-        Task<IList<object>> task = Client
+        Task<IList<IHasRequestId>> task = Client
             .Response
             .WithRequestId(id)
             .TakeUntil(x => x is SnapshotEndTick || (x is AlertMessage alert && alert.IsFatal))
@@ -29,7 +29,7 @@ public class MarketDataSnapshot : TestCollectionBase
 
         Client.Request.RequestMarketData(id, contract, isSnapshot: true);
 
-        IList<object> messages = await task;
+        IList<IHasRequestId> messages = await task;
 
         Assert.Empty(messages.OfType<AlertMessage>().Where(a => a.IsFatal));
 

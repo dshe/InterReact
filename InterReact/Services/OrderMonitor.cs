@@ -8,12 +8,13 @@ public partial class Service
     /// Places an order and returns an OrderMonitor object which can be used to monitor the order.
     /// </summary>
     public OrderMonitor PlaceOrder(Order order, Contract contract) =>
-        new(Request, Response, order, contract);
+        new(order, contract, Request, Response);
 }
 
 /// <summary>
-/// This object is returned from Services.PlaceOrder().
-/// It provides an observable which relays order messages (OpenOrder, OrderStatusReport, Execution, CommissionReport and possibly, Alerts).
+/// This object is returned from Service.PlaceOrder().
+/// It provides an observable which relays order messages: 
+/// OpenOrder, OrderStatusReport, Execution, CommissionReport and possibly, Alerts.
 /// Results are cached and replayed to subscribers.
 /// This observable completes only when the object is disposed.
 /// Use Take(Timespan) operator to return an observable that contains the latest Values.
@@ -23,23 +24,22 @@ public sealed class OrderMonitor : IDisposable
     private readonly ReplaySubject<IHasOrderId> subject = new();
     private readonly Request Request;
     private readonly Contract Contract;
-    public Order Order { get; private set; }
+    public Order Order { get; }
     public int OrderId { get; }
-    public IObservable<IHasOrderId> Messages => subject.AsObservable();
+    public IObservable<IHasOrderId> Messages { get; }
 
-    internal OrderMonitor(Request request, IObservable<object> response, Order order, Contract contract)
+    internal OrderMonitor(Order order, Contract contract, Request request, IObservable<object> response)
     {
-        Request = request;
-        Order = order;
         Contract = contract;
+        Order = order;
+        Request = request;
         OrderId = Request.GetNextId();
+        Messages = subject.AsObservable();
 
         response
-            .OfType<IHasOrderId>()
-            .Where(x => x.OrderId == OrderId)
+            .WithOrderId(OrderId)
             .Subscribe(subject);
 
-        Order.OrderId = OrderId;
         Request.PlaceOrder(OrderId, Order, Contract);
     }
 

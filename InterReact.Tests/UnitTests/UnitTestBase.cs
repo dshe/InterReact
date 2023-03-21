@@ -7,7 +7,7 @@ public abstract class UnitTestBase
     protected readonly ILogger Logger;
     protected readonly Action<string> Write;
 
-    protected UnitTestBase(ITestOutputHelper output, LogLevel logLevel = LogLevel.Trace)
+    protected UnitTestBase(ITestOutputHelper output, LogLevel logLevel = LogLevel.Debug)
     {
         Logger = LoggerFactory
             .Create(builder => builder

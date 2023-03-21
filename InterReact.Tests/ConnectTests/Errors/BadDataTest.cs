@@ -17,7 +17,7 @@ public class BadData : ConnectTestBase
 
         int id = client.Request.GetNextId();
 
-        Task<object> task = client
+        Task<IHasRequestId> task = client
             .Response
             .WithRequestId(id)
             .FirstAsync()

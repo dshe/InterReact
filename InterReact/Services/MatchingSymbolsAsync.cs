@@ -8,7 +8,7 @@ public partial class Service
     /// Returns SymbolSamples and/or Alert objects.
     /// TWS does not support more than one concurrent request.
     /// </summary>
-    public async Task<IList<object>> GetMatchingSymbolsAsync(string pattern, CancellationToken ct = default)
+    public async Task<IList<IHasRequestId>> GetMatchingSymbolsAsync(string pattern, CancellationToken ct = default)
     {
         await MatchingSymbolsSemaphore.WaitAsync(ct).ConfigureAwait(false);
 
@@ -16,7 +16,7 @@ public partial class Service
         {
             int id = Request.GetNextId();
 
-            Task<IList<object>> task = Response
+            Task<IList<IHasRequestId>> task = Response
                 .WithRequestId(id)
                 .TakeUntil(x => x is SymbolSamples)
                 .ToList()
@@ -24,7 +24,7 @@ public partial class Service
 
             Request.RequestMatchingSymbols(id, pattern);
 
-            IList<object> list = await task.WaitAsync(ct).ConfigureAwait(false);
+            IList<IHasRequestId> list = await task.WaitAsync(ct).ConfigureAwait(false);
 
             return list;
         }

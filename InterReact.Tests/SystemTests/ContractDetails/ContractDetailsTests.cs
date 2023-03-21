@@ -7,11 +7,11 @@ public class ContractDetail : TestCollectionBase
 {
     public ContractDetail(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    private async Task<IList<object>> MakeContractDetailsRequest(Contract contract)
+    private async Task<IList<IHasRequestId>> MakeContractDetailsRequest(Contract contract)
     {
         int id = Client.Request.GetNextId();
 
-        Task<IList<object>> task = Client
+        Task<IList<IHasRequestId>> task = Client
             .Response
             .WithRequestId(id)
             .TakeUntil(x => x is AlertMessage or ContractDetailsEnd)
@@ -21,7 +21,7 @@ public class ContractDetail : TestCollectionBase
 
         Client.Request.RequestContractDetails(id, contract);
 
-        IList<object> messages = await task;
+        IList<IHasRequestId> messages = await task;
 
         return messages;
     }
@@ -37,7 +37,7 @@ public class ContractDetail : TestCollectionBase
             Exchange = "SMART" 
         };
 
-        IList<object> messages = await MakeContractDetailsRequest(contract);
+        IList<IHasRequestId> messages = await MakeContractDetailsRequest(contract);
 
         object message = messages.Single();
         Assert.IsType<ContractDetails>(message);
@@ -53,7 +53,7 @@ public class ContractDetail : TestCollectionBase
             Currency = "USD" 
         };
 
-        IList<object> messages = await MakeContractDetailsRequest(contract);
+        IList<IHasRequestId> messages = await MakeContractDetailsRequest(contract);
 
         Assert.True(messages.Count > 1);
         Assert.True(messages.All(x => x is ContractDetails));
@@ -70,7 +70,7 @@ public class ContractDetail : TestCollectionBase
             Exchange = "SMART" 
         };
 
-        IList<object> messages = await MakeContractDetailsRequest(contract);
+        IList<IHasRequestId> messages = await MakeContractDetailsRequest(contract);
 
         Assert.Single(messages);
         AlertMessage alert = Assert.IsType<AlertMessage>(messages.Single());

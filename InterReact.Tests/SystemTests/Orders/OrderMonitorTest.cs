@@ -28,17 +28,21 @@ public class Monitor : TestCollectionBase
             OrderType = OrderType.Market
         };
 
-        OrderMonitor orderMonitor = Client
-            .Service
-            .PlaceOrder(order, contract);
+        OrderMonitor orderMonitor = Client.Service.PlaceOrder(order, contract);
   
         orderMonitor
             .Messages
-            .Subscribe(m => Write(m.Stringify()));
+            .Subscribe(m => Write($"OrderMonitor: {m.Stringify()}"));
 
-        await Task.Delay(TimeSpan.FromSeconds(3));
+        Execution? execution = await orderMonitor
+            .Messages
+            .OfType<Execution>()
+            .Take(TimeSpan.FromSeconds(5))
+            .FirstOrDefaultAsync();
 
         orderMonitor.Dispose();
+
+        Assert.NotNull(execution);
     }
 
     [Fact]
@@ -62,26 +66,23 @@ public class Monitor : TestCollectionBase
             OrderType = OrderType.Market
         };
 
-        OrderMonitor orderMonitor = Client
-            .Service
-            .PlaceOrder(order, contract);
+        OrderMonitor orderMonitor = Client.Service.PlaceOrder(order, contract);
 
         orderMonitor.CancelOrder();
 
-        IList<OrderStatusReport> reports = await orderMonitor
+        OrderStatusReport report = await orderMonitor
             .Messages
             .OfType<OrderStatusReport>()
-            .Take(TimeSpan.FromSeconds(2))
-            .ToList();
+            .Take(TimeSpan.FromSeconds(3))
+            .FirstOrDefaultAsync();
 
-        Assert.True(reports
-            .Any(x => x.Status == OrderStatus.Cancelled || x.Status == OrderStatus.ApiCancelled));
-      
         orderMonitor.Dispose();
+
+        Assert.True(report.Status == OrderStatus.Cancelled || report.Status == OrderStatus.ApiCancelled);
     }
 
     [Fact]
-    public async Task OrderMonitorModifyTest()
+    public async Task OrderMonitorModificationTest()
     {
         if (!Client.Connection.RemoteIpEndPoint.Port.IsIBDemoPort())
             throw new Exception("Use demo account to place order.");
@@ -113,22 +114,24 @@ public class Monitor : TestCollectionBase
         };
 
         // Place the order
-        OrderMonitor monitor = Client.Service.PlaceOrder(order, contract);
+        OrderMonitor orderMonitor = Client.Service.PlaceOrder(order, contract);
 
-        await Task.Delay(500);
+        //await Task.Delay(100);
 
-        // Change then resubmit the order
-        monitor.Order.LimitPrice = askPrice + 1; // should execute
-        monitor.ReplaceOrder();
+        // Change the order
+        orderMonitor.Order.LimitPrice = askPrice + 1; // should execute
+        // Resubmit the c hanged order
+        orderMonitor.ReplaceOrder();
 
-        Execution? execution = await monitor
+        // Wait for execution
+        Execution? execution = await orderMonitor
             .Messages
             .OfType<Execution>()
             .Take(TimeSpan.FromSeconds(2))
             .FirstOrDefaultAsync();
 
-        Assert.NotNull(execution);
-        Write("Order filled");
-    }
+        orderMonitor.Dispose();
 
+        Assert.NotNull(execution);
+    }
 }

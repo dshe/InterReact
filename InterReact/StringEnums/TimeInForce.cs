@@ -30,4 +30,6 @@ public sealed class TimeInForce : StringEnum<TimeInForce>
     public static TimeInForce FillOrKill { get; } = Create("FOK");
 
     public static TimeInForce DayUntilCancelled { get; } = Create("DTC");
+
+    public static TimeInForce Auction { get; } = Create("AUC");
 }

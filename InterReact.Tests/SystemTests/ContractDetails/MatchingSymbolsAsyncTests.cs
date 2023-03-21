@@ -9,7 +9,7 @@ public class MatchingSymbolsAsync : TestCollectionBase
     {
         string pattern = "X";
 
-        IList<object> messages = await Client
+        IList<IHasRequestId> messages = await Client
             .Service
             .GetMatchingSymbolsAsync(pattern);
 
@@ -17,7 +17,7 @@ public class MatchingSymbolsAsync : TestCollectionBase
 
         SymbolSamples samples = messages.OfType<SymbolSamples>().Single();
 
-        IList<ContractDescription> descr5iptions = samples.Descriptions;
+        IList<ContractDescription> descriptions = samples.Descriptions;
     }
 
 }

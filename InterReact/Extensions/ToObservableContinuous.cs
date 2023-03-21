@@ -41,17 +41,17 @@ public static partial class Extension
     }
 
     // For continuous results with RequestId: AccountSummary, Tick.
-    internal static IObservable<object> ToObservableContinuousWithId(this IObservable<object> source,
+    internal static IObservable<IHasRequestId> ToObservableContinuousWithId(this IObservable<object> source,
         Func<int> getRequestId, Action<int> startRequest, Action<int> stopRequest)
     {
-        return Observable.Create<object>(observer =>
+        return Observable.Create<IHasRequestId>(observer =>
         {
             int id = getRequestId();
             bool? cancelable = null;
 
             IDisposable subscription = source
                 .WithRequestId(id)
-                .SubscribeSafe(Observer.Create<object>(
+                .SubscribeSafe(Observer.Create<IHasRequestId>(
                     onNext: observer.OnNext,
                     onError: e =>
                     {

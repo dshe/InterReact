@@ -10,11 +10,10 @@ public static partial class Extension
     {
         return Observable.Create<IHasRequestId>(observer =>
         {
-            int requestId = getRequestId();
+            int id = getRequestId();
 
             IDisposable subscription = source
-                .OfType<IHasRequestId>() // IMPORTANT!
-                .Where(m => m.RequestId == requestId)
+                .WithRequestId(id) // IMPORTANT!
                 .SubscribeSafe(Observer.Create<IHasRequestId>(
                     onNext: m =>
                     {
@@ -30,7 +29,7 @@ public static partial class Extension
                     onError: observer.OnError,
                     onCompleted: observer.OnCompleted));
 
-            startRequest(requestId);
+            startRequest(id);
 
             return subscription;
         });

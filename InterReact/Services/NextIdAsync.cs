@@ -20,6 +20,6 @@ public partial class Service
         Request.RequestNextOrderId();
         
         await task.ConfigureAwait(false);
-        // The result is updated in the message NextOrderId response object constructor.
+        // The result is updated in the response object constructor of the NextOrderId message.
     }
 }

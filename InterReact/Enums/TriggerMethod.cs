@@ -20,6 +20,6 @@ public enum TriggerMethod
     NotUsed5 = 5,
     NotUsed6 = 6,
 
-    LastOfBidAsk = 7,
+    LastOrBidAsk = 7,
     Midpoint = 8
 }

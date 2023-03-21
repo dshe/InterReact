@@ -7,11 +7,11 @@ public partial class Service
     /// <summary>
     /// Returns Execution, CommissionReport, and possibly Alert objects. 
     /// </summary>
-    public async Task<IList<object>> GetExecutionsAsync(CancellationToken ct = default)
+    public async Task<IList<IHasRequestId>> GetExecutionsAsync(CancellationToken ct = default)
     {
         int id = Request.GetNextId();
 
-        Task<IList<object>> task = Response
+        Task<IList<IHasRequestId>> task = Response
             .WithRequestId(id)
             .TakeWhile(m => m is not ExecutionEnd)
             .ToList()
@@ -21,7 +21,7 @@ public partial class Service
         
         Request.RequestExecutions(id , new ExecutionFilter());
 
-        IList<object> list = await task.ConfigureAwait(false);
+        IList<IHasRequestId> list = await task.ConfigureAwait(false);
  
         return list;
     }

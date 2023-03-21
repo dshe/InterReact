@@ -11,7 +11,9 @@ public sealed class TestFixture : IAsyncLifetime
     public async Task InitializeAsync()
     {
         ILoggerFactory loggerFactory = LoggerFactory
-            .Create(builder => builder.AddMXLogger(SharedWriter.Write));
+            .Create(builder => builder
+                .AddMXLogger(SharedWriter.Write)
+                .SetMinimumLevel(LogLevel.Debug));
 
         Client = await new InterReactClientConnector()
             .WithLoggerFactory(loggerFactory)

@@ -6,7 +6,7 @@ public sealed class Order : IHasOrderId  // input + output
     /// <summary>
     /// The OrderId property identifies the order.
     /// </summary>
-    public int OrderId { get; set; } // output
+    public int OrderId { get; internal set; } // output!
 
     public bool Solicited { get; set; }
 
