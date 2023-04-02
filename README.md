@@ -3,7 +3,7 @@
 ***Reactive C# API to Interactive Brokers Trader Workstation (TWS)***
 - **.NET 6.0** library
 - supports IB TWS API Stable **10.19** (Nov 16 2022)
-- dependencies: RxSockets, NodaTime
+- dependencies: RxSockets, Stringification, NodaTime
 - demo applications: Console, WPF
 
 ```csharp
