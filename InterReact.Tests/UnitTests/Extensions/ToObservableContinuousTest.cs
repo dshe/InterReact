@@ -8,7 +8,7 @@ public class ToObservableContinuous : ReactiveUnitTestBase
 {
     private readonly TestScheduler TestScheduler = new();
 
-    public ToObservableContinuous(ITestOutputHelper output) : base(output) {}
+    public ToObservableContinuous(ITestOutputHelper output) : base(output) { }
 
     [Theory,
     InlineData(-1),
@@ -27,7 +27,7 @@ public class ToObservableContinuous : ReactiveUnitTestBase
         IObservable<object> observable = subject.ToObservableContinuous(() => Interlocked.Increment(ref start), () => Interlocked.Increment(ref stop));
 
         await Assert.ThrowsAsync<TimeoutException>(async () => await observable.Timeout(ts));
-  
+
         Assert.Equal(1, start);
         Assert.Equal(1, stop);
     }

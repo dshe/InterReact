@@ -1,37 +1,24 @@
-﻿using System.Globalization;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public partial class Service
 {
     /// <summary>
-    /// Creates an observable which continually emits AccountSummary objects.
-    /// Objects: AccountSummary, AccountSummaryEnd, Alert.
-    /// The complete account summary is sent initially, and then only any changes.
-    /// AccountSummaryEnd is emitted after the initial values for each account have been emitted.
+    /// An observable which emits AccountSummary objects for all accounts.
+    /// All positions are sent initially, and then only updates. 
     /// The latest values are cached for replay to new subscribers.
-    /// Multiple subscribers are supported.
+    /// TWS error messages (AlertMessage) are directed to OnError(AlertException).
     /// </summary>
-    public IObservable<object> AccountSummaryObservable { get; }
+    public IObservable<AccountSummary> AccountSummaryObservable { get; }
 
-    private IObservable<object> CreateAccountSummaryObservable()
+    private IObservable<AccountSummary> CreateAccountSummaryObservable()
     {
         return Response
             .ToObservableContinuousWithId(
                 Request.GetNextId,
                 id => Request.RequestAccountSummary(id),
                 Request.CancelAccountSummary)
-            .CacheSource(GetAccountSummaryCacheKey);
-    }
-
-    private static string GetAccountSummaryCacheKey(object m)
-    {
-        return m switch
-        {
-            AccountSummary a => $"{a.Account}+{a.Currency}+{a.Tag}",
-            AccountSummaryEnd => "AccountSummaryEnd",
-            AlertMessage alert => alert.Time.ToUnixTimeTicks().ToString(CultureInfo.InvariantCulture),
-            _ => throw new ArgumentException($"Unhandled type: {m.GetType()}.")
-        };
+            .AlertMessageToError()
+            .OfType<AccountSummary>()
+            .CacheSource(a => $"{a.Account}: {a.Currency}, {a.Tag}");
     }
 }

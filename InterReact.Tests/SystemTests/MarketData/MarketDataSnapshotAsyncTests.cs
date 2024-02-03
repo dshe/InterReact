@@ -2,7 +2,7 @@
 
 namespace MarketData;
 
-public class MarketDataSnapshotAsync : TestCollectionBase
+public class MarketDataSnapshotAsync : CollectionTestBase
 {
     public MarketDataSnapshotAsync(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
@@ -10,11 +10,11 @@ public class MarketDataSnapshotAsync : TestCollectionBase
     public async Task TickSnapshotObservableTest()
     {
         Contract contract = new()
-        { 
-            SecurityType = SecurityType.Stock, 
-            Symbol = "NVDA", 
-            Currency = "USD", 
-            Exchange = "SMART" 
+        {
+            SecurityType = ContractSecurityType.Stock,
+            Symbol = "NVDA",
+            Currency = "USD",
+            Exchange = "SMART"
         };
 
         IList<IHasRequestId> messages = await Client
@@ -36,11 +36,11 @@ public class MarketDataSnapshotAsync : TestCollectionBase
     public async Task TickSnapshotObservableInvalidTest()
     {
         Contract contract = new()
-        { 
-            SecurityType = SecurityType.Stock, 
-            Symbol = "InvalidSymbol", 
-            Currency = "USD", 
-            Exchange = "SMART" 
+        {
+            SecurityType = ContractSecurityType.Stock,
+            Symbol = "InvalidSymbol",
+            Currency = "USD",
+            Exchange = "SMART"
         };
 
         AlertMessage? fatalAlert = await Client

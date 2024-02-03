@@ -1,15 +1,14 @@
 ﻿using RxSockets;
+using Stringification;
 
 namespace InterReact;
 
 public sealed class Response : IObservable<object>
 {
-    private readonly IObservable<object> Observable;
+    private IObservable<object> Observable { get; }
 
-    public Response(IClock clock, ILoggerFactory loggerFactory, IRxSocketClient socketClient, Connection connection)
+    public Response(ILogger<Response> logger, IRxSocketClient socketClient, ResponseMessageComposer composer, Stringifier stringifier)
     {
-        ArgumentNullException.ThrowIfNull(clock);
-        ArgumentNullException.ThrowIfNull(loggerFactory);
         ArgumentNullException.ThrowIfNull(socketClient);
 
         Observable = socketClient
@@ -17,8 +16,8 @@ public sealed class Response : IObservable<object>
             .ToObservableFromAsyncEnumerable()
             .ToArraysFromBytesWithLengthPrefix()
             .ToStringArrays()
-            .ComposeMessages(clock, loggerFactory, connection)
-            .LogMessages(loggerFactory)
+            .ComposeMessages(composer)
+            .LogMessages(logger, stringifier)
             .Publish()
             .AutoConnect(); // connect on first observer
     }

@@ -11,12 +11,13 @@ public class NoConnect : ConnectTestBase
     {
         CancellationToken ct = new(true);
 
-        Task<IInterReactClient> task = new InterReactClientConnector()
-            .WithPort(999)
-            .WithLoggerFactory(LogFactory)
-            .ConnectAsync(ct);
+        Task<IInterReactClient> task = InterReactClient.ConnectAsync(options =>
+        {
+            options.LogFactory = LogFactory;
+            options.TwsPortAddress = "999";
+        }, null, ct);
 
-        OperationCanceledException ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await task);
+        OperationCanceledException ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => task);
         Write(ex.ToString());
     }
 
@@ -25,24 +26,26 @@ public class NoConnect : ConnectTestBase
     {
         CancellationTokenSource cts = new(TimeSpan.FromMilliseconds(100));
 
-        Task<IInterReactClient> task = new InterReactClientConnector()
-            .WithPort(999)
-            .WithLoggerFactory(LogFactory)
-            .ConnectAsync(cts.Token);
+        Task<IInterReactClient> task = InterReactClient.ConnectAsync(options =>
+        {
+            options.LogFactory = LogFactory;
+            options.TwsPortAddress = "999";
+        }, null, cts.Token);
 
-        OperationCanceledException ex = await Assert.ThrowsAsync<OperationCanceledException>(async () => await task);
+        OperationCanceledException ex = await Assert.ThrowsAsync<OperationCanceledException>(() => task);
         Write(ex.ToString());
     }
 
     [Fact]
     public async Task ConnectionRefusedTest()
     {
-        Task<IInterReactClient> task = new InterReactClientConnector()
-            .WithLoggerFactory(LogFactory)
-            .WithPort(999)
-            .ConnectAsync();
+        Task<IInterReactClient> task = InterReactClient.ConnectAsync(options =>
+        {
+            options.LogFactory = LogFactory;
+            options.TwsPortAddress = "999";
+        });
 
-        ArgumentException ex = await Assert.ThrowsAsync<ArgumentException>(async () => await task);
+        ArgumentException ex = await Assert.ThrowsAsync<ArgumentException>(() => task);
         Write("Exception: " + ex.ToString());
     }
 }

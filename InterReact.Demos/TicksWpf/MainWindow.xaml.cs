@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 
@@ -116,7 +117,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         try
         {
-            Client = await new InterReactClientConnector().ConnectAsync();
+            Client = await InterReactClient.ConnectAsync();
         }
         catch (Exception exception)
         {
@@ -152,19 +153,21 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         Contract contract = new()
         {
             Symbol = symbol,
-            SecurityType = SecurityType.Stock,
+            SecurityType = ContractSecurityType.Stock,
             Currency = "USD",
             Exchange = "SMART"
         };
 
+        CancellationTokenSource cts = new();
+        cts.CancelAfter(TimeSpan.FromSeconds(2));
+
         try
         {
-            List<ContractDetails> cds = await Client!
+            IList<ContractDetails> cds = await Client!
                 .Service
-                .GetContractDetailsAsync(contract)
-                .WaitAsync(TimeSpan.FromSeconds(2));
+                .GetContractDetailsAsync(contract, cts.Token);
 
-            ContractDetails cd = cds.First(); 
+            ContractDetails cd = cds.First();
 
             // Display the stock name.
             Description = cd.LongName;
@@ -186,7 +189,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private void SubscribeToTicks(Contract contract)
     {
         // Create the observable which will emit realtime updates.
-        IConnectableObservable<object> ticks = Client!
+        IConnectableObservable<IHasRequestId> ticks = Client!
             .Service
             .CreateTickObservable(contract)
             .ObserveOnDispatcher()
@@ -197,7 +200,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         TicksConnection = ticks.Connect();
     }
 
-    private void SubscribeToTicks(IObservable<object> ticks)
+    private void SubscribeToTicks(IObservable<IHasRequestId> ticks)
     {
         ticks.Subscribe(onNext: _ => { }, onError: exception => MessageBox.Show($"Fatal: {exception.Message}"));
         ticks.OfTickClass(t => t.Alert).Subscribe(alert => MessageBox.Show($"{alert.Message}"));

@@ -45,8 +45,8 @@ public class Types_Viewer : UnitTestBase
                 .Select(q => new { type = x.t, method = x.m, attr = q }))
             .SelectMany(x => x)
             .Where(x => x.attr is not (
-                CompilerGeneratedAttribute or 
-                DebuggerHiddenAttribute or 
+                CompilerGeneratedAttribute or
+                DebuggerHiddenAttribute or
                 SecuritySafeCriticalAttribute or
                 AsyncStateMachineAttribute or
                 DebuggerStepThroughAttribute))
@@ -62,9 +62,8 @@ public class Types_Viewer : UnitTestBase
     public void Auto_Type_And_Stringify_One()
     {
         Stringifier s = new(Logger);
-
-        var tick = new PriceTick(0, TickType.Undefined, 0, new TickAttrib() );
-        Write(tick.Stringify());
+        var tick = new PriceTick(0, TickType.Undefined, 0, new TickAttrib());
+        Write(s.Stringify(tick));
 
         //TypeInfo type = typeof(PriceTick).GetTypeInfo();
         //object instance = s.CreateInstance(type);
@@ -79,11 +78,11 @@ public class Types_Viewer : UnitTestBase
             .Where(t =>
                 t is
                 {
-                    IsClass: true, 
-                    IsPublic: true, 
-                    IsSealed: true, 
-                    IsAbstract: false, 
-                    ContainsGenericParameters: false, 
+                    IsClass: true,
+                    IsPublic: true,
+                    IsSealed: true,
+                    IsAbstract: false,
+                    ContainsGenericParameters: false,
                     Namespace: "InterReact"
                 })
             .OrderBy(x => x.Name)
@@ -93,8 +92,8 @@ public class Types_Viewer : UnitTestBase
         {
             if (type == typeof(OrderMonitor) ||
                 type == typeof(TickClassSelector) ||
-                type == typeof(Connection) ||
-                type == typeof(InterReactClient)) 
+                type == typeof(InterReactOptions) ||
+                type == typeof(InterReactClient))
                 continue;
             try
             {

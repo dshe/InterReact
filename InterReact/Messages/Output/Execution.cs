@@ -34,7 +34,7 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
     public string Account { get; } = "";
 
     public string Exchange { get; } = "";
-    public ExecutionSide Side { get; } = ExecutionSide.Undefined;
+    public string Side { get; } = "";
 
     /// <summary>
     /// The number of shares filled.
@@ -88,7 +88,7 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
         Time = r.ReadString();
         Account = r.ReadString();
         Exchange = r.ReadString();
-        Side = r.ReadStringEnum<ExecutionSide>();
+        Side = r.ReadString();
         Shares = r.ReadDecimal();
         Price = r.ReadDouble();
         PermanentId = r.ReadInt();

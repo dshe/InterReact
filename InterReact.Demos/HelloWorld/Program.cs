@@ -13,17 +13,14 @@ using System.Reactive.Threading.Tasks;
 using System.Threading.Tasks;
 
 // Create a logger which will write messages to the console.
-ILoggerFactory loggerFactory = LoggerFactory
-    .Create(builder => builder
-        .AddSimpleConsole(c => c.SingleLine = true)
-        .SetMinimumLevel(LogLevel.Debug));
+ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder
+    .AddSimpleConsole(c => c.SingleLine = true)
+    .SetMinimumLevel(LogLevel.Debug));
 
 // Create the InterReact client by connecting to TWS/Gateway on your local machine.
-IInterReactClient client = await new InterReactClientConnector()
-    .WithLoggerFactory(loggerFactory)
-    .ConnectAsync();
+IInterReactClient client = await InterReactClient.ConnectAsync(options => options.LogFactory = loggerFactory);
 
-if (!client.Connection.RemoteIpEndPoint.Port.IsIBDemoPort())
+if (!client.RemoteIpEndPoint.Port.IsIBDemoPort())
 {
     Console.WriteLine("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
     return;
@@ -31,7 +28,7 @@ if (!client.Connection.RemoteIpEndPoint.Port.IsIBDemoPort())
 
 Contract contract = new()
 {
-    SecurityType = SecurityType.Stock,
+    SecurityType = ContractSecurityType.Stock,
     Symbol = "IBKR",
     Currency = "USD",
     Exchange = "SMART"
@@ -61,8 +58,8 @@ if (askPriceTick.Price <= 0)
 // Create the order.
 Order order = new()
 {
-    OrderAction = OrderAction.Buy,
-    OrderType = OrderType.Limit,
+    Action = OrderAction.Buy,
+    OrderType = OrderTypes.Limit,
     LimitPrice = askPriceTick.Price + .50,
     TotalQuantity = 100,
 };

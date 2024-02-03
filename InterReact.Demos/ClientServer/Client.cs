@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Net;
 
 namespace ClientServer;
 
@@ -13,16 +14,18 @@ public sealed class Client : IAsyncDisposable
         Logger = logger;
     }
 
-    public static async Task<Client> CreateAsync(int port, ILogger logger, ILogger libLogger)
+    public static async Task<Client> CreateAsync(IPEndPoint ipEndPoint, ILogger logger, ILogger libLogger)
     {
-        IInterReactClient irClient = await new InterReactClientConnector()
-            .WithLoggerFactory(libLogger.ToLoggerFactory())
-            .WithPort(port)
-            .ConnectAsync();
+        IInterReactClient client = await InterReactClient.ConnectAsync(options =>
+        {
+            options.Logger = libLogger;
+            options.TwsIpAddress = ipEndPoint.Address.ToString();
+            options.TwsPortAddress = ipEndPoint.Port.ToString();
+        });
 
         logger.LogCritical("Connected to server.");
 
-        return new Client(irClient, logger);
+        return new Client(client, logger);
     }
 
     public void SendControlMessage(string message) => IRClient.Request.RequestControl(message);
@@ -58,7 +61,7 @@ public sealed class Client : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        Logger.LogCritical("Disconnecting.");
+        Logger.LogCritical("Disconnecting...");
         await IRClient.DisposeAsync();
         Logger.LogCritical("Disconnected.");
     }

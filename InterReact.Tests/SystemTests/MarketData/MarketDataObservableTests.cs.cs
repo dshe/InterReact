@@ -2,32 +2,47 @@
 
 namespace MarketData;
 
-public class MarketDataObservable : TestCollectionBase
+public class MarketDataObservable : CollectionTestBase
 {
     public MarketDataObservable(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
     [Fact]
     public async Task TicksTest()
     {
-        Contract contract = new()
-        { 
-            SecurityType = SecurityType.Stock,
-            Symbol = "AAPL", 
-            Currency = "USD", 
-            Exchange = "SMART" 
+        Contract stock = new()
+        {
+            SecurityType = ContractSecurityType.Stock,
+            Symbol = "AAPL",
+            Currency = "USD",
+            Exchange = "SMART"
         };
+        Contract euro = new()
+        {
+            SecurityType = ContractSecurityType.Cash,
+            Symbol = "EUR",
+            Currency = "USD",
+            Exchange = "IDEALPRO"
+        };
+        Contract gold = new()
+        {
+            SecurityType = ContractSecurityType.Commodity,
+            Symbol = "XAUUSD",
+            Currency = "USD",
+            Exchange = "SMART"
+        };
+
 
         List<object> messages = new();
 
         IDisposable subscription = Client
             .Service
-            .CreateTickObservable(contract)
+            .CreateTickObservable(stock)
             .Subscribe(m =>
             {
                 messages.Add(m);
             });
 
-        await Task.Delay(2000);
+        await Task.Delay(10000);
 
         subscription.Dispose();
 
@@ -39,17 +54,18 @@ public class MarketDataObservable : TestCollectionBase
             ?.Price;
 
         Assert.True(lastPrice is > 0);
+        ;
     }
 
     [Fact]
     public async Task TicksInvalidTest()
     {
         Contract contract = new()
-        { 
-            SecurityType = SecurityType.Stock, 
-            Symbol = "InvalidSymbol", 
-            Currency = "USD", 
-            Exchange = "SMART" 
+        {
+            SecurityType = ContractSecurityType.Stock,
+            Symbol = "InvalidSymbol",
+            Currency = "USD",
+            Exchange = "SMART"
         };
 
         List<object> messages = new();

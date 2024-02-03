@@ -1,23 +1,28 @@
-﻿namespace Contracts;
+﻿using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 
-public class MatchingSymbolsAsync : TestCollectionBase
+namespace Contracts;
+
+public class MatchingSymbolsAsync : CollectionTestBase
 {
     public MatchingSymbolsAsync(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
     [Fact]
-    public async Task Test()
+    public async Task GetMatchingSymbolsObservableTest()
     {
         string pattern = "X";
 
-        IList<IHasRequestId> messages = await Client
-            .Service
-            .GetMatchingSymbolsAsync(pattern);
+        IList<ContractDescription> descriptions = await Client.Service.CreateMatchingSymbolsObservable(pattern);
 
-        Assert.Empty(messages.OfType<AlertMessage>());
-
-        SymbolSamples samples = messages.OfType<SymbolSamples>().Single();
-
-        IList<ContractDescription> descriptions = samples.Descriptions;
+        Assert.NotEmpty(descriptions);
     }
 
+    [Fact]
+    public async Task GetMatchingSymbolsObservableAlertTest()
+    {
+        string pattern = "";
+
+        await Assert.ThrowsAsync<AlertException>(() => 
+            Client.Service.CreateMatchingSymbolsObservable(pattern).ToTask());
+    }
 }

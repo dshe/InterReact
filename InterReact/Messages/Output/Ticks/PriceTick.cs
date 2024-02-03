@@ -41,7 +41,7 @@ public sealed class PriceTick : ITick
             return priceTick;
 
         SizeTick sizeTick = new(requestId, sizeTickType, size);
-        
+
         return new object[] { priceTick, sizeTick };
     }
 

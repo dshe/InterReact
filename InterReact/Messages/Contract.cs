@@ -12,7 +12,7 @@ public sealed class Contract // input + output OK
     /// </summary>
     public string Symbol { get; set; } = "";
 
-    public SecurityType SecurityType { get; set; } = SecurityType.Undefined;
+    public string SecurityType { get; set; } = ContractSecurityType.Undefined;
 
     /// <summary>
     /// The contract's last trading day or contract month (for Options and Futures). 
@@ -22,7 +22,7 @@ public sealed class Contract // input + output OK
     public string LastTradeDateOrContractMonth { get; set; } = "";  // Expiry: YYYYMM or YYYYMMDD
 
     public double Strike { get; set; }
-    public OptionRightType Right { get; set; } = OptionRightType.Undefined;
+    public string Right { get; set; } = ContractOptionRight.Undefined;
     public string Multiplier { get; set; } = ""; // options and futures
 
     /// <summary>
@@ -61,7 +61,7 @@ public sealed class Contract // input + output OK
     /// Expired options or other instrument types are not available.
     /// </summary>
     public bool IncludeExpired { get; set; } // input only
-    public SecurityIdType SecurityIdType { get; set; } = SecurityIdType.Undefined; // input only
+    public string SecurityIdType { get; set; } = ContractSecurityIdType.Undefined; // input only
     public string SecurityId { get; set; } = ""; // input only
 
     public string Description { get; set; } = "";
@@ -79,15 +79,15 @@ public sealed class Contract // input + output OK
     /// </summary>
     public DeltaNeutralContract? DeltaNeutralContract { get; set; }
 
-    public Contract() {}
+    public Contract() { }
     internal Contract(ResponseReader r, bool includePrimaryExchange = true)
     {
         ContractId = r.ReadInt();
         Symbol = r.ReadString();
-        SecurityType = r.ReadStringEnum<SecurityType>();
+        SecurityType = r.ReadString();
         LastTradeDateOrContractMonth = r.ReadString();
         Strike = r.ReadDouble();
-        Right = r.ReadStringEnum<OptionRightType>();
+        Right = r.ReadString();
         Multiplier = r.ReadString();
         Exchange = r.ReadString();
         if (includePrimaryExchange)

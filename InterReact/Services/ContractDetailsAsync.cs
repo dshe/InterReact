@@ -3,11 +3,9 @@ using System.Reactive.Threading.Tasks;
 
 namespace InterReact;
 
-// add CancellationToken ct = default)
-
 public partial class Service
 {
-    private readonly Dictionary<string, Task<IList<IHasRequestId>>> ContractDetailsCache = new();
+    private readonly Dictionary<string, Task<IList<ContractDetails>>> ContractDetailsCache = new();
 
     /// <summary>
     /// Returns a list of one or more contract details objects using the supplied 
@@ -16,10 +14,8 @@ public partial class Service
     /// If expiry is not specified, ContractDetails objects are retrieved for all expiries.
     /// If strike is not specified, ContractDetails objects are retrieved for all strikes.
     /// And so on. So beware that calling this method may result in attempting to retrieve a large number of contracts.
-    /// This operation may take a long time and is subject to usage limiting, 
-    /// so the Timeout() operator may be useful.
     /// </summary>
-    public async Task<List<ContractDetails>> GetContractDetailsAsync(Contract contract)
+    public async Task<IList<ContractDetails>> GetContractDetailsAsync(Contract contract, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(contract);
 
@@ -29,45 +25,47 @@ public partial class Service
             throw new ArgumentException("Contract must not include ComboLegsDescription.");
         if (contract.DeltaNeutralContract is not null)
             throw new ArgumentException("Contract must not include DeltaNeutralValidation.");
-        if (contract.SecurityIdType == SecurityIdType.Undefined ^ string.IsNullOrEmpty(contract.SecurityId))
+        if (contract.SecurityIdType.Length == 0 ^ string.IsNullOrEmpty(contract.SecurityId))
             throw new ArgumentException("Invalid SecurityId/SecurityIdType combination.");
 
         string key = contract.Stringify();
-        
-        Task<IList<IHasRequestId>>? task;
+
+        Task<IList<ContractDetails>>? task;
         lock (ContractDetailsCache)
         {
             if (!ContractDetailsCache.TryGetValue(key, out task))
             {
-                task = GetContractDetailsTask(contract); // start task
+                task = GetContractDetailsTask(contract, ct); // start task
                 ContractDetailsCache[key] = task;
             }
         }
 
-        // await task outside lock
-        IList<IHasRequestId> result = await task.ConfigureAwait(false);
-
-        lock (ContractDetailsCache)
+        try
         {
-            AlertMessage? alert = result.OfType<AlertMessage>().FirstOrDefault();
-            if (alert == null)
-                return result.Cast<ContractDetails>().ToList();
-            ContractDetailsCache.Remove(key); // try
-
-            throw alert.ToException();       
+            // await task outside lock
+            return await task.WaitAsync(ct).ConfigureAwait(false);
+        }
+        catch
+        {
+            lock (ContractDetailsCache)
+            {
+                ContractDetailsCache.Remove(key); // try
+            }
+            throw;
         }
     }
 
-    private Task<IList<IHasRequestId>> GetContractDetailsTask(Contract contract)
+    private Task<IList<ContractDetails>> GetContractDetailsTask(Contract contract, CancellationToken ct)
     {
         int id = Request.GetNextId();
 
-        Task<IList<IHasRequestId>> task = Response
+        Task<IList<ContractDetails>> task = Response
             .WithRequestId(id)
-            .TakeUntil(m => m is ContractDetailsEnd or AlertMessage)
-            .Where(m => m is ContractDetails or AlertMessage)
+            .AlertMessageToError()
+            .TakeWhile(m => m is not ContractDetailsEnd)
+            .Cast<ContractDetails>()
             .ToList()
-            .ToTask();
+            .ToTask(ct);
 
         Request.RequestContractDetails(id, contract);
 

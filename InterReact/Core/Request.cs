@@ -1,6 +1,4 @@
-﻿using NodaTime.Text;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 /// <summary>
 /// Methods which send request messages to TWS/Gateway.
@@ -8,14 +6,12 @@ namespace InterReact;
 /// </summary>
 public sealed class Request
 {
-    private readonly IClock Clock;
-    private readonly Connection Connection;
-    private readonly Func<RequestMessage> CreateMessage;
+    private InterReactOptions Options { get; }
+    private Func<RequestMessage> CreateMessage { get; }
 
-    public Request(IClock clock, Connection connection, Func<RequestMessage> requestMessageFactory)
+    public Request(InterReactOptions options, Func<RequestMessage> requestMessageFactory)
     {
-        Clock = clock;
-        Connection = connection;
+        Options = options;
         CreateMessage = requestMessageFactory;
     }
 
@@ -23,24 +19,19 @@ public sealed class Request
     /// Returns successive ids to uniquely identify requests and orders.
     /// The initial value is set during connection and may be greater than 0 in case there are previous orders.
     /// </summary>
-    public int GetNextId() => Interlocked.Increment(ref Connection.Id);
+    public int GetNextId() => Interlocked.Increment(ref Options.Id);
 
     /// For testing with mock server.
     internal void RequestControl(string message) => CreateMessage()
         .Write(RequestCode.Control, message)
         .Send();
 
-    /// <summary>
-    /// Call this method to request market data, streaming or snapshot.
-    /// Returns market data for an instrument either in real time or 10-15 minutes delayed (depending on the market data type specified)
-    /// Include the generic Tick RealtimeVolume to receive TickRealTimeVolume ticks.
-    /// </summary>
     public void RequestMarketData(
-        int requestId, 
-        Contract contract, 
+        int requestId,
+        Contract contract,
         IEnumerable<GenericTickType>? genericTickTypes = null,
-        bool isSnapshot = false, 
-        bool isRegulatorySnapshot = false, 
+        bool isSnapshot = false,
+        bool isRegulatorySnapshot = false,
         params Tag[] options)
     {
         ArgumentNullException.ThrowIfNull(contract);
@@ -49,11 +40,11 @@ public sealed class Request
         .Write(RequestCode.RequestMarketData, "11", requestId)
         .WriteContract(contract);
 
-        if (contract.SecurityType == SecurityType.Bag)
+        if (contract.SecurityType == ContractSecurityType.Bag)
         {
             m.Write(contract.ComboLegs.Count);
             foreach (ContractComboLeg leg in contract.ComboLegs)
-                m.Write(leg.ContractId, leg.Ratio, leg.TradeAction, leg.Exchange);
+                m.Write(leg.ContractId, leg.Ratio, leg.Action, leg.Exchange);
         }
 
         DeltaNeutralContract? dnc = contract.DeltaNeutralContract;
@@ -82,41 +73,41 @@ public sealed class Request
             .Write(RequestCode.PlaceOrder, orderId)
             .WriteContract(contract)
             .Write(
-                contract.SecurityIdType, 
+                contract.SecurityIdType,
                 contract.SecurityId)
             .Write(
-                order.OrderAction,
+                order.Action,
                 order.TotalQuantity,
                 order.OrderType,
                 order.LimitPrice.ToMax(),
                 order.AuxPrice.ToMax(),
-                order.TimeInForce, 
+                order.TimeInForce,
                 order.OcaGroup,
-                order.Account, 
-                order.OpenClose, 
+                order.Account,
+                order.OpenClose,
                 order.Origin,
-                order.OrderRef, 
-                order.Transmit, 
+                order.OrderRef,
+                order.Transmit,
                 order.ParentId,
-                order.BlockOrder, 
-                order.SweepToFill, 
+                order.BlockOrder,
+                order.SweepToFill,
                 order.DisplaySize,
-                order.TriggerMethod, 
-                order.OutsideRegularTradingHours, 
+                order.TriggerMethod,
+                order.OutsideRegularTradingHours,
                 order.Hidden);
 
-        if (contract.SecurityType == SecurityType.Bag)
+        if (contract.SecurityType == ContractSecurityType.Bag)
         {
             m.Write(contract.ComboLegs.Count);
             foreach (ContractComboLeg leg in contract.ComboLegs)
                 m.Write(
-                    leg.ContractId, 
-                    leg.Ratio, 
-                    leg.TradeAction, 
+                    leg.ContractId,
+                    leg.Ratio,
+                    leg.Action,
                     leg.Exchange,
-                    leg.OpenClose, 
-                    leg.ComboShortSaleSlot, 
-                    leg.DesignatedLocation, 
+                    leg.OpenClose,
+                    leg.ComboShortSaleSlot,
+                    leg.DesignatedLocation,
                     leg.ExemptCode);
 
             m.Write(order.OrderComboLegs.Count);
@@ -130,69 +121,69 @@ public sealed class Request
 
         m.Write(
             "", // deprecated SharesAllocation field
-            order.DiscretionaryAmount, 
-            order.GoodAfterTime, 
+            order.DiscretionaryAmount,
+            order.GoodAfterTime,
             order.GoodUntilDate,
-            order.FinancialAdvisorGroup, 
+            order.FinancialAdvisorGroup,
             order.FinancialAdvisorMethod,
-            order.FinancialAdvisorPercentage, 
+            order.FinancialAdvisorPercentage,
             order.FinancialAdvisorProfile,
             order.ModelCode,
-            order.ShortSaleSlot, 
-            order.DesignatedLocation, 
+            order.ShortSaleSlot,
+            order.DesignatedLocation,
             order.ExemptCode,
-            order.OcaType, 
+            order.OcaType,
             order.Rule80A,
-            order.SettlingFirm, 
+            order.SettlingFirm,
             order.AllOrNone,
-            order.MinQty.ToMax(), 
+            order.MinQty.ToMax(),
             order.PercentOffset.ToMax(),
-            false, 
-            false, 
+            false,
+            false,
             double.MaxValue.ToMax(),
-            order.AuctionStrategy, 
-            order.StartingPrice.ToMax(), 
+            order.AuctionStrategy,
+            order.StartingPrice.ToMax(),
             order.StockReferencePrice.ToMax(),
             order.Delta.ToMax(),
-            order.StockRangeLower.ToMax(), 
+            order.StockRangeLower.ToMax(),
             order.StockRangeUpper.ToMax(),
-            order.OverridePercentageConstraints, 
-            order.Volatility.ToMax(), 
+            order.OverridePercentageConstraints,
+            order.Volatility.ToMax(),
             order.VolatilityType,
-            order.DeltaNeutralOrderType, 
+            order.DeltaNeutralOrderType,
             order.DeltaNeutralAuxPrice.ToMax());
 
         if (!string.IsNullOrEmpty(order.DeltaNeutralOrderType))
         {
             m.Write(
-                order.DeltaNeutralContractId, 
+                order.DeltaNeutralContractId,
                 order.DeltaNeutralSettlingFirm,
-                order.DeltaNeutralClearingAccount, 
+                order.DeltaNeutralClearingAccount,
                 order.DeltaNeutralClearingIntent,
-                order.DeltaNeutralOpenClose, 
-                order.DeltaNeutralShortSale, 
+                order.DeltaNeutralOpenClose,
+                order.DeltaNeutralShortSale,
                 order.DeltaNeutralShortSaleSlot,
                 order.DeltaNeutralDesignatedLocation);
         }
 
         m.Write(
-            order.ContinuousUpdate, 
+            order.ContinuousUpdate,
             order.ReferencePriceType,
-            order.TrailingStopPrice.ToMax(), 
+            order.TrailingStopPrice.ToMax(),
             order.TrailingStopPercent.ToMax(),
-            order.ScaleInitLevelSize.ToMax(), 
-            order.ScaleSubsLevelSize.ToMax(), 
+            order.ScaleInitLevelSize.ToMax(),
+            order.ScaleSubsLevelSize.ToMax(),
             order.ScalePriceIncrement.ToMax());
 
         if (order.ScalePriceIncrement > 0 && order.ScalePriceIncrement != double.MaxValue)
         {
             m.Write(
-                order.ScalePriceAdjustValue.ToMax(), 
+                order.ScalePriceAdjustValue.ToMax(),
                 order.ScalePriceAdjustInterval.ToMax(),
-                order.ScaleProfitOffset.ToMax(), 
-                order.ScaleAutoReset, 
+                order.ScaleProfitOffset.ToMax(),
+                order.ScaleAutoReset,
                 order.ScaleInitPosition.ToMax(),
-                order.ScaleInitFillQty.ToMax(), 
+                order.ScaleInitFillQty.ToMax(),
                 order.ScaleRandomPercent);
         }
 
@@ -202,7 +193,7 @@ public sealed class Request
             order.ActiveStopTime);
 
         m.Write(order.HedgeType);
-        if (order.HedgeType != HedgeType.Undefined)
+        if (order.HedgeType.Length != 0)
             m.Write(order.HedgeParam);
 
         m.Write(
@@ -215,7 +206,7 @@ public sealed class Request
         if (contract.DeltaNeutralContract is not null)
         {
             m.Write(
-                contract.DeltaNeutralContract.ContractId, 
+                contract.DeltaNeutralContract.ContractId,
                 contract.DeltaNeutralContract.Delta,
                 contract.DeltaNeutralContract.Price);
         }
@@ -229,20 +220,20 @@ public sealed class Request
         }
 
         m.Write(
-            order.AlgoId, 
-            order.WhatIf, 
+            order.AlgoId,
+            order.WhatIf,
             Tag.Combine(order.OrderMiscOptions),
-            order.Solicited, 
-            order.RandomizeSize, 
+            order.Solicited,
+            order.RandomizeSize,
             order.RandomizePrice);
 
-        if (order.OrderType == OrderType.PeggedToBenchmark)
+        if (order.OrderType == OrderTypes.PeggedToBenchmark)
         {
             m.Write(
-                order.ReferenceContractId, 
+                order.ReferenceContractId,
                 order.IsPeggedChangeAmountDecrease,
-                order.PeggedChangeAmount, 
-                order.ReferenceChangeAmount, 
+                order.PeggedChangeAmount,
+                order.ReferenceChangeAmount,
                 order.ReferenceExchange);
         }
 
@@ -255,25 +246,25 @@ public sealed class Request
                 condition.Serialize(m);
             }
             m.Write(
-                order.ConditionsIgnoreRegularTradingHours, 
+                order.ConditionsIgnoreRegularTradingHours,
                 order.ConditionsCancelOrder);
         }
 
         m.Write(
-            order.AdjustedOrderType, 
-            order.TriggerPrice, 
-            order.LmtPriceOffset, 
+            order.AdjustedOrderType,
+            order.TriggerPrice,
+            order.LmtPriceOffset,
             order.AdjustedStopPrice,
-            order.AdjustedStopLimitPrice, 
-            order.AdjustedTrailingAmount, 
+            order.AdjustedStopLimitPrice,
+            order.AdjustedTrailingAmount,
             order.AdjustableTrailingUnit,
             order.ExtOperator,
-            order.SoftDollarTier.Name, 
+            order.SoftDollarTier.Name,
             order.SoftDollarTier.Value,
             order.CashQty.ToMax(),
-            order.Mifid2DecisionMaker, 
+            order.Mifid2DecisionMaker,
             order.Mifid2DecisionAlgo,
-            order.Mifid2ExecutionTrader, 
+            order.Mifid2ExecutionTrader,
             order.Mifid2ExecutionAlgo,
             order.DontUseAutoPriceForHedge,
             order.IsOmsContainer,
@@ -287,21 +278,21 @@ public sealed class Request
 
         if (contract.Exchange == "IBKRATS")
             m.Write(order.MinTradeQty.ToMax());
-        
+
         bool sendMidOffsets = false;
-        if (order.OrderType == OrderType.PeggedToBest)
+        if (order.OrderType == OrderTypes.PeggedToBest)
         {
             m.Write(
-                order.MinCompeteSize.ToMax(), 
+                order.MinCompeteSize.ToMax(),
                 order.CompeteAgainstBestOffset.ToMax());
             if (order.CompeteAgainstBestOffset == double.PositiveInfinity)
                 sendMidOffsets = true;
         }
-        else if (order.OrderType == OrderType.PeggedToMidpoint)
+        else if (order.OrderType == OrderTypes.PeggedToMidpoint)
             sendMidOffsets = true;
         if (sendMidOffsets)
             m.Write(
-                order.MidOffsetAtWhole.ToMax(), 
+                order.MidOffsetAtWhole.ToMax(),
                 order.MidOffsetAtHalf.ToMax());
         m.Send();
     }
@@ -317,8 +308,9 @@ public sealed class Request
 
     /// <summary>
     /// Call this function to start receiving account updates.
+    /// In case there if more than one managed account, the account must be specified.
     /// Returns AccountValue, PortfolioUpdate and TimeUpdate messages.
-    /// Updates for all accounts are returned when accountCode is null(?).
+    /// Updates for all accounts are returned when accountCode is empty.
     /// This information is updated every three minutes.
     /// </summary>
     public void RequestAccountUpdates(bool subscribe, string accountCode = "") => CreateMessage()
@@ -357,9 +349,6 @@ public sealed class Request
         .Write(-1) // numIds
         .Send();
 
-    /// <summary>
-    /// Call this method to retrieve one or more ContractDetails objects for the specified selector contract.
-    /// </summary>
     public void RequestContractDetails(int requestId, Contract contract)
     {
         ArgumentNullException.ThrowIfNull(contract);
@@ -368,16 +357,18 @@ public sealed class Request
             .WriteContract(contract)
             .Write(
                 contract.IncludeExpired,
-                contract.SecurityIdType, 
+                contract.SecurityIdType,
                 contract.SecurityId,
                 contract.IssuerId)
             .Send();
     }
 
-    /// <summary>
-    /// Call this method to request market depth for the specified contract. 
-    /// </summary>
-    public void RequestMarketDepth(int requestId, Contract contract, int numRows = 3, bool isSmartDepth = false, params Tag[] options)
+    public void RequestMarketDepth(
+        int requestId,
+        Contract contract,
+        int numRows = 3,
+        bool isSmartDepth = false,
+        params Tag[] options)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
@@ -392,9 +383,6 @@ public sealed class Request
         .Write(isSmartDepth)
         .Send();
 
-    /// <summary>
-    /// Call this method to start receiving news bulletins, such as information about exchange status.
-    /// </summary>
     public void RequestNewsBulletins(bool all = true) => CreateMessage()
         .Write(RequestCode.RequestNewsBulletins, "1")
         .Write(all)
@@ -427,68 +415,61 @@ public sealed class Request
         .Write(dataType)
         .Send();
 
-    public void ReplaceFinancialAdvisorConfiguration(int requestId, FinancialAdvisorDataType dataType, string xml) => CreateMessage()
-        .Write(RequestCode.ReplaceFA, "1")
-        .Write(dataType, xml)
-        .Write(requestId)
-        .Send();
+    public void ReplaceFinancialAdvisorConfiguration(
+        int requestId,
+        FinancialAdvisorDataType dataType,
+        string xml) => CreateMessage()
+            .Write(RequestCode.ReplaceFA, "1")
+            .Write(dataType, xml)
+            .Write(requestId)
+            .Send();
 
-    private static readonly InstantPattern requestHistoricalDataDatePattern = InstantPattern.CreateWithInvariantCulture("yyyyMMdd-HH:mm:ss");
-    /// <summary>
-    /// Call this method to receive historical data.
-    /// When the "end" argument is null, data up until the current time is returned.
-    /// Historical data requests are limited to 60 every 10 minutes.
-    /// Errors may still occur when six or more historical data requests for the same Contract, Exchange and Tick Type are made within two seconds.
-    /// Note that formatData parameter affects intra-day bars only. 1-day bars always return with date in YYYYMMDD format.
-    /// Use Utility.Time.HistoricalTimespan to convert timespans to strings.
-    /// </summary>
     public void RequestHistoricalData(
         int requestId,
         Contract contract,
-        Instant endDate = default,
-        HistoricalDuration? duration = null,
-        HistoricalBarSize? barSize = null,
-        HistoricalDataType? dataType = null,
-        bool regularTradingHoursOnly = false,
+        string endDateTime = "",
+        string duration = HistoricalDataDuration.OneMonth,
+        string barSize = HistoricalDataBarSize.OneHour,
+        string whatToShow = HistoricalDataWhatToShow.Trades,
+        bool regularTradingHoursOnly = true,
+        int dateFormat = 1,  // 1: yyyyMMdd HH:mm:ss, 2: time format in seconds
         bool keepUpToDate = false,
         params Tag[] options)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        string endDateStr = "";
-        if (endDate != default && !keepUpToDate)
-        {
-            if (keepUpToDate)
-                throw new InvalidOperationException("RequestHistoricalData: endDate many not be specified when keepUpToDate = true.");
-            endDateStr = requestHistoricalDataDatePattern.Format(endDate); // UTC
-        }
-        barSize ??= HistoricalBarSize.OneHour;
-        duration ??= HistoricalDuration.OneDay;
-        dataType ??= HistoricalDataType.Trades;
+        ArgumentNullException.ThrowIfNull(endDateTime);
+        if (endDateTime.Length != 0 && keepUpToDate)
+            throw new InvalidOperationException("RequestHistoricalData: endDate many not be specified when keepUpToDate = true.");
 
         RequestMessage m = CreateMessage()
             .Write(RequestCode.RequestHistoricalData, requestId)
             .WriteContract(contract)
             .Write(contract.IncludeExpired)
             .Write(
-                endDateStr,
+                endDateTime,
                 barSize,
                 duration,
                 regularTradingHoursOnly,
-                dataType,
-                "1"); // return date as text
+                whatToShow,
+                dateFormat);
 
-        if (contract.SecurityType == SecurityType.Bag)
+        if (contract.SecurityType == ContractSecurityType.Bag)
         {
             m.Write(contract.ComboLegs.Count);
             foreach (ContractComboLeg leg in contract.ComboLegs)
-                m.Write(leg.ContractId, leg.Ratio, leg.TradeAction, leg.Exchange);
+                m.Write(leg.ContractId, leg.Ratio, leg.Action, leg.Exchange);
         }
 
         m.Write(keepUpToDate, Tag.Combine(options)).Send();
     }
 
-    public void ExerciseOptions(int requestId, Contract contract, OptionExerciseAction exerciseAction,
-        int exerciseQuantity, string account, bool overrideOrder)
+    public void ExerciseOptions(
+        int requestId,
+        Contract contract,
+        OptionExerciseAction exerciseAction,
+        int exerciseQuantity,
+        string account,
+        bool overrideOrder)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
@@ -498,8 +479,11 @@ public sealed class Request
             .Send();
     }
 
-    public void RequestScannerSubscription(int requestId, ScannerSubscription subscription, 
-        string subscriptionOptions = "", string subscriptionFilterOptions = "")
+    public void RequestScannerSubscription(
+        int requestId,
+        ScannerSubscription subscription,
+        string subscriptionOptions = "",
+        string subscriptionFilterOptions = "")
     {
         ArgumentNullException.ThrowIfNull(subscription);
         CreateMessage()
@@ -509,16 +493,16 @@ public sealed class Request
                 subscription.Instrument,
                 subscription.LocationCode,
                 subscription.ScanCode,
-                subscription.AbovePrice.ToMax(), 
-                subscription.BelowPrice.ToMax(), 
+                subscription.AbovePrice.ToMax(),
+                subscription.BelowPrice.ToMax(),
                 subscription.AboveVolume.ToMax(),
-                subscription.MarketCapAbove.ToMax(), 
+                subscription.MarketCapAbove.ToMax(),
                 subscription.MarketCapBelow.ToMax(),
-                subscription.MoodyRatingAbove, 
+                subscription.MoodyRatingAbove,
                 subscription.MoodyRatingBelow,
-                subscription.SpRatingAbove, 
+                subscription.SpRatingAbove,
                 subscription.SpRatingBelow,
-                subscription.MaturityDateAbove, 
+                subscription.MaturityDateAbove,
                 subscription.MaturityDateBelow,
                 subscription.CouponRateAbove.ToMax(),
                 subscription.CouponRateBelow.ToMax(),
@@ -535,9 +519,6 @@ public sealed class Request
         .Write(RequestCode.CancelScannerSubscription, "1", requestId)
         .Send();
 
-    /// <summary>
-    /// Call the this method to receive an XML document that describes the valid parameters that a scanner subscription can have.
-    /// </summary>ca
     public void RequestScannerParameters() => CreateMessage()
         .Write(RequestCode.RequestScannerParameters, "1")
         .Send();
@@ -546,27 +527,24 @@ public sealed class Request
         .Write(RequestCode.CancelHistoricalData, "1", requestId)
         .Send();
 
-    /// <summary>
-    /// This is the time reported by TWS. Seconds precision.
-    /// </summary>
     public void RequestCurrentTime() => CreateMessage()
         .Write(RequestCode.RequestCurrentTime, "1")
         .Send();
 
-    /// <summary>
-    /// Call this method to start receiving realtime bar data.
-    /// </summary>
-    public void RequestRealTimeBars(int requestId, Contract contract, RealtimeBarType? whatToShow = null,
-        bool regularTradingHoursOnly = true, params Tag[] options)
+    public void RequestRealTimeBars(
+        int requestId,
+        Contract contract,
+        string whatToShow = RealtimeBarWhatToShow.Trades,
+        bool regularTradingHoursOnly = true,
+        params Tag[] options)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        whatToShow ??= RealtimeBarType.Trades;
         CreateMessage()
             .Write(RequestCode.RequestRealTimeBars, "3", requestId)
             .WriteContract(contract)
             .Write("5", // bar size: only 5 seconds bars are available
                 whatToShow,
-                regularTradingHoursOnly, 
+                regularTradingHoursOnly,
                 Tag.Combine(options))
             .Send();
     }
@@ -575,15 +553,13 @@ public sealed class Request
         .Write(RequestCode.CancelRealTimeBars, "1", requestId)
         .Send();
 
-    /// <summary>
-    /// Call this method to receive Reuters global fundamental data for stocks.
-    /// There must be a subscription to Reuters Fundamental set up in Account Management before you can receive this data.
-    /// IB: The method can handle conid specified in the Contract object, but not tradingClass or multiplier.
-    /// </summary>
-    public void RequestFundamentalData(int requestId, Contract contract, FundamentalDataReportType? reportType = null, params Tag[] options)
+    public void RequestFundamentalData(
+        int requestId,
+        Contract contract,
+        string reportType = FundamentalDataReportType.CompanyOverview,
+        params Tag[] options)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        reportType ??= FundamentalDataReportType.CompanyOverview;
         CreateMessage()
             .Write(RequestCode.RequestFundamentalData, "3", requestId)
             .Write(
@@ -594,7 +570,7 @@ public sealed class Request
                 contract.PrimaryExchange,
                 contract.Currency,
                 contract.LocalSymbol)
-            .Write(reportType.ToString(), Tag.Combine(options))
+            .Write(reportType, Tag.Combine(options))
             .Send();
     }
 
@@ -602,10 +578,12 @@ public sealed class Request
         .Write(RequestCode.CancelFundamentalData, "1", requestId)
         .Send();
 
-    /// <summary>
-    /// Call this function to calculate volatility for a supplied option price and underlying price.
-    /// </summary>
-    public void CalculateImpliedVolatility(int requestId, Contract contract, double optionPrice, double underlyingPrice, params Tag[] options)
+    public void CalculateImpliedVolatility(
+        int requestId,
+        Contract contract,
+        double optionPrice,
+        double underlyingPrice,
+        params Tag[] options)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
@@ -615,10 +593,12 @@ public sealed class Request
             .Send();
     }
 
-    /// <summary>
-    /// Call this function to calculate option price and greek Values for a supplied volatility and underlying price.
-    /// </summary>
-    public void CalculateOptionPrice(int requestId, Contract contract, double volatility, double underlyingPrice, params Tag[] options)
+    public void CalculateOptionPrice(
+        int requestId,
+        Contract contract,
+        double volatility,
+        double underlyingPrice,
+        params Tag[] options)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
@@ -636,36 +616,23 @@ public sealed class Request
         .Write(RequestCode.CancelOptionPrice, "1", requestId)
         .Send();
 
-    /// <summary>
-    /// Use this method to cancel all open orders globally. It cancels both API and TWS open orders.
-    /// </summary>
     public void RequestGlobalCancel() => CreateMessage()
         .Write(RequestCode.RequestGlobalCancel, "1")
         .Send();
 
-    /// <summary>
-    /// The API can receive frozen market data from TWS. Frozen market data is the last data recorded in IB's system.
-    /// During normal trading hours, the API receives real-time market data.
-    /// If you use this function, you are telling TWS to automatically switch to frozen market data after the close.
-    /// Then, before the opening of the next trading day, market data will automatically switch back to real-time market data.
-    /// </summary>
     public void RequestMarketDataType(MarketDataType marketDataType) => CreateMessage()
         .Write(RequestCode.RequestMarketDataType, "1")
         .Write(marketDataType)
         .Send();
 
-    /// <summary>
-    /// Subscribes to position updates for all accessible accounts. All positions sent initially, and then only updates as positions change. 
-    /// </summary>
     public void RequestPositions() => CreateMessage()
         .Write(RequestCode.RequestPositions, "1")
         .Send();
 
-    /// <summary>
-    /// Subscribe to data that appears on the TWS Account Window Summary tab. 
-    /// If no tags are specified, data for all tags will be requested.
-    /// </summary>
-    public void RequestAccountSummary(int requestId, string group = "All", params AccountSummaryTag[] tags)
+    public void RequestAccountSummary(
+        int requestId,
+        string group = "All",
+        params AccountSummaryTag[] tags)
     {
         if (!tags.Any())
             tags = Enum.GetValues<AccountSummaryTag>().ToArray();
@@ -707,22 +674,23 @@ public sealed class Request
     // 71: StartApi
     // 72, 73: for IB internal use
 
-    /**
-    * Requests position subscription for account and/or model
-    * Initially all positions are returned, and then updates are returned for any position changes in real time.
-    * If an account Id is provided, only the account's positions belonging to the specified model will be delivered
-    */
-    public void RequestPositionsMulti(int requestId, string account, string modelCode) => CreateMessage()
-        .Write(RequestCode.RequestPositionsMulti, "1", requestId)
-        .Write(account, modelCode)
-        .Send();
+    public void RequestPositionsMulti(
+        int requestId,
+        string account,
+        string modelCode) => CreateMessage()
+            .Write(RequestCode.RequestPositionsMulti, "1", requestId)
+            .Write(account, modelCode)
+            .Send();
 
     public void CancelPositionsMulti(int requestId) => CreateMessage()
         .Write(RequestCode.CancelPositionsMulti, "1", requestId)
         .Send();
 
-    public void RequestAccountUpdatesMulti(int requestId, string account, string modelCode, bool ledgerAndNlv) => 
-        CreateMessage()
+    public void RequestAccountUpdatesMulti(
+        int requestId,
+        string account,
+        string modelCode,
+        bool ledgerAndNlv) => CreateMessage()
             .Write(RequestCode.RequestAccountUpdatesMulti, "1", requestId)
             .Write(account, modelCode, ledgerAndNlv)
             .Send();
@@ -731,13 +699,16 @@ public sealed class Request
         .Write(RequestCode.CancelAccountUpdatesMulti, "1", requestId)
         .Send();
 
-    public void RequestSecDefOptParams(int requestId, string underlyingSymbol,
-        string futFopExchange, string underlyingSecType, int underlyingConId) => 
-            CreateMessage()
-                .Write(RequestCode.RequestSecurityDefinitionOptionalParameters, requestId)
-                .Write(underlyingSymbol, futFopExchange, underlyingSecType, underlyingConId)
-                .Send();
- 
+    public void RequestSecDefOptParams(
+        int requestId,
+        string underlyingSymbol,
+        string futFopExchange,
+        string underlyingSecType,
+        int underlyingConId) => CreateMessage()
+            .Write(RequestCode.RequestSecurityDefinitionOptionalParameters, requestId)
+            .Write(underlyingSymbol, futFopExchange, underlyingSecType, underlyingConId)
+            .Send();
+
     public void RequestSoftDollarTiers(int requestId) => CreateMessage()
         .Write(RequestCode.RequestSoftDollarTiers, requestId)
         .Send();
@@ -751,7 +722,6 @@ public sealed class Request
         .Write(pattern)
         .Send();
 
-    // Discover exchanges for which market data is returned to updateMktDepthL2(those with market makers)
     public void RequestMarketDepthExchanges() => CreateMessage()
         .Write(RequestCode.RequestMktDepthExchanges)
         .Send();
@@ -761,29 +731,37 @@ public sealed class Request
         .Write(bboExchange)
         .Send();
 
-    public void RequestNewsArticle(int requestId, string providerCode, string articleId, params Tag[] options) => CreateMessage()
-        .Write(RequestCode.RequestNewsArticle, requestId)
-        .Write(providerCode, articleId)
-        .Write(Tag.Combine(options))
-        .Send();
+    public void RequestNewsArticle(
+        int requestId,
+        string providerCode,
+        string articleId) => CreateMessage()
+            .Write(RequestCode.RequestNewsArticle, requestId)
+            .Write(providerCode, articleId)
+            .Write("")
+            .Send();
 
     public void RequestNewsProviders() => CreateMessage()
         .Write(RequestCode.RequestNewsProviders)
         .Send();
 
-    public void RequestHistoricalNews(int requestId, int contractId, string providerCodes,
-        string startTime, string endTime, int totalResults, params Tag[] options) => 
-        CreateMessage()
+    public void RequestHistoricalNews(
+        int requestId,
+        int contractId,
+        string providerCodes,
+        string startTime,
+        string endTime,
+        int totalResults) => CreateMessage()
             .Write(RequestCode.RequestHistoricalNews, requestId)
             .Write(contractId, providerCodes, startTime, endTime, totalResults)
-            .Write(Tag.Combine(options))
+            .Write("")
             .Send();
 
-    // Returns the timestamp of earliest available historical data for a contract and data type
-    // whatToShow - type of data for head timestamp - "BID", "ASK", "TRADES", etc
-    // useRTH - use regular trading hours only, 1 for yes or 0 for no
-    // formatDate - @param formatDate set to 1 to obtain the bars' time as yyyyMMdd HH:mm:ss, set to 2 to obtain it like system time format in seconds
-    public void RequestHeadTimestamp(int requestId, Contract contract, string whatToShow, int useRth, int formatDate)
+    public void RequestHeadTimestamp(
+        int requestId,
+        Contract contract,
+        string whatToShow,
+        int useRth,
+        int formatDate)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
@@ -794,7 +772,11 @@ public sealed class Request
             .Send();
     }
 
-    public void RequestHistogramData(int requestId, Contract contract, bool useRth, string period)
+    public void RequestHistogramData(
+        int requestId,
+        Contract contract,
+        bool useRth,
+        string period)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
@@ -817,26 +799,40 @@ public sealed class Request
         .Write(RequestCode.RequestMarketRule, marketRuleId)
         .Send();
 
-    public void RequestPnL(int requestId, string account, string modelCode) => CreateMessage()
-        .Write(RequestCode.ReqPnL, requestId)
-        .Write(account, modelCode)
-        .Send();
+    public void RequestPnL(
+        int requestId,
+        string account,
+        string modelCode) => CreateMessage()
+            .Write(RequestCode.ReqPnL, requestId)
+            .Write(account, modelCode)
+            .Send();
 
     public void CancelPnL(int requestId) => CreateMessage()
         .Write(RequestCode.CancelPnL, requestId)
         .Send();
 
-    public void RequestPnLSingle(int requestId, string account, string modelCode, int contractId) => CreateMessage()
-        .Write(RequestCode.ReqPnLSingle, requestId)
-        .Write(account, modelCode, contractId)
-        .Send();
+    public void RequestPnLSingle(
+        int requestId,
+        string account,
+        string modelCode,
+        int contractId) => CreateMessage()
+            .Write(RequestCode.ReqPnLSingle, requestId)
+            .Write(account, modelCode, contractId)
+            .Send();
 
     public void CancelPnLSingle(int requestId) => CreateMessage()
         .Write(RequestCode.CancelPnLSingle, requestId)
         .Send();
 
-    public void RequestHistoricalTicks(int requestId, Contract contract, string startDateTime, string endDateTime,
-        int numberOfTicks, string whatToShow, int useRth, bool ignoreSize, params Tag[] miscOptions)
+    public void RequestHistoricalTicks(
+        int requestId,
+        Contract contract,
+        string startDateTime,
+        string endDateTime,
+        int numberOfTicks,
+        string whatToShow,
+        int useRth,
+        bool ignoreSize)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
@@ -844,11 +840,16 @@ public sealed class Request
             .WriteContract(contract)
             .Write(contract.IncludeExpired)
             .Write(startDateTime, endDateTime, numberOfTicks, whatToShow, useRth, ignoreSize)
-            .Write(Tag.Combine(miscOptions))
+            .Write("")
             .Send();
     }
 
-    public void RequestTickByTickData(int requestId, Contract contract, string tickType, int numberOfTicks, bool ignoreSize)
+    public void RequestTickByTickData(
+        int requestId,
+        Contract contract,
+        string tickType,
+        int numberOfTicks,
+        bool ignoreSize)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()

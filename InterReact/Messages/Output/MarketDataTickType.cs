@@ -8,7 +8,7 @@ public sealed class MarketDataTickType : IHasRequestId
 {
     public int RequestId { get; }
     public MarketDataType Type { get; }
- 
+
     internal MarketDataTickType(ResponseReader r)
     {
         r.IgnoreMessageVersion();

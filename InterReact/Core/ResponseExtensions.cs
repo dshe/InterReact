@@ -5,10 +5,8 @@ namespace InterReact;
 
 internal static class ResponseExtensions
 {
-    internal static IObservable<object> ComposeMessages(this IObservable<string[]> source, IClock clock, ILoggerFactory loggerFactory, Connection connection)
+    internal static IObservable<object> ComposeMessages(this IObservable<string[]> source, ResponseMessageComposer composer)
     {
-        ResponseMessageComposer composer = new(clock, loggerFactory, connection);
-
         return Observable.Create<object>(observer =>
         {
             return source.Subscribe(
@@ -39,12 +37,8 @@ internal static class ResponseExtensions
         });
     }
 
-    internal static IObservable<object> LogMessages(this IObservable<object> source, ILoggerFactory loggerFactory)
+    internal static IObservable<object> LogMessages(this IObservable<object> source, ILogger logger, Stringifier stringifier)
     {
-        ILogger logger = loggerFactory.CreateLogger("InterReact.Messages");
-
-        Stringifier stringifier = new(logger);
-
         return source.Do(msg =>
         {
             LogLevel logLevel = msg is AlertMessage ? LogLevel.Information : LogLevel.Debug;

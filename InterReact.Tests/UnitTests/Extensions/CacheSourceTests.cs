@@ -2,6 +2,7 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Reactive.Threading.Tasks;
 
 namespace Extension;
 
@@ -43,7 +44,7 @@ public class CacheSourceTests : ReactiveUnitTestBase
     public async Task T01_Empty()
     {
         IObservable<string> observable = Observable.Empty<string>().CacheSource(x => x); // completes
-        InvalidOperationException ex = await Assert.ThrowsAsync<InvalidOperationException>(async () => await observable);
+        InvalidOperationException ex = await Assert.ThrowsAsync<InvalidOperationException>(() => observable.ToTask());
         Assert.Equal("Sequence contains no elements.", ex.Message);
     }
 

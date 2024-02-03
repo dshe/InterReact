@@ -10,7 +10,7 @@ public class ToObservableContinuousWithId : ReactiveUnitTestBase
     public interface ISomeClass : IHasRequestId { }
     public class SomeClass : ISomeClass
     {
-        public SomeClass(int id) { RequestId= id; }
+        public SomeClass(int id) { RequestId = id; }
         public int RequestId { get; }
         public long Ticks { get; } = Stopwatch.GetTimestamp();
     }
@@ -62,5 +62,5 @@ public class ToObservableContinuousWithId : ReactiveUnitTestBase
         Assert.Equal(1, start);
         Assert.Equal(1, stop);
     }
-   
+
 }

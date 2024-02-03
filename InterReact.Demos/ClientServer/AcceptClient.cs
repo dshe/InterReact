@@ -16,7 +16,7 @@ public sealed class AcceptClient
     {
         Logger = logger;
         SocketClient = socketClient;
-        ServerResponseMessage = new RequestMessage(NullLoggerFactory.Instance, socketClient, new RingLimiter());
+        ServerResponseMessage = new RequestMessage(NullLogger<RequestMessage>.Instance , socketClient, new RingLimiter());
         ServerRequestMessages = socketClient
                 .ReceiveAllAsync
                 .ToObservableFromAsyncEnumerable()

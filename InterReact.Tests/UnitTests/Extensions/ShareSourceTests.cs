@@ -19,7 +19,7 @@ public sealed class ShareSourceTests : ReactiveUnitTestBase
 
         ITestableObservable<string> observable = TestScheduler.CreateColdObservable(
             OnNext(100, "1"),
-            OnCompleted<string>(1000)
+            OnCompleted<string>(500)
         );
 
         IObservable<string> sharedObservable = observable.ShareSource();
@@ -35,14 +35,14 @@ public sealed class ShareSourceTests : ReactiveUnitTestBase
         Recorded<Notification<string>>[] expected = new[]
         {
                 OnNext(101, "1"),
-                OnCompleted<string>(1001)
+                OnCompleted<string>(501)
             };
         Assert.Equal(expected.ToList(), observer1.Messages);
 
         expected = new[]
         {
                 OnNext(1101, "1"),
-                OnCompleted<string>(2001)
+                OnCompleted<string>(1501)
             };
         Assert.Equal(expected.ToList(), observer2.Messages);
 

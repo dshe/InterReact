@@ -4,7 +4,7 @@ namespace InterReact;
 
 public class PercentChangeCondition : ContractCondition
 {
-    
+
     protected override string Value
     {
         get
@@ -14,7 +14,7 @@ public class PercentChangeCondition : ContractCondition
         set
         {
             ChangePercent = double.Parse(value, NumberFormatInfo.InvariantInfo);
-        }           
+        }
     }
 
     public double ChangePercent { get; set; }

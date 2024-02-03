@@ -11,9 +11,8 @@ public class BadData : ConnectTestBase
     [Fact]
     public async Task BadRequestTest()
     {
-        IInterReactClient client = await new InterReactClientConnector()
-            .WithLoggerFactory(LogFactory)
-            .ConnectAsync();
+        IInterReactClient client = await InterReactClient.ConnectAsync(options =>
+            options.LogFactory = LogFactory);
 
         int id = client.Request.GetNextId();
 
@@ -24,13 +23,18 @@ public class BadData : ConnectTestBase
             .Timeout(TimeSpan.FromSeconds(6))
             .ToTask();
 
-        client.Request.RequestMarketData(id, new Contract { Symbol = "InvalidSymbol2" });
+        Contract contract = new() {
+            SecurityType = ContractSecurityType.Stock, 
+            Symbol = "InvalidSymbol2", 
+            Exchange = "Smart" };
+
+        client.Request.RequestMarketData(id, contract);
 
         object message = await task;
 
         AlertMessage alert = Assert.IsType<AlertMessage>(message);
 
-        Assert.StartsWith("Error validating request", alert.Message);
+        Assert.StartsWith("No security definition has been found for the request", alert.Message);
     }
 
     [Fact]
@@ -38,15 +42,14 @@ public class BadData : ConnectTestBase
     {
         Contract contract = new()
         {
-            SecurityType = SecurityType.Stock,
+            SecurityType = ContractSecurityType.Stock,
             Symbol = "IBM",
             Currency = "USD",
             Exchange = "SMART"
         };
 
-        IInterReactClient client = await new InterReactClientConnector()
-            .WithLoggerFactory(LogFactory)
-            .ConnectAsync();
+        IInterReactClient client = await InterReactClient.ConnectAsync(options =>
+            options.LogFactory = LogFactory);
 
         // This particular Id value will trigger a receive parse error when reading ContractDetails.
         int id = int.MaxValue;
@@ -63,6 +66,6 @@ public class BadData : ConnectTestBase
 
         client.Request.RequestContractDetails(id, contract);
 
-        await Assert.ThrowsAnyAsync<Exception>(async () => await task);
+        await Assert.ThrowsAnyAsync<Exception>(() => task);
     }
 }

@@ -3,19 +3,19 @@ using System.Reactive.Threading.Tasks;
 
 namespace Orders;
 
-public class Place : TestCollectionBase
+public class Place : CollectionTestBase
 {
     public Place(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
     [Fact]
     public async Task PlaceOrderTest()
     {
-        if (!Client.Connection.RemoteIpEndPoint.Port.IsIBDemoPort())
+        if (!Client.RemoteIpEndPoint.Port.IsIBDemoPort())
             throw new Exception("Use demo account to place order.");
 
         Contract contract = new()
         {
-            SecurityType = SecurityType.Stock,
+            SecurityType = ContractSecurityType.Stock,
             Symbol = "AMZN",
             Currency = "USD",
             Exchange = "SMART"
@@ -25,9 +25,9 @@ public class Place : TestCollectionBase
 
         Order order = new()
         {
-            OrderAction = OrderAction.Buy,
+            Action = OrderAction.Buy,
             TotalQuantity = 100,
-            OrderType = OrderType.Market
+            OrderType = OrderTypes.Market
         };
 
         Task<Execution?> task = Client

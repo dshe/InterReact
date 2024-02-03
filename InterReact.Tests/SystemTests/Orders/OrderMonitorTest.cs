@@ -3,19 +3,19 @@ using System.Reactive.Linq;
 
 namespace Orders;
 
-public class Monitor : TestCollectionBase
+public class Monitor : CollectionTestBase
 {
     public Monitor(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
     [Fact]
     public async Task OrderMonitorTest()
     {
-        if (!Client.Connection.RemoteIpEndPoint.Port.IsIBDemoPort())
+        if (!Client.RemoteIpEndPoint.Port.IsIBDemoPort())
             throw new Exception("Use demo account to place order.");
 
         Contract contract = new()
         {
-            SecurityType = SecurityType.Stock,
+            SecurityType = ContractSecurityType.Stock,
             Symbol = "TSLA",
             Currency = "USD",
             Exchange = "SMART"
@@ -23,13 +23,13 @@ public class Monitor : TestCollectionBase
 
         Order order = new()
         {
-            OrderAction = OrderAction.Buy,
+            Action = OrderAction.Buy,
             TotalQuantity = 100,
-            OrderType = OrderType.Market
+            OrderType = OrderTypes.Market
         };
 
         OrderMonitor orderMonitor = Client.Service.PlaceOrder(order, contract);
-  
+
         orderMonitor
             .Messages
             .Subscribe(m => Write($"OrderMonitor: {m.Stringify()}"));
@@ -48,12 +48,12 @@ public class Monitor : TestCollectionBase
     [Fact]
     public async Task OrderMonitorCancellationTest()
     {
-        if (!Client.Connection.RemoteIpEndPoint.Port.IsIBDemoPort())
+        if (!Client.RemoteIpEndPoint.Port.IsIBDemoPort())
             throw new Exception("Use demo account to place order.");
 
         Contract contract = new()
         {
-            SecurityType = SecurityType.Stock,
+            SecurityType = ContractSecurityType.Stock,
             Symbol = "GOOG",
             Currency = "USD",
             Exchange = "SMART"
@@ -61,9 +61,9 @@ public class Monitor : TestCollectionBase
 
         Order order = new()
         {
-            OrderAction = OrderAction.Buy,
+            Action = OrderAction.Buy,
             TotalQuantity = 100,
-            OrderType = OrderType.Market
+            OrderType = OrderTypes.Market
         };
 
         OrderMonitor orderMonitor = Client.Service.PlaceOrder(order, contract);
@@ -84,12 +84,12 @@ public class Monitor : TestCollectionBase
     [Fact]
     public async Task OrderMonitorModificationTest()
     {
-        if (!Client.Connection.RemoteIpEndPoint.Port.IsIBDemoPort())
+        if (!Client.RemoteIpEndPoint.Port.IsIBDemoPort())
             throw new Exception("Use demo account to place order.");
 
         Contract contract = new()
         {
-            SecurityType = SecurityType.Stock,
+            SecurityType = ContractSecurityType.Stock,
             Symbol = "IBKR",
             Currency = "USD",
             Exchange = "SMART"
@@ -107,9 +107,9 @@ public class Monitor : TestCollectionBase
 
         Order order = new()
         {
-            OrderAction = OrderAction.Buy,
+            Action = OrderAction.Buy,
             TotalQuantity = 100,
-            OrderType = OrderType.Limit,
+            OrderType = OrderTypes.Limit,
             LimitPrice = askPrice - 1 // should not execute
         };
 

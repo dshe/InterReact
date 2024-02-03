@@ -27,6 +27,6 @@ public sealed class CommissionReport : IHasExecutionId, IHasOrderId
         if (Execution.ExecutionIds.TryGetValue(ExecutionId, out int orderId))
             OrderId = orderId;
         else
-           r.Logger.LogWarning("CommissionReport: could not determine OrderId from Executions.");
+            r.Logger.LogWarning("CommissionReport: could not determine OrderId from Executions.");
     }
 }

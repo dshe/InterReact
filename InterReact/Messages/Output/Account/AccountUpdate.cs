@@ -1,13 +1,11 @@
-﻿using NodaTime.Text;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public sealed class AccountValue
 {
+    public string AccountName { get; }
     public string Key { get; }
     public string Value { get; }
     public string Currency { get; }
-    public string AccountName { get; }
     internal AccountValue(ResponseReader r)
     {
         int version = r.GetMessageVersion();
@@ -22,7 +20,7 @@ public sealed class PortfolioValue
 {
     public string AccountName { get; }
     public Contract Contract { get; }
-    public decimal Position { get;}
+    public decimal Position { get; }
     public double MarketPrice { get; }
     public double MarketValue { get; }
     public double AverageCost { get; }
@@ -35,10 +33,10 @@ public sealed class PortfolioValue
         {
             ContractId = r.ReadInt(),
             Symbol = r.ReadString(),
-            SecurityType = r.ReadStringEnum<SecurityType>(),
+            SecurityType = r.ReadString(),
             LastTradeDateOrContractMonth = r.ReadString(),
             Strike = r.ReadDouble(),
-            Right = r.ReadStringEnum<OptionRightType>(),
+            Right = r.ReadString(),
             Multiplier = r.ReadString(),
             PrimaryExchange = r.ReadString(), // note
             Currency = r.ReadString(),
@@ -57,18 +55,14 @@ public sealed class PortfolioValue
 
 public sealed class AccountUpdateTime
 {
-    private static readonly LocalTimePattern TimePattern = LocalTimePattern.CreateWithInvariantCulture("HH:mm");
-    public LocalTime Time { get; }
+    public string Time { get; }
     internal AccountUpdateTime(ResponseReader r)
     {
         r.IgnoreMessageVersion();
-        Time = r.ReadLocalTime(TimePattern);
+        Time = r.ReadString();
     }
 }
 
-/// <summary>
-/// This signals the end of update values for a particular account, not the end of the observable.
-/// </summary>
 public sealed class AccountUpdateEnd
 {
     public string AccountName { get; }

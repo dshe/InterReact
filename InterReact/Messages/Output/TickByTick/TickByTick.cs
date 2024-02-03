@@ -8,9 +8,9 @@ internal static class TickByTick
         TickByTickType tickType = r.ReadEnum<TickByTickType>();
         return tickType switch
         {
-            TickByTickType.Last     => new TickByTickAllLast (requestId, tickType, r),
-            TickByTickType.AllLast  => new TickByTickAllLast (requestId, tickType, r),
-            TickByTickType.BidAsk   => new TickByTickBidAsk  (requestId, tickType, r),
+            TickByTickType.Last => new TickByTickAllLast(requestId, tickType, r),
+            TickByTickType.AllLast => new TickByTickAllLast(requestId, tickType, r),
+            TickByTickType.BidAsk => new TickByTickBidAsk(requestId, tickType, r),
             TickByTickType.MidPoint => new TickByTickMidpoint(requestId, tickType, r),
             _ => throw new ArgumentException("Invalid TickByTick type.")
         };
@@ -45,7 +45,7 @@ public sealed class TickByTickBidAsk : ITickByTick
 {
     public int RequestId { get; }
     public TickByTickType TickByTickType { get; }
-    public long Time { get;}
+    public long Time { get; }
     public double BidPrice { get; }
     public double AskPrice { get; }
     public decimal BidSize { get; }

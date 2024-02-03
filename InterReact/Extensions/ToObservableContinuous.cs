@@ -5,7 +5,7 @@ namespace InterReact;
 
 public static partial class Extension
 {
-    // For continuous results that do not use RequestId: AccountUpdates, AccountPositions.
+    // For continuous results: AccountUpdates, AccountPositions.
     internal static IObservable<T> ToObservableContinuous<T>(this IObservable<T> filteredSource,
         Action startRequest, Action stopRequest)
     {

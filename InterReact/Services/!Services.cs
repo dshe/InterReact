@@ -2,18 +2,17 @@
 
 public partial class Service : IDisposable
 {
-    private readonly AsyncSemaphore MatchingSymbolsSemaphore = new("MatchingSymbolsSemaphore");
-    private readonly Request Request;
-    private readonly Response Response;
+    private Request Request { get; }
+    private Response Response { get; }
     private bool Disposed;
 
     public Service(Request request, Response response)
     {
         Request = request;
         Response = response;
-        AccountUpdatesObservable = CreateAccountUpdatesObservable();
         AccountSummaryObservable = CreateAccountSummaryObservable();
         PositionsObservable = CreatePositionsObservable();
+        ManagedAccountsObservable = CreateManagedAccountsObservable();
     }
 
     protected virtual void Dispose(bool disposing)
@@ -24,7 +23,6 @@ public partial class Service : IDisposable
         if (disposing)
         {
             // dispose managed objects
-            MatchingSymbolsSemaphore.Dispose();
         }
 
         Disposed = true;

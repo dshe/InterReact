@@ -9,8 +9,8 @@ public sealed class NextOrderId
         r.IgnoreMessageVersion();
         NextId = r.ReadInt();
 
-        int oldId = r.Connection.Id;
-        r.Connection.Id = Math.Max(NextId - 1, oldId);
-        r.Logger.LogTrace("NextOrderId: {NextId}[{Id1}->{Id2}].", NextId, oldId, r.Connection.Id);
+        int oldId = r.Options.Id;
+        r.Options.Id = Math.Max(NextId - 1, oldId);
+        r.Logger.LogTrace("NextOrderId: {NextId}[{Id1}->{Id2}].", NextId, oldId, r.Options.Id);
     }
 }

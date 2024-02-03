@@ -14,7 +14,7 @@ public sealed class HistoricalSchedule : IHasRequestId
         EndDate = r.ReadString();
         Timezone = r.ReadString();
         int n = r.ReadInt();
-        for (int i = 0; i < n; i++) 
+        for (int i = 0; i < n; i++)
             Sessions.Add(new HistoricalSession(r));
     }
 

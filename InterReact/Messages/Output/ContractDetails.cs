@@ -139,10 +139,10 @@ public sealed class ContractDetails : IHasRequestId
             case ContractDetailsType.GeneralContractType:
                 RequestId = r.ReadInt();
                 Contract.Symbol = r.ReadString();
-                Contract.SecurityType = r.ReadStringEnum<SecurityType>();
+                Contract.SecurityType = r.ReadString();
                 ReadLastTradeDate(r.ReadString(), false);
                 Contract.Strike = r.ReadDouble();
-                Contract.Right = r.ReadStringEnum<OptionRightType>();
+                Contract.Right = r.ReadString();
                 Contract.Exchange = r.ReadString();
                 Contract.Currency = r.ReadString();
                 Contract.LocalSymbol = r.ReadString();
@@ -181,7 +181,7 @@ public sealed class ContractDetails : IHasRequestId
             case ContractDetailsType.BondContractType:
                 RequestId = r.ReadInt();
                 Contract.Symbol = r.ReadString();
-                Contract.SecurityType = r.ReadStringEnum<SecurityType>();
+                Contract.SecurityType = r.ReadString();
                 Cusip = r.ReadString();
                 Coupon = r.ReadDouble();
                 ReadLastTradeDate(r.ReadString(), true);
@@ -221,10 +221,10 @@ public sealed class ContractDetails : IHasRequestId
             case ContractDetailsType.ScannerContractType:
                 Contract.ContractId = r.ReadInt();
                 Contract.Symbol = r.ReadString();
-                Contract.SecurityType = r.ReadStringEnum<SecurityType>();
+                Contract.SecurityType = r.ReadString();
                 Contract.LastTradeDateOrContractMonth = r.ReadString();
                 Contract.Strike = r.ReadDouble();
-                Contract.Right = r.ReadStringEnum<OptionRightType>();
+                Contract.Right = r.ReadString();
                 Contract.Exchange = r.ReadString();
                 Contract.Currency = r.ReadString();
                 Contract.LocalSymbol = r.ReadString();

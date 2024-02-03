@@ -3,7 +3,7 @@ using System.Reactive.Threading.Tasks;
 
 namespace MarketData;
 
-public class MarketDataSnapshot : TestCollectionBase
+public class MarketDataSnapshot : CollectionTestBase
 {
     public MarketDataSnapshot(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
@@ -11,11 +11,11 @@ public class MarketDataSnapshot : TestCollectionBase
     public async Task TickSnapshotTest()
     {
         Contract contract = new()
-        { 
-            SecurityType = SecurityType.Stock, 
-            Symbol = "AMD", 
-            Currency = "USD", 
-            Exchange = "SMART" 
+        {
+            SecurityType = ContractSecurityType.Stock,
+            Symbol = "AMD",
+            Currency = "USD",
+            Exchange = "SMART"
         };
 
         int id = Client.Request.GetNextId();
@@ -47,8 +47,8 @@ public class MarketDataSnapshot : TestCollectionBase
     public async Task TickSnapshotInvalidTest()
     {
         Contract contract = new()
-        { 
-            SecurityType = SecurityType.Stock, 
+        {
+            SecurityType = ContractSecurityType.Stock,
             Symbol = "InvalidSymbol",
             Currency = "USD",
             Exchange = "SMART"
@@ -67,7 +67,7 @@ public class MarketDataSnapshot : TestCollectionBase
         Client.Request.RequestMarketData(id, contract, isSnapshot: true);
 
         AlertMessage fatalAlert = await task;
- 
+
         Assert.True(fatalAlert.Message.StartsWith("No security definition"));
     }
 }

@@ -3,7 +3,7 @@ using System.Reactive.Threading.Tasks;
 
 namespace MarketData;
 
-public class MarketData : TestCollectionBase
+public class MarketData : CollectionTestBase
 {
     public MarketData(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
@@ -11,9 +11,9 @@ public class MarketData : TestCollectionBase
     public async Task TicksTest()
     {
         Contract contract = new()
-        { 
-            SecurityType = SecurityType.Stock, 
-            Symbol = "SPY", 
+        {
+            SecurityType = ContractSecurityType.Stock,
+            Symbol = "SPY",
             Currency = "USD",
             Exchange = "SMART"
         };
@@ -35,9 +35,9 @@ public class MarketData : TestCollectionBase
 
         double? lastPrice = messages
             .OfType<PriceTick>()
-            .FirstOrDefault(x => x.TickType == TickType.DelayedLastPrice || x.TickType == TickType.LastPrice)
+            .FirstOrDefault(m => m.TickType == TickType.DelayedLastPrice || m.TickType == TickType.LastPrice)
             ?.Price;
-        
+
         Write("LastPrice: " + lastPrice);
 
         Assert.True(lastPrice != null && lastPrice > 0);
@@ -47,11 +47,11 @@ public class MarketData : TestCollectionBase
     public async Task TicksInvalidTest()
     {
         Contract contract = new()
-        { 
-            SecurityType = SecurityType.Stock, 
-            Symbol = "InvalidSymbol", 
-            Currency = "USD", 
-            Exchange = "SMART" 
+        {
+            SecurityType = ContractSecurityType.Stock,
+            Symbol = "InvalidSymbol",
+            Currency = "USD",
+            Exchange = "SMART"
         };
 
         int id = Client.Request.GetNextId();
@@ -66,7 +66,7 @@ public class MarketData : TestCollectionBase
         Client.Request.RequestMarketData(id, contract, isSnapshot: false);
 
         IList<IHasRequestId> messages = await task;
- 
+
         AlertMessage alert = messages.OfType<AlertMessage>().Single();
         Assert.True(alert.IsFatal);
         Write(alert.Message);

@@ -97,5 +97,5 @@ public sealed class ScannerSubscription
     /// </summary>
     public string ScannerSettingPairs { get; init; } = "";
 
-    public ScannerStockType StockType { get; init; } = ScannerStockType.All;
+    public string StockType { get; init; } = ScannerStockType.All;
 }

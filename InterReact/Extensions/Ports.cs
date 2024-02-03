@@ -1,16 +1,24 @@
-﻿using System.Net;
+﻿using Stringification;
+using System.Globalization;
+using System.Net;
 
 namespace InterReact;
 
 public static partial class Extension
 {
-    public static readonly int[] AllIBPorts =
-    {
-        (int)IBDefaultPort.TwsRegularAccount,
-        (int)IBDefaultPort.TwsDemoAccount,
-        (int)IBDefaultPort.GatewayRegularAccount,
-        (int)IBDefaultPort.GatewayDemoAccount
-    };
+    internal static string GetDefaultPorts()
+    {   // allows order to be specified
+        return new IBDefaultPort[]
+        {
+            IBDefaultPort.TwsRegularAccount,
+            IBDefaultPort.TwsDemoAccount,
+            IBDefaultPort.GatewayRegularAccount,
+            IBDefaultPort.GatewayDemoAccount
+        }
+        .Select(e => (int)e)
+        .Select(n => n.ToString(CultureInfo.InvariantCulture))
+        .JoinStrings(", ");
+    }
 
     public static bool IsUsingIBDemoPort(this IPEndPoint endPoint)
     {
@@ -18,6 +26,6 @@ public static partial class Extension
         return endPoint.Port.IsIBDemoPort();
     }
 
-    public static bool IsIBDemoPort(this int port) => port is 
+    public static bool IsIBDemoPort(this int port) => port is
         (int)IBDefaultPort.TwsDemoAccount or (int)IBDefaultPort.GatewayDemoAccount;
 }

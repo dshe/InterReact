@@ -1,23 +1,21 @@
-﻿using System.Reactive.Linq;
+﻿namespace Contracts;
 
-namespace Contracts;
-
-public class ContractDetailsAsync : TestCollectionBase
+public class ContractDetailsAsync : CollectionTestBase
 {
     public ContractDetailsAsync(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
- 
+
     [Fact]
     public async Task SingleTest()
     {
-        Contract contract = new() 
-        { 
-            SecurityType = SecurityType.Stock, 
-            Symbol = "MSFT", 
-            Currency = "USD", 
-            Exchange = "SMART" 
+        Contract contract = new()
+        {
+            SecurityType = ContractSecurityType.Stock,
+            Symbol = "MSFT",
+            Currency = "USD",
+            Exchange = "SMART"
         };
 
-        List<ContractDetails> cds = await Client
+        IList<ContractDetails> cds = await Client
             .Service
             .GetContractDetailsAsync(contract);
 
@@ -28,18 +26,17 @@ public class ContractDetailsAsync : TestCollectionBase
     [Fact]
     public async Task MultiTest()
     {
-        Contract contract = new() 
-        { 
-            SecurityType = SecurityType.Stock,
-            Symbol = "MSFT", 
-            Currency = "USD" 
+        Contract contract = new()
+        {
+            SecurityType = ContractSecurityType.Stock,
+            Symbol = "MSFT",
+            Currency = "USD"
         };
 
-        List<ContractDetails> cds = await Client
+        IList<ContractDetails> cds = await Client
             .Service
             .GetContractDetailsAsync(contract);
 
-        Assert.True(cds.All(cd => cd is not null)); // no Alerts
         Assert.True(cds.Count > 1); // multiple exchanges
     }
 
@@ -47,14 +44,13 @@ public class ContractDetailsAsync : TestCollectionBase
     public async Task InvalidTest()
     {
         Contract contract = new()
-        { 
+        {
             ContractId = 99999
         };
 
-        await Assert.ThrowsAsync<AlertException>(async () =>
-            await Client
-             .Service
-             .GetContractDetailsAsync(contract));
+        await Assert.ThrowsAsync<AlertException>(() => Client
+            .Service
+            .GetContractDetailsAsync(contract));
     }
 
     [Fact]
@@ -62,14 +58,16 @@ public class ContractDetailsAsync : TestCollectionBase
     {
         Contract contract = new()
         {
-            SecurityType = SecurityType.Stock, 
-            Symbol = "X", 
-            Currency = "USD" 
+            SecurityType = ContractSecurityType.Stock,
+            Symbol = "X",
+            Currency = "USD"
         };
 
-        await Assert.ThrowsAsync<TimeoutException>(async () => await Client
+        CancellationTokenSource cts = new();
+        cts.CancelAfter(1);
+
+        await Assert.ThrowsAsync<TaskCanceledException>(() => Client
             .Service
-            .GetContractDetailsAsync(contract)
-            .WaitAsync(TimeSpan.FromMilliseconds(1)));
+            .GetContractDetailsAsync(contract, cts.Token));
     }
 }

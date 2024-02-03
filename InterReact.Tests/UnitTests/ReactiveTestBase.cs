@@ -5,17 +5,18 @@ namespace UnitTests;
 
 public abstract class ReactiveUnitTestBase : ReactiveTest
 {
+    private readonly ITestOutputHelper Output;
+    protected readonly ILoggerFactory LogFactory;
     protected readonly ILogger Logger;
-    protected readonly Action<string> Write;
+    protected void Write(string format, params object[] args) =>
+        Output.WriteLine(string.Format(format, args) + Environment.NewLine);
 
-    protected ReactiveUnitTestBase(ITestOutputHelper output, LogLevel logLevel = LogLevel.Trace)
+    protected ReactiveUnitTestBase(ITestOutputHelper output, LogLevel logLevel = LogLevel.Trace, string name = "Test")
     {
-        Logger = LoggerFactory
-            .Create(builder => builder
-                .AddMXLogger(output.WriteLine)
-                .SetMinimumLevel(logLevel))
-            .CreateLogger("ReactiveUnitTest");
-
-        Write = (s) => output.WriteLine(s + "\r\n");
+        Output = output;
+        LogFactory = LoggerFactory.Create(builder => builder
+            .AddMXLogger(output.WriteLine)
+            .SetMinimumLevel(logLevel));
+        Logger = LogFactory.CreateLogger(name);
     }
 }

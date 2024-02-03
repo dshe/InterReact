@@ -10,11 +10,10 @@ public class MessageSendRate : ConnectTestBase
     [Fact]
     public async Task SendRateTest()
     {
-        int count = 0;
-        IInterReactClient client = await new InterReactClientConnector()
-            .WithLoggerFactory(LogFactory)
-            .ConnectAsync();
+        IInterReactClient client = await InterReactClient.ConnectAsync(options => 
+            options.LogFactory = LogFactory);
 
+        int count = 0;
         long start = Stopwatch.GetTimestamp();
         while (Stopwatch.GetTimestamp() - start < Stopwatch.Frequency)
         {

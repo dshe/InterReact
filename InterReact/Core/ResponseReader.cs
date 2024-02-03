@@ -1,5 +1,4 @@
 ﻿using NodaTime.Text;
-using StringEnums;
 using System.IO;
 
 namespace InterReact;
@@ -8,13 +7,13 @@ public sealed class ResponseReader
 {
     internal ILogger Logger { get; }
     internal ResponseParser Parser { get; }
-    internal Connection Connection { get; }
+    internal InterReactOptions Options { get; }
 
-    internal ResponseReader(ILoggerFactory loggerFactory, Connection connection)
+    public ResponseReader(ILogger<ResponseReader> logger, InterReactOptions options, ResponseParser parser)
     {
-        Logger = loggerFactory.CreateLogger("InterReact.ResponseReader");
-        Parser = new ResponseParser(loggerFactory);
-        Connection = connection;
+        Logger = logger;
+        Options = options;
+        Parser = parser;
     }
 
     private IEnumerator<string> Enumerator = Enumerable.Empty<string>().GetEnumerator();
@@ -35,6 +34,7 @@ public sealed class ResponseReader
     }
 
     internal bool ReadBool() => Parser.ParseBool(ReadString());
+
     internal char ReadChar() => Parser.ParseChar(ReadString());
 
     internal int ReadInt() => Parser.ParseInt(ReadString());
@@ -48,20 +48,21 @@ public sealed class ResponseReader
     internal decimal ReadDecimal() => Parser.ParseDecimal(ReadString());
 
     internal LocalTime ReadLocalTime(LocalTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
+
     internal ZonedDateTime ReadZonedDateTime(ZonedDateTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
 
     internal T ReadEnum<T>() where T : Enum
     {
         T t = Parser.ParseEnum<T>(ReadString());
-        if (!Connection.UseDelayedTicks && t is TickType tickType)
+        if (!Options.UseDelayedTicks && t is TickType tickType)
             return (T)(object)UndelayTick(tickType);
         return t;
     }
 
-    internal T ReadStringEnum<T>() where T : StringEnum<T>, new() => Parser.ParseStringEnum<T>(ReadString());
-
     internal void IgnoreMessageVersion() => ReadString();
+
     internal int GetMessageVersion() => ReadInt();
+
     internal void RequireMessageVersion(int minimumVersion)
     {
         int v = GetMessageVersion();

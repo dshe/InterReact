@@ -4,50 +4,41 @@ using System.Reactive.Threading.Tasks;
 
 namespace Account;
 
-public class Positions : TestCollectionBase
+public class Positions : CollectionTestBase
 {
     public Positions(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    [Fact]
-    public async Task PositionsObservableTest()
+    [Fact(Skip = "May interfere with PositionsObservableTest")]
+    public async Task PositionsTest()
     {
-        IList<Position> list = await Client
-            .Service
-            .PositionsObservable
-            .TakeWhile(o => o is not PositionEnd)
-            .Cast<Position>()
-            .ToList();
-
-        // The account may or may not have positions.
-        if (!list.Any())
-            Write("no positions!");
-
-        foreach (var o in list)
-            Write(o.Stringify());
-    }
-
-    [Fact(Skip = "PositionsTest may interfere with PositionsObservableTest")]
-    internal async Task PositionsTest()
-    {
-        Task<IList<Position>> task = Client
+        Task<IList<object>> task = Client
             .Response
-            .Where(x => x is Position or PositionEnd)
-            .TakeWhile(o => o is not PositionEnd)
-            .Cast<Position>()
+            .Where(m => m is Position or PositionEnd)
+            .Take(TimeSpan.FromMilliseconds(100))
             .ToList()
             .ToTask();
 
         Client.Request.RequestPositions();
 
-        IList<Position> list = await task;
-
-        Client.Request.CancelPositions();
+        IList<object> positions = await task;
 
         // The account may or may not have positions.
-        if (!list.Any())
-            Write("no positions!");
-        foreach (var o in list)
-            Write(o.Stringify());
+        foreach (var p in positions)
+            Write(p.Stringify());
+    }
+
+    [Fact]
+    public async Task PositionsObservableTest()
+    {
+        IList<Position> positions = await Client
+            .Service
+            .PositionsObservable
+            .Take(TimeSpan.FromMilliseconds(100))
+            .ToList();
+
+        // The account may or may not have positions.
+        foreach (var p in positions)
+            Write(p.Stringify());
     }
 
 }

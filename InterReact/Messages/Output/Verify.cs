@@ -38,7 +38,7 @@ public sealed class VerifyAndAuthorizeCompleted
 {
     public bool IsSuccessful { get; }
     public string ErrorText { get; }
-    
+
     internal VerifyAndAuthorizeCompleted(ResponseReader r)
     {
         r.IgnoreMessageVersion();

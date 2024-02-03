@@ -2,17 +2,25 @@
 
 public static partial class Extension
 {
-    internal static IObservable<IHasRequestId> WithRequestId(this IObservable<object> source, int requestId)
-    {
-        return source
+    internal static IObservable<IHasRequestId> WithRequestId(this IObservable<object> source, int requestId) =>
+        source
             .OfType<IHasRequestId>()
-            .Where(x => x.RequestId == requestId);
-    }
+            .Where(m => m.RequestId == requestId);
 
-    internal static IObservable<IHasOrderId> WithOrderId(this IObservable<object> source, int orderId)
-    {
-        return source
+    internal static IObservable<IHasOrderId> WithOrderId(this IObservable<object> source, int orderId) =>
+        source
             .OfType<IHasOrderId>()
-            .Where(x => x.OrderId == orderId);
-    }
+            .Where(m => m.OrderId == orderId);
+
+    public static IObservable<T> TakeWhileInclusive<T>(this IObservable<T> source, Func<T, bool> predicate) =>
+        Observable.Create<T>(o =>
+            source.Subscribe(m =>
+            {
+                o.OnNext(m);
+                if (!predicate(m))
+                    o.OnCompleted();
+            },
+            o.OnError,
+            o.OnCompleted
+        ));
 }

@@ -1,48 +1,65 @@
-﻿using NodaTime.Text;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public sealed class HistoricalData : IHasRequestId
 {
-    internal static ZonedDateTimePattern DateTimePattern = ZonedDateTimePattern
-        .CreateWithInvariantCulture("yyyyMMdd HH:mm:ss z", DateTimeZoneProviders.Tzdb);
-
     public int RequestId { get; }
-    public Instant Start { get; }
-    public Instant End { get; }
+    public string Start { get; }
+    public string End { get; }
     public IList<HistoricalDataBar> Bars { get; } = new List<HistoricalDataBar>();
 
     internal HistoricalData(ResponseReader r) // a one-shot deal
     {
         RequestId = r.ReadInt();
-        Start = r.ReadZonedDateTime(DateTimePattern).ToInstant();
-        End = r.ReadZonedDateTime(DateTimePattern).ToInstant();
+        Start = r.ReadString();
+        End = r.ReadString();
         int n = r.ReadInt();
         for (int i = 0; i < n; i++)
-            Bars.Add(new HistoricalDataBar(r));
+            Bars.Add(HistoricalDataBar.CreateHistoricalBar(r, RequestId));
     }
 }
 
-public sealed class HistoricalDataBar
+public sealed class HistoricalDataBar : IHasRequestId
 {
-    public Instant Date { get; }
-    public double Open { get; }
-    public double High { get; }
-    public double Low { get; }
-    public double Close { get; }
-    public decimal Volume { get; }
-    public decimal WeightedAveragePrice { get; }
-    public int Count { get; }
+    public int RequestId { get; init; }
+    public string Date { get; init; } = "";
+    public double Open { get; init; }
+    public double High { get; init; }
+    public double Low { get; init; }
+    public double Close { get; init; }
+    public decimal Volume { get; init; }
+    public decimal WeightedAveragePrice { get; init; }
+    public int Count { get; init; }
+    private HistoricalDataBar() { }
 
-    internal HistoricalDataBar(ResponseReader r)
+    internal static HistoricalDataBar CreateHistoricalBar(ResponseReader r, int requestId)
     {
-        Date = r.ReadZonedDateTime(HistoricalData.DateTimePattern).ToInstant();
-        Open = r.ReadDouble();
-        High = r.ReadDouble();
-        Low = r.ReadDouble();
-        Close = r.ReadDouble();
-        Volume = r.ReadDecimal();
-        WeightedAveragePrice = r.ReadDecimal();
-        Count = r.ReadInt();
+        return new HistoricalDataBar()
+        {
+            RequestId = requestId,
+            Date = r.ReadString(),
+            Open = r.ReadDouble(),
+            High = r.ReadDouble(),
+            Low = r.ReadDouble(),
+            Close = r.ReadDouble(),
+            Volume = r.ReadDecimal(),
+            WeightedAveragePrice = r.ReadDecimal(),
+            Count = r.ReadInt()
+        };
+    }
+
+    internal static HistoricalDataBar CreateUpdateBar(ResponseReader r)
+    {
+        return new HistoricalDataBar()
+        {
+            RequestId = r.ReadInt(),
+            Count = r.ReadInt(),
+            Date = r.ReadString(),
+            Open = r.ReadDouble(),
+            Close = r.ReadDouble(),
+            High = r.ReadDouble(),
+            Low = r.ReadDouble(),
+            WeightedAveragePrice = r.ReadDecimal(),
+            Volume = r.ReadDecimal()
+        };
     }
 }

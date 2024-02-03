@@ -2,7 +2,7 @@
 
 public sealed class ExecutionFilter // input
 {
-     /// <summary>
+    /// <summary>
     /// Zero means no filtering on this field.
     /// </summary>
     public int ClientId { get; set; }
@@ -12,7 +12,7 @@ public sealed class ExecutionFilter // input
     public string Account { get; set; } = "";
     public string Time { get; set; } = "";
     public string Symbol { get; set; } = "";
-    public SecurityType SecurityType { get; set; } = SecurityType.Undefined;
+    public string SecurityType { get; set; } = ContractSecurityType.Undefined;
     public string Exchange { get; set; } = "";
     public string Side { get; set; } = "";
 }

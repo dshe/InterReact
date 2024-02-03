@@ -16,10 +16,10 @@ public partial class Service
             .OfType<NextOrderId>()
             .FirstAsync()
             .ToTask(ct);
-        
+
         Request.RequestNextOrderId();
-        
+
         await task.ConfigureAwait(false);
-        // The result is updated in the response object constructor of the NextOrderId message.
+        // IMPORTANT: The result is updated in the constructor of the NextOrderId response message.
     }
 }

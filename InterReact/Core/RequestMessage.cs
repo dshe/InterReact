@@ -1,5 +1,4 @@
 ﻿using RxSockets;
-using StringEnums;
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -8,14 +7,14 @@ namespace InterReact;
 
 public sealed class RequestMessage
 {
-    private readonly ILogger Logger;
-    private readonly IRxSocketClient RxSocket;
-    private readonly RingLimiter Limiter;
-    internal readonly List<string> Strings = new(); // internal for testing
-    public RequestMessage(ILoggerFactory loggerFactory, IRxSocketClient rxSocket, RingLimiter limiter)
+    private ILogger Logger { get; }
+    private IRxSocketClient RxSocket { get; }
+    private RingLimiter Limiter { get; }
+    internal List<string> Strings { get; } = new(); // internal for testing
+    public RequestMessage(ILogger<RequestMessage> logger, IRxSocketClient rxSocket, RingLimiter limiter)
     {
-        ArgumentNullException.ThrowIfNull(loggerFactory);
-        Logger = loggerFactory.CreateLogger("InterReact.RequestMessage");
+        ArgumentNullException.ThrowIfNull(logger);
+        Logger = logger;
         RxSocket = rxSocket;
         Limiter = limiter;
     }
@@ -27,8 +26,8 @@ public sealed class RequestMessage
             throw new InvalidOperationException("Empty send message.");
         // V100Plus format: 4 byte message length prefix plus payload of null-terminated strings.
         byte[] bytes = Strings.ToByteArray().ToByteArrayWithLengthPrefix();
-        Limiter.Limit(() => RxSocket.Send(bytes));
         Strings.Clear(); // allows the message to be reused
+        Limiter.Limit(() => RxSocket.Send(bytes));
     }
 
     /////////////////////////////////////////////////////
@@ -67,9 +66,6 @@ public sealed class RequestMessage
             Type ut = Enum.GetUnderlyingType(type);
             return Convert.ChangeType(e, ut, CultureInfo.InvariantCulture).ToString() ?? "";
         }
-
-        if (type.IsStringEnum())
-            return o.ToString() ?? "";
 
         Type? utype = Nullable.GetUnderlyingType(type);
         if (utype is not null)

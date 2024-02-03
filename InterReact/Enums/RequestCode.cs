@@ -47,8 +47,6 @@ internal enum RequestCode
     RequestAccountSummary = 62,
     CancelAccountSummary = 63,
     CancelPositions = 64,
-
-
     VerifyRequest = 65,
     VerifyMessage = 66,
     QueryDisplayGroups = 67,

@@ -1,11 +1,13 @@
-﻿namespace Core;
+﻿using Microsoft.Extensions.Logging.Abstractions;
+
+namespace Core;
 
 public class ResponseParserTests : UnitTestBase
 {
     private readonly List<object> alerts = new();
     private readonly ResponseParser parser;
     public ResponseParserTests(ITestOutputHelper output) : base(output) =>
-        parser = new ResponseParser(Logger.ToLoggerFactory());
+        parser = new ResponseParser(NullLogger<ResponseParser>.Instance);
 
     [Fact]
     public void T04_Bool()

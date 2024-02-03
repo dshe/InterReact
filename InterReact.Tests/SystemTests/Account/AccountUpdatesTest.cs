@@ -4,40 +4,54 @@ using System.Reactive.Threading.Tasks;
 
 namespace Account;
 
-public class Updates : TestCollectionBase
+public class Updates : CollectionTestBase
 {
     public Updates(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    [Fact]
+    [Fact(Skip = "May interfere with AccountUpdatesObservableTest")]
     public async Task AccountUpdatesTest()
     {
+        IList<string> accounts = await Client
+            .Service
+            .ManagedAccountsObservable
+            .Timeout(TimeSpan.FromSeconds(1));
+
+        string account = accounts.Last();
+
         Task<IList<object>> task = Client
             .Response
             .Where(m => m is AccountValue or PortfolioValue or AccountUpdateTime or AccountUpdateEnd)
-            .TakeWhile(o => o is not AccountUpdateEnd)
+            .Take(TimeSpan.FromMilliseconds(1000))
             .ToList()
             .ToTask();
 
-        Client.Request.RequestAccountUpdates(true);
+        Client.Request.RequestAccountUpdates(true, account);
 
-        IList<object> list = await task;
+        IList<object> messages = await task;
 
-        Client.Request.RequestAccountUpdates(false);
+        Client.Request.RequestAccountUpdates(false, account);
 
-        foreach (var o in list)
-            Write(o.Stringify());
+        foreach (var m in messages)
+            Write(m.Stringify());
     }
 
     [Fact]
     public async Task AccountUpdatesObservableTest()
     {
-        IList<object> list = await Client
+        IList<string> accounts = await Client
             .Service
-            .AccountUpdatesObservable
-            .TakeWhile(o => o is not AccountUpdateEnd)
+            .ManagedAccountsObservable
+            .Timeout(TimeSpan.FromSeconds(1));
+
+        string account = accounts.Last();
+
+        IList<object> messages = await Client
+            .Service
+            .CreateAccountUpdatesObservable(account)
+            .Take(TimeSpan.FromMilliseconds(100))
             .ToList();
 
-        foreach (var o in list)
-            Write(o.Stringify());
+        foreach (var m in messages)
+            Write(m.Stringify());
     }
 }

@@ -12,9 +12,9 @@ public sealed class Server : IAsyncDisposable
     public Server(ILogger logger, ILogger libLogger)
     {
         Logger = logger;
-        
+
         // Create the server on an available port on the local host.
-        SocketServer = RxSocketServer.Create(libLogger);
+        SocketServer = RxSocketServer.Create(libLogger.ToLoggerFactory());
 
         // The default EndPoint is type IPEndPoint.
         IPEndPoint = (IPEndPoint)SocketServer.LocalEndPoint;
@@ -36,7 +36,7 @@ public sealed class Server : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        Logger.LogCritical("Disconnecting.");
+        Logger.LogCritical("Disconnecting...");
         await SocketServer.DisposeAsync();
         Logger.LogCritical("Disconnected.");
     }

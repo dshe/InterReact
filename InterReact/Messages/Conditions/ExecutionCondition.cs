@@ -79,7 +79,7 @@ public class ExecutionCondition : OrderCondition
         if (other == null)
             return false;
 
-        return base.Equals(obj) 
+        return base.Equals(obj)
             && Exchange.Equals(other.Exchange)
             && SecType.Equals(other.SecType)
             && Symbol.Equals(other.Symbol);

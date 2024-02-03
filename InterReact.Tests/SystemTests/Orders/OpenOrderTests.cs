@@ -2,7 +2,7 @@
 
 namespace Orders;
 
-public class Open : TestCollectionBase
+public class Open : CollectionTestBase
 {
     public Open(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 

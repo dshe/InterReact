@@ -6,14 +6,13 @@ public static class Program
     {
         Console.Title = "InterReact";
 
-        ConsoleLogger clientLogger    = new("Client:    ", LogLevel.Trace,       ConsoleColor.DarkYellow);
-        ConsoleLogger serverLogger    = new("Server:    ", LogLevel.Trace,       ConsoleColor.DarkMagenta);
+        ConsoleLogger clientLogger = new("Client:    ", LogLevel.Trace, ConsoleColor.DarkYellow);
+        ConsoleLogger serverLogger = new("Server:    ", LogLevel.Trace, ConsoleColor.DarkMagenta);
         ConsoleLogger clientLibLogger = new("ClientLib: ", LogLevel.Information, ConsoleColor.DarkGreen);
         ConsoleLogger serverLibLogger = new("ServerLib: ", LogLevel.Information, ConsoleColor.DarkCyan);
 
         Server server = new(serverLogger, serverLibLogger);
-
-        Client client = await Client.CreateAsync(server.IPEndPoint.Port, clientLogger, clientLibLogger);
+        Client client = await Client.CreateAsync(server.IPEndPoint, clientLogger, clientLibLogger);
 
         await client.MeasurePerformance();
         //client.SendControlMessage("Dispose");

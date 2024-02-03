@@ -2,7 +2,7 @@
 
 namespace Orders;
 
-public class Completed : TestCollectionBase
+public class Completed : CollectionTestBase
 {
     public Completed(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 

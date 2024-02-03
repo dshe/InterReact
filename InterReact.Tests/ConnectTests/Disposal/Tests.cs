@@ -1,4 +1,5 @@
 ﻿using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 
 namespace Other;
 
@@ -9,13 +10,12 @@ public class Disposal : ConnectTestBase
     [Fact]
     public async Task DisposalTest()
     {
-        IInterReactClient client = await new InterReactClientConnector()
-            .WithLoggerFactory(LogFactory)
-            .ConnectAsync();
-        
+        IInterReactClient client = await InterReactClient.ConnectAsync(options =>
+            options.LogFactory = LogFactory);
+
         await client.DisposeAsync();
-        
+
         Assert.ThrowsAny<Exception>(() => client.Request.RequestCurrentTime());
-        await Assert.ThrowsAnyAsync<Exception>(async () => await client.Service.GetMatchingSymbolsAsync("x"));
+        await Assert.ThrowsAnyAsync<Exception>(() => client.Service.CreateMatchingSymbolsObservable("x").ToTask());
     }
 }

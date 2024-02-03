@@ -13,7 +13,7 @@ public class Type_Viewer : UnitTestBase
     {
         foreach (TypeInfo type in Assembly.DefinedTypes
             .Where(t => t.IsInterface)
-            .OrderBy(x => x.FullName)) 
+            .OrderBy(x => x.FullName))
             Write(type.FullName!);
     }
 

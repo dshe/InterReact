@@ -12,7 +12,7 @@ public sealed class ContractComboLeg // input + output
     /// </summary>
     public int Ratio { get; init; }
 
-    public OrderAction TradeAction { get; init; } = OrderAction.Undefined;
+    public string Action { get; init; } = OrderAction.Undefined;
 
     /// <summary>
     /// The exchange to which the order will be routed.
@@ -43,7 +43,7 @@ public sealed class ContractComboLeg // input + output
     {
         ContractId = r.ReadInt();
         Ratio = r.ReadInt();
-        TradeAction = r.ReadStringEnum<OrderAction>();
+        Action = r.ReadString();
         Exchange = r.ReadString();
         OpenClose = r.ReadEnum<ComboOpenClose>();
         ComboShortSaleSlot = r.ReadEnum<ComboShortSaleSlot>();

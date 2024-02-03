@@ -9,17 +9,16 @@ public class AllArgs : ConnectTestBase
     [Fact]
     public async Task AllArgsTest()
     {
-        InterReactClientConnector connector = new InterReactClientConnector()
-            .WithLoggerFactory(LogFactory)
-            .WithIpAddress(IPAddress.IPv6Loopback)
-            .WithClientId(1234)
-            .WithMaxRequestsPerSecond(10)
-            .DoNotUseDelayedTicks();
+        IInterReactClient client = await InterReactClient.ConnectAsync(options =>
+        {
+            options.LogFactory = LogFactory;
+            options.TwsIpAddress = IPAddress.IPv6Loopback.ToString();
+            options.TwsClientId = 1234;
+            options.MaxRequestsPerSecond = 10;
+            options.UseDelayedTicks = false;
+        });
 
-        IInterReactClient client = await connector.ConnectAsync();
-     
-        Assert.Equal(IPAddress.IPv6Loopback, client.Connection.RemoteIpEndPoint.Address);
-        Assert.Equal(1234, client.Connection.ClientId);
+        Assert.Equal(IPAddress.IPv6Loopback, client.RemoteIpEndPoint.Address);
 
         await client.DisposeAsync();
     }

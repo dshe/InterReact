@@ -1,21 +1,19 @@
-﻿using Microsoft.VisualBasic;
-using StringEnums;
-using System.Globalization;
+﻿using System.Globalization;
 
 namespace InterReact;
 
 #pragma warning disable CA1822 // can be marked as static
 
-internal sealed class ResponseParser
+public sealed class ResponseParser
 {
     private const string MaxInt = "2147483647";
     private const string MaxLong = "9223372036854775807";
     private const string MaxDouble = "1.7976931348623157E308";
-    private readonly Dictionary<Type, Dictionary<string, object>> EnumCache = new();
-    private readonly ILogger Logger;
+    private Dictionary<Type, Dictionary<string, object>> EnumCache { get; } = new();
+    private ILogger Logger { get; }
 
-    internal ResponseParser(ILoggerFactory loggerFactory) =>
-        Logger = loggerFactory.CreateLogger("InterReact.ResponseParser");
+    public ResponseParser(ILogger<ResponseParser> logger) =>
+        Logger = logger;
 
     internal char ParseChar(string s)
     {
@@ -82,7 +80,7 @@ internal sealed class ResponseParser
         if (decimal.TryParse(s, NumberStyles.Any, NumberFormatInfo.InvariantInfo, out decimal n))
             return n;
         throw new ArgumentException($"ParseDecimal('{s}') failure.");
-    }  
+    }
 
     internal T ParseEnum<T>(string numberString) where T : Enum
     {
@@ -104,19 +102,6 @@ internal sealed class ResponseParser
             Logger.LogTrace("ParseEnum<{Name}>('{NumberString}') new value.", type.Name, numberString);
         }
         return (T)e;
-    }
-
-    internal T ParseStringEnum<T>(string s) where T : StringEnum<T>, new()
-    {
-        T? e = StringEnum<T>.ToStringEnum(s);
-        if (e is null)
-        {
-            e = StringEnum<T>.Add(s);
-            if (e is null)
-                throw new InvalidOperationException($"Could not add new value {s} to StringEnum.");
-            Logger.LogTrace("ParseStringEnum<{Name}>('{E}') added new value.", typeof(T).Name, e);
-        }
-        return e;
     }
 }
 

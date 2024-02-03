@@ -12,9 +12,9 @@ internal sealed class FactoryLogger : ILoggerFactory
 
     public void AddProvider(ILoggerProvider provider) => throw new NotImplementedException();
 
-    // Does not actually create a logger of categoryName.
-    // Just returns the logger passed to the construtor.
-    public ILogger CreateLogger(string categoryName) => Logger;
+    // This does not actually create a logger of categoryName.
+    // Just returns the logger passed in the construtor.
+    public ILogger CreateLogger(string ignoredCategoryName) => Logger;
 
     public void Dispose() { }
 }

@@ -3,17 +3,17 @@ using System.IO;
 
 namespace InterReact;
 
-internal sealed class ResponseMessageComposer
+public sealed class ResponseMessageComposer
 {
     private IClock Clock { get; }
     private ILogger Logger { get; }
     private ResponseReader Reader { get; }
 
-    internal ResponseMessageComposer(IClock clock, ILoggerFactory loggerFactory, Connection connection)
+    public ResponseMessageComposer(IClock clock, ILogger<ResponseMessageComposer> logger, ResponseReader reader)
     {
         Clock = clock;
-        Logger = loggerFactory.CreateLogger("InterReact.ResponseMessageComposer");
-        Reader = new ResponseReader(loggerFactory, connection);
+        Logger = logger;
+        Reader = reader;
     }
 
     internal object ComposeMessage(string[] strings)
@@ -30,9 +30,7 @@ internal sealed class ResponseMessageComposer
         catch (Exception e)
         {
             string m = $"ResponseComposer error: [{code} => {strings.JoinStrings(", ")}].";
-            //return new MessageError(code, e, m);
             Logger.LogError(e, "{Message}", m);
-            //Observable.Throw(m);
             throw new InvalidDataException(m, e);
         }
     }
@@ -106,7 +104,7 @@ internal sealed class ResponseMessageComposer
         "87" => new HistoricalNewsEnd(Reader),
         "88" => new HeadTimestamp(Reader),
         "89" => new HistogramData(Reader),
-        "90" => new HistoricalDataUpdate(Reader),
+        "90" => HistoricalDataBar.CreateUpdateBar(Reader),
         "91" => new RerouteMktData(Reader),
         "92" => new RerouteMktDepth(Reader),
         "93" => new MarketRule(Reader),

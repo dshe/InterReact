@@ -20,7 +20,7 @@ public sealed class ContractDetailsTime
     public IReadOnlyList<ContractDetailsTimeEvent> Events { get; }
     // completes immediately if no timeZone or hours
     public IObservable<ContractDetailsTimePeriod> ContractTimeObservable { get; }
- 
+
     public ContractDetailsTime(ContractDetails contractDetails, IScheduler? scheduler = null)
     {
         ArgumentNullException.ThrowIfNull(contractDetails);
@@ -121,8 +121,8 @@ public sealed class ContractDetailsTime
                 return Disposable.Empty;
             }
 
-            return TheScheduler.Schedule(initialResult.Value.Next.Value.Time.ToDateTimeOffset(), Work);            
-            
+            return TheScheduler.Schedule(initialResult.Value.Next.Value.Time.ToDateTimeOffset(), Work);
+
             void Work(Action<DateTimeOffset> self)
             {
                 try

@@ -6,31 +6,18 @@ public partial class Service
 {
     /// <summary>
     /// An observable which emits Position objects for all accounts.
-    /// Objects: Position, PositionsEnd.
-    /// All positions are sent initially, and then only updates as positions change. 
-    /// PositionEnd is emitted after the initial values for each account have been emitted.
+    /// All positions are sent initially, and then only updates. 
     /// The latest values are cached for replay to new subscribers.
-    /// Multiple subscribers are supported. 
     /// </summary>
-    public IObservable<object> PositionsObservable { get; }
+    public IObservable<Position> PositionsObservable { get; }
 
-    private IObservable<object> CreatePositionsObservable()
+    private IObservable<Position> CreatePositionsObservable()
     {
         return Response
-            .Where(x => x is Position or PositionEnd)
+            .OfType<Position>()
             .ToObservableContinuous(
                 Request.RequestPositions,
                 Request.CancelPositions)
-            .CacheSource(GetPositionsCacheKey);
-    }
-
-    private static string GetPositionsCacheKey(object m)
-    {
-        return m switch
-        {
-            Position p => $"{p.Account}+{p.Contract.Stringify()}",
-            PositionEnd => "PositionEnd",
-            _ => throw new ArgumentException($"Unhandled type: {m.GetType()}.")
-        };
+            .CacheSource(p => $"{p.Account}: {p.Contract.Stringify()}");
     }
 }

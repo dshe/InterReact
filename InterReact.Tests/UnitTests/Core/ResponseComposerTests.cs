@@ -8,9 +8,9 @@ public class ResponseComposerTests : UnitTestBase
 
     public ResponseComposerTests(ITestOutputHelper output) : base(output)
     {
-        var connector = new InterReactClientConnector();
-        var connection = new Connection(connector);
-        Composer = new ResponseMessageComposer(SystemClock.Instance, NullLoggerFactory.Instance, connection);
+        ResponseParser parser = new(NullLogger<ResponseParser>.Instance);
+        ResponseReader reader = new(NullLogger<ResponseReader>.Instance, new(null, null), parser);
+        Composer = new ResponseMessageComposer(SystemClock.Instance, NullLogger<ResponseMessageComposer>.Instance, reader);
     }
 
     [Fact]

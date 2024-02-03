@@ -4,16 +4,20 @@ namespace ConnectTests;
 
 public abstract class ConnectTestBase
 {
+    private readonly ITestOutputHelper Output;
     protected readonly ILoggerFactory LogFactory;
-    protected readonly Action<string> Write;
+    protected readonly ILogger Logger;
+    protected void Write(string format, params object[] args) =>
+       Output.WriteLine(string.Format(format, args) + Environment.NewLine);
+    protected void Write(string str) =>
+       Output.WriteLine(str + Environment.NewLine);
 
-    protected ConnectTestBase(ITestOutputHelper output, LogLevel logLevel = LogLevel.Debug)
+    protected ConnectTestBase(ITestOutputHelper output, LogLevel logLevel = LogLevel.Debug, string name = "Test")
     {
-        LogFactory = LoggerFactory
-            .Create(builder => builder
-                .AddMXLogger(output.WriteLine)
-                .SetMinimumLevel(logLevel));
-        
-        Write = s => output.WriteLine(s + "\r\n");
+        Output = output;
+        LogFactory = LoggerFactory.Create(builder => builder
+            .AddMXLogger(output.WriteLine)
+            .SetMinimumLevel(logLevel));
+        Logger = LogFactory.CreateLogger(name);
     }
 }

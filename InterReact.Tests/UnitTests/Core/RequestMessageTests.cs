@@ -1,17 +1,14 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using RxSockets;
-using Stringification;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
 
 namespace Core;
 
 public class RequestMessageTests : UnitTestBase
 {
-    private readonly RequestMessage requestMessage = 
-        new(NullLoggerFactory.Instance, NullRxSocketClient.Instance, new RingLimiter());
-    public RequestMessageTests(ITestOutputHelper output) : base(output) {}
+    private readonly RequestMessage requestMessage =
+        new(NullLogger<RequestMessage>.Instance, NullRxSocketClient.Instance, new RingLimiter());
+    public RequestMessageTests(ITestOutputHelper output) : base(output) { }
 
     private void AssertResult(params string[] strings)
     {
@@ -95,7 +92,7 @@ public class RequestMessageTests : UnitTestBase
         static string GetEnumValueString(T en)
         {
             Type underlyingType = Enum.GetUnderlyingType(typeof(T));
-            object o = Convert.ChangeType(en, underlyingType, CultureInfo.InvariantCulture) 
+            object o = Convert.ChangeType(en, underlyingType, CultureInfo.InvariantCulture)
                 ?? throw new ArgumentException("Could not get enum value.");
             return o.ToString() ?? throw new ArgumentException("Could not get enum value.");
         }
