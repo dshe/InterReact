@@ -18,9 +18,13 @@ public sealed class HistoricalLastTicks : IHasRequestId
 
 public sealed class HistoricalLastTick
 {
+    //[return: MarshalAs(UnmanagedType.I8)]
+    //[param: MarshalAs(UnmanagedType.I8)]
     public long Time { get; }
     public TickAttribLast TickAttribLast { get; }
     public double Price { get; }
+    //[return: MarshalAs(UnmanagedType.I8)]
+    //[param: MarshalAs(UnmanagedType.I8)]
     public decimal Size { get; }
     public string Exchange { get; }
     public string SpecialConditions { get; }

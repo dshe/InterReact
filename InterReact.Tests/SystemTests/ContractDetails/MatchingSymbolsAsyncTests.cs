@@ -12,7 +12,7 @@ public class MatchingSymbolsAsync : CollectionTestBase
     {
         string pattern = "X";
 
-        IList<ContractDescription> descriptions = await Client.Service.CreateMatchingSymbolsObservable(pattern);
+        IList<ContractDescription> descriptions = await Client.Service.FindMatchingSymbolsAsync(pattern, default);
 
         Assert.NotEmpty(descriptions);
     }
@@ -23,6 +23,6 @@ public class MatchingSymbolsAsync : CollectionTestBase
         string pattern = "";
 
         await Assert.ThrowsAsync<AlertException>(() => 
-            Client.Service.CreateMatchingSymbolsObservable(pattern).ToTask());
+            Client.Service.FindMatchingSymbolsAsync(pattern, default));
     }
 }

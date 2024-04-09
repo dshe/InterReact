@@ -12,8 +12,7 @@ public sealed class ResponseParser
     private Dictionary<Type, Dictionary<string, object>> EnumCache { get; } = new();
     private ILogger Logger { get; }
 
-    public ResponseParser(ILogger<ResponseParser> logger) =>
-        Logger = logger;
+    public ResponseParser(ILogger<ResponseParser> logger) => Logger = logger;
 
     internal char ParseChar(string s)
     {
@@ -71,7 +70,7 @@ public sealed class ResponseParser
         return ParseDouble(s);
     }
 
-    internal decimal ParseDecimal(string s)
+    internal decimal ParseDecimal(string s) // ok
     {
         if (s.Length == 0 || s == MaxInt || s == MaxLong || s == MaxDouble)
             return decimal.MaxValue;

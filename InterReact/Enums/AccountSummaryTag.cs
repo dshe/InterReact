@@ -9,7 +9,7 @@ public enum AccountSummaryTag
     AccruedCash,
     BuyingPower,
     EquityWithLoanValue,
-    PreviousEquityWithLoanValue,
+    PreviousDayEquityWithLoanValue,
     GrossPositionValue,
     RegTEquity,
     RegTMargin,

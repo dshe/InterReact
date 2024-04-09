@@ -9,9 +9,9 @@
     <PackageTags>IB Interactive-Brokers IBApi Trader-Workstation TWS reactive reactive-extensions Rx</PackageTags>
     <Description>Interactive Brokers reactive C# API.</Description>
     <Authors>DavidS</Authors>
-    <Version>0.4.0</Version>
-    <AssemblyVersion>0.4.0</AssemblyVersion>
-    <FileVersion>0.4.0</FileVersion>
+    <Version>0.4.1</Version>
+    <AssemblyVersion>0.4.1</AssemblyVersion>
+    <FileVersion>0.4.1</FileVersion>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
     <DebugType>embedded</DebugType>
     <DebugSymbols>true</DebugSymbols>
@@ -27,15 +27,11 @@
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
-    <PackageReference Include="NodaTime" Version="3.1.10" />
-    <PackageReference Include="RxSockets" Version="5.0.3" />
-    <PackageReference Include="Stringification" Version="3.2.4" />
+    <PackageReference Include="NodaTime" Version="3.1.11" />
+    <PackageReference Include="RxSockets" Version="5.0.4" />
+    <PackageReference Include="Stringification" Version="3.2.5" />
     <PackageReference Include="System.Reactive" Version="6.0.0" />
     <None Include="worm64.png" Pack="true" PackagePath="\" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Services\ok\" />
   </ItemGroup>
 
 </Project>

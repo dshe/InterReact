@@ -8,13 +8,13 @@ public class Updates : CollectionTestBase
 {
     public Updates(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    [Fact(Skip = "May interfere with AccountUpdatesObservableTest")]
+    // May interfere with AccountUpdatesObservableTest
+    [Fact]
     public async Task AccountUpdatesTest()
     {
         IList<string> accounts = await Client
             .Service
-            .ManagedAccountsObservable
-            .Timeout(TimeSpan.FromSeconds(1));
+            .GetManagedAccountsAsync(default);
 
         string account = accounts.Last();
 
@@ -40,8 +40,7 @@ public class Updates : CollectionTestBase
     {
         IList<string> accounts = await Client
             .Service
-            .ManagedAccountsObservable
-            .Timeout(TimeSpan.FromSeconds(1));
+            .GetManagedAccountsAsync(default);
 
         string account = accounts.Last();
 

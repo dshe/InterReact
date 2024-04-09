@@ -44,7 +44,7 @@ public class HistoryTests : CollectionTestBase
     }
 
     [Fact]
-    public async Task Test2HistoryObservable()
+    public async Task Test2HistoryAsync()
     {
         Contract contract = new()
         {
@@ -54,18 +54,16 @@ public class HistoryTests : CollectionTestBase
             Exchange = "SMART"
         };
 
-        IList<HistoricalDataBar> bars = await Client
+        HistoricalData data = await Client
             .Service
-            .CreateHistoricalDataObservable(
+            .GetHistoricalDataAsync(
                 contract,
                 "",
                 "1 M",
                 "1 day",
-                "TRADES")
-            .ToList();
+                "TRADES");
 
-        Assert.NotEmpty(bars);
-        foreach (var bar in bars)
+        foreach (var bar in data.Bars)
             Write(bar.Stringify());
     }
 

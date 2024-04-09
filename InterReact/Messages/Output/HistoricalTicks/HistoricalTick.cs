@@ -19,10 +19,13 @@ public sealed class HistoricalTicks : IHasRequestId
 
 public sealed class HistoricalTick
 {
+    //[return: MarshalAs(UnmanagedType.I8)]
+    //[param: MarshalAs(UnmanagedType.I8)]
     public long Time { get; }
     public double Price { get; }
+    //[return: MarshalAs(UnmanagedType.I8)]
+    //[param: MarshalAs(UnmanagedType.I8)]
     public decimal Size { get; }
-
     internal HistoricalTick(ResponseReader r)
     {
         Time = r.ReadLong();

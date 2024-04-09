@@ -11,7 +11,7 @@ public sealed class Position
     {
         r.RequireMessageVersion(3);
         Account = r.ReadString();
-        Contract = new(r, false);
+        Contract = new(r, includePrimaryExchange: false);
         Quantity = r.ReadDecimal();
         AverageCost = r.ReadDouble();
     }

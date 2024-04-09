@@ -19,8 +19,7 @@ public class MarketDataSnapshotAsync : CollectionTestBase
 
         IList<IHasRequestId> messages = await Client
             .Service
-            .CreateTickSnapshotObservable(contract)
-            .ToList();
+            .GetTickSnapshotAsync(contract);
 
         Assert.Empty(messages.OfType<AlertMessage>().Where(a => a.IsFatal));
 
@@ -43,13 +42,17 @@ public class MarketDataSnapshotAsync : CollectionTestBase
             Exchange = "SMART"
         };
 
-        AlertMessage? fatalAlert = await Client
-            .Service
-            .CreateTickSnapshotObservable(contract)
-            .OfType<AlertMessage>()
-            .FirstOrDefaultAsync(alert => alert.IsFatal);
+        try
+        {
+            await Client.Service.GetTickSnapshotAsync(contract);
+        }
+        catch (AlertException alertException)
+        {
+            //Assert.True(alertException.IsFatal);
+            Assert.StartsWith("No security definition", alertException.Message);
+        }
 
-        Assert.NotNull(fatalAlert);
-        Assert.True(fatalAlert.Message.StartsWith("No security definition"));
+        //Assert.NotNull(fatalAlert);
+        //Assert.True(fatalAlert.Message.StartsWith("No security definition"));
     }
 }

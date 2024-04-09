@@ -80,7 +80,7 @@ public sealed class Contract // input + output OK
     public DeltaNeutralContract? DeltaNeutralContract { get; set; }
 
     public Contract() { }
-    internal Contract(ResponseReader r, bool includePrimaryExchange = true)
+    internal Contract(ResponseReader r, bool includeExchange = true, bool includePrimaryExchange = true)
     {
         ContractId = r.ReadInt();
         Symbol = r.ReadString();
@@ -89,7 +89,8 @@ public sealed class Contract // input + output OK
         Strike = r.ReadDouble();
         Right = r.ReadString();
         Multiplier = r.ReadString();
-        Exchange = r.ReadString();
+        if (includeExchange)
+            Exchange = r.ReadString();
         if (includePrimaryExchange)
             PrimaryExchange = r.ReadString();
         Currency = r.ReadString();
@@ -97,7 +98,7 @@ public sealed class Contract // input + output OK
         TradingClass = r.ReadString();
     }
 
-    internal RequestMessage Write(RequestMessage m, bool excludePrimaryExchange)
+    internal RequestMessage Write(RequestMessage m, bool includePrimaryExchange, bool includeExpired)
     {
         m.Write(
             ContractId,
@@ -109,12 +110,17 @@ public sealed class Contract // input + output OK
             Multiplier,
             Exchange);
 
-        if (!excludePrimaryExchange)
+        if (includePrimaryExchange)
             m.Write(PrimaryExchange);
 
-        return m.Write(
+        m.Write(
             Currency,
             LocalSymbol,
             TradingClass);
+
+        if (includeExpired)
+            m.Write(IncludeExpired);
+
+        return m;
     }
 }

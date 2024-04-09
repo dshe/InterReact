@@ -81,7 +81,7 @@ public static partial class Extension
         ));
 
     // This operator converts Observable.OnNext(AlertMessage) to an OnError(AlertException).
-    public static IObservable<T> AlertMessageToError<T>(this IObservable<T> source, bool fatalOnly = false) =>
+    public static IObservable<T> AlertMessageToError<T>(this IObservable<T> source) =>
         Observable.Create<T>(o =>
             source.Subscribe(m =>
             {

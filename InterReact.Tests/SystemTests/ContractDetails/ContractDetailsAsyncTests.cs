@@ -17,7 +17,7 @@ public class ContractDetailsAsync : CollectionTestBase
 
         IList<ContractDetails> cds = await Client
             .Service
-            .GetContractDetailsAsync(contract);
+            .GetContractDetailsAsync(contract, default);
 
         ContractDetails cd = Assert.Single(cds);
         Assert.Equal("MSFT", cd.Contract.Symbol);
@@ -35,7 +35,7 @@ public class ContractDetailsAsync : CollectionTestBase
 
         IList<ContractDetails> cds = await Client
             .Service
-            .GetContractDetailsAsync(contract);
+            .GetContractDetailsAsync(contract, default);
 
         Assert.True(cds.Count > 1); // multiple exchanges
     }
@@ -50,7 +50,7 @@ public class ContractDetailsAsync : CollectionTestBase
 
         await Assert.ThrowsAsync<AlertException>(() => Client
             .Service
-            .GetContractDetailsAsync(contract));
+            .GetContractDetailsAsync(contract, default));
     }
 
     [Fact]

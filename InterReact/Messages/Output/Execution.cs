@@ -83,7 +83,7 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
     {
         RequestId = r.ReadInt();
         OrderId = r.ReadInt();
-        Contract = new(r, false);
+        Contract = new(r, includePrimaryExchange: false);
         ExecutionId = r.ReadString();
         Time = r.ReadString();
         Account = r.ReadString();

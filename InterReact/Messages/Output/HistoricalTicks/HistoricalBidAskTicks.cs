@@ -19,11 +19,17 @@ public sealed class HistoricalBidAskTicks : IHasRequestId
 
 public sealed class HistoricalBidAskTick
 {
+    //[return: MarshalAs(UnmanagedType.I8)]
+    //[param: MarshalAs(UnmanagedType.I8)]
     public long Time { get; }
     public TickAttribBidAsk TickAttribBidAsk { get; }
     public double PriceBid { get; }
     public double PriceAsk { get; }
+    //[return: MarshalAs(UnmanagedType.I8)]
+    //[param: MarshalAs(UnmanagedType.I8)]
     public decimal SizeBid { get; }
+    //[return: MarshalAs(UnmanagedType.I8)]
+    //[param: MarshalAs(UnmanagedType.I8)]
     public decimal SizeAsk { get; }
 
     internal HistoricalBidAskTick(ResponseReader r)

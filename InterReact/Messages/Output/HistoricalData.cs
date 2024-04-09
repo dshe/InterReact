@@ -21,7 +21,7 @@ public sealed class HistoricalData : IHasRequestId
 public sealed class HistoricalDataBar : IHasRequestId
 {
     public int RequestId { get; init; }
-    public string Date { get; init; } = "";
+    public string Time { get; init; } = "";
     public double Open { get; init; }
     public double High { get; init; }
     public double Low { get; init; }
@@ -36,7 +36,7 @@ public sealed class HistoricalDataBar : IHasRequestId
         return new HistoricalDataBar()
         {
             RequestId = requestId,
-            Date = r.ReadString(),
+            Time = r.ReadString(),
             Open = r.ReadDouble(),
             High = r.ReadDouble(),
             Low = r.ReadDouble(),
@@ -53,7 +53,7 @@ public sealed class HistoricalDataBar : IHasRequestId
         {
             RequestId = r.ReadInt(),
             Count = r.ReadInt(),
-            Date = r.ReadString(),
+            Time = r.ReadString(),
             Open = r.ReadDouble(),
             Close = r.ReadDouble(),
             High = r.ReadDouble(),

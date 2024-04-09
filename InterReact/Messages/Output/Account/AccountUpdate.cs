@@ -8,11 +8,11 @@ public sealed class AccountValue
     public string Currency { get; }
     internal AccountValue(ResponseReader r)
     {
-        int version = r.GetMessageVersion();
+        r.RequireMessageVersion(2);
         Key = r.ReadString();
         Value = r.ReadString();
         Currency = r.ReadString();
-        AccountName = version >= 2 ? r.ReadString() : "";
+        AccountName = r.ReadString();
     }
 }
 
@@ -29,20 +29,7 @@ public sealed class PortfolioValue
     internal PortfolioValue(ResponseReader r)
     {
         r.RequireMessageVersion(8);
-        Contract = new()
-        {
-            ContractId = r.ReadInt(),
-            Symbol = r.ReadString(),
-            SecurityType = r.ReadString(),
-            LastTradeDateOrContractMonth = r.ReadString(),
-            Strike = r.ReadDouble(),
-            Right = r.ReadString(),
-            Multiplier = r.ReadString(),
-            PrimaryExchange = r.ReadString(), // note
-            Currency = r.ReadString(),
-            LocalSymbol = r.ReadString(),
-            TradingClass = r.ReadString()
-        };
+        Contract = new(r, includeExchange:false);
         Position = r.ReadDecimal();
         MarketPrice = r.ReadDouble();
         MarketValue = r.ReadDouble();

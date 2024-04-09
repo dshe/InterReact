@@ -33,21 +33,18 @@ public sealed class PriceTick : ITick
         double price = r.ReadDouble();
         decimal size = r.ReadDecimal();
         TickAttrib tickAttrib = new(r.ReadInt());
-
         PriceTick priceTick = new(requestId, priceTickType, price, tickAttrib);
 
-        var sizeTickType = GetSizeTickType(priceTickType);
+        TickType sizeTickType = GetSizeTickType(priceTickType);
         if (sizeTickType == TickType.Undefined)
             return priceTick;
 
         SizeTick sizeTick = new(requestId, sizeTickType, size);
-
         return new object[] { priceTick, sizeTick };
     }
 
-    private static TickType GetSizeTickType(TickType priceTickType)
-    {
-        return priceTickType switch
+    private static TickType GetSizeTickType(TickType priceTickType) =>
+        priceTickType switch
         {
             TickType.BidPrice => TickType.BidSize,
             TickType.AskPrice => TickType.AskSize,
@@ -57,7 +54,6 @@ public sealed class PriceTick : ITick
             TickType.DelayedLastPrice => TickType.DelayedLastSize,
             _ => TickType.Undefined
         };
-    }
 }
 
 public sealed class TickAttrib
@@ -71,7 +67,6 @@ public sealed class TickAttrib
     internal TickAttrib() { }
     internal TickAttrib(int value)
     {
-        CanAutoExecute = value == 1;
         BitMask mask = new(value);
         CanAutoExecute = mask[0];
         PastLimit = mask[1];

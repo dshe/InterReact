@@ -1,4 +1,6 @@
-﻿namespace InterReact;
+﻿using System.Reactive.Threading.Tasks;
+
+namespace InterReact;
 
 public partial class Service
 {
@@ -7,16 +9,20 @@ public partial class Service
     /// TWS does not support more than one concurrent request.
     /// TWS error messages (AlertMessage) are directed to OnError(AlertException).
     /// </summary>
-    public IObservable<IList<ContractDescription>> CreateMatchingSymbolsObservable(string pattern)
+    public async Task<IList<ContractDescription>> FindMatchingSymbolsAsync(string pattern, CancellationToken ct)
     {
-        return Response
-            .ToObservableSingleWithId(
-                Request.GetNextId,
-                id => Request.RequestMatchingSymbols(id, pattern))
+        int id = Request.GetNextId();
+
+        Task<IList<ContractDescription>> task = Response
+            .WithRequestId(id)
             .AlertMessageToError()
             .Cast<SymbolSamples>()
             .Select(x => x.Descriptions)
             .FirstAsync()
-            .ShareSource();
+            .ToTask(ct);
+
+        Request.RequestMatchingSymbols(id, pattern);
+
+        return await task.ConfigureAwait(false);
     }
 }

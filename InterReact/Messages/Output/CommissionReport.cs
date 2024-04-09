@@ -6,7 +6,7 @@
 public sealed class CommissionReport : IHasExecutionId, IHasOrderId
 {
     public string ExecutionId { get; }
-    /// OrderId is determined using the executionId from Execution.
+    // OrderId is determined using the executionId from Execution.
     public int OrderId { get; }
     public double Commission { get; }
     public string Currency { get; }

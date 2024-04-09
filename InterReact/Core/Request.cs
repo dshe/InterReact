@@ -346,7 +346,7 @@ public sealed class Request
     /// </summary>
     public void RequestNextOrderId() => CreateMessage()
         .Write(RequestCode.RequestIds, "1")
-        .Write(-1) // numIds
+        .Write(1) // numIds
         .Send();
 
     public void RequestContractDetails(int requestId, Contract contract)
@@ -354,9 +354,8 @@ public sealed class Request
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
             .Write(RequestCode.RequestContractData, "8", requestId)
-            .WriteContract(contract)
+            .WriteContract(contract, includeExpired: true)
             .Write(
-                contract.IncludeExpired,
                 contract.SecurityIdType,
                 contract.SecurityId,
                 contract.IssuerId)
@@ -392,7 +391,7 @@ public sealed class Request
         .Write(RequestCode.CancelNewsBulletin, "1")
         .Send();
 
-    public void ChangeServerLogLevel(LogEntryLevel logLevel) => CreateMessage()
+    public void SetServerLogLevel(LogEntryLevel logLevel) => CreateMessage()
         .Write(RequestCode.ChangeServerLog, "1")
         .Write(logLevel)
         .Send();
@@ -415,14 +414,11 @@ public sealed class Request
         .Write(dataType)
         .Send();
 
-    public void ReplaceFinancialAdvisorConfiguration(
-        int requestId,
-        FinancialAdvisorDataType dataType,
-        string xml) => CreateMessage()
-            .Write(RequestCode.ReplaceFA, "1")
-            .Write(dataType, xml)
-            .Write(requestId)
-            .Send();
+    public void ReplaceFinancialAdvisorConfiguration(int requestId, FinancialAdvisorDataType dataType, string xml) => CreateMessage()
+        .Write(RequestCode.ReplaceFA, "1")
+        .Write(dataType, xml)
+        .Write(requestId)
+        .Send();
 
     public void RequestHistoricalData(
         int requestId,
@@ -443,8 +439,7 @@ public sealed class Request
 
         RequestMessage m = CreateMessage()
             .Write(RequestCode.RequestHistoricalData, requestId)
-            .WriteContract(contract)
-            .Write(contract.IncludeExpired)
+            .WriteContract(contract, includeExpired: true)
             .Write(
                 endDateTime,
                 barSize,
@@ -474,7 +469,7 @@ public sealed class Request
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
             .Write(RequestCode.ExerciseOptions, "2", requestId)
-            .WriteContract(contract, true)
+            .WriteContract(contract, includePrimaryExchange: false)
             .Write(exerciseAction, exerciseQuantity, account, overrideOrder)
             .Send();
     }
@@ -534,6 +529,7 @@ public sealed class Request
     public void RequestRealTimeBars(
         int requestId,
         Contract contract,
+        int barSize, // this parameter is not currently used
         string whatToShow = RealtimeBarWhatToShow.Trades,
         bool regularTradingHoursOnly = true,
         params Tag[] options)
@@ -542,7 +538,7 @@ public sealed class Request
         CreateMessage()
             .Write(RequestCode.RequestRealTimeBars, "3", requestId)
             .WriteContract(contract)
-            .Write("5", // bar size: only 5 seconds bars are available
+            .Write(barSize,
                 whatToShow,
                 regularTradingHoursOnly,
                 Tag.Combine(options))
@@ -651,7 +647,7 @@ public sealed class Request
         .Write(RequestCode.CancelPositions, "1")
         .Send();
 
-    // 65, 66: For IB internal use
+    // 65, 66: For IB internal use.
 
     public void QueryDisplayGroups(int requestId) => CreateMessage()
         .Write(RequestCode.QueryDisplayGroups, "1", requestId)
@@ -671,29 +667,22 @@ public sealed class Request
         .Write(RequestCode.UnsubscribeFromGroupEvents, "1", requestId)
         .Send();
 
-    // 71: StartApi
-    // 72, 73: for IB internal use
+    // 71: StartApi.
+    // 72, 73: for IB internal use.
 
-    public void RequestPositionsMulti(
-        int requestId,
-        string account,
-        string modelCode) => CreateMessage()
-            .Write(RequestCode.RequestPositionsMulti, "1", requestId)
-            .Write(account, modelCode)
-            .Send();
+    public void RequestPositionsMulti(int requestId, string account, string modelCode) => CreateMessage()
+        .Write(RequestCode.RequestPositionsMulti, "1", requestId)
+        .Write(account, modelCode)
+        .Send();
 
     public void CancelPositionsMulti(int requestId) => CreateMessage()
         .Write(RequestCode.CancelPositionsMulti, "1", requestId)
         .Send();
 
-    public void RequestAccountUpdatesMulti(
-        int requestId,
-        string account,
-        string modelCode,
-        bool ledgerAndNlv) => CreateMessage()
-            .Write(RequestCode.RequestAccountUpdatesMulti, "1", requestId)
-            .Write(account, modelCode, ledgerAndNlv)
-            .Send();
+    public void RequestAccountUpdatesMulti(int requestId, string account, string modelCode, bool ledgerAndNlv) => CreateMessage()
+        .Write(RequestCode.RequestAccountUpdatesMulti, "1", requestId)
+        .Write(account, modelCode, ledgerAndNlv)
+        .Send();
 
     public void CancelAccountUpdatesMulti(int requestId) => CreateMessage()
         .Write(RequestCode.CancelAccountUpdatesMulti, "1", requestId)
@@ -734,10 +723,10 @@ public sealed class Request
     public void RequestNewsArticle(
         int requestId,
         string providerCode,
-        string articleId) => CreateMessage()
+        string articleId,
+        params Tag[] options) => CreateMessage()
             .Write(RequestCode.RequestNewsArticle, requestId)
-            .Write(providerCode, articleId)
-            .Write("")
+            .Write(providerCode, articleId, options)
             .Send();
 
     public void RequestNewsProviders() => CreateMessage()
@@ -750,10 +739,10 @@ public sealed class Request
         string providerCodes,
         string startTime,
         string endTime,
-        int totalResults) => CreateMessage()
+        int totalResults,
+        params Tag[] options) => CreateMessage()
             .Write(RequestCode.RequestHistoricalNews, requestId)
-            .Write(contractId, providerCodes, startTime, endTime, totalResults)
-            .Write("")
+            .Write(contractId, providerCodes, startTime, endTime, totalResults, options)
             .Send();
 
     public void RequestHeadTimestamp(
@@ -766,8 +755,7 @@ public sealed class Request
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
             .Write(RequestCode.RequestHeadTimestamp, requestId)
-            .WriteContract(contract)
-            .Write(contract.IncludeExpired)
+            .WriteContract(contract, includeExpired: true)
             .Write(useRth, whatToShow, formatDate)
             .Send();
     }
@@ -781,8 +769,7 @@ public sealed class Request
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
             .Write(RequestCode.RequestHistogramData, requestId)
-            .WriteContract(contract)
-            .Write(contract.IncludeExpired)
+            .WriteContract(contract, includeExpired: true)
             .Write(useRth, period)
             .Send();
     }
@@ -799,26 +786,19 @@ public sealed class Request
         .Write(RequestCode.RequestMarketRule, marketRuleId)
         .Send();
 
-    public void RequestPnL(
-        int requestId,
-        string account,
-        string modelCode) => CreateMessage()
-            .Write(RequestCode.ReqPnL, requestId)
-            .Write(account, modelCode)
-            .Send();
+    public void RequestPnL(int requestId, string account, string modelCode) => CreateMessage()
+        .Write(RequestCode.ReqPnL, requestId)
+        .Write(account, modelCode)
+        .Send();
 
     public void CancelPnL(int requestId) => CreateMessage()
         .Write(RequestCode.CancelPnL, requestId)
         .Send();
 
-    public void RequestPnLSingle(
-        int requestId,
-        string account,
-        string modelCode,
-        int contractId) => CreateMessage()
-            .Write(RequestCode.ReqPnLSingle, requestId)
-            .Write(account, modelCode, contractId)
-            .Send();
+    public void RequestPnLSingle(int requestId, string account, string modelCode, int contractId) => CreateMessage()
+        .Write(RequestCode.ReqPnLSingle, requestId)
+        .Write(account, modelCode, contractId)
+        .Send();
 
     public void CancelPnLSingle(int requestId) => CreateMessage()
         .Write(RequestCode.CancelPnLSingle, requestId)
@@ -832,15 +812,15 @@ public sealed class Request
         int numberOfTicks,
         string whatToShow,
         int useRth,
-        bool ignoreSize)
+        bool ignoreSize,
+        params Tag[] options)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
             .Write(RequestCode.ReqHistoricalTicks, requestId)
-            .WriteContract(contract)
-            .Write(contract.IncludeExpired)
+            .WriteContract(contract, includeExpired: true)
             .Write(startDateTime, endDateTime, numberOfTicks, whatToShow, useRth, ignoreSize)
-            .Write("")
+            .Write(options)
             .Send();
     }
 

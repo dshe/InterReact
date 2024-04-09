@@ -95,13 +95,8 @@ public class Monitor : CollectionTestBase
             Exchange = "SMART"
         };
 
-        PriceTick? askPriceTick = await Client
-            .Service
-            .CreateTickSnapshotObservable(contract)
-            .OfTickClass(msg => msg.PriceTick)
-            .FirstOrDefaultAsync(priceTick =>
-                priceTick.TickType == TickType.AskPrice || priceTick.TickType == TickType.DelayedAskPrice);
-
+        IList<IHasRequestId> list = await Client.Service.GetTickSnapshotAsync(contract);
+        PriceTick? askPriceTick = list.OfType<PriceTick>().Where(priceTick => priceTick.TickType == TickType.AskPrice || priceTick.TickType == TickType.DelayedAskPrice).FirstOrDefault();
         Assert.NotNull(askPriceTick);
         double askPrice = askPriceTick.Price;
 

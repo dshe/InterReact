@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 
 namespace Other;
 
@@ -16,6 +15,6 @@ public class Disposal : ConnectTestBase
         await client.DisposeAsync();
 
         Assert.ThrowsAny<Exception>(() => client.Request.RequestCurrentTime());
-        await Assert.ThrowsAnyAsync<Exception>(() => client.Service.CreateMatchingSymbolsObservable("x").ToTask());
+        await Assert.ThrowsAnyAsync<Exception>(() => client.Service.FindMatchingSymbolsAsync("x", default));
     }
 }

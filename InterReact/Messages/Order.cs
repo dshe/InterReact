@@ -313,6 +313,14 @@ public sealed class Order : IHasOrderId  // input + output
     public long ParentPermId { get; set; } = long.MaxValue;
 
 
+    public string AdvancedErrorOverride { get; set; } = "";
+    public string ManualOrderTime { get; set; } = "";
+    public int MinTradeQty { get; set; } = int.MaxValue;
+    public int MinCompeteSize { get; set; } = int.MaxValue;
+    public double CompeteAgainstBestOffset { get; set; } = double.PositiveInfinity;
+    public double MidOffsetAtWhole { get; set; } = double.MaxValue;
+    public double MidOffsetAtHalf { get; set; } = double.MaxValue;
+
     public bool RandomizeSize { get; set; }
     public bool RandomizePrice { get; set; }
     public int ReferenceContractId { get; set; }
@@ -336,13 +344,4 @@ public sealed class Order : IHasOrderId  // input + output
     public bool? UsePriceMgmtAlgo { get; set; }
     public int Duration { get; set; } = int.MaxValue;
     public int PostToAts { get; set; } = int.MaxValue;
-
-
-    public string AdvancedErrorOverride { get; set; } = "";
-    public string ManualOrderTime { get; set; } = "";
-    public int MinTradeQty { get; set; } = int.MaxValue;
-    public int MinCompeteSize { get; set; } = int.MaxValue;
-    public double CompeteAgainstBestOffset { get; set; } = double.MaxValue;
-    public double MidOffsetAtWhole { get; set; } = double.MaxValue;
-    public double MidOffsetAtHalf { get; set; } = double.MaxValue;
 }

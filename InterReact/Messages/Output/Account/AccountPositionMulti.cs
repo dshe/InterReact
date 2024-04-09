@@ -13,7 +13,7 @@ public sealed class AccountPositionMulti : IHasRequestId
         r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
         Account = r.ReadString();
-        Contract = new(r, false);
+        Contract = new(r, includePrimaryExchange: false);
         Position = r.ReadDecimal();
         AvgCost = r.ReadDouble();
         ModelCode = r.ReadString();

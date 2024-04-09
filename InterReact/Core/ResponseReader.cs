@@ -45,7 +45,7 @@ public sealed class ResponseReader
     internal double ReadDouble() => Parser.ParseDouble(ReadString());
     internal double ReadDoubleMax() => Parser.ParseDoubleMax(ReadString());
 
-    internal decimal ReadDecimal() => Parser.ParseDecimal(ReadString());
+    internal decimal ReadDecimal() => Parser.ParseDecimal(ReadString()); // ok
 
     internal LocalTime ReadLocalTime(LocalTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
 

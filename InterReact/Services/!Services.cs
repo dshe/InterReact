@@ -12,7 +12,6 @@ public partial class Service : IDisposable
         Response = response;
         AccountSummaryObservable = CreateAccountSummaryObservable();
         PositionsObservable = CreatePositionsObservable();
-        ManagedAccountsObservable = CreateManagedAccountsObservable();
     }
 
     protected virtual void Dispose(bool disposing)

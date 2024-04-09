@@ -106,11 +106,11 @@ public sealed class RequestMessage
         }
     }
 
-    internal RequestMessage WriteContract(Contract contract, bool excludePrimaryExchange = false) =>
-        contract.Write(this, excludePrimaryExchange);
+    internal RequestMessage WriteContract(Contract contract, bool includePrimaryExchange = true, bool includeExpired = false) =>
+        contract.Write(this, includePrimaryExchange, includeExpired);
 }
 
-internal static class ResponseMessageExtensions
+internal static class RequestMessageExtensions
 {
     internal static string ToMax(this double val)
     {
@@ -126,4 +126,5 @@ internal static class ResponseMessageExtensions
             return "";
         return val.ToString(CultureInfo.InvariantCulture);
     }
+
 }
