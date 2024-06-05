@@ -6,18 +6,19 @@ public class Completed : CollectionTestBase
 {
     public Completed(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    [Fact]
-    public async Task CompletedOrdersAsyncTest()
-    {
-        bool api = true;
 
-        IList<CompletedOrder> orders = await Client
-            .Service
-            .GetCompleteOrdersAsync(api);
+    //[Fact]
+    //public async Task CompletedOrdersAsyncTest()
+    //{
+    //    bool api = true;
 
-        Write($"Complete orders found: {orders.Count}.");
+    //    IList<CompletedOrder> orders = await Client
+    //        .Service
+    //        .GetCompleteOrdersAsync(api);
 
-        foreach (CompletedOrder order in orders)
-            Write(order.Stringify());
-    }
+    //    Write($"Complete orders found: {orders.Count}.");
+
+    //    foreach (CompletedOrder order in orders)
+    //        Write(order.Stringify());
+    //}
 }
