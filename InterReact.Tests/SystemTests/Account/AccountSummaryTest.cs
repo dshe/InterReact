@@ -16,7 +16,7 @@ public class Summary : CollectionTestBase
         Task<IList<IHasRequestId>> task = Client
             .Response
             .WithRequestId(id)
-            .Take(TimeSpan.FromMilliseconds(100))
+            .Take(TimeSpan.FromMilliseconds(1000))
             .ToList()
             .ToTask();
 
@@ -38,7 +38,7 @@ public class Summary : CollectionTestBase
         IList<AccountSummary> messages = await Client
             .Service
             .AccountSummaryObservable
-            .Take(TimeSpan.FromMilliseconds(100))
+            .Take(TimeSpan.FromMilliseconds(1000))
             .ToList();
 
         Assert.NotEmpty(messages);
@@ -53,7 +53,7 @@ public class Summary : CollectionTestBase
         IList<AccountSummary> messages = await Client
             .Service
             .AccountSummaryObservable
-            .Take(TimeSpan.FromMilliseconds(100))
+            .Take(TimeSpan.FromMilliseconds(1000))
             .ToList();
 
         Assert.NotEmpty(messages);

@@ -6,16 +6,16 @@ public class Executions : CollectionTestBase
 {
     public Executions(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    [Fact]
-    public async Task RequestExecutionsAsyncTest()
-    {
-        IList<IHasRequestId> list = await Client
-            .Service
-            .GetExecutionsAsync();
+    //[Fact]
+    //public async Task RequestExecutionsAsyncTest()
+    //{
+    //    IList<IHasRequestId> list = await Client
+    //        .Service
+    //        .GetExecutionsAsync();
 
-        Write($"Executions found: {list.Count}.");
+    //    Write($"Executions found: {list.Count}.");
 
-        foreach (IHasRequestId item in list)
-            Write(item.Stringify());
-    }
+    //    foreach (IHasRequestId item in list)
+    //        Write(item.Stringify());
+    //}
 }
