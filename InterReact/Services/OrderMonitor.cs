@@ -7,8 +7,27 @@ public partial class Service
     /// <summary>
     /// Places an order and returns an OrderMonitor object (below) which can be used to monitor the order.
     /// </summary>
-    public OrderMonitor PlaceOrder(Order order, Contract contract) =>
-        new(order, contract, Request, Response);
+    public async Task<OrderMonitor> PlaceOrderAsync(Order order, Contract contract)
+    {
+        return await Task.Run(() =>
+        {
+            return new OrderMonitor(order, contract, Request, Response);
+        });
+    }
+
+    public async Task<IList<Object>> RequestOpenOrdersAsync()
+    {
+        //todo: how to get return values from this.Response?
+        Request.RequestOpenOrders();
+        throw new NotImplementedException();
+    }
+
+    public async Task<IList<CompletedOrder>> GetCompleteOrdersAsync(bool api)
+    {
+        Request.RequestCompletedOrders(api);
+        // how to get return values from this.Response?
+        throw new NotImplementedException();
+    }
 }
 
 /// <summary>
