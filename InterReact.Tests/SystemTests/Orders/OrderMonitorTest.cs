@@ -28,7 +28,7 @@ public class Monitor : CollectionTestBase
             OrderType = OrderTypes.Market
         };
 
-        OrderMonitor orderMonitor = Client.Service.PlaceOrder(order, contract);
+        OrderMonitor orderMonitor = await Client.Service.PlaceOrderAsync(order, contract);
 
         orderMonitor
             .Messages
@@ -66,7 +66,7 @@ public class Monitor : CollectionTestBase
             OrderType = OrderTypes.Market
         };
 
-        OrderMonitor orderMonitor = Client.Service.PlaceOrder(order, contract);
+        OrderMonitor orderMonitor = await Client.Service.PlaceOrderAsync(order, contract);
 
         orderMonitor.CancelOrder();
 
@@ -109,7 +109,7 @@ public class Monitor : CollectionTestBase
         };
 
         // Place the order
-        OrderMonitor orderMonitor = Client.Service.PlaceOrder(order, contract);
+        OrderMonitor orderMonitor = await Client.Service.PlaceOrderAsync(order, contract);
 
         //await Task.Delay(100);
 

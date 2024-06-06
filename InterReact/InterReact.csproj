@@ -18,6 +18,7 @@
 	<EnablePackageValidation>true</EnablePackageValidation>
 	<AnalysisMode>All</AnalysisMode>
 	<NoWarn>CA1848;</NoWarn>
+	<Title>InterReact.IBKR</Title>
   </PropertyGroup>
 
   <ItemGroup>
