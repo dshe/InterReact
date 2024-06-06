@@ -17,11 +17,17 @@ public partial class Service
         });
     }
 
-    public async Task<IList<Object>> RequestOpenOrdersAsync()
+    public async Task<IList<OpenOrder>> RequestOpenOrdersAsync()
     {
-        //todo: how to get return values from this.Response?
+        Task<IList<OpenOrder>> task =
+            Response
+            .OfType<OpenOrder>()
+            .Take(TimeSpan.FromMilliseconds(500))
+            .ToList()
+            .ToTask();
         Request.RequestOpenOrders();
-        throw new NotImplementedException();
+        var orders = await task;
+        return orders;
     }
 
     public async Task<IList<CompletedOrder>> GetCompleteOrdersAsync(bool api)
