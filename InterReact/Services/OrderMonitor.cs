@@ -1,4 +1,6 @@
 ﻿using System.Reactive.Subjects;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 
 namespace InterReact;
 
@@ -24,9 +26,17 @@ public partial class Service
 
     public async Task<IList<CompletedOrder>> GetCompleteOrdersAsync(bool api)
     {
+        Task<IList<CompletedOrder>> task = 
+            Response
+            .OfType<CompletedOrder>()
+            .Take(TimeSpan.FromMilliseconds(500))
+            .ToList()
+            .ToTask();
+
         Request.RequestCompletedOrders(api);
-        // how to get return values from this.Response?
-        throw new NotImplementedException();
+
+        var completedOrders = await task;
+        return completedOrders;
     }
 }
 
