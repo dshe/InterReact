@@ -6,20 +6,48 @@ public class Open : CollectionTestBase
 {
     public Open(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
 
-    //[Fact(Skip = "Test may conflict when run together with order placement tests")]
-    //public async Task OpenOrdersAsyncTest()
-    //{
-    //    await Task.Delay(3000);
+    [Fact]
+    public async Task OpenOrdersAsyncTest()
+    {
+        await Task.Delay(1000);
 
-    //    IList<object> list = await Client
-    //        .Service
-    //        .GetOpenOrdersAsync(OpenOrdersRequestType.OpenOrders)
-    //        .WaitAsync(TimeSpan.FromSeconds(10));
+        // 1 place order
+        // Place the order with orderId: orderId
+        var contract = new Contract()
+        {
+            SecurityType = ContractSecurityType.Stock,
+            Symbol = "AMZN",
+            Currency = "USD",
+            Exchange = "SMART"
+        };
 
-    //    Write($"Open orders found: {list.Count}.");
+        int orderId = Client.Request.GetNextId();
 
-    //    foreach (object item in list)
-    //        Write(item.Stringify());
-    //}
+        var order = new Order()
+        {
+            Action = OrderAction.Buy,
+            TotalQuantity = 1,
+            OrderType = OrderTypes.Limit,
+            LimitPrice = 1,
+            TimeInForce = OrderTimeInForce.GoodUntilCancelled
+        };
+
+        OrderMonitor orderMonitor = await Client.Service.PlaceOrderAsync(order, contract);
+
+        //2 Request Open Order
+        IList<OpenOrder> openOrders = await Client
+            .Service
+            .RequestOpenOrdersAsync()
+            .WaitAsync(TimeSpan.FromSeconds(1));
+
+        Write($"Open orders found: {openOrders.Count}.");
+
+        foreach (Object item in openOrders)
+            Write(item.Stringify());
+
+        //3 cancel Order
+        orderMonitor.CancelOrder();
+        orderMonitor.Dispose();
+    }
 }
 

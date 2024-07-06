@@ -1,4 +1,6 @@
 ﻿using System.Reactive.Subjects;
+using System.Reactive.Linq;
+using System.Reactive.Threading.Tasks;
 
 namespace InterReact;
 
@@ -7,8 +9,41 @@ public partial class Service
     /// <summary>
     /// Places an order and returns an OrderMonitor object (below) which can be used to monitor the order.
     /// </summary>
-    public OrderMonitor PlaceOrder(Order order, Contract contract) =>
-        new(order, contract, Request, Response);
+    public async Task<OrderMonitor> PlaceOrderAsync(Order order, Contract contract)
+    {
+        return await Task.Run(() =>
+        {
+            return new OrderMonitor(order, contract, Request, Response);
+        });
+    }
+
+    public async Task<IList<OpenOrder>> RequestOpenOrdersAsync()
+    {
+        Task<IList<OpenOrder>> task =
+            Response
+            .OfType<OpenOrder>()
+            .Take(TimeSpan.FromMilliseconds(500))
+            .ToList()
+            .ToTask();
+        Request.RequestOpenOrders();
+        var orders = await task;
+        return orders;
+    }
+
+    public async Task<IList<CompletedOrder>> GetCompleteOrdersAsync(bool api)
+    {
+        Task<IList<CompletedOrder>> task = 
+            Response
+            .OfType<CompletedOrder>()
+            .Take(TimeSpan.FromMilliseconds(500))
+            .ToList()
+            .ToTask();
+
+        Request.RequestCompletedOrders(api);
+
+        var completedOrders = await task;
+        return completedOrders;
+    }
 }
 
 /// <summary>
