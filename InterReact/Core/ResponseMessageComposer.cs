@@ -1,38 +1,34 @@
-﻿using Stringification;
+﻿using System.Diagnostics;
 using System.IO;
 
 namespace InterReact;
 
-public sealed class ResponseMessageComposer
+public sealed class ResponseMessageComposer(IClock clock, ResponseReader reader)
 {
-    private IClock Clock { get; }
-    private ILogger Logger { get; }
-    private ResponseReader Reader { get; }
+    private IClock Clock { get; } = clock;
+    private ResponseReader Reader { get; } = reader;
 
-    public ResponseMessageComposer(IClock clock, ILogger<ResponseMessageComposer> logger, ResponseReader reader)
+    internal void OnNext(string[] message, Action<object> onNext)
     {
-        Clock = clock;
-        Logger = logger;
-        Reader = reader;
+        object result = ComposeMessage(message);
+        if (result is object[] results)
+        {
+            Debug.Assert(message[0] == "1");
+            Debug.Assert(results.Length == 2);
+            onNext(results[0]); // priceTick
+            onNext(results[1]); // sizeTick
+            return;
+        }
+        onNext(result);
     }
 
     internal object ComposeMessage(string[] strings)
     {
-        string code = "";
-        try
-        {
-            Reader.SetEnumerator(strings);
-            code = Reader.ReadString();
-            object message = GetResponseMessage(code);
-            Reader.VerifyEnumerationEnd();
-            return message;
-        }
-        catch (Exception e)
-        {
-            string m = $"ResponseComposer error: [{code} => {strings.JoinStrings(", ")}].";
-            Logger.LogError(e, "{Message}", m);
-            throw new InvalidDataException(m, e);
-        }
+        Reader.SetStrings(strings);
+        string code = Reader.ReadString();
+        object message = GetResponseMessage(code);
+        Reader.VerifyEnumerationEnd();
+        return message;
     }
 
     private object GetResponseMessage(string code) => code switch
@@ -75,8 +71,8 @@ public sealed class ResponseMessageComposer
         "58" => new MarketDataTickType(Reader),
         "59" => new CommissionReport(Reader),
 
-        "61" => new Position(Reader),
-        "62" => new PositionEnd(Reader),
+        "61" => new AccountPosition(Reader),
+        "62" => new AccountPositionEnd(Reader),
         "63" => new AccountSummary(Reader),
         "64" => new AccountSummaryEnd(Reader),
         "65" => new VerifyMessageApi(Reader),
@@ -85,8 +81,8 @@ public sealed class ResponseMessageComposer
         "68" => new DisplayGroupUpdate(Reader),
         "69" => new VerifyAndAuthorizeMessageApi(Reader),
         "70" => new VerifyAndAuthorizeCompleted(Reader),
-        "71" => new AccountPositionMulti(Reader),
-        "72" => new AccountPositionMultiEnd(Reader),
+        "71" => new AccountPositionsMulti(Reader),
+        "72" => new AccountPositionsMultiEnd(Reader),
         "73" => new AccountUpdateMulti(Reader),
         "74" => new AccountUpdateMultiEnd(Reader),
         "75" => new SecurityDefinitionOptionParameter(Reader),

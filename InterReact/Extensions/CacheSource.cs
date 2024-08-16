@@ -14,7 +14,7 @@ public static partial class Extension
         (this IObservable<T> source, Func<T, string> keySelector)
     {
         long index = 0;
-        Dictionary<string, (T Item, long Index)> cache = new();
+        Dictionary<string, (T Item, long Index)> cache = [];
 
         Subject<T>? subject = null;
         IDisposable sourceSubscription = Disposable.Empty;
@@ -40,12 +40,7 @@ public static partial class Extension
                                 return;
                             string key = keySelector(x);
                             if (key.Length != 0)
-                            {
-                                if (cache.TryGetValue(key, out (T Item, long Index) item))
-                                    item.Item = x;
-                                else
-                                    cache.Add(key, (x, index++));
-                            }
+                                cache[key] = (x, index++);
                         }
                         subject.OnNext(x);
                     },

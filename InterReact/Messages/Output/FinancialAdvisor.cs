@@ -2,8 +2,8 @@
 
 public sealed class FinancialAdvisor
 {
-    public FinancialAdvisorDataType DataType { get; } = FinancialAdvisorDataType.Undefined;
-    public string Data { get; } = "";
+    public FinancialAdvisorDataType DataType { get; }
+    public string Data { get; }
     internal FinancialAdvisor(ResponseReader r)
     {
         r.IgnoreMessageVersion();

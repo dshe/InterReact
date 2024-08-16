@@ -89,7 +89,7 @@ public sealed class ContractDetails : IHasRequestId
     /// <summary>
     /// CUSIP, ISIN etc.
     /// </summary>
-    public IList<Tag> SecurityIds { get; } = new List<Tag>(); // output
+    public IList<Tag> SecurityIds { get; } = [];
 
     public string UnderSymbol { get; } = "";
     public string UnderSecType { get; } = "";
@@ -115,23 +115,30 @@ public sealed class ContractDetails : IHasRequestId
     public string Maturity { get; private set; } = "";
     public string IssueDate { get; } = "";
     public string NextOptionDate { get; } = "";
-
-    /// <summary>
-    /// If bond has embedded options.
-    /// </summary>
     public string NextOptionType { get; } = "";
-
-    /// <summary>
-    /// If bond has embedded options.
-    /// </summary>
     public bool NextOptionPartial { get; }
-
     public string Notes { get; } = "";
-
     public decimal MinSize { get; } = decimal.MaxValue;
     public decimal SizeIncrement { get; } = decimal.MaxValue;
     public decimal SuggestedSizeIncrement { get; } = decimal.MaxValue;
-
+    public string FundName { get; } = "";
+    public string FundFamily { get; } = "";
+    public string FundType { get; } = "";
+    public string FundFrontLoad { get; } = "";
+    public string FundBackLoad { get; } = "";
+    public string FundBackLoadTimeInterval { get; } = "";
+    public string FundManagementFee { get; } = "";
+    public bool FundClosed { get; }
+    public bool FundClosedForNewInvestors { get; }
+    public bool FundClosedForNewMoney { get; }
+    public string FundNotifyAmount { get; } = "";
+    public string FundMinimumInitialPurchase { get; } = "";
+    public string FundSubsequentMinimumPurchase { get; } = "";
+    public string FundBlueSkyStates { get; } = "";
+    public string FundBlueSkyTerritories { get; } = "";
+    public FundDistributionPolicyIndicator FundDistributionPolicyIndicator { get; }
+    public FundAssetType FundAssetType { get; }
+    public IList<IneligibilityReason> IneligibilityReasonList { get; } = [];
     internal ContractDetails(ResponseReader r, ContractDetailsType type)
     {
         switch (type)
@@ -140,7 +147,11 @@ public sealed class ContractDetails : IHasRequestId
                 RequestId = r.ReadInt();
                 Contract.Symbol = r.ReadString();
                 Contract.SecurityType = r.ReadString();
+
                 ReadLastTradeDate(r.ReadString(), false);
+                //if (r.Options.ServerVersionCurrent >= ServerVersion.LAST_TRADE_DATE)
+                //    Contract.LastTradeDateOrContractMonth = r.ReadString(); // ???
+
                 Contract.Strike = r.ReadDouble();
                 Contract.Right = r.ReadString();
                 Contract.Exchange = r.ReadString();
@@ -166,7 +177,7 @@ public sealed class ContractDetails : IHasRequestId
                 LiquidHours = r.ReadString();
                 EconomicValueRule = r.ReadString();
                 EconomicValueMultiplier = r.ReadDouble();
-                r.AddTagsToList(SecurityIds);
+                r.AddToTags(SecurityIds);
                 AggGroup = r.ReadInt();
                 UnderSymbol = r.ReadString();
                 UnderSecType = r.ReadString();
@@ -176,6 +187,47 @@ public sealed class ContractDetails : IHasRequestId
                 MinSize = r.ReadDecimal();
                 SizeIncrement = r.ReadDecimal();
                 SuggestedSizeIncrement = r.ReadDecimal();
+
+                /*
+                if (r.Options.ServerVersionCurrent >= ServerVersion.FUND_DATA_FIELDS && Contract.SecurityType == "FUND")
+                {
+                    FundName = r.ReadString();
+                    FundFamily = r.ReadString();
+                    FundType = r.ReadString();
+                    FundFrontLoad = r.ReadString();
+                    FundBackLoad = r.ReadString();
+                    FundBackLoadTimeInterval = r.ReadString();
+                    FundManagementFee = r.ReadString();
+                    FundClosed = r.ReadBool();
+                    FundClosedForNewInvestors = r.ReadBool();
+                    FundClosedForNewMoney = r.ReadBool();
+                    FundNotifyAmount = r.ReadString();
+                    FundMinimumInitialPurchase = r.ReadString();
+                    FundSubsequentMinimumPurchase = r.ReadString();
+                    FundBlueSkyStates = r.ReadString();
+                    FundBlueSkyTerritories = r.ReadString();
+                    FundDistributionPolicyIndicator = CFundDistributionPolicyIndicator.GetFundDistributionPolicyIndicator(r.ReadString());
+                    FundAssetType = CFundAssetType.GetFundAssetType(r.ReadString());
+                }
+                */
+
+                /*
+                if (r.Options.ServerVersionCurrent >= ServerVersion.INELIGIBILITY_REASONS)
+                {
+                    var n = r.ReadInt();
+                    if (n > 0)
+                    {
+                        for (var i = 0; i < n; ++i)
+                        {
+                            IneligibilityReasonList.Add(new IneligibilityReason
+                            {
+                                Id = r.ReadString(),
+                                Description = r.ReadString()
+                            });
+                        }
+                    }
+                }
+                */
                 break;
 
             case ContractDetailsType.BondContractType:
@@ -210,7 +262,7 @@ public sealed class ContractDetails : IHasRequestId
                 LongName = r.ReadString();
                 EconomicValueRule = r.ReadString();
                 EconomicValueMultiplier = r.ReadDouble();
-                r.AddTagsToList(SecurityIds);
+                r.AddToTags(SecurityIds);
                 AggGroup = r.ReadInt();
                 MarketRuleIds = r.ReadString();
                 MinSize = r.ReadDecimal();
@@ -232,6 +284,7 @@ public sealed class ContractDetails : IHasRequestId
                 Contract.TradingClass = r.ReadString();
                 break;
         }
+
         if (RequestId == int.MaxValue)
             throw new InvalidDataException("Test Exception!!");
     }

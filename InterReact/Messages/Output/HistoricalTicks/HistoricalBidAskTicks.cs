@@ -3,13 +3,13 @@
 public sealed class HistoricalBidAskTicks : IHasRequestId
 {
     public int RequestId { get; }
-    public IList<HistoricalBidAskTick> Ticks { get; } = new List<HistoricalBidAskTick>();
+    public IList<HistoricalBidAskTick> Ticks { get; }
     public bool Done { get; }
-
     internal HistoricalBidAskTicks(ResponseReader r)
     {
         RequestId = r.ReadInt();
         int n = r.ReadInt();
+        Ticks = new List<HistoricalBidAskTick>(n);
         for (int i = 0; i < n; i++)
             Ticks.Add(new HistoricalBidAskTick(r));
         Done = r.ReadBool();

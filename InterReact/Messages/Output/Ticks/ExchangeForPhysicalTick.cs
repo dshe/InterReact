@@ -3,7 +3,7 @@
 public sealed class ExchangeForPhysicalTick : ITick
 {
     public int RequestId { get; }
-    public TickType TickType { get; } = TickType.Undefined;
+    public TickType TickType { get; }
     public double BasisPoints { get; }
     public string FormattedBasisPoints { get; }
     public double ImpliedFuturesPrice { get; }

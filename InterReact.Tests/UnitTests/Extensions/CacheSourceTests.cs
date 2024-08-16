@@ -6,10 +6,8 @@ using System.Reactive.Threading.Tasks;
 
 namespace Extension;
 
-public class CacheSourceTests : ReactiveUnitTestBase
+public class CacheSourceTests(ITestOutputHelper output) : ReactiveUnitTestBase(output)
 {
-    public CacheSourceTests(ITestOutputHelper output) : base(output) { }
-
     [Fact]
     public void T00_Test()
     {
@@ -29,10 +27,10 @@ public class CacheSourceTests : ReactiveUnitTestBase
         testScheduler.AdvanceBy(150);
         observable.Subscribe(observer2);
 
-        Recorded<Notification<string>>[] expected1 = new[] { OnNext(100, "one") };
+        Recorded<Notification<string>>[] expected1 = [OnNext(100, "one")];
         Assert.Equal(expected1.ToList(), observer1.Messages);
 
-        Recorded<Notification<string>>[] expected2 = new[] { OnNext(150, "one") };
+        Recorded<Notification<string>>[] expected2 = [OnNext(150, "one")];
         Assert.Equal(expected2.ToList(), observer2.Messages);
 
         testScheduler.Start();

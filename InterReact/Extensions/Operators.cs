@@ -23,4 +23,5 @@ public static partial class Extension
             o.OnError,
             o.OnCompleted
         ));
+
 }

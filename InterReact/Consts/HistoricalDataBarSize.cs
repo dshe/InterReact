@@ -21,6 +21,6 @@ public static class HistoricalDataBarSize
     public const string FourHours = "4 hours";
     public const string EightHours = "8 hours";
     public const string OneDay = "1 day";
-    public const string OneWeek = "1 week";
-    public const string OneMonth = "1 month";
+    public const string OneWeek = "1W";
+    public const string OneMonth = "1M";
 }

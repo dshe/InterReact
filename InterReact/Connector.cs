@@ -69,9 +69,9 @@ internal sealed class Connector
     {
         IPAddress ipAddress = IPAddress.Parse(Options.TwsIpAddress);
         IPEndPoint ipEndPoint = new(ipAddress, 0);
-        foreach (string port in Options.TwsPortAddress.Split(","))
+        foreach (int port in Options.IBPortAddresses)
         {
-            ipEndPoint.Port = int.Parse(port, CultureInfo.InvariantCulture);
+            ipEndPoint.Port = port;
             var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
             cts.CancelAfter(TimeSpan.FromSeconds(1));
             try
@@ -93,7 +93,8 @@ internal sealed class Connector
                 cts.Dispose();
             }
         }
-        string message = $"Could not connect to TWS/Gateway at [{ipEndPoint.Address}]:{Options.TwsPortAddress}. " +
+        string message = $"Could not connect to TWS/Gateway at " +
+            $"[{ipEndPoint.Address}]:{string.Join(", ", Options.IBPortAddresses)}. " +
             $"In TWS, navigate to Edit / Global Configuration / API / Settings and ensure" +
             $" the option \"Enable ActiveX and Socket Clients\" is selected.";
         throw new ArgumentException(message);
@@ -107,8 +108,11 @@ internal sealed class Connector
         // Report a range of supported API versions to TWS.
         SendWithPrefix($"v{(int)Options.ServerVersionMin}..{(int)Options.ServerVersionMax}");
 
-        SendWithPrefix(((int)RequestCode.StartApi).ToString(CultureInfo.InvariantCulture),
-            "2", Options.TwsClientId.ToString(CultureInfo.InvariantCulture), Options.OptionalCapabilities);
+        SendWithPrefix(
+            ((int)RequestCode.StartApi).ToString(CultureInfo.InvariantCulture),
+            "2",
+            Options.TwsClientId.ToString(CultureInfo.InvariantCulture), 
+            Options.OptionalCapabilities);
 
         string[] message;
         try

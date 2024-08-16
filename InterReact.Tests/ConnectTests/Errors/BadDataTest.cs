@@ -4,10 +4,8 @@ using System.Reactive.Threading.Tasks;
 
 namespace Other;
 
-public class BadData : ConnectTestBase
+public class BadData(ITestOutputHelper output) : ConnectTestBase(output, LogLevel.Debug)
 {
-    public BadData(ITestOutputHelper output) : base(output, LogLevel.Debug) { }
-
     [Fact]
     public async Task BadRequestTest()
     {

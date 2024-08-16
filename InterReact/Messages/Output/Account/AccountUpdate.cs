@@ -4,7 +4,7 @@ public sealed class AccountValue
 {
     public string AccountName { get; }
     public string Key { get; }
-    public string Value { get; }
+    public string Value { get; } = "0";
     public string Currency { get; }
     internal AccountValue(ResponseReader r)
     {

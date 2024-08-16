@@ -1,18 +1,10 @@
 ﻿namespace InterReact;
 
-public partial class Service : IDisposable
+public partial class Service(Request request, Response response) : IDisposable
 {
-    private Request Request { get; }
-    private Response Response { get; }
+    private readonly Request Request = request;
+    private readonly Response Response = response;
     private bool Disposed;
-
-    public Service(Request request, Response response)
-    {
-        Request = request;
-        Response = response;
-        AccountSummaryObservable = CreateAccountSummaryObservable();
-        PositionsObservable = CreatePositionsObservable();
-    }
 
     protected virtual void Dispose(bool disposing)
     {

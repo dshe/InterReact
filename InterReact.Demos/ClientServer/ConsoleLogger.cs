@@ -2,18 +2,12 @@
 
 namespace ClientServer;
 
-public sealed class ConsoleLogger : ILogger
+public sealed class ConsoleLogger(
+    string categoryName, LogLevel logLevel, ConsoleColor color) : ILogger
 {
-    private readonly string CategoryName;
-    private readonly LogLevel LogLevel;
-    private readonly ConsoleColor Color;
-
-    public ConsoleLogger(string categoryName, LogLevel logLevel, ConsoleColor color)
-    {
-        CategoryName = categoryName;
-        LogLevel = logLevel;
-        Color = color;
-    }
+    private readonly string CategoryName = categoryName;
+    private readonly LogLevel LogLevel = logLevel;
+    private readonly ConsoleColor Color = color;
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {

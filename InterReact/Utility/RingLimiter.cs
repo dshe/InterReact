@@ -15,8 +15,7 @@ public sealed class RingLimiter
     internal RingLimiter(ILogger logger, int rate = 0)
     {
         Logger = logger;
-        if (rate < 0)
-            throw new ArgumentOutOfRangeException(nameof(rate));
+        ArgumentOutOfRangeException.ThrowIfNegative(rate);
         Rate = rate;
         Ring = new long[rate];
     }

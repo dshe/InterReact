@@ -76,4 +76,32 @@ public static partial class Extension
             });
         });
     }
+
+    // For multiple results with RequestId: MarketDataSnapshot
+    internal static IObservable<IHasRequestId> ToObservableMultipleWithId<TEnd>(
+        this IObservable<object> source, Func<int> getRequestId, Action<int> startRequest)
+            where TEnd : IHasRequestId
+    {
+        return Observable.Create<IHasRequestId>(observer =>
+        {
+            int id = getRequestId();
+
+            IDisposable subscription = source
+                .WithRequestId(id)
+                .SubscribeSafe(Observer.Create<IHasRequestId>(
+                    onNext: m =>
+                    {
+                        if (m is not TEnd)
+                            observer.OnNext(m);
+                        else
+                            observer.OnCompleted();
+                    },
+                    onError: observer.OnError,
+                    onCompleted: observer.OnCompleted));
+
+            startRequest(id);
+
+            return subscription;
+        });
+    }
 }

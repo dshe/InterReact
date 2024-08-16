@@ -1,14 +1,12 @@
 ﻿using InterReact;
 using Stringification;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Threading;
 using System.Windows;
 using System.Windows.Media;
 
@@ -104,7 +102,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     ////////////////////////////////////////////////////////////////////
 
-    private IInterReactClient? Client;
+    private IInterReactClient Client = NullInterReactClient.Instance;
     private IDisposable TicksConnection = Disposable.Empty;
 
     public MainWindow()
@@ -158,16 +156,14 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             Exchange = "SMART"
         };
 
-        CancellationTokenSource cts = new();
-        cts.CancelAfter(TimeSpan.FromSeconds(2));
-
         try
         {
-            IList<ContractDetails> cds = await Client!
+            ContractDetails cd = await Client
                 .Service
-                .GetContractDetailsAsync(contract, cts.Token);
-
-            ContractDetails cd = cds.First();
+                .CreateContractDetailsObservable(contract)
+                .Timeout(TimeSpan.FromSeconds(2))
+                .CastTo<ContractDetails>()
+                .FirstAsync();
 
             // Display the stock name.
             Description = cd.LongName;
@@ -188,20 +184,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     private void SubscribeToTicks(Contract contract)
     {
-        // Create the observable which will emit realtime updates.
-        IConnectableObservable<IHasRequestId> ticks = Client!
+        // Create a connectable observable which will emit realtime updates.
+        IConnectableObservable<IHasRequestId> ticks = Client
             .Service
-            .CreateTickObservable(contract)
+            .CreateMarketDataObservable(contract)
             .ObserveOnDispatcher()
             .Publish();
 
-        SubscribeToTicks(ticks);
-
-        TicksConnection = ticks.Connect();
-    }
-
-    private void SubscribeToTicks(IObservable<IHasRequestId> ticks)
-    {
         ticks.Subscribe(onNext: _ => { }, onError: exception => MessageBox.Show($"Fatal: {exception.Message}"));
         ticks.OfTickClass(t => t.Alert).Subscribe(alert => MessageBox.Show($"{alert.Message}"));
 
@@ -218,11 +207,11 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         IObservable<double> changes = lastPrices.Changes();
         changes.Subscribe(p => ChangePrice = p);
         changes.ToColor().Subscribe(color => ChangeColor = color);
+
+        // Activate the subsciptions to the observable.
+        TicksConnection = ticks.Connect();
     }
 
-    private async void MainWindow_OnClosing(object sender, CancelEventArgs e)
-    {
-        if (Client is not null)
-            await Client.DisposeAsync();
-    }
+    private async void MainWindow_OnClosing(object sender, CancelEventArgs e) => await Client.DisposeAsync();
 }
+

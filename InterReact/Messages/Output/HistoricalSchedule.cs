@@ -6,7 +6,7 @@ public sealed class HistoricalSchedule : IHasRequestId
     public string StartDate { get; }
     public string EndDate { get; }
     public string Timezone { get; }
-    IList<HistoricalSession> Sessions { get; } = new List<HistoricalSession>();
+    public IList<HistoricalSession> Sessions { get; }
     internal HistoricalSchedule(ResponseReader r)
     {
         RequestId = r.ReadInt();
@@ -14,11 +14,10 @@ public sealed class HistoricalSchedule : IHasRequestId
         EndDate = r.ReadString();
         Timezone = r.ReadString();
         int n = r.ReadInt();
+        Sessions = new List<HistoricalSession>(n);
         for (int i = 0; i < n; i++)
             Sessions.Add(new HistoricalSession(r));
     }
-
-
 }
 
 public sealed class HistoricalSession

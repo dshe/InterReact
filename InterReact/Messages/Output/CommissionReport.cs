@@ -6,14 +6,13 @@
 public sealed class CommissionReport : IHasExecutionId, IHasOrderId
 {
     public string ExecutionId { get; }
-    // OrderId is determined using the executionId from Execution.
-    public int OrderId { get; }
     public double Commission { get; }
     public string Currency { get; }
     public double RealizedPnl { get; }
     public double Yield { get; }
     // Yet another date format: YYYYMMDD as integer.
     public int YieldRedemptionDate { get; }
+    public int OrderId { get; } // OrderId may be set below
     internal CommissionReport(ResponseReader r)
     {
         r.IgnoreMessageVersion();
@@ -23,7 +22,6 @@ public sealed class CommissionReport : IHasExecutionId, IHasOrderId
         RealizedPnl = r.ReadDouble();
         Yield = r.ReadDouble();
         YieldRedemptionDate = r.ReadInt();
-
         if (Execution.ExecutionIds.TryGetValue(ExecutionId, out int orderId))
             OrderId = orderId;
         else

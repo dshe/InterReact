@@ -4,7 +4,7 @@ public sealed class NewsBulletin
 {
     public int MessageId { get; }
 
-    public NewsBulletinType Type { get; } = NewsBulletinType.Undefined;
+    public NewsBulletinType Type { get; }
 
     public string Message { get; }
 

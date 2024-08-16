@@ -2,14 +2,11 @@
 
 public sealed class ManagedAccounts
 {
-    public IEnumerable<string> Accounts { get; } = Enumerable.Empty<string>();
+    public string Accounts { get; }
 
     internal ManagedAccounts(ResponseReader r)
     {
         r.IgnoreMessageVersion();
-        Accounts = r
-            .ReadString()
-            .Split(',', StringSplitOptions.RemoveEmptyEntries);
-        
+        Accounts = r.ReadString();
     }
 }

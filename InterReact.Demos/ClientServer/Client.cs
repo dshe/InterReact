@@ -20,7 +20,7 @@ public sealed class Client : IAsyncDisposable
         {
             options.Logger = libLogger;
             options.TwsIpAddress = ipEndPoint.Address.ToString();
-            options.TwsPortAddress = ipEndPoint.Port.ToString();
+            options.IBPortAddresses = [ipEndPoint.Port];
         });
 
         logger.LogCritical("Connected to server.");

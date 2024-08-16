@@ -165,7 +165,7 @@ internal sealed class OrderDecoder
         if (n > 0)
         {
             for (int i = 0; i < n; ++i)
-                Order.SmartComboRoutingParams.Add(new Tag(R));
+                Order.SmartComboRoutingParams.Add(new Tag(R.ReadString(), R.ReadString()));
         }
     }
 
@@ -219,7 +219,7 @@ internal sealed class OrderDecoder
             if (n > 0)
             {
                 for (int i = 0; i < n; ++i)
-                    Order.AlgoParams.Add(new Tag(R));
+                    Order.AlgoParams.Add(new Tag(R.ReadString(), R.ReadString()));
             }
         }
     }

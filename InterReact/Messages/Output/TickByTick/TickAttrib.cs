@@ -4,7 +4,6 @@ public sealed class TickAttribBidAsk
 {
     public bool BidPastLow { get; }
     public bool AskPastHigh { get; }
-
     internal TickAttribBidAsk(int value)
     {
         BitMask mask = new(value);

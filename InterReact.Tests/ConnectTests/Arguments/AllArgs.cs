@@ -2,10 +2,8 @@
 
 namespace Args;
 
-public class AllArgs : ConnectTestBase
+public class AllArgs(ITestOutputHelper output) : ConnectTestBase(output)
 {
-    public AllArgs(ITestOutputHelper output) : base(output) { }
-
     [Fact]
     public async Task AllArgsTest()
     {

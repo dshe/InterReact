@@ -4,11 +4,9 @@ using System.Reactive.Subjects;
 
 namespace Extension;
 
-public class ToObservableContinuous : ReactiveUnitTestBase
+public class ToObservableContinuous(ITestOutputHelper output) : ReactiveUnitTestBase(output)
 {
     private readonly TestScheduler TestScheduler = new();
-
-    public ToObservableContinuous(ITestOutputHelper output) : base(output) { }
 
     [Theory,
     InlineData(-1),

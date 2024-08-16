@@ -72,13 +72,7 @@ public sealed class RealtimeVolumeTick : ITick // from StringTick
     public long Size { get; internal init; }
     public long Volume { get; internal init; }
     public double Vwap { get; internal init; }
-    /// <summary>
-    /// Indicates whether the trade was filled by a single market-maker.
-    /// </summary>
     public bool SingleTrade { get; internal init; }
-    /// <summary>
-    /// Milliseconds precision.
-    /// </summary>
     public Instant Instant { get; internal init; }
     internal RealtimeVolumeTick() { }
 };

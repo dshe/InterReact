@@ -2,10 +2,8 @@
 
 namespace Analysis;
 
-public class Type_Viewer : UnitTestBase
+public class Type_Viewer(ITestOutputHelper output) : UnitTestBase(output)
 {
-    public Type_Viewer(ITestOutputHelper output) : base(output) { }
-
     private static readonly Assembly Assembly = typeof(InterReactClient).Assembly;
 
     [Fact]

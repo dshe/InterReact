@@ -6,10 +6,8 @@ using System.Security;
 
 namespace Analysis;
 
-public class Types_Viewer : UnitTestBase
+public class Types_Viewer(ITestOutputHelper output) : UnitTestBase(output)
 {
-    public Types_Viewer(ITestOutputHelper output) : base(output) { }
-
     private static readonly List<TypeInfo> Types = typeof(InterReactClient)
         .Assembly
         .DefinedTypes
@@ -36,7 +34,7 @@ public class Types_Viewer : UnitTestBase
     {
         foreach (var group in Types
             .Select(t => t.DeclaredMembers
-                .Where(m => !m.Name.StartsWith("<"))
+                .Where(m => !m.Name.StartsWith('<'))
                 .Select(m => (t, m)))
             .SelectMany(x => x)
             //.Where(x => x.m is not null) //.OfType<(TypeInfo, MemberInfo)>()
@@ -74,7 +72,7 @@ public class Types_Viewer : UnitTestBase
     [Fact]
     public void Auto_Type_And_Stringify_All() // sometimes fails?
     {
-        List<TypeInfo> types = Types
+        IEnumerable<TypeInfo> types = Types
             .Where(t =>
                 t is
                 {
@@ -85,13 +83,13 @@ public class Types_Viewer : UnitTestBase
                     ContainsGenericParameters: false,
                     Namespace: "InterReact"
                 })
-            .OrderBy(x => x.Name)
-            .ToList();
+            .OrderBy(x => x.Name);            ;
 
         foreach (TypeInfo type in types)
         {
             if (type == typeof(OrderMonitor) ||
-                type == typeof(TickClassSelector) ||
+                type == typeof(TickEnumerableSelector) ||
+                type == typeof(TickObservableSelector) ||
                 type == typeof(InterReactOptions) ||
                 type == typeof(InterReactClient))
                 continue;

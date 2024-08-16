@@ -2,7 +2,7 @@
 
 internal class SharedWriter
 {
-    private readonly HashSet<Action<string>> Writers = new();
+    private readonly HashSet<Action<string>> Writers = [];
 
     internal void Add(Action<string> writer)
     {

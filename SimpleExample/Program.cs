@@ -13,26 +13,30 @@ IInterReactClient client = await InterReactClient.ConnectAsync();
 // Create a contract object.
 Contract contract = new()
 {
-    SecurityType = ContractSecurityType.Stock,
-    Symbol = "AMZN",
+    SecurityType = ContractSecurityType.Cash,
+    Symbol = "EUR",
     Currency = "USD",
-    Exchange = "SMART"
+    Exchange = "IDEALPRO"
 };
 
-// Create and then subscribe to the observable which can observe ticks for the contract.
-IDisposable subscription = client
-    .Service
-    .CreateTickObservable(contract)
-    .OfTickClass(selector => selector.PriceTick)
-    .Where(tick => tick.TickType == TickType.LastPrice)
-    .Subscribe(onNext: priceTick => Console.WriteLine($"Price = {priceTick.Price}"));
+// Display the alert messages which are not associated with a particular request.
+client
+    .Response
+    .OfType<AlertMessage>()
+    .Where(msg => msg.RequestId == -1)
+    .Subscribe(AlertMessage => Console.WriteLine(AlertMessage.Message));
 
-Console.WriteLine(Environment.NewLine + "press a key to exit...");
+// Create an observable and subscribe to observe ticks for the contract.
+client
+    .Service
+    .CreateMarketDataObservable(contract)
+    .ThrowAlertMessage()
+    .OfTickClass(selector => selector.PriceTick)
+    .Subscribe(priceTick => Console.WriteLine(priceTick.TickType + " = " + priceTick.Price));
+
+Console.WriteLine(Environment.NewLine + "press a key to exit..." + Environment.NewLine);
 Console.ReadKey();
 Console.Clear();
-
-// Dispose the subscription to stop receiving ticks.
-subscription.Dispose();
 
 // Disconnect from TWS/Gateway.
 await client.DisposeAsync();

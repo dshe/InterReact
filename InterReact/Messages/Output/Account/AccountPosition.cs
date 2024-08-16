@@ -1,13 +1,12 @@
 ﻿namespace InterReact;
 
-public sealed class Position
+public sealed class AccountPosition
 {
     public string Account { get; }
     public Contract Contract { get; }
     public decimal Quantity { get; }
     public double AverageCost { get; }
-
-    internal Position(ResponseReader r)
+    internal AccountPosition(ResponseReader r)
     {
         r.RequireMessageVersion(3);
         Account = r.ReadString();
@@ -17,7 +16,7 @@ public sealed class Position
     }
 }
 
-public sealed class PositionEnd
+public sealed class AccountPositionEnd
 {
-    internal PositionEnd(ResponseReader r) => r.IgnoreMessageVersion();
+    internal AccountPositionEnd(ResponseReader r) => r.IgnoreMessageVersion();
 }

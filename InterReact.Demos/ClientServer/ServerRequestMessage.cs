@@ -6,13 +6,8 @@ public static partial class Extension
         => source.Select(strings => new ServerRequestMessage(strings));
 }
 
-public sealed class ServerRequestMessage
+public sealed class ServerRequestMessage(string[] strings)
 {
-    internal RequestCode RequestCode { get; }
-    public List<string> Strings { get; }
-    public ServerRequestMessage(string[] strings)
-    {
-        RequestCode = Enum.Parse<RequestCode>(strings[0]);
-        Strings = strings.Skip(1).ToList();
-    }
+    internal RequestCode RequestCode { get; } = Enum.Parse<RequestCode>(strings[0]);
+    public List<string> Strings { get; } = strings.Skip(1).ToList();
 }

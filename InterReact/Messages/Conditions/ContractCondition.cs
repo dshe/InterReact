@@ -50,13 +50,13 @@ public abstract class ContractCondition : OperatorCondition
             cond = cond.Substring(cond.IndexOf(delimiter) + delimiter.Length);
             int conid;
 
-            if (!int.TryParse(cond.Substring(0, cond.IndexOf("(")), out conid))
+            if (!int.TryParse(cond[..cond.IndexOf('(')], out conid))
                 return false;
 
             ConId = conid;
-            cond = cond.Substring(cond.IndexOf("(") + 1);
-            Exchange = cond.Substring(0, cond.IndexOf(")"));
-            cond = cond.Substring(cond.IndexOf(")") + 1);
+            cond = cond[(cond.IndexOf('(') + 1)..];
+            Exchange = cond[..cond.IndexOf(')')];
+            cond = cond[(cond.IndexOf(')') + 1)..];
 
             return base.TryParse(cond);
         }

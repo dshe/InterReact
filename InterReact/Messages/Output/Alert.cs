@@ -11,14 +11,19 @@ namespace InterReact;
 /// </summary>
 public sealed class AlertMessage : IHasRequestId, IHasOrderId
 {
-    public int RequestId { get; init; } = -1;
-    public int OrderId { get; init; } = -1;
+    public int RequestId { get; init; }
+    public int OrderId { get; init; }
     public int Code { get; init; }
-    public string Message { get; init; } = "";
-    public string AdvancedOrderRejectJson { get; } = "";
-    public bool IsFatal { get; init; }
+    public string Message { get; init; }
+    public string AdvancedOrderRejectJson { get; }
     internal Instant Time { get; init; }
-    internal AlertMessage() { }
+    internal AlertMessage() 
+    {
+        RequestId = OrderId = -1;
+        Message = "";
+        AdvancedOrderRejectJson = "";
+        Time = Instant.MinValue;
+    }
     internal AlertMessage(ResponseReader r, IClock clock)
     {
         r.RequireMessageVersion(2);
@@ -27,52 +32,24 @@ public sealed class AlertMessage : IHasRequestId, IHasOrderId
         Message = Regex.Unescape(r.ReadString());
         AdvancedOrderRejectJson = Regex.Unescape(r.ReadString());
         Time = clock.GetCurrentInstant();
-        IsFatal = IsFatalCode(RequestId, Code);
     }
-
-    // https://interactivebrokers.github.io/tws-api/message_codes.html
-    private static bool IsFatalCode(int id, int code)
-    {
-        if (id < 1)
-        {
-            if (code >= 500 && code <= 599)
-                return true;
-            if (code == 1300) // port changed
-                return true;
-            return false;
-        }
-
-        // RequestHistoricalData:
-        // "Historical Market Data Service error message:API historical data query cancelled: 1"
-        if (code == 162)
-            return false;
-
-        // "Requested market data is not subscribed. Displaying delayed market data."
-        if (code == 10167)
-            return false;
-
-        return true;
-    }
-
-    public AlertException ToAlertException() => AlertException.Create(this);
+    public AlertException ToAlertException() => new(this);
 }
 
 [SuppressMessage("Design", "CA1032:Implement standard exception constructors", Justification = "<Pending>")]
 public sealed class AlertException : Exception
 {
-    public AlertMessage AlertMessage { get; }
-    private AlertException(AlertMessage alert) : base(alert.Message) => AlertMessage = alert;
-    public static AlertException Create(AlertMessage alert) => new(alert);
+    internal AlertException(AlertMessage alert) : base(alert.Message + "(" + alert.Code + ")") { }
 }
 
 public static partial class Extension
 {
-    // This operator ignore Alerts (messages and errors) with the specified code.
-    public static IObservable<T> IgnoreAlertMessage<T>(this IObservable<T> source, int code) =>
+    // This operator ignores Alerts (messages and errors) with the specified code.
+    public static IObservable<T> IgnoreAlertMessage<T>(this IObservable<T> source, ErrorResponse? error = null) =>
         Observable.Create<T>(o =>
             source.Subscribe(m =>
             {
-                if (m is AlertMessage alertMessage && alertMessage.Code == code)
+                if (m is AlertMessage alert && (error == null || alert.Code == error.Code))
                     return; // ignore
                 o.OnNext(m);
             },
@@ -80,15 +57,40 @@ public static partial class Extension
             o.OnCompleted
         ));
 
-    // This operator converts Observable.OnNext(AlertMessage) to an OnError(AlertException).
-    public static IObservable<T> AlertMessageToError<T>(this IObservable<T> source) =>
+    public static IEnumerable<T> IgnoreAlertMessage<T>(this IEnumerable<T> source, ErrorResponse? error = null)
+    {
+        ArgumentNullException.ThrowIfNull(source);
+        foreach (T m in source)
+        {
+            if (m is AlertMessage alert && (error == null || alert.Code == error.Code))
+                continue; // ignore
+            yield return m;
+        }
+    }
+
+    public static IObservable<T> ThrowAlertMessage<T>(this IObservable<T> source, ErrorResponse? error = null) =>
         Observable.Create<T>(o =>
             source.Subscribe(m =>
             {
-                if (m is AlertMessage alertMessage) // && (alertMessage.IsFatal || !fatalOnly))
-                    o.OnError(alertMessage.ToAlertException());
+                if (m is AlertMessage alert && (error == null || alert.Code == error.Code))
+                    o.OnError(alert.ToAlertException());
                 else
                     o.OnNext(m);
+            },
+            o.OnError,
+            o.OnCompleted
+        ));
+
+    public static IObservable<T> CastTo<T>(this IObservable<object> source) =>
+        Observable.Create<T>(o =>
+            source.Subscribe(m =>
+            {
+                if (m is T t)
+                    o.OnNext(t);
+                else if (m is AlertMessage alertMessage)
+                    o.OnError(alertMessage.ToAlertException());
+                else
+                    o.OnError(new InvalidOperationException("Invalid type: " + m.GetType().Name));
             },
             o.OnError,
             o.OnCompleted

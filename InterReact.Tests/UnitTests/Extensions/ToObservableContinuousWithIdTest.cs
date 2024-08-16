@@ -3,21 +3,16 @@ using System.Diagnostics;
 
 namespace Extension;
 
-public class ToObservableContinuousWithId : ReactiveUnitTestBase
+public class ToObservableContinuousWithId(ITestOutputHelper output) : ReactiveUnitTestBase(output)
 {
-    public ToObservableContinuousWithId(ITestOutputHelper output) : base(output) { }
-
     public interface ISomeClass : IHasRequestId { }
-    public class SomeClass : ISomeClass
+    public class SomeClass(int id) : ISomeClass
     {
-        public SomeClass(int id) { RequestId = id; }
-        public int RequestId { get; }
-        public long Ticks { get; } = Stopwatch.GetTimestamp();
+        public int RequestId { get; } = id; public long Ticks { get; } = Stopwatch.GetTimestamp();
     }
-    public class SomeClassEnd : ISomeClass
+    public class SomeClassEnd(int id) : ISomeClass
     {
-        public SomeClassEnd(int id) { RequestId = id; }
-        public int RequestId { get; }
+        public int RequestId { get; } = id;
     }
 
     [Fact]

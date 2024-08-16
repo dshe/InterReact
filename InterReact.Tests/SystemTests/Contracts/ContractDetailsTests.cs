@@ -1,11 +1,11 @@
-﻿namespace Contracts;
+﻿using System.Reactive.Linq;
 
-public class ContractDetailsAsync : CollectionTestBase
+namespace Contracts;
+
+public class ContractDetail(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
 {
-    public ContractDetailsAsync(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
-
     [Fact]
-    public async Task SingleTest()
+    public async Task ContractDetailSingleTest()
     {
         Contract contract = new()
         {
@@ -15,16 +15,17 @@ public class ContractDetailsAsync : CollectionTestBase
             Exchange = "SMART"
         };
 
-        IList<ContractDetails> cds = await Client
+        IList<ContractDetails> messages = await Client
             .Service
-            .GetContractDetailsAsync(contract, default);
+            .GetContractDetailsAsync(contract);
 
-        ContractDetails cd = Assert.Single(cds);
+        var cd = messages.Single();
+
         Assert.Equal("MSFT", cd.Contract.Symbol);
     }
 
     [Fact]
-    public async Task MultiTest()
+    public async Task ContractDetailMultiTest()
     {
         Contract contract = new()
         {
@@ -35,26 +36,26 @@ public class ContractDetailsAsync : CollectionTestBase
 
         IList<ContractDetails> cds = await Client
             .Service
-            .GetContractDetailsAsync(contract, default);
+            .GetContractDetailsAsync(contract);
 
         Assert.True(cds.Count > 1); // multiple exchanges
     }
 
     [Fact]
-    public async Task InvalidTest()
+    public async Task ContractDetailErrorTest()
     {
         Contract contract = new()
         {
             ContractId = 99999
         };
 
-        await Assert.ThrowsAsync<AlertException>(() => Client
+        await Assert.ThrowsAsync<AlertException>(async () => await Client
             .Service
-            .GetContractDetailsAsync(contract, default));
+            .GetContractDetailsAsync(contract));
     }
 
     [Fact]
-    public async Task TimeoutTest()
+    public async Task ContractDetailTimeoutTest()
     {
         Contract contract = new()
         {
@@ -63,11 +64,10 @@ public class ContractDetailsAsync : CollectionTestBase
             Currency = "USD"
         };
 
-        CancellationTokenSource cts = new();
-        cts.CancelAfter(1);
-
-        await Assert.ThrowsAsync<TaskCanceledException>(() => Client
+        await Assert.ThrowsAsync<TimeoutException>(async() => await Client
             .Service
-            .GetContractDetailsAsync(contract, cts.Token));
-    }
+            .CreateContractDetailsObservable(contract)
+            .Timeout(TimeSpan.FromMilliseconds(1))
+            .ToList());
+     }
 }

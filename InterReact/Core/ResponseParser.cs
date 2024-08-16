@@ -4,15 +4,13 @@ namespace InterReact;
 
 #pragma warning disable CA1822 // can be marked as static
 
-public sealed class ResponseParser
+public sealed class ResponseParser(ILogger<ResponseParser> logger)
 {
     private const string MaxInt = "2147483647";
     private const string MaxLong = "9223372036854775807";
     private const string MaxDouble = "1.7976931348623157E308";
     private Dictionary<Type, Dictionary<string, object>> EnumCache { get; } = new();
-    private ILogger Logger { get; }
-
-    public ResponseParser(ILogger<ResponseParser> logger) => Logger = logger;
+    private ILogger Logger { get; } = logger;
 
     internal char ParseChar(string s)
     {

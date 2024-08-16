@@ -10,7 +10,7 @@ public sealed class RequestMessage
     private ILogger Logger { get; }
     private IRxSocketClient RxSocket { get; }
     private RingLimiter Limiter { get; }
-    internal List<string> Strings { get; } = new(); // internal for testing
+    internal List<string> Strings { get; } = []; // internal for testing
     public RequestMessage(ILogger<RequestMessage> logger, IRxSocketClient rxSocket, RingLimiter limiter)
     {
         ArgumentNullException.ThrowIfNull(logger);
@@ -22,7 +22,7 @@ public sealed class RequestMessage
     internal void Send([CallerMemberName] string memberName = "")
     {
         Logger.LogDebug("Request: {Method}", memberName);
-        if (!Strings.Any())
+        if (Strings.Count == 0)
             throw new InvalidOperationException("Empty send message.");
         // V100Plus format: 4 byte message length prefix plus payload of null-terminated strings.
         byte[] bytes = Strings.ToByteArray().ToByteArrayWithLengthPrefix();
@@ -41,7 +41,7 @@ public sealed class RequestMessage
     private static IEnumerable<string> GetStrings(object?[]? objs)
     {
         if (objs is null)
-            return new[] { string.Empty };
+            return [string.Empty];
         if (objs.Length == 0)
             throw new ArgumentException("Invalid length", nameof(objs));
         return objs.Select(GetString);
@@ -91,10 +91,7 @@ public sealed class RequestMessage
     {
         if (enums is null)
             return Write("");
-
-        List<string> list = enums.Select(GetEnumValueString).ToList();
-
-        return Write(string.Join(",", list));
+        return Write(string.Join(",", enums.Select(GetEnumValueString)));
 
         // local
         static string GetEnumValueString(T en)
@@ -126,5 +123,4 @@ internal static class RequestMessageExtensions
             return "";
         return val.ToString(CultureInfo.InvariantCulture);
     }
-
 }

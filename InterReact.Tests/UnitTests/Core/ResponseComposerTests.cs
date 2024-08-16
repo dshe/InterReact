@@ -10,29 +10,26 @@ public class ResponseComposerTests : UnitTestBase
     {
         ResponseParser parser = new(NullLogger<ResponseParser>.Instance);
         ResponseReader reader = new(NullLogger<ResponseReader>.Instance, new(null, null), parser);
-        Composer = new ResponseMessageComposer(SystemClock.Instance, NullLogger<ResponseMessageComposer>.Instance, reader);
+        Composer = new ResponseMessageComposer(SystemClock.Instance, reader);
     }
 
     [Fact]
     public void T00_Null()
     {
-        Assert.Throws<ArgumentNullException>(() => Composer.ComposeMessage(null!));
+        Assert.Throws<NullReferenceException>(() => Composer.ComposeMessage(null!));
     }
 
     [Fact]
     public void T01_Short_Message()
     {
-        InvalidDataException e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(Array.Empty<string>()));
-        Assert.IsType<InvalidDataException>(e.InnerException);
-
-        e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(new[] { "2", "2" })); // short
-        Assert.IsType<InvalidDataException>(e.InnerException);
+        Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage([]));
+        Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(["2", "2"])); // short
     }
 
     [Fact]
     public void T02_Long_Message()
     {
-        string[] longMessage = new[] {
+        string[] longMessage = [
                 "1",  // code = TickPrice
                 "99", // version
                 "21",  // requestId
@@ -41,38 +38,38 @@ public class ResponseComposerTests : UnitTestBase
                 "100", // size
                 "1", // AutoExec, true
                 "too long", // extra, to make it too long
-            };
+            ];
         Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(longMessage));
     }
 
     [Fact]
     public void T03_Undefined_Code()
     {
-        InvalidDataException e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(new string[] { "" }));
-        Assert.Equal("Undefined code ''.", e.InnerException?.Message);
+        InvalidDataException e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage([""]));
+        Assert.Equal("Undefined code ''.", e.Message);
 
-        e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(new string[] { "notInSwitch" }));
-        Assert.Equal("Undefined code 'notInSwitch'.", e.InnerException?.Message);
+        e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(["notInSwitch"]));
+        Assert.Equal("Undefined code 'notInSwitch'.", e.Message);
+        ;
     }
 
     [Fact]
     public void T04_ParseError()
     {
-        InvalidDataException e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(new[] { "1", "version", "cannotParseInt" }));
-        Assert.IsType<ArgumentException>(e.InnerException);
-        Assert.StartsWith("Parse", e.InnerException?.Message);
+        ArgumentException e = Assert.Throws<ArgumentException>(() => Composer.ComposeMessage(["1", "version", "cannotParseInt"]));
+        Assert.StartsWith("Parse", e.Message);
     }
 
     [Fact]
     public void T03_Ok()
     {
-        object message = Composer.ComposeMessage(new[] {
+        object message = Composer.ComposeMessage([
                 "2",  // code = size
                 "99", // version
                 "2",  // requestId
                 "5",  // tickType
                 "100" // size
-            });
+            ]);
 
         Assert.IsType<SizeTick>(message);
     }

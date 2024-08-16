@@ -4,16 +4,10 @@
 /// Methods which send request messages to TWS/Gateway.
 /// Request methods are serialized, thread-safe and limited to a specified number of messages per second.
 /// </summary>
-public sealed class Request
+public sealed class Request(InterReactOptions options, Func<RequestMessage> requestMessageFactory)
 {
-    private InterReactOptions Options { get; }
-    private Func<RequestMessage> CreateMessage { get; }
-
-    public Request(InterReactOptions options, Func<RequestMessage> requestMessageFactory)
-    {
-        Options = options;
-        CreateMessage = requestMessageFactory;
-    }
+    private InterReactOptions Options { get; } = options;
+    private Func<RequestMessage> CreateMessage { get; } = requestMessageFactory;
 
     /// <summary>
     /// Returns successive ids to uniquely identify requests and orders.
@@ -72,9 +66,7 @@ public sealed class Request
         RequestMessage m = CreateMessage()
             .Write(RequestCode.PlaceOrder, orderId)
             .WriteContract(contract)
-            .Write(
-                contract.SecurityIdType,
-                contract.SecurityId)
+            .Write(contract.SecurityIdType, contract.SecurityId)
             .Write(
                 order.Action,
                 order.TotalQuantity,
@@ -297,10 +289,12 @@ public sealed class Request
         m.Send();
     }
 
-    public void CancelOrder(int orderId, string manualOrderCancelTime = "") => CreateMessage()
-        .Write(RequestCode.CancelOrder, "1")
-        .Write(orderId, manualOrderCancelTime)
-        .Send();
+    public void CancelOrder(int orderId, string manualOrderCancelTime = "")
+    {
+        RequestMessage m = CreateMessage()
+            .Write(RequestCode.CancelOrder, "1", orderId, manualOrderCancelTime);
+        m.Send();
+    }
 
     public void RequestOpenOrders() => CreateMessage()
         .Write(RequestCode.RequestOpenOrders, "1")
@@ -324,20 +318,22 @@ public sealed class Request
     /// When ExecutionFilter is null, all executions are returned.
     /// Note that the valid format for time is "yyyymmdd-hh:mm:ss"
     /// </summary>
-    public void RequestExecutions(int requestId, ExecutionFilter filter)
+    public void RequestExecutions(int requestId, ExecutionFilter? filter = null)
     {
-        ArgumentNullException.ThrowIfNull(filter);
-        CreateMessage()
-            .Write(RequestCode.RequestExecutions, "3", requestId)
-            .Write(
+        RequestMessage m = CreateMessage()
+            .Write(RequestCode.RequestExecutions, "3", requestId);
+        if (filter != null)
+        {
+            m.Write(
                 filter.ClientId,
                 filter.Account,
                 filter.Time,
                 filter.Symbol,
                 filter.SecurityType,
                 filter.Exchange,
-                filter.Side)
-            .Send();
+                filter.Side);
+        }
+        m.Send();
     }
 
     /// <summary>
@@ -458,6 +454,7 @@ public sealed class Request
         m.Write(keepUpToDate, Tag.Combine(options)).Send();
     }
 
+    
     public void ExerciseOptions(
         int requestId,
         Contract contract,
@@ -465,13 +462,22 @@ public sealed class Request
         int exerciseQuantity,
         string account,
         bool overrideOrder)
+        //string manualOrderTime
+        //string customerAccount,
+        //bool professionalCustomer)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        CreateMessage()
+        RequestMessage m = CreateMessage()
             .Write(RequestCode.ExerciseOptions, "2", requestId)
             .WriteContract(contract, includePrimaryExchange: false)
-            .Write(exerciseAction, exerciseQuantity, account, overrideOrder)
-            .Send();
+            .Write(exerciseAction, exerciseQuantity, account, overrideOrder);
+        //if (Options.ServerVersionCurrent >= ServerVersion.MANUAL_ORDER_TIME_EXERCISE_OPTIONS)
+        //    m.Write(manualOrderTime);
+        //if (Options.ServerVersionCurrent >= ServerVersion.CUSTOMER_ACCOUNT) 
+        //    m.Write(customerAccount);
+        //if (Options.ServerVersionCurrent >= ServerVersion.PROFESSIONAL_CUSTOMER)
+        //    m.Write(professionalCustomer);
+        m.Send();
     }
 
     public void RequestScannerSubscription(
@@ -630,8 +636,9 @@ public sealed class Request
         string group = "All",
         params AccountSummaryTag[] tags)
     {
-        if (!tags.Any())
-            tags = Enum.GetValues<AccountSummaryTag>().ToArray();
+        ArgumentNullException.ThrowIfNull(tags);
+        if (tags.Length == 0)
+            tags = [.. Enum.GetValues<AccountSummaryTag>()];
         List<string> tagNames = tags.Select(tag => tag.ToString()).ToList();
         CreateMessage()
             .Write(RequestCode.RequestAccountSummary, "1", requestId)

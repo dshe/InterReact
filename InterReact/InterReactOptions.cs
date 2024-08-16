@@ -17,7 +17,7 @@ public sealed class InterReactOptions
     /// Specify the port(s) used to attempt connection to TWS/Gateway.
     /// If unspecified, connection will be attempted on ports 7496 and 7497, 4001, 4002.
     /// </summary>
-    public string TwsPortAddress { get; set; } = Extension.GetDefaultPorts();
+    public IEnumerable<int> IBPortAddresses { get; set; } = Extension.IBDefaultPorts;
     /// <summary>
     /// Specify a client id. Up to 8 clients can attach to TWS/Gateway.
     /// Each client requires a unique Id. The default Id is random.
@@ -31,9 +31,8 @@ public sealed class InterReactOptions
     /// </summary>
     public bool UseDelayedTicks { get; set; } = true; // default is true!
 
-    // This build of InterReact supports ServerVersion.MIN_SERVER_VER_BOND_ISSUERID.
-    public ServerVersion ServerVersionMin { get; } = ServerVersion.MIN_SERVER_VER_BOND_ISSUERID;
-    public ServerVersion ServerVersionMax  { get; } = ServerVersion.MIN_SERVER_VER_BOND_ISSUERID;
+    public ServerVersion ServerVersionMin { get; } = ServerVersion.BOND_ISSUERID;
+    public ServerVersion ServerVersionMax  { get; } = ServerVersion.BOND_ISSUERID;
     public ServerVersion ServerVersionCurrent { get; internal set; } = ServerVersion.NONE;
     internal bool SupportsServerVersion(ServerVersion version) => version <= ServerVersionCurrent;
     internal void RequireServerVersion(ServerVersion version)
@@ -60,11 +59,10 @@ public sealed class InterReactOptions
         if (LogFactory == NullLoggerFactory.Instance && Logger != NullLogger.Instance)
             LogFactory = Logger.ToLoggerFactory();
 
-        //Validation
         if (string.IsNullOrEmpty(TwsIpAddress))
             throw new InvalidOperationException("InterReactOptions: invalid IP address.");
-        if (string.IsNullOrEmpty(TwsPortAddress))
-            throw new InvalidOperationException("InterReactOptions: invalid port address.");
+        if (!IBPortAddresses.Any())
+            throw new InvalidOperationException("InterReactOptions: missing port address.");
         if (MaxRequestsPerSecond <= 0)
             throw new InvalidOperationException("InterReactOptions: invalid MaxRequestsPerSecond.");
     }

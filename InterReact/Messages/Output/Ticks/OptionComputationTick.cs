@@ -7,7 +7,7 @@
 public sealed class OptionComputationTick : ITick
 {
     public int RequestId { get; }
-    public TickType TickType { get; } = TickType.Undefined;
+    public TickType TickType { get; }
     public int TickAttrib { get; }
     public double ImpliedVolatility { get; }
     public double Delta { get; }

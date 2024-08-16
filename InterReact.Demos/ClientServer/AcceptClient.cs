@@ -5,19 +5,11 @@ using System.IO;
 
 namespace ClientServer;
 
-public sealed class AcceptClient
+public sealed class AcceptClient(IRxSocketClient socketClient, ILogger logger)
 {
-    private readonly ILogger Logger;
-    private readonly IRxSocketClient SocketClient;
-    private readonly IObservable<ServerRequestMessage> ServerRequestMessages;
-    private readonly RequestMessage ServerResponseMessage;
-
-    public AcceptClient(IRxSocketClient socketClient, ILogger logger)
-    {
-        Logger = logger;
-        SocketClient = socketClient;
-        ServerResponseMessage = new RequestMessage(NullLogger<RequestMessage>.Instance , socketClient, new RingLimiter());
-        ServerRequestMessages = socketClient
+    private readonly ILogger Logger = logger;
+    private readonly IRxSocketClient SocketClient = socketClient;
+    private readonly IObservable<ServerRequestMessage> ServerRequestMessages = socketClient
                 .ReceiveAllAsync
                 .ToObservableFromAsyncEnumerable()
                 .ToArraysFromBytesWithLengthPrefix()
@@ -25,7 +17,7 @@ public sealed class AcceptClient
                 .ToServerRequestMessages()
                 .Publish()
                 .AutoConnect();
-    }
+    private readonly RequestMessage ServerResponseMessage = new(NullLogger<RequestMessage>.Instance, socketClient, new RingLimiter());
 
     public async Task Run()
     {
@@ -78,7 +70,7 @@ public sealed class AcceptClient
         // Get the first string of the first message,
         string versions = message1.Single();
 
-        if (!versions.StartsWith("v"))
+        if (!versions.StartsWith('v'))
             throw new InvalidDataException("Versions not received.");
         Logger.LogCritical("Received supported server versions: '{Versions}'.", versions);
 
@@ -91,7 +83,7 @@ public sealed class AcceptClient
 
         // Send server version and date.
         ServerResponseMessage
-            .Write((int)ServerVersion.MIN_SERVER_VER_BOND_ISSUERID)
+            .Write((int)ServerVersion.BOND_ISSUERID)
             .Write(DateTime.Now.ToString("yyyyMMdd HH:mm:ss XXX"))
             .Send();
 

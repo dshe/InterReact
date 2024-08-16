@@ -2,16 +2,13 @@
 
 namespace Analysis;
 
-public class Enum_Checker : UnitTestBase
+public class Enum_Checker(ITestOutputHelper output) : UnitTestBase(output)
 {
-    public Enum_Checker(ITestOutputHelper output) : base(output) { }
-
-    private static readonly List<TypeInfo> EnumTypes = typeof(InterReactClient)
+    private static readonly List<TypeInfo> EnumTypes = [.. typeof(InterReactClient)
         .Assembly
         .DefinedTypes
         .Where(type => type.IsEnum)
-        .OrderBy(x => x.Name)
-        .ToList();
+        .OrderBy(x => x.Name)];
 
     [Fact]
     public void T01_Show_All()

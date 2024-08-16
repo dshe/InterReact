@@ -7,9 +7,9 @@ public sealed class OpenOrder : IHasOrderId
     public Contract Contract { get; } = new();
     public OrderState OrderState { get; } = new();
 
-    internal OpenOrder(ResponseReader r)
+    internal OpenOrder(ResponseReader reader)
     {
-        OrderDecoder eOrderDecoder = new(r, Contract, Order, OrderState);
+        OrderDecoder eOrderDecoder = new(reader, Contract, Order, OrderState);
 
         eOrderDecoder.ReadOrderId();
         OrderId = Order.OrderId;
@@ -83,6 +83,8 @@ public sealed class OpenOrder : IHasOrderId
         eOrderDecoder.ReadPostToAts();
         eOrderDecoder.ReadAutoCancelParent();
         eOrderDecoder.ReadPegBestPegMidOrderAttributes();
+
+        reader.ReadString(); // ???
     }
 }
 

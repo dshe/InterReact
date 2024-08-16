@@ -1,110 +1,132 @@
-﻿using NodaTime.Text;
+﻿using Stringification;
 using System.IO;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace InterReact;
 
-public sealed class ResponseReader
+public sealed class ResponseReader(
+    ILogger<ResponseReader> logger, InterReactOptions options, ResponseParser parser)
 {
-    internal ILogger Logger { get; }
-    internal ResponseParser Parser { get; }
-    internal InterReactOptions Options { get; }
-
-    public ResponseReader(ILogger<ResponseReader> logger, InterReactOptions options, ResponseParser parser)
+    internal ILogger Logger { get; } = logger;
+    internal ResponseParser Parser { get; } = parser;
+    internal InterReactOptions Options { get; } = options;
+    private string[] Strings = [];
+    private int Index;
+    private string CallerInfo = "";
+    internal void SetStrings(string[] strings)
     {
-        Logger = logger;
-        Options = options;
-        Parser = parser;
+        Strings = strings;
+        Index = 0;
     }
 
-    private IEnumerator<string> Enumerator = Enumerable.Empty<string>().GetEnumerator();
-    internal void SetEnumerator(IEnumerable<string> strings) =>
-        Enumerator = strings.AsEnumerable().GetEnumerator();
-
-    internal string ReadString()
+    private static string GetCallerInfo(string member, string file, int l)
     {
-        if (Enumerator.MoveNext())
-            return Enumerator.Current;
-        throw new InvalidDataException("Message is shorter than expected.");
+        string line = File.ReadLines(file).Skip(l - 1).First().Trim();
+        string projectName = Assembly.GetExecutingAssembly().GetName().Name ?? throw new InvalidOperationException("ProjectName not found");
+        int pos = file.LastIndexOf('\\' + projectName + '\\', StringComparison.Ordinal);
+        string path = file[(pos + projectName.Length + 2)..];
+        return $"{path}:{l} {member}\r\n\t{line}";
     }
-
+    
     internal void VerifyEnumerationEnd()
     {
-        if (Enumerator.MoveNext())
-            throw new InvalidDataException("Message longer than expected.");
+        if (Index == Strings.Length)
+            return;
+        string[] extra = Strings.Skip(Index).Select(x => $"'{x}'").ToArray();
+        string msg = $"ResponseReader: long message => [{extra.JoinStrings(", ")}]\r\n{CallerInfo}";
+        throw new InvalidDataException(msg);
+    }
+    
+    private T Read<T>(Func<string, T> convert, string member, string file, int l)
+    {
+        if (Index >= Strings.Length)
+        {   // find line in source that attempts to retrieve missing data
+            throw new InvalidDataException(
+                $"ResponseReader: short message => [{Strings.JoinStrings(", ")}]" +
+                $"\r\n{GetCallerInfo(member, file, l)}");
+        }
+
+        string input = Strings[Index++];
+        T output = convert(input);
+
+        if (Logger.IsEnabled(LogLevel.Debug))
+        {
+            CallerInfo = GetCallerInfo(member, file, l); // slow!
+            Logger.LogDebug(
+                "{CallerInfo}\r\n\t\"{Input}\" => {Output} ({Type})",
+                    CallerInfo, input, output, typeof(T).Name);
+        }
+
+        return output;
     }
 
-    internal bool ReadBool() => Parser.ParseBool(ReadString());
+    internal string ReadString([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
+        Read(x => x, member, file, line);
 
-    internal char ReadChar() => Parser.ParseChar(ReadString());
+    internal bool ReadBool([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
+        Read(Parser.ParseBool, member, file, line);
 
-    internal int ReadInt() => Parser.ParseInt(ReadString());
-    internal int ReadIntMax() => Parser.ParseIntMax(ReadString());
+    internal char ReadChar([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
+        Read(Parser.ParseChar, member, file, line);
+    
+    internal int ReadInt([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
+        Read(Parser.ParseInt, member, file, line);
 
-    internal long ReadLong() => Parser.ParseLong(ReadString());
+    internal int ReadIntMax([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
+        Read(Parser.ParseIntMax, member, file, line);
 
-    internal double ReadDouble() => Parser.ParseDouble(ReadString());
-    internal double ReadDoubleMax() => Parser.ParseDoubleMax(ReadString());
+    internal long ReadLong([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
+        Read(Parser.ParseLong, member, file, line);
 
-    internal decimal ReadDecimal() => Parser.ParseDecimal(ReadString()); // ok
+    internal double ReadDouble([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
+        Read(Parser.ParseDouble, member, file, line);
 
-    internal LocalTime ReadLocalTime(LocalTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
+    internal double ReadDoubleMax([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
+        Read(Parser.ParseDoubleMax, member, file, line);
 
-    internal ZonedDateTime ReadZonedDateTime(ZonedDateTimePattern p) => p.Parse(ReadString()).GetValueOrThrow();
+    internal decimal ReadDecimal([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
+        Read(Parser.ParseDecimal, member, file, line);
 
-    internal T ReadEnum<T>() where T : Enum
+    //internal LocalTime ReadLocalTime(LocalTimePattern p) => p.Parse(Read()).GetValueOrThrow();
+    //internal ZonedDateTime ReadZonedDateTime(ZonedDateTimePattern p) => p.Parse(Read()).GetValueOrThrow();
+
+    internal T ReadEnum<T>([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) where T : Enum
     {
-        T t = Parser.ParseEnum<T>(ReadString());
+        T t = Read(Parser.ParseEnum<T>, member, file, line);
         if (!Options.UseDelayedTicks && t is TickType tickType)
-            return (T)(object)UndelayTick(tickType);
+            return (T)(object)tickType.UndelayTick();
         return t;
     }
 
-    internal void IgnoreMessageVersion() => ReadString();
+    internal void IgnoreMessageVersion([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
+        Read(x => x, member, file, line);
 
-    internal int GetMessageVersion() => ReadInt();
+    internal int GetMessageVersion([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
+        Read(Parser.ParseInt, member, file, line);
 
-    internal void RequireMessageVersion(int minimumVersion)
+    internal void RequireMessageVersion(int minimumVersion, [CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
     {
-        int v = GetMessageVersion();
+        int v = Read(Parser.ParseInt, member, file, line);
         if (v < minimumVersion)
             throw new InvalidDataException($"Invalid response version: {v} < {minimumVersion}.");
     }
 
-    internal void AddStringsToList(IList<string> list)
+    internal List<string> GetStringList([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
     {
-        int n = ReadInt();
+        int n = Read(Parser.ParseInt, member, file, line);
+        List<string> list = new(n);
         for (int i = 0; i < n; i++)
-            list.Add(ReadString());
+            list.Add(Read(x => x, member, file, line));
+        return list;
     }
 
-    internal void AddTagsToList(IList<Tag> list)
+    internal void AddToTags(IList<Tag> tags, [CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0)
     {
-        int n = ReadInt();
+        int n = Read(Parser.ParseInt, member, file, line);
         for (int i = 0; i < n; i++)
-            list.Add(new Tag(this));
-    }
-
-    private static TickType UndelayTick(TickType tickType)
-    {
-        return tickType switch
-        {
-            TickType.DelayedBidPrice => TickType.BidPrice,
-            TickType.DelayedAskPrice => TickType.AskPrice,
-            TickType.DelayedLastPrice => TickType.LastPrice,
-            TickType.DelayedBidSize => TickType.BidSize,
-            TickType.DelayedAskSize => TickType.AskSize,
-            TickType.DelayedLastSize => TickType.LastSize,
-            TickType.DelayedHighPrice => TickType.HighPrice,
-            TickType.DelayedLowPrice => TickType.LowPrice,
-            TickType.DelayedVolume => TickType.Volume,
-            TickType.DelayedClosePrice => TickType.ClosePrice,
-            TickType.DelayedOpenPrice => TickType.OpenPrice,
-            TickType.DelayedBidOptionComputation => TickType.BidOptionComputation,
-            TickType.DelayedAskOptionComputation => TickType.AskOptionComputation,
-            TickType.DelayedLastOptionComputation => TickType.LastOptionComputation,
-            TickType.DelayedModelOptionComputation => TickType.ModelOptionComputation,
-            TickType.DelayedLastTimeStamp => TickType.LastTimeStamp,
-            _ => tickType
-        };
+            tags.Add(new Tag(
+                Read(x => x, member, file, line),
+                Read(x => x, member, file, line)));
     }
 }

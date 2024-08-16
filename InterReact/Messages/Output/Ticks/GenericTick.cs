@@ -3,7 +3,7 @@
 public sealed class GenericTick : ITick
 {
     public int RequestId { get; }
-    public TickType TickType { get; } = TickType.Undefined;
+    public TickType TickType { get; }
     public double Value { get; }
 
     internal GenericTick(ResponseReader r)

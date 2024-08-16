@@ -27,7 +27,6 @@ public sealed class TickByTickAllLast : ITickByTick
     public TickAttribLast TickAttribLast { get; }
     public string Exchange { get; }
     public string SpecialConditions { get; }
-
     internal TickByTickAllLast(int requestId, TickByTickType type, ResponseReader r)
     {
         RequestId = requestId;
@@ -51,7 +50,6 @@ public sealed class TickByTickBidAsk : ITickByTick
     public decimal BidSize { get; }
     public decimal AskSize { get; }
     public TickAttribBidAsk TickAttribBidAsk { get; }
-
     internal TickByTickBidAsk(int requestId, TickByTickType type, ResponseReader r)
     {
         RequestId = requestId;
@@ -71,7 +69,6 @@ public sealed class TickByTickMidpoint : ITickByTick
     public TickByTickType TickByTickType { get; }
     public long Time { get; }
     public double Midpoint { get; }
-
     internal TickByTickMidpoint(int requestId, TickByTickType type, ResponseReader r)
     {
         RequestId = requestId;

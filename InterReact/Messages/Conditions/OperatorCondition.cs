@@ -45,10 +45,10 @@ public abstract class OperatorCondition : OrderCondition
 
             IsMore = cond.StartsWith(">=");
 
-            if (base.TryParse(cond.Substring(cond.LastIndexOf(" "))))
-                cond = cond.Substring(0, cond.LastIndexOf(" "));
+            if (base.TryParse(cond[cond.LastIndexOf(' ')..]))
+                cond = cond[..cond.LastIndexOf(' ')];
 
-            Value = cond.Substring(3);
+            Value = cond[3..];
         }
         catch
         {

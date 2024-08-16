@@ -4,14 +4,10 @@ namespace InterReact;
 
 public sealed class Tag // input + output
 {
-    public string Name { get; init; } = "";
-    public string Value { get; init; } = "";
-    public Tag() { }
-    internal Tag(ResponseReader r)
-    {
-        Name = r.ReadString();
-        Value = r.ReadString();
-    }
+    public string Name { get; }
+    public string Value { get; }
+
+    public Tag(string name, string value) => (Name, Value) = (name, value);
 
     internal static string Combine(IEnumerable<Tag>? tags)
     {
@@ -19,7 +15,7 @@ public sealed class Tag // input + output
             return "";
 
         List<Tag> tagsList = tags.ToList();
-        if (!tagsList.Any())
+        if (tagsList.Count == 0)
             return "";
 
         return tagsList

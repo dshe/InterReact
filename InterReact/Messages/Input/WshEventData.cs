@@ -2,12 +2,12 @@
 
 public sealed class WshEventData // input
 {
-    public int ContractId { get; set; } = int.MaxValue;
-    public string Filter { get; set; } = "";
-    public bool FillWatchlist { get; set; }
-    public bool FillPortfolio { get; set; }
-    public bool FillCompetitors { get; set; }
-    public string StartDate { get; set; } = "";
-    public string EndDate { get; set; } = "";
-    public int TotalLimit { get; set; } = int.MaxValue;
+    public int ContractId { get; init; } = int.MaxValue;
+    public string Filter { get; init; } = "";
+    public bool FillWatchlist { get; init; }
+    public bool FillPortfolio { get; init; }
+    public bool FillCompetitors { get; init; }
+    public string StartDate { get; init; } = "";
+    public string EndDate { get; init; } = "";
+    public int TotalLimit { get; init; } = int.MaxValue;
 }

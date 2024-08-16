@@ -7,7 +7,6 @@ public sealed class HistoricalNews : IHasRequestId
     public string ProviderCode { get; }
     public string ArticleId { get; }
     public string Headline { get; }
-
     internal HistoricalNews(ResponseReader r)
     {
         RequestId = r.ReadInt();
@@ -22,9 +21,7 @@ public sealed class HistoricalNewsEnd : IHasRequestId
 {
     public int RequestId { get; }
     public bool HasMore { get; }
-
     internal HistoricalNewsEnd() { }
-
     internal HistoricalNewsEnd(ResponseReader r)
     {
         RequestId = r.ReadInt();

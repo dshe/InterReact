@@ -4,11 +4,10 @@ using System.Globalization;
 
 namespace Core;
 
-public class RequestMessageTests : UnitTestBase
+public class RequestMessageTests(ITestOutputHelper output) : UnitTestBase(output)
 {
     private readonly RequestMessage requestMessage =
         new(NullLogger<RequestMessage>.Instance, NullRxSocketClient.Instance, new RingLimiter());
-    public RequestMessageTests(ITestOutputHelper output) : base(output) { }
 
     private void AssertResult(params string[] strings)
     {

@@ -72,7 +72,7 @@ public sealed class Contract // input + output OK
     /// <summary>
     /// The legs of a combined contract definition.
     /// </summary>
-    public IList<ContractComboLeg> ComboLegs { get; } = new List<ContractComboLeg>(); // input + output
+    public IList<ContractComboLeg> ComboLegs { get; } = []; // input + output
 
     /// <summary>
     /// Delta and underlying price for Delta-Neutral combo orders.

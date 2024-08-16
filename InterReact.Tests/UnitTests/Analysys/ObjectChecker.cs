@@ -2,10 +2,8 @@
 
 namespace Analysis;
 
-public class Interface_Checker : UnitTestBase
+public class Interface_Checker(ITestOutputHelper output) : UnitTestBase(output)
 {
-    public Interface_Checker(ITestOutputHelper output) : base(output) { }
-
     private static readonly List<TypeInfo> Types = typeof(InterReactClient)
         .Assembly
         .DefinedTypes.Where(t => t.IsClass)

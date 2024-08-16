@@ -2,10 +2,8 @@
 
 namespace Other;
 
-public class NoConnect : ConnectTestBase
+public class NoConnect(ITestOutputHelper output) : ConnectTestBase(output, LogLevel.Debug)
 {
-    public NoConnect(ITestOutputHelper output) : base(output, LogLevel.Debug) { }
-
     [Fact]
     public async Task CancelTest()
     {
@@ -14,7 +12,7 @@ public class NoConnect : ConnectTestBase
         Task<IInterReactClient> task = InterReactClient.ConnectAsync(options =>
         {
             options.LogFactory = LogFactory;
-            options.TwsPortAddress = "999";
+            options.IBPortAddresses = [999];
         }, null, ct);
 
         OperationCanceledException ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => task);
@@ -29,7 +27,7 @@ public class NoConnect : ConnectTestBase
         Task<IInterReactClient> task = InterReactClient.ConnectAsync(options =>
         {
             options.LogFactory = LogFactory;
-            options.TwsPortAddress = "999";
+            options.IBPortAddresses = [999];
         }, null, cts.Token);
 
         OperationCanceledException ex = await Assert.ThrowsAsync<OperationCanceledException>(() => task);
@@ -42,7 +40,7 @@ public class NoConnect : ConnectTestBase
         Task<IInterReactClient> task = InterReactClient.ConnectAsync(options =>
         {
             options.LogFactory = LogFactory;
-            options.TwsPortAddress = "999";
+            options.IBPortAddresses = [999];
         });
 
         ArgumentException ex = await Assert.ThrowsAsync<ArgumentException>(() => task);

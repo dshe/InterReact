@@ -1,7 +1,6 @@
 ﻿namespace InterReact;
 
-public sealed class OrderComboLeg // input + output
+public sealed class OrderComboLeg(double price) // input + output
 {
-    public double Price { get; } = double.MaxValue;
-    public OrderComboLeg(double price) => Price = price;
+    public double Price { get; } = price;
 }

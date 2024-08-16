@@ -2,10 +2,8 @@
 
 namespace Other;
 
-public class Disposal : ConnectTestBase
+public class Disposal(ITestOutputHelper output) : ConnectTestBase(output)
 {
-    public Disposal(ITestOutputHelper output) : base(output) { }
-
     [Fact]
     public async Task DisposalTest()
     {
@@ -15,6 +13,6 @@ public class Disposal : ConnectTestBase
         await client.DisposeAsync();
 
         Assert.ThrowsAny<Exception>(() => client.Request.RequestCurrentTime());
-        await Assert.ThrowsAnyAsync<Exception>(() => client.Service.FindMatchingSymbolsAsync("x", default));
+        await Assert.ThrowsAnyAsync<Exception>(() => client.Service.GetMatchingSymbolsAsync("x", default));
     }
 }

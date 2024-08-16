@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-public sealed class AccountPositionMulti : IHasRequestId
+public sealed class AccountPositionsMulti : IHasRequestId
 {
     public int RequestId { get; }
     public string Account { get; }
@@ -8,7 +8,7 @@ public sealed class AccountPositionMulti : IHasRequestId
     public decimal Position { get; }
     public double AvgCost { get; }
     public string ModelCode { get; }
-    internal AccountPositionMulti(ResponseReader r)
+    internal AccountPositionsMulti(ResponseReader r)
     {
         r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
@@ -20,10 +20,10 @@ public sealed class AccountPositionMulti : IHasRequestId
     }
 }
 
-public sealed class AccountPositionMultiEnd : IHasRequestId
+public sealed class AccountPositionsMultiEnd : IHasRequestId
 {
     public int RequestId { get; }
-    internal AccountPositionMultiEnd(ResponseReader r)
+    internal AccountPositionsMultiEnd(ResponseReader r)
     {
         r.IgnoreMessageVersion();
         RequestId = r.ReadInt();

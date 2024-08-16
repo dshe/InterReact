@@ -40,7 +40,7 @@ public sealed class OrderMonitor : IDisposable
             .WithOrderId(OrderId)
             .Subscribe(Subject);
 
-        Request.PlaceOrder(OrderId, Order, Contract);
+        Request.PlaceOrder(OrderId, Order, contract);
     }
 
     public void ReplaceOrder() => Request.PlaceOrder(OrderId, Order, Contract);

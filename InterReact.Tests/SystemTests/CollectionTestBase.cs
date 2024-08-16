@@ -18,13 +18,12 @@ public sealed class TestFixture : IAsyncLifetime
             .ConnectAsync(options => options.LogFactory = loggerFactory)
             .ConfigureAwait(false);
 
-        // Tests should run with the demo account since orders are submitted.
+        // Tests should be run with the demo account since orders are submitted.
         // The demo account does not have data subscriptions, so use delayed data.
         // Note that delayed data produces delayed tick types: 
         // TickType.BidPrice => TickType.DelayedBidPrice.
-        await Task.Delay(500);
-        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
-        await Task.Delay(500);
+        if (Client.RemoteIpEndPoint.IsUsingIBDemoPort())
+            Client.Request.RequestMarketDataType(MarketDataType.Delayed);
     }
 
     public async Task DisposeAsync()
@@ -68,7 +67,6 @@ public abstract class CollectionTestBase : IDisposable
         if (disposed)
             return;
         disposed = true;
-
         if (disposing)
         {   // dispose managed objects
             RemoveWriter();

@@ -3,10 +3,8 @@ using System.Diagnostics;
 
 namespace Utility;
 
-public sealed class Limiter : UnitTestBase
+public sealed class Limiter(ITestOutputHelper output) : UnitTestBase(output)
 {
-    public Limiter(ITestOutputHelper output) : base(output) { }
-
     public double Limit(int rate, double duration)
     {
         RingLimiter limiter = new(Logger, rate);

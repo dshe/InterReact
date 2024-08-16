@@ -3,7 +3,7 @@
 public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
 {
     // associate OrderIds with ExecutionIds
-    internal readonly static Dictionary<string, int> ExecutionIds = new();
+    internal readonly static Dictionary<string, int> ExecutionIds = [];
 
     /// <summary>
     /// RequestId will be -1 if this object sent due to an execution rather than a request for executions.

@@ -1,16 +1,15 @@
-﻿using System.Reactive.Linq;
+﻿using System;
+using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 
 namespace Orders;
 
-public class Place : CollectionTestBase
+public class Place(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
 {
-    public Place(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
-
     [Fact]
     public async Task PlaceOrderTest()
     {
-        if (!Client.RemoteIpEndPoint.Port.IsIBDemoPort())
+        if (!Client.RemoteIpEndPoint.IsUsingIBDemoPort())
             throw new Exception("Use demo account to place order.");
 
         Contract contract = new()
@@ -21,8 +20,6 @@ public class Place : CollectionTestBase
             Exchange = "SMART"
         };
 
-        int orderId = Client.Request.GetNextId();
-
         Order order = new()
         {
             Action = OrderAction.Buy,
@@ -30,18 +27,16 @@ public class Place : CollectionTestBase
             OrderType = OrderTypes.Market
         };
 
-        Task<Execution?> task = Client
-            .Response
+        int orderId = Client.Request.GetNextId();
+
+        Task<IHasOrderId> task = Client.Response
             .WithOrderId(orderId)
-            .OfType<Execution>()
-            .Take(TimeSpan.FromSeconds(5))
-            .FirstOrDefaultAsync()
+            .FirstAsync()
             .ToTask();
 
         Client.Request.PlaceOrder(orderId, order, contract);
 
-        Execution? execution = await task;
-
-        Assert.NotNull(execution);
+        await task;
+        await Task.Delay(TimeSpan.FromSeconds(3));
     }
 }

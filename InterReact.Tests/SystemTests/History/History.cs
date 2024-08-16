@@ -1,50 +1,63 @@
 ﻿using Stringification;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 
 namespace History;
 
-public class HistoryTests : CollectionTestBase
+public class HistoryTests(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
 {
-    public HistoryTests(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
-
     [Fact]
-    public async Task Test1History()
+    public async Task HistoryObservableTest()
     {
         Contract contract = new()
         {
-            SecurityType = ContractSecurityType.Stock,
-            Symbol = "AMZN",
+            SecurityType = ContractSecurityType.Cash,
+            PrimaryExchange = "IDEALPRO",
+            Symbol = "EUR",
             Currency = "USD",
             Exchange = "SMART"
         };
 
-        int id = Client.Request.GetNextId();
+        IObservable<IHasRequestId> observable = Client
+            .Service
+            .CreateHistoricalDataObservable(
+                contract,
+                HistoricalDataDuration.EightHours,
+                HistoricalDataBarSize.FiveSeconds,
+                HistoricalDataWhatToShow.Midpoint,
+                false
+            );
 
-        Task<HistoricalData> task = Client
-            .Response
-            .WithRequestId(id)
-            .AlertMessageToError()
-            .Cast<HistoricalData>()
-            .FirstAsync()
-            .ToTask();
+        IList<IHasRequestId> messages = await observable
+            //.IgnoreAlertMessage(ErrorResponse.HistoricalDataServiceError)
+            //.CastTo<HistoricalDataBar>()
+            // wait some time for TWS to send some updates
+            .Take(TimeSpan.FromSeconds(10))
+            .ToList();
 
-        Client.Request.RequestHistoricalData(
-            id,
-            contract,
-            "", // up to the current date/time
-            "1 M",
-            "1 day",
-            "TRADES");
-
-        HistoricalData data = await task;
-        Assert.NotEmpty(data.Bars);
-        foreach (var bar in data.Bars)
-            Write(bar.Stringify());
+        Assert.NotEmpty(messages);
+        foreach (HistoricalDataBar bar in messages.OfType<HistoricalDataBar>())
+            Write(bar.Time + " " + bar.Close.ToString());
     }
 
     [Fact]
-    public async Task Test2HistoryAsync()
+    public async Task HistoryObservableErrorTest()
+    {
+        Contract contract = new()
+        {
+            SecurityType = ContractSecurityType.Stock,
+            Symbol = "InvalidSymbol",
+            Currency = "USD",
+            Exchange = "SMART"
+        };
+
+        await Assert.ThrowsAsync<AlertException>(async () => await Client
+            .Service
+            .CreateHistoricalDataObservable(contract)
+            .ThrowAlertMessage());
+    }
+
+    [Fact]
+    public async Task HistorySnapshotAsyncTest()
     {
         Contract contract = new()
         {
@@ -59,38 +72,27 @@ public class HistoryTests : CollectionTestBase
             .GetHistoricalDataAsync(
                 contract,
                 "",
-                "1 M",
-                "1 day",
-                "TRADES");
+                HistoricalDataDuration.OneMonth,
+                HistoricalDataBarSize.OneDay,
+                HistoricalDataWhatToShow.Trades);
 
         foreach (var bar in data.Bars)
             Write(bar.Stringify());
     }
 
     [Fact]
-    public async Task Test3HistoryContinuousObservable()
+    public async Task HistorySnapshotAsyncErrorTest()
     {
         Contract contract = new()
         {
             SecurityType = ContractSecurityType.Stock,
-            Symbol = "MSFT",
+            Symbol = "InvalidSymbol",
             Currency = "USD",
             Exchange = "SMART"
         };
 
-        IList<HistoricalDataBar> bars = await Client
+        await Assert.ThrowsAsync<AlertException>(async () => await Client
             .Service
-            .CreateHistoricalDataContinuousObservable(
-                contract,
-                "1 D",
-                "10 secs",
-                "TRADES")
-            // wait some time for TWS to send some updates
-            .Take(TimeSpan.FromSeconds(30))
-            .ToList();
-
-        Assert.NotEmpty(bars);
-        foreach (var bar in bars)
-            Write(bar.Stringify());
+            .GetHistoricalDataAsync(contract));
     }
 }

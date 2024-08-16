@@ -3,10 +3,10 @@
 public sealed class MarketDepth : IHasRequestId
 {
     public int RequestId { get; }
-    public int Position { get; } = -1; // stringify always
+    public int Position { get; }
     public string MarketMaker { get; } = "";
-    public MarketDepthOperation Operation { get; } = MarketDepthOperation.Undefined;
-    public MarketDepthSide Side { get; } = MarketDepthSide.Undefined;
+    public MarketDepthOperation Operation { get; }
+    public MarketDepthSide Side { get; }
     public double Price { get; }
     public decimal Size { get; }
     public bool IsSmartDepth { get; }

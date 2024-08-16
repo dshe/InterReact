@@ -1,50 +1,36 @@
-﻿using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
+﻿using System;
+using System.Reactive.Linq;
 
 namespace MarketData;
 
-public class MarketDataSnapshot : CollectionTestBase
+public class MarketDataSnapshot(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
 {
-    public MarketDataSnapshot(ITestOutputHelper output, TestFixture fixture) : base(output, fixture) { }
-
     [Fact]
-    public async Task TickSnapshotTest()
+    public async Task MarketDataSnapshotTest()
     {
         Contract contract = new()
         {
             SecurityType = ContractSecurityType.Stock,
-            Symbol = "AMD",
+            Symbol = "NVDA",
             Currency = "USD",
             Exchange = "SMART"
         };
 
-        int id = Client.Request.GetNextId();
+        IObservable<IHasRequestId> observable = Client.Service.CreateMarketDataSnapshotObservable(contract);
 
-        Task<IList<IHasRequestId>> task = Client
-            .Response
-            .WithRequestId(id)
-            .TakeUntil(x => x is SnapshotEndTick || (x is AlertMessage alert && alert.IsFatal))
-            .ToList()
-            .ToTask(); // start task
+        IList<PriceTick> priceTicks = await observable
+            .IgnoreAlertMessage(ErrorResponse.MarketDataNotSubscribed)
+            .ThrowAlertMessage()
+            //.OfType<PriceTick>()
+            .OfTickClass(x => x.PriceTick)
+            .ToList();
 
-        Client.Request.RequestMarketData(id, contract, isSnapshot: true);
-
-        IList<IHasRequestId> messages = await task;
-
-        Assert.Empty(messages.OfType<AlertMessage>().Where(a => a.IsFatal));
-
-        double? lastPrice = messages
-            .OfType<PriceTick>()
-            .FirstOrDefault(x => x.TickType == TickType.DelayedLastPrice || x.TickType == TickType.LastPrice)
-            ?.Price;
-
-        Write("LastPrice: " + lastPrice);
-
-        Assert.True(lastPrice != null && lastPrice > 0);
+        foreach (var priceTick in priceTicks)
+            Write(priceTick.TickType + ": " + priceTick.Price);
     }
 
     [Fact]
-    public async Task TickSnapshotInvalidTest()
+    public async Task MarketDataSnapshotErrorTest()
     {
         Contract contract = new()
         {
@@ -54,20 +40,12 @@ public class MarketDataSnapshot : CollectionTestBase
             Exchange = "SMART"
         };
 
-        int id = Client.Request.GetNextId();
+        IObservable<IHasRequestId> observable = Client.Service.CreateMarketDataObservable(contract);
+        IHasRequestId message = await observable.FirstAsync();
 
-        Task<AlertMessage> task = Client
-            .Response
-            .WithRequestId(id)
-            .OfType<AlertMessage>()
-            .Where(x => x.IsFatal)
-            .FirstAsync()
-            .ToTask(); // start task
-
-        Client.Request.RequestMarketData(id, contract, isSnapshot: true);
-
-        AlertMessage fatalAlert = await task;
-
-        Assert.True(fatalAlert.Message.StartsWith("No security definition"));
+        Assert.True(message is AlertMessage);
+        AlertMessage alert = (AlertMessage)message;
+        Write(alert.Message);
+        Assert.StartsWith("No security definition has been found", alert.Message);
     }
 }

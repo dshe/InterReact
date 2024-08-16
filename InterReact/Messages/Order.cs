@@ -272,7 +272,7 @@ public sealed class Order : IHasOrderId  // input + output
     public string ClearingIntent { get; set; } = OrderClearingIntent.Default;
 
     public string AlgoStrategy { get; set; } = "";
-    public IList<Tag> AlgoParams { get; } = new List<Tag>(); // input + output
+    public IList<Tag> AlgoParams { get; } = []; // input + output
 
     public bool WhatIf { get; set; }
 
@@ -280,9 +280,9 @@ public sealed class Order : IHasOrderId  // input + output
 
     public bool NotHeld { get; set; }
 
-    public IList<Tag> SmartComboRoutingParams { get; } = new List<Tag>(); // input + output
-    public IList<OrderComboLeg> OrderComboLegs { get; } = new List<OrderComboLeg>(); // input + output
-    public IList<Tag> OrderMiscOptions { get; } = new List<Tag>(); // input
+    public IList<Tag> SmartComboRoutingParams { get; } = []; // input + output
+    public IList<OrderComboLeg> OrderComboLegs { get; } = []; // input + output
+    public IList<Tag> OrderMiscOptions { get; } = []; // input
 
     /// <summary>
     /// For GTC(good-till cancelled) orders.
@@ -335,7 +335,7 @@ public sealed class Order : IHasOrderId  // input + output
     public double AdjustedStopLimitPrice { get; set; } = double.MaxValue;
     public double AdjustedTrailingAmount { get; set; } = double.MaxValue;
     public int AdjustableTrailingUnit { get; set; }
-    public IList<OrderCondition> Conditions { get; } = new List<OrderCondition>();
+    public IList<OrderCondition> Conditions { get; } = [];
     public bool ConditionsIgnoreRegularTradingHours { get; set; }
     public bool ConditionsCancelOrder { get; set; }
     public SoftDollarTier SoftDollarTier { get; } = new();

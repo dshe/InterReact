@@ -2,12 +2,10 @@
 
 namespace Core;
 
-public class ResponseParserTests : UnitTestBase
+public class ResponseParserTests(ITestOutputHelper output) : UnitTestBase(output)
 {
-    private readonly List<object> alerts = new();
-    private readonly ResponseParser parser;
-    public ResponseParserTests(ITestOutputHelper output) : base(output) =>
-        parser = new ResponseParser(NullLogger<ResponseParser>.Instance);
+    private readonly List<object> alerts = [];
+    private readonly ResponseParser parser = new(NullLogger<ResponseParser>.Instance);
 
     [Fact]
     public void T04_Bool()

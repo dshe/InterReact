@@ -2,10 +2,8 @@
 
 namespace Args;
 
-public class IpAddress : ConnectTestBase
+public class IpAddress(ITestOutputHelper output) : ConnectTestBase(output)
 {
-    public IpAddress(ITestOutputHelper output) : base(output) { }
-
     [Fact]
     public async Task AllDefaultsTest()
     {

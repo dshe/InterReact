@@ -25,7 +25,7 @@ public class SimplestExample
         // Create and then subscribe to the observable which can observe ticks for the contract.
         IDisposable subscription = interReact
             .Service
-            .CreateTickObservable(contract)
+            .CreateMarketDataObservable(contract)
             .OfTickClass(selector => selector.PriceTick)
             .Where(tick => tick.TickType == TickType.LastPrice)
             .Subscribe(onNext: priceTick => Console.WriteLine($"Last Price = {priceTick.Price}"));

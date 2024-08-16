@@ -5,14 +5,13 @@ namespace InterReact;
 public partial class Service
 {
     /// <summary>
-    /// Returns the list of managed accounts.
-    /// TWS does not support more than one concurrent request.
+    /// Returns a list of managed accounts.
     /// </summary>
-    public async Task<IList<string>> GetManagedAccountsAsync(CancellationToken ct)
+    public async Task<IList<string>> GetManagedAccountsAsync(CancellationToken ct = default)
     {
-        Task<List<string>> task = Response
+        Task<string[]> task = Response
             .OfType<ManagedAccounts>()
-            .Select(x => x.Accounts.ToList())
+            .Select(x => x.Accounts.Split(',', StringSplitOptions.RemoveEmptyEntries))
             .FirstAsync()
             .ToTask(ct);
 

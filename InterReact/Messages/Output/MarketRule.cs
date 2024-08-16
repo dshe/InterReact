@@ -3,12 +3,13 @@
 public sealed class MarketRule
 {
     public int MarketRuleId { get; }
-    public IList<PriceIncrement> PriceIncrements { get; } = new List<PriceIncrement>();
+    public IList<PriceIncrement> PriceIncrements { get; }
 
     internal MarketRule(ResponseReader r)
     {
         MarketRuleId = r.ReadInt();
         int n = r.ReadInt();
+        PriceIncrements = new List<PriceIncrement>(n);
         for (int i = 0; i < n; i++)
             PriceIncrements.Add(new PriceIncrement(r));
     }

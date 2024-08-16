@@ -48,7 +48,7 @@ public sealed class ObservableTests
     }
 
     [Fact]
-    public async void TestTake()
+    public async Task TestTake()
     {
         IObservable<int> o = new int[] { 1, 2, 3, 4 }.ToObservable();
 
@@ -70,10 +70,10 @@ public sealed class ObservableTests
             .FromResult("a")
             .WaitAsync(CancellationToken.None);
 
-        var result2 = new AlertMessage[] { new AlertMessage() }
+        var result2 = new [] { new AlertMessage() }
             .ToObservable()
             //.OfType<IHasRequestId>()
-            .AlertMessageToError() // modify exception handling
+            .ThrowAlertMessage() // modify exception handling
             //.OfType<ContractDetails>()
             //.Select(x => x) // manipulation
             //.Timeout(TimeSpan.FromSeconds(3)) // timeout

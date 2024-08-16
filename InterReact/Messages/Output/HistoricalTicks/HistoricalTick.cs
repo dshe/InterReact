@@ -3,13 +3,13 @@
 public sealed class HistoricalTicks : IHasRequestId
 {
     public int RequestId { get; }
-    public IList<HistoricalTick> Ticks { get; } = new List<HistoricalTick>();
+    public IList<HistoricalTick> Ticks { get; }
     public bool Done { get; }
-
     internal HistoricalTicks(ResponseReader r)
     {
         RequestId = r.ReadInt();
         int n = r.ReadInt();
+        Ticks = new List<HistoricalTick>(n);
         for (int i = 0; i < n; i++)
             Ticks.Add(new HistoricalTick(r));
         Done = r.ReadBool();

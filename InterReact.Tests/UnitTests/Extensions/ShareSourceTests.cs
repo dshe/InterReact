@@ -5,11 +5,9 @@ using System.Reactive.Linq;
 
 namespace Extension;
 
-public sealed class ShareSourceTests : ReactiveUnitTestBase
+public sealed class ShareSourceTests(ITestOutputHelper output) : ReactiveUnitTestBase(output)
 {
     private readonly TestScheduler TestScheduler = new();
-
-    public ShareSourceTests(ITestOutputHelper output) : base(output) { }
 
     [Fact]
     public void T01_Consecutive()

@@ -3,10 +3,8 @@ using System.Diagnostics;
 
 namespace Args;
 
-public class MessageSendRate : ConnectTestBase
+public class MessageSendRate(ITestOutputHelper output) : ConnectTestBase(output, LogLevel.Debug)
 {
-    public MessageSendRate(ITestOutputHelper output) : base(output, LogLevel.Debug) { }
-
     [Fact]
     public async Task SendRateTest()
     {

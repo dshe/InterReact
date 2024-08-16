@@ -77,7 +77,7 @@ public sealed class ContractDetailsTime
                 LocalDateTime end = date.At(endTime);
                 if (end < start)
                     start = start.PlusDays(-1); //end = end.PlusDays(1); ??
-                if (list.Any() && (start <= list.Last().end || end <= start)) // ensure consecutive, non-overlapping periods
+                if (list.Count != 0 && (start <= list.Last().end || end <= start)) // ensure consecutive, non-overlapping periods
                     throw new InvalidDataException("Invalid period.");
                 list.Add((start, end));
             }

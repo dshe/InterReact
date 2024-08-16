@@ -9,14 +9,13 @@ public partial class Service
     /// TWS does not support more than one concurrent request.
     /// TWS error messages (AlertMessage) are directed to OnError(AlertException).
     /// </summary>
-    public async Task<IList<ContractDescription>> FindMatchingSymbolsAsync(string pattern, CancellationToken ct)
+    public async Task<IList<ContractDescription>> GetMatchingSymbolsAsync(string pattern, CancellationToken ct = default)
     {
         int id = Request.GetNextId();
 
         Task<IList<ContractDescription>> task = Response
             .WithRequestId(id)
-            .AlertMessageToError()
-            .Cast<SymbolSamples>()
+            .CastTo<SymbolSamples>() // Throws for other types.
             .Select(x => x.Descriptions)
             .FirstAsync()
             .ToTask(ct);

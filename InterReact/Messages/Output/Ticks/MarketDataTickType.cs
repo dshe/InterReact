@@ -4,11 +4,11 @@
 /// This message indicates a change in MarketDataType. 
 /// Tws sends this message to announce that market data has been switched between frozen and real-time.
 /// </summary>
-public sealed class MarketDataTickType : IHasRequestId
+public sealed class MarketDataTickType : ITick
 {
+    public TickType TickType { get; } = TickType.Undefined;
     public int RequestId { get; }
     public MarketDataType Type { get; }
-
     internal MarketDataTickType(ResponseReader r)
     {
         r.IgnoreMessageVersion();
