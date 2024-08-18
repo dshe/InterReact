@@ -19,11 +19,13 @@ public sealed class TestFixture : IAsyncLifetime
             .ConfigureAwait(false);
 
         // Tests should be run with the demo account since orders are submitted.
+        if (!Client.RemoteIpEndPoint.IsUsingIBDemoPort())
+            throw new Exception("The tests may place orders, so use the demo account.");
+
         // The demo account does not have data subscriptions, so use delayed data.
         // Note that delayed data produces delayed tick types: 
         // TickType.BidPrice => TickType.DelayedBidPrice.
-        if (Client.RemoteIpEndPoint.IsUsingIBDemoPort())
-            Client.Request.RequestMarketDataType(MarketDataType.Delayed);
+        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
     }
 
     public async Task DisposeAsync()

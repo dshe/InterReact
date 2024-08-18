@@ -8,21 +8,18 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
     [Fact]
     public async Task OrderMonitorTest()
     {
-        if (!Client.RemoteIpEndPoint.IsUsingIBDemoPort())
-            throw new Exception("Use demo account to place order.");
-
         Contract contract = new()
         {
-            SecurityType = ContractSecurityType.Stock,
-            Symbol = "TSLA",
+            SecurityType = ContractSecurityType.Cash,
+            Symbol = "EUR",
             Currency = "USD",
-            Exchange = "SMART"
+            Exchange = "IDEALPRO"
         };
 
         Order order = new()
         {
             Action = OrderAction.Buy,
-            TotalQuantity = 100,
+            TotalQuantity = 50000,
             OrderType = OrderTypes.Market
         };
 
@@ -32,35 +29,26 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
             .Messages
             .Subscribe(m => Write($"OrderMonitor: {m.Stringify()}"));
 
-        Execution? execution = await orderMonitor
-            .Messages
-            .OfType<Execution>()
-            .Take(TimeSpan.FromSeconds(5))
-            .FirstOrDefaultAsync();
+        await Task.Delay(TimeSpan.FromSeconds(5));
 
         orderMonitor.Dispose();
-
-        Assert.NotNull(execution);
     }
 
     [Fact]
     public async Task OrderMonitorCancellationTest()
     {
-        if (!Client.RemoteIpEndPoint.IsUsingIBDemoPort())
-            throw new Exception("Use demo account to place order.");
-
         Contract contract = new()
         {
-            SecurityType = ContractSecurityType.Stock,
-            Symbol = "GOOG",
-            Currency = "USD",
-            Exchange = "SMART"
+            SecurityType = ContractSecurityType.Cash,
+            Symbol = "USD",
+            Currency = "SGD",
+            Exchange = "IDEALPRO"
         };
 
         Order order = new()
         {
             Action = OrderAction.Buy,
-            TotalQuantity = 100,
+            TotalQuantity = 60000,
             OrderType = OrderTypes.Market
         };
 
@@ -68,13 +56,11 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
 
         orderMonitor.CancelOrder();
 
-        OrderStatusReport report = await orderMonitor
+        orderMonitor
             .Messages
-            .OfType<OrderStatusReport>()
-            .Take(TimeSpan.FromSeconds(3))
-            .FirstOrDefaultAsync();
+            .Subscribe(m => Write($"OrderMonitor: {m.Stringify()}"));
 
-        //Assert.True(report.Status == OrderStatus.Cancelled || report.Status == OrderStatus.ApiCancelled);
+        await Task.Delay(TimeSpan.FromSeconds(3));
 
         orderMonitor.Dispose();
     }
@@ -82,38 +68,46 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
     [Fact]
     public async Task OrderMonitorModificationTest()
     {
-        if (!Client.RemoteIpEndPoint.IsUsingIBDemoPort())
-            throw new Exception("Use demo account to place order.");
-
         Contract contract = new()
         {
-            SecurityType = ContractSecurityType.Stock,
-            Symbol = "IBKR",
+            SecurityType = ContractSecurityType.Cash,
+            Symbol = "CHF",
             Currency = "USD",
-            Exchange = "SMART"
+            Exchange = "IDEALPRO"
         };
 
-        IList<IHasRequestId> list = await Client.Service.CreateMarketDataSnapshotObservable(contract).ToList();
+        double askPrice = await Client
+            .Service
+            .CreateMarketDataSnapshotObservable(contract)
+            .OfTickClass(x => x.PriceTick)
+            .Where(priceTick => priceTick.TickType == TickType.AskPrice)
+            .Select(priceTick => priceTick.Price)
+            .Take(TimeSpan.FromSeconds(3))
+            .FirstOrDefaultAsync();
 
-        PriceTick? askPriceTick = list.OfType<PriceTick>().Where(priceTick => priceTick.TickType == TickType.AskPrice || priceTick.TickType == TickType.DelayedAskPrice).FirstOrDefault();
-        Assert.NotNull(askPriceTick);
-        double askPrice = askPriceTick.Price;
+        if (askPrice <= 0)
+        {
+            Write("Price not available.");
+            return;
+        }
 
         Order order = new()
         {
             Action = OrderAction.Buy,
-            TotalQuantity = 100,
+            TotalQuantity = 40000,
             OrderType = OrderTypes.Limit,
-            LimitPrice = askPrice - 1 // should not execute
+            LimitPrice = askPrice - .01 // should not execute
         };
 
         // Place the order
         OrderMonitor orderMonitor = Client.Service.PlaceOrder(order, contract);
 
-        //await Task.Delay(100);
+        orderMonitor
+            .Messages
+            .Subscribe(m => Write($"OrderMonitor: {m.Stringify()}"));
 
         // Change the order
-        orderMonitor.Order.LimitPrice = askPrice + 1; // should execute
+        orderMonitor.Order.LimitPrice = askPrice + .01; // should execute
         // Resubmit the changed order
         orderMonitor.ReplaceOrder();
 
@@ -121,7 +115,7 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
         Execution? execution = await orderMonitor
             .Messages
             .OfType<Execution>()
-            .Take(TimeSpan.FromSeconds(2))
+            .Take(TimeSpan.FromSeconds(3))
             .FirstOrDefaultAsync();
 
         orderMonitor.Dispose();

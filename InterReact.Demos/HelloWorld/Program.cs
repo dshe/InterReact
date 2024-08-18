@@ -37,7 +37,8 @@ Contract contract = new()
 // Find the latest ask price for the security.
 PriceTick askPriceTick = await client
     .Service.CreateMarketDataSnapshotObservable(contract)
-    .OfType<PriceTick>()
+    //.OfType<PriceTick>()
+    .OfTickClass(c => c.PriceTick)
     .Where(priceTick => priceTick.TickType is TickType.AskPrice)
     .FirstAsync();
 

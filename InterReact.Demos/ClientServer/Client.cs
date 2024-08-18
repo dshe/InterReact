@@ -19,7 +19,7 @@ public sealed class Client : IAsyncDisposable
         IInterReactClient client = await InterReactClient.ConnectAsync(options =>
         {
             options.Logger = libLogger;
-            options.TwsIpAddress = ipEndPoint.Address.ToString();
+            options.TwsIpAddress = ipEndPoint.Address;
             options.IBPortAddresses = [ipEndPoint.Port];
         });
 

@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging.Abstractions;
+﻿using Microsoft.Extensions.Logging.Abstractions;
+using System.Net;
 using System.Security.Cryptography;
 
 namespace InterReact;
@@ -12,7 +12,7 @@ public sealed class InterReactOptions
     /// <summary>
     /// Specify the IP address of TWS/Gateway if not the local host.
     /// </summary>
-    public string TwsIpAddress { get; set; } = "::1";
+    public IPAddress TwsIpAddress { get; set; } = IPAddress.IPv6Loopback;
     /// <summary>
     /// Specify the port(s) used to attempt connection to TWS/Gateway.
     /// If unspecified, connection will be attempted on ports 7496 and 7497, 4001, 4002.
@@ -46,21 +46,11 @@ public sealed class InterReactOptions
     // The NextOrderId message is also received in response to Request.RequestNextOrderId().
     internal int Id;
 
-    internal InterReactOptions(Action<InterReactOptions>? action, IConfigurationSection? configSection)
+    internal InterReactOptions(Action<InterReactOptions>? action)
     {
-        // Precedence: environment variables > action > configSection
-        configSection?.Bind(this, options => options.ErrorOnUnknownConfiguration = true);
         action?.Invoke(this);
-        new ConfigurationBuilder()
-            .AddEnvironmentVariables("InterReact__")
-            .Build()
-            .Bind(this, options => options.ErrorOnUnknownConfiguration = true);
-
         if (LogFactory == NullLoggerFactory.Instance && Logger != NullLogger.Instance)
             LogFactory = Logger.ToLoggerFactory();
-
-        if (string.IsNullOrEmpty(TwsIpAddress))
-            throw new InvalidOperationException("InterReactOptions: invalid IP address.");
         if (!IBPortAddresses.Any())
             throw new InvalidOperationException("InterReactOptions: missing port address.");
         if (MaxRequestsPerSecond <= 0)

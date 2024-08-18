@@ -3,7 +3,7 @@
 public sealed class RealtimeBar : IHasRequestId
 {
     public int RequestId { get; }
-    public Instant Time { get; }
+    public long Time { get; }
     public double Open { get; }
     public double High { get; }
     public double Low { get; }
@@ -16,7 +16,7 @@ public sealed class RealtimeBar : IHasRequestId
     {
         r.IgnoreMessageVersion();
         RequestId = r.ReadInt();
-        Time = Instant.FromUnixTimeSeconds(r.ReadLong());
+        Time = r.ReadLong(); // Instant.FromUnixTimeSeconds(r.ReadLong());
         Open = r.ReadDouble();
         High = r.ReadDouble();
         Low = r.ReadDouble();

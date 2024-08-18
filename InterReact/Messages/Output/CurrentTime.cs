@@ -2,10 +2,10 @@
 
 public sealed class CurrentTime
 {
-    public Instant Time { get; }
+    public long Seconds { get; }
     internal CurrentTime(ResponseReader r)
     {
         r.IgnoreMessageVersion();
-        Time = Instant.FromUnixTimeSeconds(r.ReadLong());
+        Seconds =r.ReadLong();
     }
 }

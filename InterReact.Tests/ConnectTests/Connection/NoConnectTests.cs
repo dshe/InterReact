@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace Other;
+namespace Connection;
 
 public class NoConnect(ITestOutputHelper output) : ConnectTestBase(output, LogLevel.Debug)
 {
@@ -13,7 +13,7 @@ public class NoConnect(ITestOutputHelper output) : ConnectTestBase(output, LogLe
         {
             options.LogFactory = LogFactory;
             options.IBPortAddresses = [999];
-        }, null, ct);
+        }, ct);
 
         OperationCanceledException ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => task);
         Write(ex.ToString());
@@ -28,7 +28,7 @@ public class NoConnect(ITestOutputHelper output) : ConnectTestBase(output, LogLe
         {
             options.LogFactory = LogFactory;
             options.IBPortAddresses = [999];
-        }, null, cts.Token);
+        }, cts.Token);
 
         OperationCanceledException ex = await Assert.ThrowsAsync<OperationCanceledException>(() => task);
         Write(ex.ToString());

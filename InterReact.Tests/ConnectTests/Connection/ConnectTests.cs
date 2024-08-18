@@ -1,8 +1,8 @@
 ﻿using System.Net;
 
-namespace Args;
+namespace Connection;
 
-public class IpAddress(ITestOutputHelper output) : ConnectTestBase(output)
+public class IpAddressTest(ITestOutputHelper output) : ConnectTestBase(output)
 {
     [Fact]
     public async Task AllDefaultsTest()
@@ -17,7 +17,7 @@ public class IpAddress(ITestOutputHelper output) : ConnectTestBase(output)
         IInterReactClient client = await InterReactClient.ConnectAsync(options =>
         {
             options.LogFactory = LogFactory;
-            options.TwsIpAddress = IPAddress.Loopback.ToString();
+            options.TwsIpAddress = IPAddress.Loopback;
         });
 
         await client.DisposeAsync();
@@ -29,7 +29,7 @@ public class IpAddress(ITestOutputHelper output) : ConnectTestBase(output)
         IInterReactClient client = await InterReactClient.ConnectAsync(options =>
         {
             options.LogFactory = LogFactory;
-            options.TwsIpAddress = IPAddress.IPv6Loopback.ToString();
+            options.TwsIpAddress = IPAddress.IPv6Loopback;
         });
 
         await client.DisposeAsync();

@@ -91,6 +91,7 @@ public class Types_Viewer(ITestOutputHelper output) : UnitTestBase(output)
                 type == typeof(TickEnumerableSelector) ||
                 type == typeof(TickObservableSelector) ||
                 type == typeof(InterReactOptions) ||
+                type == typeof(NullInterReactClient) ||
                 type == typeof(InterReactClient))
                 continue;
             try

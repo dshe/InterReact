@@ -21,10 +21,12 @@ internal sealed class Connector
         AssemblyName name = Assembly.GetExecutingAssembly().GetName();
         Logger.LogInformation("{Name} v{Version}.", name.Name, name.Version);
     }
-    internal static async Task<IInterReactClient> ConnectAsync(InterReactOptions options, CancellationToken ct)
+    internal static async Task<IInterReactClient> ConnectAsync(Action<InterReactOptions>? action, CancellationToken ct)
     {
+        InterReactOptions options = new(action);
         Connector connector = new(options);
-        return await connector.ConnectAsync(ct).ConfigureAwait(false);
+        IInterReactClient client = await connector.ConnectAsync(ct).ConfigureAwait(false);
+        return client;
     }
 
     private async Task<IInterReactClient> ConnectAsync(CancellationToken ct)
@@ -67,8 +69,7 @@ internal sealed class Connector
 
     private async Task<IRxSocketClient> ConnectSocketAsync(CancellationToken ct)
     {
-        IPAddress ipAddress = IPAddress.Parse(Options.TwsIpAddress);
-        IPEndPoint ipEndPoint = new(ipAddress, 0);
+        IPEndPoint ipEndPoint = new(Options.TwsIpAddress, 0);
         foreach (int port in Options.IBPortAddresses)
         {
             ipEndPoint.Port = port;
@@ -77,6 +78,7 @@ internal sealed class Connector
             try
             {
                 return await ipEndPoint.CreateRxSocketClientAsync(Options.LogFactory, cts.Token).ConfigureAwait(false);
+                //return await ipEndPoint.CreateRxSocketClientAsync(cts.Token).ConfigureAwait(false);
                 // token cancel  => OperationCanceledException
                 // token timeout => OperationCanceledException
                 // socket timeout/error => SocketException

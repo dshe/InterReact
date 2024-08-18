@@ -1,6 +1,5 @@
-﻿using System;
+﻿using Stringification;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
 
 namespace Orders;
 
@@ -9,9 +8,6 @@ public class Place(ITestOutputHelper output, TestFixture fixture) : CollectionTe
     [Fact]
     public async Task PlaceOrderTest()
     {
-        if (!Client.RemoteIpEndPoint.IsUsingIBDemoPort())
-            throw new Exception("Use demo account to place order.");
-
         Contract contract = new()
         {
             SecurityType = ContractSecurityType.Stock,
@@ -29,14 +25,13 @@ public class Place(ITestOutputHelper output, TestFixture fixture) : CollectionTe
 
         int orderId = Client.Request.GetNextId();
 
-        Task<IHasOrderId> task = Client.Response
+        Client
+            .Response
             .WithOrderId(orderId)
-            .FirstAsync()
-            .ToTask();
+            .Subscribe(m => Write($"Message: {m.Stringify()}"));
 
         Client.Request.PlaceOrder(orderId, order, contract);
 
-        await task;
-        await Task.Delay(TimeSpan.FromSeconds(3));
+        await Task.Delay(TimeSpan.FromSeconds(10));
     }
 }

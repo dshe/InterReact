@@ -22,8 +22,8 @@ public partial class Service
 public sealed class OrderMonitor : IDisposable
 {
     private readonly ReplaySubject<IHasOrderId> Subject = new();
-    private readonly Contract Contract;
     private readonly Request Request;
+    private Contract Contract { get; }
     public Order Order { get; }
     public int OrderId { get; }
     public IObservable<IHasOrderId> Messages { get; }
@@ -34,6 +34,7 @@ public sealed class OrderMonitor : IDisposable
         Contract = contract;
         Request = request;
         OrderId = Request.GetNextId();
+        Order.OrderId = OrderId;
         Messages = Subject.AsObservable();
 
         response

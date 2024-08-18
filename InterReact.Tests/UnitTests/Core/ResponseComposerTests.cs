@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Core;
+namespace UnitTests.Core;
 
 public class ResponseComposerTests : UnitTestBase
 {
@@ -9,7 +9,7 @@ public class ResponseComposerTests : UnitTestBase
     public ResponseComposerTests(ITestOutputHelper output) : base(output)
     {
         ResponseParser parser = new(NullLogger<ResponseParser>.Instance);
-        ResponseReader reader = new(NullLogger<ResponseReader>.Instance, new(null, null), parser);
+        ResponseReader reader = new(NullLogger<ResponseReader>.Instance, new(null), parser);
         Composer = new ResponseMessageComposer(SystemClock.Instance, reader);
     }
 

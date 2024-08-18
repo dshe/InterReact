@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using RxSockets;
+﻿using RxSockets;
 using System.Net;
 
 namespace InterReact;
@@ -23,11 +22,8 @@ public sealed class InterReactClient(
     public async ValueTask DisposeAsync() =>
         await RxSocketClient.DisposeAsync().ConfigureAwait(false);
     public static async Task<IInterReactClient> ConnectAsync(
-        Action<InterReactOptions>? action = null, IConfigurationSection? configSection = null, CancellationToken ct = default)
-    {
-        InterReactOptions options = new(action, configSection);
-        return await Connector.ConnectAsync(options, ct).ConfigureAwait(false);
-    }
+        Action<InterReactOptions>? action = null, CancellationToken ct = default) =>
+            await Connector.ConnectAsync(action, ct).ConfigureAwait(false);
 }
 
 public sealed class NullInterReactClient : IInterReactClient
