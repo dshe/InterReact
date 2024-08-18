@@ -1,7 +1,7 @@
-# InterReact&nbsp;&nbsp; [![Version](https://img.shields.io/badge/Version-0.4.1-blue)](../..) [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0) [![Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
+# InterReact&nbsp;&nbsp; [![Version](https://img.shields.io/badge/Version-0.5.0-blue)](../..) [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0) [![Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
 ***Reactive C# API to Interactive Brokers Trader Workstation (TWS)***
-- **.NET 6.0** library
+- **.NET 8.0** library
 - supports IB TWS API Stable **10.19** (Mar 25 2024 )
 - dependencies: RxSockets, Stringification, NodaTime
 - demo applications: Console, WPF
@@ -25,7 +25,6 @@ using InterReact;
 ```csharp
 // Create the InterReact client by connecting to TWS/Gateway on the local host.
 IInterReactClient client = await InterReactClient.ConnectAsync();
-
 
 // Create a contract object.
 Contract contract = new()
