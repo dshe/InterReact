@@ -1,6 +1,4 @@
-﻿using System.Reactive.Threading.Tasks;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public partial class Service
 {

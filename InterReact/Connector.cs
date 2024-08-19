@@ -44,7 +44,6 @@ internal sealed class Connector
                 .AddSingleton(Options.Clock)
                 .AddSingleton(Options.LogFactory) // add LoggerFactor before AddLogging()
                 .AddLogging() // so that LogFactory is used rather than the LoggerFactory.
-                //.AddOptions<InterReactOptions>().Services if IOption<T> is used
                 .AddSingleton(rxSocketClient) // instance
                 .AddSingleton(new RingLimiter(Options.MaxRequestsPerSecond))
                 .AddSingleton<Stringifier>()

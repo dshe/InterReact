@@ -1,6 +1,6 @@
 ﻿using RxSockets;
 using Stringification;
-using System.Reactive.Concurrency;
+using System.Reactive;
 
 namespace InterReact;
 
@@ -14,11 +14,11 @@ public sealed class Response : IObservable<object>
 
         Observable = socketClient
             .ReceiveAllAsync
-            .ToObservableFromAsyncEnumerable(NewThreadScheduler.Default)
+            .ToObservableFromAsyncEnumerable()
             .ToArraysFromBytesWithLengthPrefix()
             .ToStringArrays()
             .ComposeMessage(composer)
-            .LogMessages(logger, stringifier)
+            .LogMessage(logger, stringifier)
             .Publish()
             .AutoConnect(); // connect on first observer
     }
@@ -28,35 +28,14 @@ public sealed class Response : IObservable<object>
 
 public static partial class Extension
 {
-    internal static IObservable<object> ComposeMessage(this IObservable<string[]> source, ResponseMessageComposer composer)
-    {
-        return Observable.Create<object>(observer =>
-        {
-            return source.Subscribe(
-                message =>
-                {
-                    try
-                    {
-                        composer.OnNext(message, observer.OnNext);
-                    }
-#pragma warning disable CA1031
-                    catch (Exception e)
-#pragma warning restore CA1031
-                    {
-                        observer.OnError(e);
-                    }
-                },
-                observer.OnError,
-                observer.OnCompleted);
-        });
-    }
+    internal static IObservable<object> ComposeMessage(this IObservable<string[]> source, ResponseMessageComposer composer) =>
+        Observable.Create<object>(observer =>
+            source.SubscribeSafe(Observer.Create<string[]>(msg => composer.OnNext(msg, observer.OnNext))));
 
-    internal static IObservable<object> LogMessages(this IObservable<object> source, ILogger logger, Stringifier stringifier)
-    {
-        return source.Do(msg =>
+    internal static IObservable<object> LogMessage(this IObservable<object> source, ILogger logger, Stringifier stringifier) =>
+        source.Do(msg =>
         {
             if (logger.IsEnabled(LogLevel.Debug))
-                logger.Log(LogLevel.Debug, "Response {Message}", stringifier.Stringify(msg));
+                logger.Log(LogLevel.Debug, "Response received: {Message}", stringifier.Stringify(msg));
         });
-    }
 }

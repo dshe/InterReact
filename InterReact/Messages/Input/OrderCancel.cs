@@ -5,7 +5,7 @@ public sealed class OrderCancel
     //public static readonly OrderCancel Default = new();
 
     /**
-     * @brief This is a regulartory attribute that applies to all US Commodity (Futures) Exchanges, provided to allow client to comply with CFTC Tag 50 Rules
+     * @brief This is a regulatory attribute that applies to all US Commodity (Futures) Exchanges, provided to allow client to comply with CFTC Tag 50 Rules
      */
     public string ExtOperator { get; init; } = "";
 

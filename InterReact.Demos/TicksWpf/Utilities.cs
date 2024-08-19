@@ -12,7 +12,7 @@ public static class Utilities
         {
             MessageBox.Show(message, caption);
             if (terminate)
-                // Application.Current.Shutdown() may only be called from the thread that created the Application object.
+                // may only be called from the thread that created the Application object.
                 Application.Current.Shutdown();
         });
     }

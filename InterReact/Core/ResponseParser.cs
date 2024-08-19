@@ -9,7 +9,7 @@ public sealed class ResponseParser(ILogger<ResponseParser> logger)
     private const string MaxInt = "2147483647";
     private const string MaxLong = "9223372036854775807";
     private const string MaxDouble = "1.7976931348623157E308";
-    private Dictionary<Type, Dictionary<string, object>> EnumCache { get; } = new();
+    private Dictionary<Type, Dictionary<string, object>> EnumCache { get; } = [];
     private ILogger Logger { get; } = logger;
 
     internal char ParseChar(string s)

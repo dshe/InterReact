@@ -6,8 +6,8 @@ namespace InterReact;
 public static partial class Extension
 {
     // For continuous results: AccountUpdates, AccountPositions.
-    internal static IObservable<T> ToObservableContinuous<T>(this IObservable<T> filteredSource,
-        Action startRequest, Action stopRequest)
+    internal static IObservable<T> ToObservableContinuous<T>(
+        this IObservable<T> filteredSource, Action startRequest, Action stopRequest)
     {
         return Observable.Create<T>(observer =>
         {
@@ -41,8 +41,8 @@ public static partial class Extension
     }
 
     // For continuous results with RequestId: AccountSummary, Tick.
-    internal static IObservable<IHasRequestId> ToObservableContinuousWithId(this IObservable<object> source,
-        Func<int> getRequestId, Action<int> startRequest, Action<int> stopRequest)
+    internal static IObservable<IHasRequestId> ToObservableContinuousWithId(
+        this IObservable<object> source, Func<int> getRequestId, Action<int> startRequest, Action<int> stopRequest)
     {
         return Observable.Create<IHasRequestId>(observer =>
         {

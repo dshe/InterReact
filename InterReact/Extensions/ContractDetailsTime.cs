@@ -39,7 +39,7 @@ public sealed class ContractDetailsTime
     private List<ContractDetailsTimeEvent> GetList()
     {
         // sorted list is used to ensure that dates are unique and to maintain order
-        SortedList<LocalDateTime, ContractTimeStatus> list = new();
+        SortedList<LocalDateTime, ContractTimeStatus> list = [];
 
         foreach ((LocalDateTime start, LocalDateTime end) in GetSessions(ContractDetails.TradingHours))
         {
@@ -57,7 +57,7 @@ public sealed class ContractDetailsTime
 
     private static List<(LocalDateTime start, LocalDateTime end)> GetSessions(string s)
     {
-        List<(LocalDateTime start, LocalDateTime end)> list = new();
+        List<(LocalDateTime start, LocalDateTime end)> list = [];
 
         if (string.IsNullOrEmpty(s))
             return list;

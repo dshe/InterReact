@@ -42,15 +42,16 @@ public sealed class ObservableTests
     [Fact]
     public async Task TestListObservable()
     {
-        // IList<string>? list
         IList<string> list = await Observable.Never<string>().ToList().Take(TimeSpan.FromSeconds(3)).FirstOrDefaultAsync();
         Assert.Null(list);
     }
+   
 
     [Fact]
     public async Task TestTake()
     {
-        IObservable<int> o = new int[] { 1, 2, 3, 4 }.ToObservable();
+        int[] sourceArray = [1, 2, 3, 4];
+        IObservable<int> o = sourceArray.ToObservable();
 
         IList<int> x3 = await o.TakeUntil(x => x == 2).ToList(); // inclusive 12
         IList<int> x4 = await o.TakeUntil(x => x != 3).ToList(); // inclusive 1
@@ -60,7 +61,6 @@ public sealed class ObservableTests
 
         IList<int> x11 = await o.TakeWhileInclusive(x => x == 1).ToList(); // inclusive 12
         IList<int> x22 = await o.TakeWhileInclusive(x => x != 3).ToList(); // inclusive 123
-        ;
     }
 
     [Fact]
@@ -81,26 +81,4 @@ public sealed class ObservableTests
 
         await Assert.ThrowsAsync<AlertException>(() => result2);
     }
-
-    /*
-    public class ObservableCollectionx<T> : INotifyCollectionChanged, INotifyPropertyChanged
-    {
-        public event PropertyChangedEventHandler? PropertyChanged;
-        public event NotifyCollectionChangedEventHandler? CollectionChanged;
-        //
-    }
-    */
 }
-
-// Value Object, mmutable type
-public sealed class Name
-{
-    public string Value { get; }
-    private Name(string value) => Value = value;
-    public static Name Create(string name)
-    {
-        // validation
-        return new Name(name);
-    }
-}
-

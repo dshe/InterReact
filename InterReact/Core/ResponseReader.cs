@@ -11,9 +11,10 @@ public sealed class ResponseReader(
     internal ILogger Logger { get; } = logger;
     internal ResponseParser Parser { get; } = parser;
     internal InterReactOptions Options { get; } = options;
-    private string[] Strings = [];
-    private int Index;
     private string CallerInfo = "";
+    internal string[] Strings = [];
+    private int Index;
+
     internal void SetStrings(string[] strings)
     {
         Strings = strings;

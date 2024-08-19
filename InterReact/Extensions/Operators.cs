@@ -19,9 +19,7 @@ public static partial class Extension
                 o.OnNext(m);
                 if (!predicate(m))
                     o.OnCompleted();
-            },
-            o.OnError,
-            o.OnCompleted
+            }
         ));
 
 }

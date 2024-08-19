@@ -9,8 +9,6 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive.Threading.Tasks;
-using System.Threading.Tasks;
 
 // Create a logger which will write messages to the console.
 ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder
@@ -37,12 +35,13 @@ Contract contract = new()
 // Find the latest ask price for the security.
 PriceTick askPriceTick = await client
     .Service.CreateMarketDataSnapshotObservable(contract)
-    //.OfType<PriceTick>()
     .OfTickClass(c => c.PriceTick)
     .Where(priceTick => priceTick.TickType is TickType.AskPrice)
     .FirstAsync();
 
-if (askPriceTick.Price <= 0)
+if (askPriceTick.Price > 0)
+    Console.WriteLine($"\nFound the latest ask price: {askPriceTick.Price}.\n");
+else
 {
     Console.WriteLine($"\nInvalid price: {askPriceTick.Price}. Perhaps the market is closed.\n");
     return;
@@ -57,36 +56,37 @@ Order order = new()
     TotalQuantity = 50000,
 };
 
-int orderId = client.Request.GetNextId();
+Console.WriteLine($"Placing a buy order at price: {order.LimitPrice}.\n");
 
-// Start the task to receive the first OrderStatusReport, indicating either a filled or cancelled order, within the time limit.
-Task<OrderStatusReport> orderTask = client
-    .Response
-    .OfType<OrderStatusReport>()
-    .Where(x => x.OrderId == orderId)
-    .Where(x => x.Status == OrderStatus.Filled || x.Status == OrderStatus.Cancelled || x.Status == OrderStatus.ApiCancelled)
-    .FirstAsync()
-    .Timeout(TimeSpan.FromSeconds(10)) // max time to fill the order
-    .ToTask();
+OrderMonitor orderMonitor = client.Service.PlaceOrder(order, contract);
 
-Console.WriteLine($"\nPlacing a buy order at the ask price: {order.LimitPrice}.\n");
-client.Request.PlaceOrder(orderId, order, contract);
+// Display all the types of messages received for the order.
+orderMonitor.Messages.Subscribe(x => Console.WriteLine(x.GetType()));
 
 try
 {
+    // Wait for an OrderStatusReport, indicating either a filled or cancelled order, within the time limit.
+    OrderStatusReport osr = await orderMonitor
+        .Messages
+        .OfType<OrderStatusReport>()
+        .Where(x => x.Status == OrderStatus.Filled || x.Status == OrderStatus.Cancelled || x.Status == OrderStatus.ApiCancelled)
+        .Timeout(TimeSpan.FromSeconds(5)) // max time to fill the order
+        .FirstAsync();
+
     // Wait for order completion, or until timeout
-    OrderStatusReport orderStatusReport = await orderTask;
-    if (orderStatusReport.Status == OrderStatus.Filled)
-        Console.WriteLine($"\nOrder was filled at price: {orderStatusReport.AverageFillPrice}.\n");
-    else if (orderStatusReport.Status == OrderStatus.Cancelled || orderStatusReport.Status == OrderStatus.ApiCancelled)
+    //OrderStatusReport orderStatusReport = await orderTask;
+    if (osr.Status == OrderStatus.Filled)
+        Console.WriteLine($"\nOrder was filled at price: {osr.AverageFillPrice}.\n");
+    else if (osr.Status == OrderStatus.Cancelled || osr.Status == OrderStatus.ApiCancelled)
         Console.WriteLine("\nOrder was cancelled.\n");
 }
 catch (TimeoutException)
 {
-    client.Request.CancelOrder(orderId);
+    orderMonitor.CancelOrder();
     Console.WriteLine("\nTimeout! Order cancelled. Perhaps try again.\n");
 }
 
+Console.WriteLine(Environment.NewLine + "press a key to exit..." + Environment.NewLine);
+Console.ReadKey();
 
-await Task.Delay(2000);
 await client.DisposeAsync();
