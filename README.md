@@ -29,7 +29,7 @@ IInterReactClient client = await InterReactClient.ConnectAsync();
 // Create a contract object.
 Contract contract = new()
 {
-   SecurityType = SecurityType.Stock,
+   SecurityType = ContractSecurityType.Stock,
    Symbol       = "AMZN",
    Currency     = "USD",
    Exchange     = "SMART"
@@ -38,7 +38,7 @@ Contract contract = new()
 // Create and then subscribe to the observable which can observe ticks for the contract.
 IDisposable subscription = client
     .Service
-    .CreateTickObservable(contract)
+    .CreateMarketDataObservable(contract)
     .OfTickClass(selector => selector.PriceTick)
     .Where(tick => tick.TickType == TickType.LastPrice)
     .Subscribe(onNext: priceTick => Console.WriteLine($"Last Price = {priceTick.Price}"));
