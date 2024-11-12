@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-
 namespace Analysis;
 
 public class Enum_Checker(ITestOutputHelper output) : UnitTestBase(output)
@@ -22,7 +21,7 @@ public class Enum_Checker(ITestOutputHelper output) : UnitTestBase(output)
     {
         foreach (TypeInfo type in EnumTypes)
         {
-            Dictionary<int, object> dict = new();
+            Dictionary<int, object> dict = [];
             foreach (object? val in type.GetEnumValues())
             {
                 if (val is null)
@@ -32,8 +31,8 @@ public class Enum_Checker(ITestOutputHelper output) : UnitTestBase(output)
                     throw new Exception($"{type.Name} value {val} has duplicate value {v}.");
                 dict.Add(v, val);
             }
-            if (dict.ContainsKey(0))
-                Write($"{type.Name}: {dict[0]}");
+            if (dict.TryGetValue(0, out object? value))
+                Write($"{type.Name}: {value}");
         }
     }
 

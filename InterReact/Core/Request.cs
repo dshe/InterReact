@@ -16,17 +16,15 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
     public int GetNextId() => Interlocked.Increment(ref Options.Id);
 
     /// For testing with mock server.
-    internal void RequestControl(string message) => CreateMessage()
-        .Write(RequestCode.Control, message)
-        .Send();
+    internal void RequestControl(string message) => CreateMessage().Write(RequestCode.Control, message).Send();
 
     public void RequestMarketData(
         int requestId,
         Contract contract,
-        IEnumerable<GenericTickType>? genericTickTypes = null,
+        IList<GenericTickType>? genericTickTypes = null,
         bool isSnapshot = false,
         bool isRegulatorySnapshot = false,
-        params Tag[] options)
+        IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
         RequestMessage m = CreateMessage()
@@ -54,9 +52,7 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
             .Send();
     }
 
-    public void CancelMarketData(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelMarketData, "1", requestId)
-        .Send();
+    public void CancelMarketData(int requestId) => CreateMessage().Write(RequestCode.CancelMarketData, "1", requestId).Send();
 
     public void PlaceOrder(int orderId, Order order, Contract contract) // the monster
     {
@@ -289,16 +285,10 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
         m.Send();
     }
 
-    public void CancelOrder(int orderId, string manualOrderCancelTime = "")
-    {
-        RequestMessage m = CreateMessage()
-            .Write(RequestCode.CancelOrder, "1", orderId, manualOrderCancelTime);
-        m.Send();
-    }
+    public void CancelOrder(int orderId, string manualOrderCancelTime = "") =>
+        CreateMessage().Write(RequestCode.CancelOrder, "1", orderId, manualOrderCancelTime).Send();
 
-    public void RequestOpenOrders() => CreateMessage()
-        .Write(RequestCode.RequestOpenOrders, "1")
-        .Send();
+    public void RequestOpenOrders() => CreateMessage().Write(RequestCode.RequestOpenOrders, "1").Send();
 
     /// <summary>
     /// Call this function to start receiving account updates.
@@ -307,10 +297,8 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
     /// Updates for all accounts are returned when accountCode is empty.
     /// This information is updated every three minutes.
     /// </summary>
-    public void RequestAccountUpdates(bool subscribe, string accountCode = "") => CreateMessage()
-        .Write(RequestCode.RequestAccountData, "2")
-        .Write(subscribe, accountCode)
-        .Send();
+    public void RequestAccountUpdates(bool subscribe, string accountCode = "") =>
+        CreateMessage().Write(RequestCode.RequestAccountData, "2", subscribe, accountCode).Send();
 
     /// <summary>
     /// When this method is called, execution reports from the last 24 hours that meet the filter criteria are retrieved.
@@ -337,21 +325,19 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
     }
 
     /// <summary>
-    /// Call this function to request the next available order Id.
+    /// Call this function to request the next available Id.
     /// (the numids parameter has been deprecated)
     /// </summary>
-    public void RequestNextOrderId() => CreateMessage()
-        .Write(RequestCode.RequestIds, "1")
-        .Write(1) // numIds
-        .Send();
+    public void RequestNextOrderId() => CreateMessage().Write(RequestCode.RequestIds, "1", 1).Send();
 
-    public void RequestContractDetails(int requestId, Contract contract)
+    public void RequestContractDetails(int requestId, Contract contract, bool includeExpired = false)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
             .Write(RequestCode.RequestContractData, "8", requestId)
-            .WriteContract(contract, includeExpired: true)
+            .WriteContract(contract)
             .Write(
+                includeExpired,
                 contract.SecurityIdType,
                 contract.SecurityId,
                 contract.IssuerId)
@@ -363,7 +349,7 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
         Contract contract,
         int numRows = 3,
         bool isSmartDepth = false,
-        params Tag[] options)
+        IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
@@ -373,48 +359,18 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
             .Send();
     }
 
-    public void CancelMarketDepth(int requestId, bool isSmartDepth = false) => CreateMessage()
-        .Write(RequestCode.CancelMarketDepth, "1", requestId)
-        .Write(isSmartDepth)
-        .Send();
-
-    public void RequestNewsBulletins(bool all = true) => CreateMessage()
-        .Write(RequestCode.RequestNewsBulletins, "1")
-        .Write(all)
-        .Send();
-
-    public void CancelNewsBulletins() => CreateMessage()
-        .Write(RequestCode.CancelNewsBulletin, "1")
-        .Send();
-
-    public void SetServerLogLevel(LogEntryLevel logLevel) => CreateMessage()
-        .Write(RequestCode.ChangeServerLog, "1")
-        .Write(logLevel)
-        .Send();
-
-    public void RequestAutoOpenOrders(bool autoBind) => CreateMessage()
-        .Write(RequestCode.RequestAutoOpenOrders, "1")
-        .Write(autoBind)
-        .Send();
-
-    public void RequestAllOpenOrders() => CreateMessage()
-        .Write(RequestCode.RequestAllOpenOrders, "1")
-        .Send();
-
-    public void RequestManagedAccounts() => CreateMessage()
-        .Write(RequestCode.RequestManagedAccounts, "1")
-        .Send();
-
-    public void RequestFinancialAdvisorConfiguration(FinancialAdvisorDataType dataType) => CreateMessage()
-        .Write(RequestCode.RequestFA, "1")
-        .Write(dataType)
-        .Send();
-
-    public void ReplaceFinancialAdvisorConfiguration(int requestId, FinancialAdvisorDataType dataType, string xml) => CreateMessage()
-        .Write(RequestCode.ReplaceFA, "1")
-        .Write(dataType, xml)
-        .Write(requestId)
-        .Send();
+    public void CancelMarketDepth(int requestId, bool isSmartDepth = false) =>
+        CreateMessage().Write(RequestCode.CancelMarketDepth, "1", requestId, isSmartDepth).Send();
+    public void RequestNewsBulletins(bool all = true) => CreateMessage().Write(RequestCode.RequestNewsBulletins, "1", all).Send();
+    public void CancelNewsBulletins() => CreateMessage().Write(RequestCode.CancelNewsBulletin, "1").Send();
+    public void SetServerLogLevel(LogEntryLevel logLevel) => CreateMessage().Write(RequestCode.ChangeServerLog, "1", logLevel).Send();
+    public void RequestAutoOpenOrders(bool autoBind) => CreateMessage().Write(RequestCode.RequestAutoOpenOrders, "1", autoBind).Send();
+    public void RequestAllOpenOrders() => CreateMessage().Write(RequestCode.RequestAllOpenOrders, "1").Send();
+    public void RequestManagedAccounts() => CreateMessage().Write(RequestCode.RequestManagedAccounts, "1").Send();
+    public void RequestFinancialAdvisorConfiguration(FinancialAdvisorDataType dataType) => 
+        CreateMessage().Write(RequestCode.RequestFA, "1", dataType).Send();
+    public void ReplaceFinancialAdvisorConfiguration(int requestId, FinancialAdvisorDataType dataType, string xml) => 
+        CreateMessage().Write(RequestCode.ReplaceFA, "1", dataType, xml, requestId).Send();
 
     public void RequestHistoricalData(
         int requestId,
@@ -426,7 +382,7 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
         bool regularTradingHoursOnly = true,
         int dateFormat = 1,  // 1: yyyyMMdd HH:mm:ss, 2: time format in seconds
         bool keepUpToDate = false,
-        params Tag[] options)
+        IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
         ArgumentNullException.ThrowIfNull(endDateTime);
@@ -435,7 +391,8 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
 
         RequestMessage m = CreateMessage()
             .Write(RequestCode.RequestHistoricalData, requestId)
-            .WriteContract(contract, includeExpired: true)
+            .WriteContract(contract)
+            .Write(true) // include expired
             .Write(
                 endDateTime,
                 barSize,
@@ -454,7 +411,6 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
         m.Write(keepUpToDate, Tag.Combine(options)).Send();
     }
 
-    
     public void ExerciseOptions(
         int requestId,
         Contract contract,
@@ -516,21 +472,10 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
             .Send();
     }
 
-    public void CancelScannerSubscription(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelScannerSubscription, "1", requestId)
-        .Send();
-
-    public void RequestScannerParameters() => CreateMessage()
-        .Write(RequestCode.RequestScannerParameters, "1")
-        .Send();
-
-    public void CancelHistoricalData(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelHistoricalData, "1", requestId)
-        .Send();
-
-    public void RequestCurrentTime() => CreateMessage()
-        .Write(RequestCode.RequestCurrentTime, "1")
-        .Send();
+    public void CancelScannerSubscription(int requestId) => CreateMessage().Write(RequestCode.CancelScannerSubscription, "1", requestId).Send();
+    public void RequestScannerParameters() => CreateMessage().Write(RequestCode.RequestScannerParameters, "1").Send();
+    public void CancelHistoricalData(int requestId) => CreateMessage().Write(RequestCode.CancelHistoricalData, "1", requestId).Send();
+    public void RequestCurrentTime() => CreateMessage().Write(RequestCode.RequestCurrentTime, "1").Send();
 
     public void RequestRealTimeBars(
         int requestId,
@@ -538,7 +483,7 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
         int barSize, // this parameter is not currently used
         string whatToShow = RealtimeBarWhatToShow.Trades,
         bool regularTradingHoursOnly = true,
-        params Tag[] options)
+        IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
@@ -551,15 +496,13 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
             .Send();
     }
 
-    public void CancelRealTimeBars(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelRealTimeBars, "1", requestId)
-        .Send();
+    public void CancelRealTimeBars(int requestId) => CreateMessage().Write(RequestCode.CancelRealTimeBars, "1", requestId).Send();
 
     public void RequestFundamentalData(
         int requestId,
         Contract contract,
         string reportType = FundamentalDataReportType.CompanyOverview,
-        params Tag[] options)
+        IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
@@ -576,16 +519,14 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
             .Send();
     }
 
-    public void CancelFundamentalData(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelFundamentalData, "1", requestId)
-        .Send();
+    public void CancelFundamentalData(int requestId) => CreateMessage().Write(RequestCode.CancelFundamentalData, "1", requestId).Send();
 
     public void CalculateImpliedVolatility(
         int requestId,
         Contract contract,
         double optionPrice,
         double underlyingPrice,
-        params Tag[] options)
+        IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
@@ -600,7 +541,7 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
         Contract contract,
         double volatility,
         double underlyingPrice,
-        params Tag[] options)
+        IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
@@ -610,34 +551,22 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
             .Send();
     }
 
-    public void CancelCalculateImpliedVolatility(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelImpliedVolatility, "1", requestId)
-        .Send();
-
-    public void CancelCalculateOptionPrice(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelOptionPrice, "1", requestId)
-        .Send();
-
-    public void RequestGlobalCancel() => CreateMessage()
-        .Write(RequestCode.RequestGlobalCancel, "1")
-        .Send();
-
-    public void RequestMarketDataType(MarketDataType marketDataType) => CreateMessage()
-        .Write(RequestCode.RequestMarketDataType, "1")
-        .Write(marketDataType)
-        .Send();
-
-    public void RequestPositions() => CreateMessage()
-        .Write(RequestCode.RequestPositions, "1")
-        .Send();
+    public void CancelCalculateImpliedVolatility(int requestId) =>
+        CreateMessage().Write(RequestCode.CancelImpliedVolatility, "1", requestId).Send();
+    public void CancelCalculateOptionPrice(int requestId) =>
+        CreateMessage().Write(RequestCode.CancelOptionPrice, "1", requestId).Send();
+    public void RequestGlobalCancel() => 
+        CreateMessage().Write(RequestCode.RequestGlobalCancel, "1").Send();
+    public void RequestMarketDataType(MarketDataType marketDataType) =>
+        CreateMessage().Write(RequestCode.RequestMarketDataType, "1", marketDataType).Send();
+    public void RequestPositions() => CreateMessage().Write(RequestCode.RequestPositions, "1").Send();
 
     public void RequestAccountSummary(
         int requestId,
         string group = "All",
-        params AccountSummaryTag[] tags)
+        IList<AccountSummaryTag>? tags = null)
     {
-        ArgumentNullException.ThrowIfNull(tags);
-        if (tags.Length == 0)
+        if (tags is null || tags.Count == 0)
             tags = [.. Enum.GetValues<AccountSummaryTag>()];
         List<string> tagNames = tags.Select(tag => tag.ToString()).ToList();
         CreateMessage()
@@ -646,54 +575,30 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
             .Send();
     }
 
-    public void CancelAccountSummary(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelAccountSummary, "1", requestId)
-        .Send();
-
-    public void CancelPositions() => CreateMessage()
-        .Write(RequestCode.CancelPositions, "1")
-        .Send();
+    public void CancelAccountSummary(int requestId) => CreateMessage().Write(RequestCode.CancelAccountSummary, "1", requestId).Send();
+    public void CancelPositions() => CreateMessage().Write(RequestCode.CancelPositions, "1").Send();
 
     // 65, 66: For IB internal use.
 
-    public void QueryDisplayGroups(int requestId) => CreateMessage()
-        .Write(RequestCode.QueryDisplayGroups, "1", requestId)
-        .Send();
-
-    public void SubscribeToGroupEvents(int requestId, int groupId) => CreateMessage()
-        .Write(RequestCode.SubscribeToGroupEvents, "1", requestId)
-        .Write(groupId)
-        .Send();
-
-    public void UpdateDisplayGroup(int requestId, string contractInfo) => CreateMessage()
-        .Write(RequestCode.UpdateDisplayGroup, "1", requestId)
-        .Write(contractInfo)
-        .Send();
-
-    public void UnsubscribeFromGroupEvents(int requestId) => CreateMessage()
-        .Write(RequestCode.UnsubscribeFromGroupEvents, "1", requestId)
-        .Send();
+    public void QueryDisplayGroups(int requestId) => CreateMessage().Write(RequestCode.QueryDisplayGroups, "1", requestId).Send();
+    public void SubscribeToGroupEvents(int requestId, int groupId) => 
+        CreateMessage().Write(RequestCode.SubscribeToGroupEvents, "1", requestId, groupId).Send();
+    public void UpdateDisplayGroup(int requestId, string contractInfo) => 
+        CreateMessage().Write(RequestCode.UpdateDisplayGroup, "1", requestId, contractInfo).Send();
+    public void UnsubscribeFromGroupEvents(int requestId) => 
+        CreateMessage().Write(RequestCode.UnsubscribeFromGroupEvents, "1", requestId).Send();
 
     // 71: StartApi.
     // 72, 73: for IB internal use.
 
-    public void RequestPositionsMulti(int requestId, string account, string modelCode) => CreateMessage()
-        .Write(RequestCode.RequestPositionsMulti, "1", requestId)
-        .Write(account, modelCode)
-        .Send();
-
-    public void CancelPositionsMulti(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelPositionsMulti, "1", requestId)
-        .Send();
-
-    public void RequestAccountUpdatesMulti(int requestId, string account, string modelCode, bool ledgerAndNlv) => CreateMessage()
-        .Write(RequestCode.RequestAccountUpdatesMulti, "1", requestId)
-        .Write(account, modelCode, ledgerAndNlv)
-        .Send();
-
-    public void CancelAccountUpdatesMulti(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelAccountUpdatesMulti, "1", requestId)
-        .Send();
+    public void RequestPositionsMulti(int requestId, string account, string modelCode) =>
+        CreateMessage().Write(RequestCode.RequestPositionsMulti, "1", requestId, account, modelCode).Send();
+    public void CancelPositionsMulti(int requestId) => 
+        CreateMessage().Write(RequestCode.CancelPositionsMulti, "1", requestId).Send();
+    public void RequestAccountUpdatesMulti(int requestId, string account, string modelCode, bool ledgerAndNlv) =>
+        CreateMessage().Write(RequestCode.RequestAccountUpdatesMulti, "1", requestId, account, modelCode, ledgerAndNlv).Send();
+    public void CancelAccountUpdatesMulti(int requestId) => 
+        CreateMessage().Write(RequestCode.CancelAccountUpdatesMulti, "1", requestId).Send();
 
     public void RequestSecDefOptParams(
         int requestId,
@@ -705,40 +610,26 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
             .Write(underlyingSymbol, futFopExchange, underlyingSecType, underlyingConId)
             .Send();
 
-    public void RequestSoftDollarTiers(int requestId) => CreateMessage()
-        .Write(RequestCode.RequestSoftDollarTiers, requestId)
-        .Send();
-
-    public void RequestFamilyCodes() => CreateMessage()
-        .Write(RequestCode.RequestFamilyCodes)
-        .Send();
-
-    public void RequestMatchingSymbols(int requestId, string pattern) => CreateMessage()
-        .Write(RequestCode.RequestMatchingSymbols, requestId)
-        .Write(pattern)
-        .Send();
-
-    public void RequestMarketDepthExchanges() => CreateMessage()
-        .Write(RequestCode.RequestMktDepthExchanges)
-        .Send();
-
-    public void RequestSmartComponents(int requestId, string bboExchange) => CreateMessage()
-        .Write(RequestCode.RequestSmartComponents, requestId)
-        .Write(bboExchange)
-        .Send();
+    public void RequestSoftDollarTiers(int requestId) => 
+        CreateMessage().Write(RequestCode.RequestSoftDollarTiers, requestId).Send();
+    public void RequestFamilyCodes() => CreateMessage().Write(RequestCode.RequestFamilyCodes).Send();
+    public void RequestMatchingSymbols(int requestId, string pattern) =>
+        CreateMessage().Write(RequestCode.RequestMatchingSymbols, requestId, pattern).Send();
+    public void RequestMarketDepthExchanges() => 
+        CreateMessage().Write(RequestCode.RequestMktDepthExchanges).Send();
+    public void RequestSmartComponents(int requestId, string bboExchange) =>
+        CreateMessage().Write(RequestCode.RequestSmartComponents, requestId, bboExchange).Send();
 
     public void RequestNewsArticle(
         int requestId,
         string providerCode,
         string articleId,
-        params Tag[] options) => CreateMessage()
+        IList<Tag>? options = null) => CreateMessage()
             .Write(RequestCode.RequestNewsArticle, requestId)
             .Write(providerCode, articleId, options)
             .Send();
 
-    public void RequestNewsProviders() => CreateMessage()
-        .Write(RequestCode.RequestNewsProviders)
-        .Send();
+    public void RequestNewsProviders() => CreateMessage().Write(RequestCode.RequestNewsProviders).Send();
 
     public void RequestHistoricalNews(
         int requestId,
@@ -747,7 +638,7 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
         string startTime,
         string endTime,
         int totalResults,
-        params Tag[] options) => CreateMessage()
+        IList<Tag>? options = null) => CreateMessage()
             .Write(RequestCode.RequestHistoricalNews, requestId)
             .Write(contractId, providerCodes, startTime, endTime, totalResults, options)
             .Send();
@@ -762,7 +653,8 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
             .Write(RequestCode.RequestHeadTimestamp, requestId)
-            .WriteContract(contract, includeExpired: true)
+            .WriteContract(contract)
+            .Write(true) // includeExpired
             .Write(useRth, whatToShow, formatDate)
             .Send();
     }
@@ -776,40 +668,21 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
             .Write(RequestCode.RequestHistogramData, requestId)
-            .WriteContract(contract, includeExpired: true)
+            .WriteContract(contract)
+            .Write(true) // includeExpired
             .Write(useRth, period)
             .Send();
     }
 
-    public void CancelHistogramData(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelHistogramData, requestId)
-        .Send();
-
-    public void CancelHeadTimestamp(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelHeadTimestamp, requestId)
-        .Send();
-
-    public void RequestMarketRule(int marketRuleId) => CreateMessage()
-        .Write(RequestCode.RequestMarketRule, marketRuleId)
-        .Send();
-
-    public void RequestPnL(int requestId, string account, string modelCode) => CreateMessage()
-        .Write(RequestCode.ReqPnL, requestId)
-        .Write(account, modelCode)
-        .Send();
-
-    public void CancelPnL(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelPnL, requestId)
-        .Send();
-
-    public void RequestPnLSingle(int requestId, string account, string modelCode, int contractId) => CreateMessage()
-        .Write(RequestCode.ReqPnLSingle, requestId)
-        .Write(account, modelCode, contractId)
-        .Send();
-
-    public void CancelPnLSingle(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelPnLSingle, requestId)
-        .Send();
+    public void CancelHistogramData(int requestId) => CreateMessage().Write(RequestCode.CancelHistogramData, requestId).Send();
+    public void CancelHeadTimestamp(int requestId) => CreateMessage().Write(RequestCode.CancelHeadTimestamp, requestId).Send();
+    public void RequestMarketRule(int marketRuleId) => CreateMessage().Write(RequestCode.RequestMarketRule, marketRuleId).Send();
+    public void RequestPnL(int requestId, string account, string modelCode) =>
+        CreateMessage().Write(RequestCode.ReqPnL, requestId, account, modelCode).Send();
+    public void CancelPnL(int requestId) => CreateMessage().Write(RequestCode.CancelPnL, requestId).Send();
+    public void RequestPnLSingle(int requestId, string account, string modelCode, int contractId) =>
+        CreateMessage().Write(RequestCode.ReqPnLSingle, requestId, account, modelCode, contractId).Send();
+    public void CancelPnLSingle(int requestId) => CreateMessage().Write(RequestCode.CancelPnLSingle, requestId).Send();
 
     public void RequestHistoricalTicks(
         int requestId,
@@ -820,12 +693,13 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
         string whatToShow,
         int useRth,
         bool ignoreSize,
-        params Tag[] options)
+        IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
         CreateMessage()
             .Write(RequestCode.ReqHistoricalTicks, requestId)
-            .WriteContract(contract, includeExpired: true)
+            .WriteContract(contract)
+            .Write(true) // includeExpired
             .Write(startDateTime, endDateTime, numberOfTicks, whatToShow, useRth, ignoreSize)
             .Write(options)
             .Send();
@@ -846,21 +720,10 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
             .Send();
     }
 
-    public void CancelTickByTickData(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelTickByTickData, requestId)
-        .Send();
-
-    public void RequestCompletedOrders(bool apiOnly) => CreateMessage()
-        .Write(RequestCode.ReqCompletedOrders, apiOnly)
-        .Send();
-
-    public void RequestWshMetaData(int requestId) => CreateMessage()
-        .Write(RequestCode.ReqWshMetaData, requestId)
-        .Send();
-
-    public void CancelWshMetaData(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelWshMetaData, requestId)
-        .Send();
+    public void CancelTickByTickData(int requestId) => CreateMessage().Write(RequestCode.CancelTickByTickData, requestId).Send();
+    public void RequestCompletedOrders(bool apiOnly) => CreateMessage().Write(RequestCode.ReqCompletedOrders, apiOnly).Send();
+    public void RequestWshMetaData(int requestId) => CreateMessage().Write(RequestCode.ReqWshMetaData, requestId).Send();
+    public void CancelWshMetaData(int requestId) => CreateMessage().Write(RequestCode.CancelWshMetaData, requestId).Send();
 
     public void RequestWshEventData(int requestId, WshEventData wshEventData)
     {
@@ -879,11 +742,6 @@ public sealed class Request(InterReactOptions options, Func<RequestMessage> requ
             .Send();
     }
 
-    public void CancelWshEventData(int requestId) => CreateMessage()
-        .Write(RequestCode.CancelWshEventData, requestId)
-        .Send();
-
-    public void RequestUserInformation(int requestId) => CreateMessage()
-        .Write(RequestCode.ReqUserInfo, requestId)
-        .Send();
+    public void CancelWshEventData(int requestId) => CreateMessage().Write(RequestCode.CancelWshEventData, requestId).Send();
+    public void RequestUserInformation(int requestId) => CreateMessage().Write(RequestCode.ReqUserInfo, requestId).Send();
 }

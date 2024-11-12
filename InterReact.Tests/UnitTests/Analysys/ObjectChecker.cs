@@ -1,5 +1,4 @@
 ﻿using System.Reflection;
-
 namespace Analysis;
 
 public class Interface_Checker(ITestOutputHelper output) : UnitTestBase(output)

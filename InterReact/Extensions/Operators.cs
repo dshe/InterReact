@@ -22,4 +22,29 @@ public static partial class Extension
             }
         ));
 
+    public static IObservable<T[]> Accumulate<T, TEnd>(this IObservable<object> source)
+    {
+        return Observable.Create <T[]>(observer =>
+        {
+            List<T> list = [];
+            return source.Subscribe(onNext: o =>
+            {
+                if (o is T t)
+                {
+                    list.Add(t);
+                    return;
+                }
+                if (o is TEnd)
+                {
+                    observer.OnNext([.. list]);
+                    list.Clear();
+                    return;
+                }
+                throw new InvalidOperationException($"Invalid type: {o.GetType().Name}.");
+            }, 
+            onError: observer.OnError,
+            onCompleted: observer.OnCompleted);
+        });
+    }
+
 }

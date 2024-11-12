@@ -19,8 +19,8 @@ public sealed class TestFixture : IAsyncLifetime
             .ConfigureAwait(false);
 
         // Tests should be run with the demo account since orders are submitted.
-        if (!Client.RemoteIpEndPoint.IsUsingIBDemoPort())
-            throw new Exception("The tests may place orders, so use the demo account.");
+        //if (!Client.RemoteIpEndPoint.IsUsingIBDemoPort())
+        //    throw new Exception("The tests may place orders, so use the demo account.");
 
         // The demo account does not have data subscriptions, so use delayed data.
         // Note that delayed data produces delayed tick types: 
@@ -54,14 +54,16 @@ public abstract class CollectionTestBase : IDisposable
     protected void Write(string format, params object[] args) =>
         Output.WriteLine(string.Format(format, args) + Environment.NewLine);
     protected void Write(string str) =>
-        Output.WriteLine(str + Environment.NewLine);
+        Output.WriteLine(str);
 
-    protected CollectionTestBase(ITestOutputHelper output, TestFixture fixture)
+    protected CollectionTestBase(ITestOutputHelper output, TestFixture fixture, bool orderPlacement = false)
     {
         Output = output;
         fixture.SharedWriter.Add(output.WriteLine);
         RemoveWriter = () => fixture.SharedWriter.Remove(output.WriteLine);
         Client = fixture.Client ?? throw new NullReferenceException("Client");
+        if (orderPlacement && !Client.RemoteIpEndPoint.IsUsingIBDemoPort())
+            throw new InvalidOperationException("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
     }
 
     protected virtual void Dispose(bool disposing)

@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Disposables;
-
 namespace ClientServer;
 
 public sealed class ConsoleLogger(

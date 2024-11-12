@@ -61,7 +61,7 @@ Console.WriteLine($"Placing a buy order at price: {order.LimitPrice}.\n");
 OrderMonitor orderMonitor = client.Service.PlaceOrder(order, contract);
 
 // Display all the types of messages received for the order.
-orderMonitor.Messages.Subscribe(x => Console.WriteLine(x.GetType()));
+orderMonitor.Messages.OfType<AlertMessage>().Subscribe(AlertMessage => Console.WriteLine(AlertMessage.Message));
 
 try
 {

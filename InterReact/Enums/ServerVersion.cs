@@ -1,7 +1,8 @@
-﻿namespace InterReact;
+﻿using System.Diagnostics.CodeAnalysis;
 
-#pragma warning disable CA1707
+namespace InterReact;
 
+[SuppressMessage("Design", "CA1707")]
 public enum ServerVersion
 {
     NONE = 0,
@@ -81,17 +82,15 @@ public enum ServerVersion
     //INSTRUMENT_TIMEZONE = 174,
     //HMDS_MARKET_DATA_IN_SHARES = 175,
     BOND_ISSUERID = 176,
-    //FA_PROFILE_DESUPPORT = 177,
-    //PENDING_PRICE_REVISION = 178,
-    //FUND_DATA_FIELDS = 179,
-    //MANUAL_ORDER_TIME_EXERCISE_OPTIONS = 180,
-    //OPEN_ORDER_AD_STRATEGY = 181,
-    //LAST_TRADE_DATE = 182,
-    //CUSTOMER_ACCOUNT = 183,
-    //PROFESSIONAL_CUSTOMER = 184,
-    //BOND_ACCRUED_INTEREST = 185,
-    //INELIGIBILITY_REASONS = 186,
-    //RFQ_FIELDS = 187
+    FA_PROFILE_DESUPPORT = 177,
+    PENDING_PRICE_REVISION = 178,
+    FUND_DATA_FIELDS = 179,
+    MANUAL_ORDER_TIME_EXERCISE_OPTIONS = 180,
+    OPEN_ORDER_AD_STRATEGY = 181,
+    LAST_TRADE_DATE = 182,
+    CUSTOMER_ACCOUNT = 183,
+    PROFESSIONAL_CUSTOMER = 184,
+    BOND_ACCRUED_INTEREST = 185,
+    INELIGIBILITY_REASONS = 186,
+    RFQ_FIELDS = 187
 }
-
-#pragma warning restore CA1707

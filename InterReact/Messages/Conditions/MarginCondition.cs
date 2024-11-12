@@ -1,7 +1,8 @@
-﻿#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
-
+﻿using System.Diagnostics.CodeAnalysis;
 namespace InterReact;
 
+[SuppressMessage("Usage", "CA1307", Scope = "member")]
+[SuppressMessage("Usage", "CA1310", Scope = "member")]
 public class MarginCondition : OperatorCondition
 {
     const string header = "the margin cushion percent";
@@ -39,5 +40,3 @@ public class MarginCondition : OperatorCondition
         return base.TryParse(cond);
     }
 }
-
-#pragma warning restore CA1012, CA1307, CA1309, CA1031, CA1310, CA1305

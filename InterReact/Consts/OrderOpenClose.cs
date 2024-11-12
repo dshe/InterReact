@@ -2,10 +2,10 @@
 
 public static class OrderOpenClose
 {
-    public const string Undefined = "";
-    public const string Open = "O";
+    public static readonly string Undefined = "";
+    public static readonly string Open = "O";
     /// <summary>
     /// Close. Institutional orders only.
     /// </summary>
-    public const string Close = "C";
+    public static readonly string Close = "C";
 }

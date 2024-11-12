@@ -30,7 +30,7 @@ client
 client
     .Service
     .CreateMarketDataObservable(contract)
-    .ThrowAlertMessage()
+    //.ThrowAlertMessage()
     .OfTickClass(selector => selector.PriceTick)
     .Subscribe(priceTick => Console.WriteLine(priceTick.TickType + " = " + priceTick.Price));
 

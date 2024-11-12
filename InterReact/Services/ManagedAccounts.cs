@@ -1,22 +1,20 @@
-﻿using System.Reactive.Threading.Tasks;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public partial class Service
 {
-    /// <summary>
-    /// Returns a list of managed accounts.
-    /// </summary>
-    public async Task<IList<string>> GetManagedAccountsAsync(CancellationToken ct = default)
+    public IObservable<string[]> CreateManagedAccountsObservable()
     {
-        Task<string[]> task = Response
+        IObservable<string[]> observable = Response
             .OfType<ManagedAccounts>()
-            .Select(x => x.Accounts.Split(',', StringSplitOptions.RemoveEmptyEntries))
             .FirstAsync()
-            .ToTask(ct);
+            .Select(x => x.Accounts.Split(',', StringSplitOptions.RemoveEmptyEntries));
 
         Request.RequestManagedAccounts();
 
-        return await task.ConfigureAwait(false);
+        return observable;
     }
+
+    public async Task<string[]> GetManagedAccountsAsync(TimeSpan? timeout = null) =>
+        await CreateManagedAccountsObservable()
+            .Timeout(timeout ?? TimeSpan.MaxValue);
 }

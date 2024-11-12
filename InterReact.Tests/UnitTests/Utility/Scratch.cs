@@ -1,9 +1,12 @@
-﻿using System.Reactive.Linq;
+﻿using System;
+using System.Diagnostics;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-
+using System.Threading;
 namespace Utility;
 
-public sealed class ObservableTests
+public sealed class ObservableTests(ITestOutputHelper output) : UnitTestBase(output)
 {
     [Fact]
     public async Task TestObservableEmpty()
@@ -64,21 +67,84 @@ public sealed class ObservableTests
     }
 
     [Fact]
-    public async Task TestAsyncVersusObservable()
+    public void TestCatchErrorHandlingObservable()
     {
-        string result1 = await Task
-            .FromResult("a")
-            .WaitAsync(CancellationToken.None);
+        IObservable<string> o = Observable.Create<string>(observer =>
+        {
+            observer.OnNext("a");
+            observer.OnError(new InvalidOperationException("error message"));
+            return Disposable.Empty;
+        });
 
-        var result2 = new [] { new AlertMessage() }
-            .ToObservable()
-            //.OfType<IHasRequestId>()
-            .ThrowAlertMessage() // modify exception handling
-            //.OfType<ContractDetails>()
-            //.Select(x => x) // manipulation
-            //.Timeout(TimeSpan.FromSeconds(3)) // timeout
-            .ToTask(CancellationToken.None);  // cancellation
+        var xx = o.Catch<string, Exception>(ex =>
+        {
+            Console.WriteLine(ex.Message);
+            return Observable.Empty<string>(); // Completes
+        });
 
-        await Assert.ThrowsAsync<AlertException>(() => result2);
+        static IObservable<string> ErrorFunction(Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return Observable.Empty<string>(); // Completes
+        }
+        var xy = o.Catch<string, Exception>(ErrorFunction);
     }
+
+    private IObservable<string> CreateObservable()
+    {
+        return Observable.Create<string>(async (obs, ct) =>
+        {
+            Write("Subscribing");
+            await Task.Delay(500, ct);
+            obs.OnNext("a");
+            obs.OnCompleted();
+        });
+    }
+
+    //private void Some(IReadOnlyList<string> argx)
+    //private void Some(IReadOnlyCollection<string> argx)
+    private void Some(IList<string> argx)
+    //private void Some(string[] arg)
+    //private void Some(IEnumerable<string> arg)
+    {
+
+    }
+
+    [Fact]
+    public async Task Cancellation()
+    {
+        var arrayx = new[] { "a", "b", "c" };
+        IEnumerable<string> enumx = new[] { "a", "b", "c" };
+        List<string> list = arrayx.ToList();
+        IList<string> list2 = arrayx.ToList();
+
+        //Some(enumx);
+        Some(arrayx);
+        Some(["xx"]);
+        Some(list);
+        Some(list2);
+
+
+
+        //await Observable.Throw<string>(new IndexOutOfRangeException());
+
+        //await Observable.Return("a").Timeout(TimeSpan.Zero);
+
+        CancellationTokenSource cts = new();
+        cts.Cancel();
+        //await Observable.Return("a").CancelOn(cts.Token);
+
+        string s = await CreateObservable()
+            .FirstAsync()
+            .CancelOn(cts.Token)
+            .Timeout(TimeSpan.FromSeconds(3))
+            //.Catch(Observable.Empty<string>())
+            .Catch<string, Exception>(ex =>
+            {
+                return Observable.Return("");
+            });
+        ;
+    }
+
+
 }

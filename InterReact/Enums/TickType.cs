@@ -1,7 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace InterReact;
 
-#pragma warning disable CA1707
-
+[SuppressMessage("Usage", "CA1707", Scope = "member")]
 public enum TickType
 {
     /// <summary> 
@@ -344,5 +345,3 @@ public enum TickType
     ESTIMATED_IPO_MIDPOINT = 101,
     FINAL_IPO_LAST = 102
 }
-
-#pragma warning restore CA1707

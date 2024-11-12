@@ -1,7 +1,8 @@
-﻿#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
-
+﻿using System.Diagnostics.CodeAnalysis;
 namespace InterReact;
 
+[SuppressMessage("Usage", "CA1310", Scope = "member")]
+[SuppressMessage("Usage", "CA1307", Scope = "member")]
 public class TimeCondition : OperatorCondition
 {
     const string header = "time";
@@ -40,5 +41,3 @@ public class TimeCondition : OperatorCondition
         return base.TryParse(cond);
     }
 }
-
-#pragma warning restore CA1012, CA1307, CA1309, CA1031, CA1310, CA1305

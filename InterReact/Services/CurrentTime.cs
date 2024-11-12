@@ -1,20 +1,16 @@
-﻿using System.Reactive.Threading.Tasks;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public partial class Service
 {
-    public async Task<Instant> GetCurrentTimeAsync(CancellationToken ct = default)
+    public IObservable<Instant> CreateCurrentTimeObservable()
     {
-        Task<Instant> task = Response
+        IObservable<Instant> observable = Response
             .OfType<CurrentTime>()
-            .Select(time =>time.Seconds)
-            .Select(seconds => Instant.FromUnixTimeSeconds(seconds))
             .FirstAsync()
-            .ToTask(ct);
+            .Select(currentTime => Instant.FromUnixTimeSeconds(currentTime.Seconds));
 
         Request.RequestCurrentTime();
 
-        return await task.ConfigureAwait(false);
+        return observable;
     }
 }

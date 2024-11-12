@@ -2,7 +2,6 @@
 using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-
 namespace InterReact;
 
 public sealed class ResponseReader(
@@ -54,9 +53,7 @@ public sealed class ResponseReader(
         if (Logger.IsEnabled(LogLevel.Debug))
         {
             CallerInfo = GetCallerInfo(member, file, l); // slow!
-            Logger.LogDebug(
-                "{CallerInfo}\r\n\t\"{Input}\" => {Output} ({Type})",
-                    CallerInfo, input, output, typeof(T).Name);
+            Logger.LogResponseString(CallerInfo, input, output?.ToString() ?? "", typeof(T).Name);
         }
 
         return output;

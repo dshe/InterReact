@@ -1,6 +1,5 @@
 ﻿using RxSockets;
 using System.Net;
-
 namespace ClientServer;
 
 public sealed class Server : IAsyncDisposable
@@ -20,16 +19,13 @@ public sealed class Server : IAsyncDisposable
         IPEndPoint = (IPEndPoint)SocketServer.LocalEndPoint;
 
         SocketServer
-            .AcceptAllAsync
-            .ToObservableFromAsyncEnumerable()
-            .Select(socketClient => Observable.FromAsync(async ct =>
+            .AcceptObservable
+            .ForEachAsync(async socketClient =>
             {
                 Logger.LogCritical("Client connection accepted.");
                 AcceptClient acceptClient = new(socketClient, Logger);
                 await acceptClient.Run();
-            }))
-            .Concat()
-            .Subscribe();
+            });
 
         Logger.LogCritical("Server Started.");
     }

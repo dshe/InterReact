@@ -3,15 +3,15 @@ using System.Reactive.Linq;
 
 namespace Orders;
 
-public class Place(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
+public class Place(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture, true)
 {
     [Fact]
     public async Task PlaceOrderTest()
     {
         Contract contract = new()
         {
-            SecurityType = ContractSecurityType.Stock,
-            Symbol = "AMZN",
+            SecurityType = ContractSecurityType.Commodity,
+            Symbol = "XAUUSD",
             Currency = "USD",
             Exchange = "SMART"
         };
@@ -19,7 +19,7 @@ public class Place(ITestOutputHelper output, TestFixture fixture) : CollectionTe
         Order order = new()
         {
             Action = OrderAction.Buy,
-            TotalQuantity = 100,
+            TotalQuantity = 1,
             OrderType = OrderTypes.Market
         };
 

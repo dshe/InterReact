@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using RxSockets;
 using System.Globalization;
-
 namespace Core;
 
 public class RequestMessageTests(ITestOutputHelper output) : UnitTestBase(output)
@@ -70,7 +69,7 @@ public class RequestMessageTests(ITestOutputHelper output) : UnitTestBase(output
     [Fact]
     public void T08_EnumsToNumbers()
     {
-        DayOfWeek[] enums = new DayOfWeek[] { DayOfWeek.Saturday, DayOfWeek.Sunday };
+        DayOfWeek[] _ = [DayOfWeek.Saturday, DayOfWeek.Sunday];
 
         var x2 = GetEnumValuesString(Array.Empty<DayOfWeek>());
         Write(x2);

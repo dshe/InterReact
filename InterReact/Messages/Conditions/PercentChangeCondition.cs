@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-
 namespace InterReact;
 
 public class PercentChangeCondition : ContractCondition

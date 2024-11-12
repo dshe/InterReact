@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
 using System.Diagnostics;
-
 namespace Utility;
 
 public sealed class Limiter(ITestOutputHelper output) : UnitTestBase(output)

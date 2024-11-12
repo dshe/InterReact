@@ -2,49 +2,49 @@ namespace InterReact;
 
 public static class OrderTypes
 {
-    public const string Undefined = "";
+    public static readonly string Undefined = "";
 
-    public const string Market = "MKT";
-    public const string MarketIfTouched = "MIT";
-    public const string MarketOnClose = "MOC";
-    public const string MarketOnOpen = "MOO";
-    public const string MarketToLimit = "MTL";
-    public const string MarketWithProtection = "MKT PRT";
+    public static readonly string Market = "MKT";
+    public static readonly string MarketIfTouched = "MIT";
+    public static readonly string MarketOnClose = "MOC";
+    public static readonly string MarketOnOpen = "MOO";
+    public static readonly string MarketToLimit = "MTL";
+    public static readonly string MarketWithProtection = "MKT PRT";
 
-    public const string Limit = "LMT";
-    public const string LimitOnClose = "LOC";
-    public const string LimitOnOpen = "LOO";
-    public const string LimitIfTouched = "LIT";
+    public static readonly string Limit = "LMT";
+    public static readonly string LimitOnClose = "LOC";
+    public static readonly string LimitOnOpen = "LOO";
+    public static readonly string LimitIfTouched = "LIT";
 
-    public const string MidPrice = "MIDPRICE";
+    public static readonly string MidPrice = "MIDPRICE";
 
-    public const string Stop = "STP";
-    public const string StopLimit = "STP LMT";
-    public const string StopWithProtection = "STP PRT";
-    public const string TrailingStop = "TRAIL";
-    public const string TrailingStopLimit = "TRAIL LIMIT";
-    public const string TrailingLimitIfTouched = "TRAIL LIT";
-    public const string TrailingMarketIfTouched = "TRAIL MIT";
+    public static readonly string Stop = "STP";
+    public static readonly string StopLimit = "STP LMT";
+    public static readonly string StopWithProtection = "STP PRT";
+    public static readonly string TrailingStop = "TRAIL";
+    public static readonly string TrailingStopLimit = "TRAIL LIMIT";
+    public static readonly string TrailingLimitIfTouched = "TRAIL LIT";
+    public static readonly string TrailingMarketIfTouched = "TRAIL MIT";
 
-    public const string PeggedToPrimary = "REL";
-    public const string PeggedToMarket = "PEG MKT";
-    public const string PeggedToBenchmark = "PEG BENCH";
-    public const string PeggedToBest = "PEG BEST";
-    public const string PeggedToMidpoint = "PEG MID";
-    public const string PeggedToStock = "PEG STK";
+    public static readonly string PeggedToPrimary = "REL";
+    public static readonly string PeggedToMarket = "PEG MKT";
+    public static readonly string PeggedToBenchmark = "PEG BENCH";
+    public static readonly string PeggedToBest = "PEG BEST";
+    public static readonly string PeggedToMidpoint = "PEG MID";
+    public static readonly string PeggedToStock = "PEG STK";
 
-    public const string GoodAfterTime = "GAT";
-    public const string GoodUntilDate = "GTD";
-    public const string GoodUntilCancelled = "GTC";
-    public const string ImmediateOrCancel = "IOC";
-    public const string OneCancelsAll = "OCA";
+    public static readonly string GoodAfterTime = "GAT";
+    public static readonly string GoodUntilDate = "GTD";
+    public static readonly string GoodUntilCancelled = "GTC";
+    public static readonly string ImmediateOrCancel = "IOC";
+    public static readonly string OneCancelsAll = "OCA";
 
-    public const string RelativeLimitCombo = "REL + LMT";
-    public const string RelativeMarketCombo = "REL + MKT";
-    public const string PassiveRelative = "PASSV REL";
+    public static readonly string RelativeLimitCombo = "REL + LMT";
+    public static readonly string RelativeMarketCombo = "REL + MKT";
+    public static readonly string PassiveRelative = "PASSV REL";
 
-    public const string BoxTop = "BOX TOP";
-    public const string VolumeWeightedAveragePrice = "VWAP";
-    public const string Volatility = "VOL";
-    public const string RequestForQuote = "QUOTE";
+    public static readonly string BoxTop = "BOX TOP";
+    public static readonly string VolumeWeightedAveragePrice = "VWAP";
+    public static readonly string Volatility = "VOL";
+    public static readonly string RequestForQuote = "QUOTE";
 }

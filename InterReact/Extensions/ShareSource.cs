@@ -1,6 +1,5 @@
 ﻿using System.Reactive.Disposables;
 using System.Reactive.Subjects;
-
 namespace InterReact;
 
 public static partial class Extension
@@ -8,7 +7,7 @@ public static partial class Extension
     /// <summary>
     /// Returns an observable which shares a subscription to the source observable.
     /// Messages are relayed from the underlying sequence so that
-    /// concurrent observers receive the same sequence.
+    /// concurrent observers receive the same complete sequence.
     /// </summary>
     internal static IObservable<T> ShareSource<T>(this IObservable<T> source)
     {

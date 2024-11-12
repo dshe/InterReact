@@ -1,4 +1,5 @@
-﻿using System.Reactive.Linq;
+﻿using Stringification;
+using System.Reactive.Linq;
 
 namespace MarketData;
 
@@ -10,21 +11,19 @@ public class MarketData(ITestOutputHelper output, TestFixture fixture) : Collect
         Contract contract = new()
         {
             SecurityType = ContractSecurityType.Stock,
-            Symbol = "AAPL",
+            Symbol = "GOOG",
             Currency = "USD",
             Exchange = "SMART"
         };
 
         IObservable<IHasRequestId> observable = Client.Service.CreateMarketDataObservable(contract);
-        //IList<IHasRequestId> messages = await observable.Take(TimeSpan.FromSeconds(2)).ToList();
+        
+        IHasRequestId[] messages = await observable.Take(TimeSpan.FromSeconds(3)).ToArray();
 
-        PriceTick priceTick = await observable
-            .IgnoreAlertMessage(ErrorResponse.MarketDataNotSubscribed)
-            .ThrowAlertMessage()
-            .OfTickClass(x => x.PriceTick)
-            .FirstAsync();
-       
-        Write(priceTick.TickType + ": " + priceTick.Price);
+        foreach (IHasRequestId m in messages)
+            Write(m.Stringify());
+
+        Assert.True(messages.Length > 3);
     }
 
     [Fact]
@@ -39,13 +38,8 @@ public class MarketData(ITestOutputHelper output, TestFixture fixture) : Collect
         };
 
         IObservable<IHasRequestId> observable = Client.Service.CreateMarketDataObservable(contract);
-        //IList<IHasRequestId> messages = await observable.Take(TimeSpan.FromSeconds(2)).ToList();
 
-        IHasRequestId message = await observable.FirstAsync();
-
-        Assert.True(message is AlertMessage);
-        AlertMessage alert = (AlertMessage)message;
-        Write(alert.Message);
-        Assert.StartsWith("No security definition has been found", alert.Message);
+        var ex = await Assert.ThrowsAsync<AlertException>(async () => await observable.FirstAsync());
+        Assert.StartsWith("Alert: No security definition has been found", ex.Message);
     }
 }

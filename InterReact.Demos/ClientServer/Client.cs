@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Net;
-
 namespace ClientServer;
 
 public sealed class Client : IAsyncDisposable

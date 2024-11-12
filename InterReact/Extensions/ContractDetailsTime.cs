@@ -1,9 +1,9 @@
 ﻿using NodaTime.Text;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
-
 namespace InterReact;
 
 public record struct ContractDetailsTimeEvent(ZonedDateTime Time, ContractTimeStatus Status);
@@ -108,6 +108,7 @@ public sealed class ContractDetailsTime
     /// <summary>
     /// Creates an observable which emits Contract time events for the specified contract details.
     /// </summary>
+    [SuppressMessage("Usage", "CA1031", Scope = "member")]
     private IObservable<ContractDetailsTimePeriod> CreateContractTimeObservable()
     {
         return Observable.Create<ContractDetailsTimePeriod>(observer =>
@@ -135,9 +136,7 @@ public sealed class ContractDetailsTime
                     else
                         self(result.Value.Next.Value.Time.ToDateTimeOffset());
                 }
-#pragma warning disable CA1031
                 catch (Exception e)
-#pragma warning restore CA1031
                 {
                     observer.OnError(e);
                 }

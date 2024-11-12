@@ -1,10 +1,11 @@
 ﻿using Microsoft.Reactive.Testing;
 using Stringification;
+using System.Diagnostics.CodeAnalysis;
 using System.Reactive;
 using System.Reactive.Linq;
-
 namespace Extension;
 
+[SuppressMessage("Usage", "IDE0305:CollectiionExpression")]
 public sealed class ShareSourceTests(ITestOutputHelper output) : ReactiveUnitTestBase(output)
 {
     private readonly TestScheduler TestScheduler = new();
@@ -30,18 +31,10 @@ public sealed class ShareSourceTests(ITestOutputHelper output) : ReactiveUnitTes
 
         TestScheduler.Start();
 
-        Recorded<Notification<string>>[] expected = new[]
-        {
-                OnNext(101, "1"),
-                OnCompleted<string>(501)
-            };
+        Recorded<Notification<string>>[] expected = [OnNext(101, "1"), OnCompleted<string>(501)];
         Assert.Equal(expected.ToList(), observer1.Messages);
 
-        expected = new[]
-        {
-                OnNext(1101, "1"),
-                OnCompleted<string>(1501)
-            };
+        expected = [OnNext(1101, "1"), OnCompleted<string>(1501)];
         Assert.Equal(expected.ToList(), observer2.Messages);
 
         Assert.Equal(2, observable.Subscriptions.Count);
@@ -72,26 +65,26 @@ public sealed class ShareSourceTests(ITestOutputHelper output) : ReactiveUnitTes
 
         TestScheduler.Start();
 
-        Recorded<Notification<string>>[] expected = new[]
-        {
+        Recorded<Notification<string>>[] expected =
+        [
                 OnNext(101, "1"),
                 OnNext(201, "2"),
                 OnNext(301, "3"),
                 OnNext(401, "4"),
                 OnNext(501, "5"),
                 OnCompleted<string>(601)
-            };
+        ];
         Assert.Equal(expected.ToList(), observer1.Messages);
 
-        expected = new[]
-        {
+        expected =
+        [
                 OnNext(351, "1"),
                 OnNext(351, "2"),
                 OnNext(351, "3"),
                 OnNext(401, "4"),
                 OnNext(501, "5"),
                 OnCompleted<string>(601)
-            };
+        ];
         Assert.Equal(expected.ToList(), observer2.Messages);
         Assert.Equal(1, observable.Subscriptions.Count);
     }
@@ -117,15 +110,15 @@ public sealed class ShareSourceTests(ITestOutputHelper output) : ReactiveUnitTes
 
         TestScheduler.Start();
 
-        Recorded<Notification<string>>[] expected = new[]
-        {
+        Recorded<Notification<string>>[] expected =
+        [
                 OnNext(101, "1"),
                 OnNext(201, "2"),
                 OnNext(301, "3"),
                 OnNext(401, "4"),
                 OnNext(501, "5"),
                 OnCompleted<string>(601)
-            };
+        ];
 
         Assert.Equal(expected.ToList(), observer1.Messages);
         Assert.Equal(expected.ToList(), observer2.Messages);

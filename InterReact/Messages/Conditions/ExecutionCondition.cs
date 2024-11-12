@@ -1,7 +1,10 @@
-﻿#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
-
+﻿using System.Diagnostics.CodeAnalysis;
 namespace InterReact;
 
+//[SuppressMessage("Usage", "CA1031", Scope = "member")]
+[SuppressMessage("Usage", "CA1307", Scope = "member")]
+[SuppressMessage("Usage", "CA1309", Scope = "member")]
+[SuppressMessage("Usage", "CA1310", Scope = "member")]
 public class ExecutionCondition : OrderCondition
 {
     /**
@@ -72,6 +75,7 @@ public class ExecutionCondition : OrderCondition
         message.Write(Symbol);
     }
 
+    [SuppressMessage("Usage", "IDE0019", Scope = "member")]
     public override bool Equals(object? obj)
     {
         var other = obj as ExecutionCondition;
@@ -90,5 +94,3 @@ public class ExecutionCondition : OrderCondition
         return base.GetHashCode() + Exchange.GetHashCode() + SecType.GetHashCode() + Symbol.GetHashCode();
     }
 }
-
-#pragma warning restore CA1012, CA1307, CA1309, CA1031, CA1310, CA1305

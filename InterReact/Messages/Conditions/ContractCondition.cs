@@ -1,7 +1,13 @@
-﻿namespace InterReact;
+﻿using System.Diagnostics.CodeAnalysis;
+namespace InterReact;
 
-#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1846
-
+[SuppressMessage("Usage", "CA1012", Scope = "member")]
+[SuppressMessage("Usage", "CA1307", Scope = "member")]
+[SuppressMessage("Usage", "CA1309", Scope = "member")]
+[SuppressMessage("Usage", "CA1310", Scope = "member")]
+[SuppressMessage("Usage", "CA1031", Scope = "member")]
+[SuppressMessage("Usage", "IDE0057", Scope = "member")]
+[SuppressMessage("Usage", "IDE0018", Scope = "member")]
 public abstract class ContractCondition : OperatorCondition
 {
     public int ConId { get; set; }
@@ -21,6 +27,7 @@ public abstract class ContractCondition : OperatorCondition
         return Type + delimiter + ContractResolver(ConId, Exchange) + base.ToString();
     }
 
+    [SuppressMessage("Usage", "IDE0019", Scope = "member")]
     public override bool Equals(object? obj)
     {
         var other = obj as ContractCondition;
@@ -82,5 +89,3 @@ public abstract class ContractCondition : OperatorCondition
         message.Write(Exchange);
     }
 }
-
-#pragma warning restore CA1012, CA1307, CA1309, CA1031, CA1310, CA1846

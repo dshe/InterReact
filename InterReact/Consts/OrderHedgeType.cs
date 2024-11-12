@@ -2,9 +2,9 @@
 
 public static class OrderHedgeType
 {
-    public const string Undefined = "";
-    public const string Delta = "D";
-    public const string Beta = "B";
-    public const string Forex = "F";
-    public const string Pair = "P";
+    public static readonly string Undefined = "";
+    public static readonly string Delta = "D";
+    public static readonly string Beta = "B";
+    public static readonly string Forex = "F";
+    public static readonly string Pair = "P";
 }

@@ -2,7 +2,6 @@
 using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
-
 namespace InterReact;
 
 public sealed class RequestMessage
@@ -103,8 +102,8 @@ public sealed class RequestMessage
         }
     }
 
-    internal RequestMessage WriteContract(Contract contract, bool includePrimaryExchange = true, bool includeExpired = false) =>
-        contract.Write(this, includePrimaryExchange, includeExpired);
+    internal RequestMessage WriteContract(Contract contract, bool includePrimaryExchange = true) =>
+        contract.Write(this, includePrimaryExchange);
 }
 
 internal static class RequestMessageExtensions

@@ -4,15 +4,15 @@ public partial class Service
 {
     /// <summary>
     /// Creates an observable which continually emits market data ticks for the specified contract.
-    /// The latest tick values are cachedr replay to new subscribers.
-    /// Use CreateTickObservable().Publish().[RefCount() | AutoConnect()] to share the subscription.
-    /// Tick class may be selected by using the OfTickClass() extension method.
+    /// Output messages types are ITick or AlertMessage.
+    /// The latest tick values are cached replay to new subscribers.
+    /// Tick class may be selected by using the "OfTickClass()" extension method.
     /// </summary>
     public IObservable<IHasRequestId> CreateMarketDataObservable(
         Contract contract,
-        IEnumerable<GenericTickType>? genericTickTypes = null,
-        params Tag[] options) => Response
-            .ToObservableContinuousWithId(
+        IList<GenericTickType>? genericTickTypes = null,
+        IList<Tag>? options = null) => Response
+            .ToObservableWithId<IHasRequestId>(
                 Request.GetNextId,
                 id => Request.RequestMarketData(
                     id,
@@ -21,23 +21,21 @@ public partial class Service
                     false,
                     false,
                     options),
-                Request.CancelMarketData)
+                Request.CancelMarketData,
+                null)
             .CacheSource(m => m switch
             {
                 ITick tick => tick.TickType.ToString(),
                 _ => ""
-            });
+            }, m => false);
 
-    /// <summary>
-    /// Creates an observable which emits a snapshot of market data ticks.
-    /// Tick class may be selected by using the OfTickClass extension method.
-    /// </summary>
     public IObservable<IHasRequestId> CreateMarketDataSnapshotObservable(
         Contract contract,
-        IEnumerable<GenericTickType>? genericTickTypes = null,
+        IList<GenericTickType>? genericTickTypes = null,
         bool isRegulatorySnapshot = false,
-        params Tag[] options) => Response
-            .ToObservableMultipleWithId<SnapshotEndTick>(
+        IList<Tag>? options = null) => Response
+
+            .ToObservableWithId<IHasRequestId>(
                 Request.GetNextId,
                 id => Request.RequestMarketData(
                     id,
@@ -45,6 +43,18 @@ public partial class Service
                     genericTickTypes,
                     true,
                     isRegulatorySnapshot,
-                    options))
-            .ShareSource();
+                    options),
+                Request.CancelMarketData,
+                m => m is SnapshotEndTick);
+
+    public async Task<IHasRequestId[]> GetMarketDataSnapshotAsync(
+        Contract contract,
+        IList<GenericTickType>? genericTickTypes = null,
+        bool isRegulatorySnapshot = false,
+        IList<Tag>? options = null,
+        TimeSpan? timeout = null) =>
+            await CreateMarketDataSnapshotObservable(contract, genericTickTypes, isRegulatorySnapshot, options)
+                .ToArray()
+                .Timeout(timeout ?? TimeSpan.MaxValue);
+
 }

@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO;
-
+﻿using System.IO;
 namespace InterReact;
 
 public sealed class ResponseMessageComposer(IClock clock, ResponseReader reader)
@@ -8,27 +6,20 @@ public sealed class ResponseMessageComposer(IClock clock, ResponseReader reader)
     private IClock Clock { get; } = clock;
     private ResponseReader Reader { get; } = reader;
 
-    internal void OnNext(string[] message, Action<object> onNext)
-    {
-        object result = ComposeMessage(message);
-        if (result is object[] results)
-        {
-            Debug.Assert(message[0] == "1");
-            Debug.Assert(results.Length == 2);
-            onNext(results[0]); // priceTick
-            onNext(results[1]); // sizeTick
-            return;
-        }
-        onNext(result);
-    }
-
     internal object ComposeMessage(string[] strings)
     {
         Reader.SetStrings(strings);
         string code = Reader.ReadString();
-        object message = GetResponseMessage(code);
-        Reader.VerifyEnumerationEnd();
-        return message;
+        try
+        {
+            object message = GetResponseMessage(code);
+            Reader.VerifyEnumerationEnd();
+            return message;
+        }
+        catch (Exception ex)
+        {
+             throw new InvalidDataException($"Error occurred in ResponseMessageComposer({code}).", ex);
+        }
     }
 
     private object GetResponseMessage(string code) => code switch
@@ -81,10 +72,10 @@ public sealed class ResponseMessageComposer(IClock clock, ResponseReader reader)
         "68" => new DisplayGroupUpdate(Reader),
         "69" => new VerifyAndAuthorizeMessageApi(Reader),
         "70" => new VerifyAndAuthorizeCompleted(Reader),
-        "71" => new AccountPositionsMulti(Reader),
-        "72" => new AccountPositionsMultiEnd(Reader),
-        "73" => new AccountUpdateMulti(Reader),
-        "74" => new AccountUpdateMultiEnd(Reader),
+        "71" => new AccountPositionsMulti(Reader, false),
+        "72" => new AccountPositionsMulti(Reader, true),
+        "73" => new AccountUpdateMulti(Reader, false),
+        "74" => new AccountUpdateMulti(Reader, true),
         "75" => new SecurityDefinitionOptionParameter(Reader),
         "76" => new SecurityDefinitionOptionParameterEnd(Reader),
         "77" => new SoftDollarTiers(Reader),

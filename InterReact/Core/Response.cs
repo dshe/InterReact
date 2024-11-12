@@ -1,7 +1,7 @@
 ﻿using RxSockets;
 using Stringification;
-using System.Reactive;
-
+using System.Diagnostics;
+using System.Reactive.Concurrency;
 namespace InterReact;
 
 public sealed class Response : IObservable<object>
@@ -13,12 +13,12 @@ public sealed class Response : IObservable<object>
         ArgumentNullException.ThrowIfNull(socketClient);
 
         Observable = socketClient
-            .ReceiveAllAsync
-            .ToObservableFromAsyncEnumerable()
+            .ReceiveObservable
+            .SubscribeOn(NewThreadScheduler.Default.BackgroundThread("SubscriberThread"))
             .ToArraysFromBytesWithLengthPrefix()
             .ToStringArrays()
             .ComposeMessage(composer)
-            .LogMessage(logger, stringifier)
+            .Do(msg => logger.LogResponseMessage(stringifier.Stringify(msg)))
             .Publish()
             .AutoConnect(); // connect on first observer
     }
@@ -28,14 +28,32 @@ public sealed class Response : IObservable<object>
 
 public static partial class Extension
 {
-    internal static IObservable<object> ComposeMessage(this IObservable<string[]> source, ResponseMessageComposer composer) =>
-        Observable.Create<object>(observer =>
-            source.SubscribeSafe(Observer.Create<string[]>(msg => composer.OnNext(msg, observer.OnNext))));
-
-    internal static IObservable<object> LogMessage(this IObservable<object> source, ILogger logger, Stringifier stringifier) =>
-        source.Do(msg =>
+    internal static IObservable<object> ComposeMessage(this IObservable<string[]> source, ResponseMessageComposer composer)
+    {
+        return Observable.Create<object>(observer =>
         {
-            if (logger.IsEnabled(LogLevel.Debug))
-                logger.Log(LogLevel.Debug, "Response received: {Message}", stringifier.Stringify(msg));
+            return source.Subscribe(onNext: strings =>
+            {
+                try
+                {
+                    object result = composer.ComposeMessage(strings);
+                    if (result is object[] results)
+                    {
+                        Debug.Assert(strings[0] == "1");
+                        Debug.Assert(results.Length == 2);
+                        observer.OnNext(results[0]); // priceTick
+                        observer.OnNext(results[1]); // sizeTick
+                        return;
+                    }
+                    observer.OnNext(result);
+                }
+                catch (Exception ex)
+                {
+                    observer.OnError(ex);
+                }
+            },
+            onError: observer.OnError,
+            onCompleted: observer.OnCompleted);
         });
+    }
 }

@@ -1,9 +1,8 @@
-﻿using System.Globalization;
-
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 namespace InterReact;
 
-#pragma warning disable CA1822 // can be marked as static
-
+[SuppressMessage("Usage", "CA1822", Scope = "member")]
 public sealed class ResponseParser(ILogger<ResponseParser> logger)
 {
     private const string MaxInt = "2147483647";
@@ -101,5 +100,3 @@ public sealed class ResponseParser(ILogger<ResponseParser> logger)
         return (T)e;
     }
 }
-
-#pragma warning restore CA1822

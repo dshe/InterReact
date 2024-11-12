@@ -11,9 +11,9 @@
 
   <ItemGroup>
 	<ProjectReference Include="..\..\InterReact\InterReact.csproj" />
-	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
-    <PackageReference Include="MXLogger" Version="2.0.8" />
-    <PackageReference Include="xunit" Version="2.9.0" />
+	<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="MXLogger" Version="2.0.9" />
+    <PackageReference Include="xunit" Version="2.9.2" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

@@ -1,44 +1,63 @@
-﻿using System.Reactive.Linq;
-
+﻿using Stringification;
+using System.Reactive.Linq;
 namespace Contracts;
 
 public class ContractDetail(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
 {
     [Fact]
-    public async Task ContractDetailSingleTest()
+    public async Task ContractDetailObservableTest()
     {
         Contract contract = new()
         {
             SecurityType = ContractSecurityType.Stock,
-            Symbol = "MSFT",
-            Currency = "USD",
-            Exchange = "SMART"
-        };
-
-        IList<ContractDetails> messages = await Client
-            .Service
-            .GetContractDetailsAsync(contract);
-
-        var cd = messages.Single();
-
-        Assert.Equal("MSFT", cd.Contract.Symbol);
-    }
-
-    [Fact]
-    public async Task ContractDetailMultiTest()
-    {
-        Contract contract = new()
-        {
-            SecurityType = ContractSecurityType.Stock,
-            Symbol = "MSFT",
+            Symbol = "C",
             Currency = "USD"
         };
 
-        IList<ContractDetails> cds = await Client
+        ContractDetails[] cds = await Client
             .Service
-            .GetContractDetailsAsync(contract);
+            .CreateContractDetailsObservable(contract)
+            .CancelOn(CancellationToken.None)
+            .Timeout(TimeSpan.FromSeconds(5))
+            .Catch<ContractDetails, Exception>(ex =>
+            {
+                // Could be symbol not found, timout or other error
+                Write(ex.Message);
+                return Observable.Empty<ContractDetails>();
+            })
+           .ToArray();
 
-        Assert.True(cds.Count > 1); // multiple exchanges
+        Assert.True(cds.Length > 1); // multiple exchanges
+
+        foreach (var cd in cds)
+            Write(cd?.Stringify() ?? "");
+    }
+
+    [Fact]
+    public async Task ContractDetailObservablePushTest()
+    {
+        Write("Start");
+
+        Contract contract = new()
+        {
+            SecurityType = ContractSecurityType.Stock,
+            Symbol = "X",
+            Currency = "USD"
+        };
+
+        IDisposable subscription = Client
+            .Service
+            .CreateContractDetailsObservable(contract)
+            .Timeout(TimeSpan.FromSeconds(5))
+            .Subscribe(
+                onNext: m => Write(m?.Stringify() ?? ""),
+                onError: ex => Write(ex?.Stringify() ?? ""),
+                onCompleted: () => Write("Completed")
+            );
+
+        await Task.Delay(TimeSpan.FromSeconds(2));
+
+        subscription.Dispose();
     }
 
     [Fact]
@@ -46,12 +65,14 @@ public class ContractDetail(ITestOutputHelper output, TestFixture fixture) : Col
     {
         Contract contract = new()
         {
-            ContractId = 99999
+            SecurityType = ContractSecurityType.Stock
         };
 
-        await Assert.ThrowsAsync<AlertException>(async () => await Client
+        var ex = await Assert.ThrowsAsync<AlertException>(async () => await Client
             .Service
-            .GetContractDetailsAsync(contract));
+            .CreateContractDetailsObservable(contract));
+
+        Write(ex.Message);
     }
 
     [Fact]
@@ -60,7 +81,7 @@ public class ContractDetail(ITestOutputHelper output, TestFixture fixture) : Col
         Contract contract = new()
         {
             SecurityType = ContractSecurityType.Stock,
-            Symbol = "X",
+            Symbol = "A",
             Currency = "USD"
         };
 
@@ -69,5 +90,6 @@ public class ContractDetail(ITestOutputHelper output, TestFixture fixture) : Col
             .CreateContractDetailsObservable(contract)
             .Timeout(TimeSpan.FromMilliseconds(1))
             .ToList());
+
      }
 }

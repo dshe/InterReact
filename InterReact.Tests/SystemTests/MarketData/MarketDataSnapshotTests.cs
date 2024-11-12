@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Stringification;
+using System;
 using System.Reactive.Linq;
 
 namespace MarketData;
@@ -18,15 +19,16 @@ public class MarketDataSnapshot(ITestOutputHelper output, TestFixture fixture) :
 
         IObservable<IHasRequestId> observable = Client.Service.CreateMarketDataSnapshotObservable(contract);
 
-        IList<PriceTick> priceTicks = await observable
-            .IgnoreAlertMessage(ErrorResponse.MarketDataNotSubscribed)
-            .ThrowAlertMessage()
+        IHasRequestId[] ticks = await observable
+            //.ThrowAlertMessage()
             //.OfType<PriceTick>()
-            .OfTickClass(x => x.PriceTick)
-            .ToList();
+            //.OfTickClass(x => x.PriceTick)
+            .ToArray();
 
-        foreach (var priceTick in priceTicks)
-            Write(priceTick.TickType + ": " + priceTick.Price);
+        Assert.NotEmpty(ticks);
+
+        foreach (var tick in ticks)
+            Write(tick.Stringify());
     }
 
     [Fact]
@@ -40,12 +42,9 @@ public class MarketDataSnapshot(ITestOutputHelper output, TestFixture fixture) :
             Exchange = "SMART"
         };
 
-        IObservable<IHasRequestId> observable = Client.Service.CreateMarketDataObservable(contract);
-        IHasRequestId message = await observable.FirstAsync();
+        IObservable<IHasRequestId> observable = Client.Service.CreateMarketDataSnapshotObservable(contract);
 
-        Assert.True(message is AlertMessage);
-        AlertMessage alert = (AlertMessage)message;
-        Write(alert.Message);
-        Assert.StartsWith("No security definition has been found", alert.Message);
+        var ex = await Assert.ThrowsAsync<AlertException>(async () => await observable.FirstAsync());
+        Assert.StartsWith("Alert: No security definition has been found", ex.Message);
     }
 }

@@ -6,7 +6,7 @@ using System.Net.Sockets;
 using System.Net;
 using Stringification;
 using System.Reflection;
-
+using System.Reactive.Threading.Tasks;
 namespace InterReact;
 
 internal sealed class Connector
@@ -77,7 +77,6 @@ internal sealed class Connector
             try
             {
                 return await ipEndPoint.CreateRxSocketClientAsync(Options.LogFactory, cts.Token).ConfigureAwait(false);
-                //return await ipEndPoint.CreateRxSocketClientAsync(cts.Token).ConfigureAwait(false);
                 // token cancel  => OperationCanceledException
                 // token timeout => OperationCanceledException
                 // socket timeout/error => SocketException
@@ -119,11 +118,11 @@ internal sealed class Connector
         try
         {
             message = await rxSocketClient
-                .ReceiveAllAsync
+                .ReceiveObservable
                 .ToArraysFromBytesWithLengthPrefix()
                 .ToStringArrays()
-                .FirstAsync(ct)
-                .AsTask()
+                .FirstAsync()
+                .ToTask(ct)
                 .ConfigureAwait(false);
         }
         catch (TimeoutException e)

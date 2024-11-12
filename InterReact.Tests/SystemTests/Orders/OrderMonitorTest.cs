@@ -3,7 +3,7 @@ using System.Reactive.Linq;
 
 namespace Orders;
 
-public class Monitor(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
+public class Monitor(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture, true)
 {
     [Fact]
     public async Task OrderMonitorTest()
@@ -83,7 +83,7 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
             .Where(priceTick => priceTick.TickType == TickType.AskPrice)
             .Select(priceTick => priceTick.Price)
             .Take(TimeSpan.FromSeconds(3))
-            .FirstOrDefaultAsync();
+            .FirstAsync();
 
         if (askPrice <= 0)
         {
@@ -119,7 +119,5 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
             .FirstOrDefaultAsync();
 
         orderMonitor.Dispose();
-
-        //Assert.NotNull(execution);
     }
 }

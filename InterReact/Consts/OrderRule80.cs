@@ -5,14 +5,14 @@ namespace InterReact;
 /// </summary>
 public static class OrderRule80
 {
-    public const string None = "";
-    public const string Individual = "I";
-    public const string Agency = "A";
-    public const string AgentOtherMember = "W";
-    public const string IndividualPtia = "J";
-    public const string AgencyPtia = "U";
-    public const string AgentOtherMemberPtia = "M";
-    public const string IndividualPt = "K";
-    public const string AgencyPt = "Y";
-    public const string AgentOtherMemberPt = "N";
+    public static readonly string None = "";
+    public static readonly string Individual = "I";
+    public static readonly string Agency = "A";
+    public static readonly string AgentOtherMember = "W";
+    public static readonly string IndividualPtia = "J";
+    public static readonly string AgencyPtia = "U";
+    public static readonly string AgentOtherMemberPtia = "M";
+    public static readonly string IndividualPt = "K";
+    public static readonly string AgencyPt = "Y";
+    public static readonly string AgentOtherMemberPt = "N";
 }

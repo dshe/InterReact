@@ -1,5 +1,4 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
-
 namespace UnitTests.Core;
 
 public class ResponseComposerTests : UnitTestBase
@@ -46,18 +45,20 @@ public class ResponseComposerTests : UnitTestBase
     public void T03_Undefined_Code()
     {
         InvalidDataException e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage([""]));
-        Assert.Equal("Undefined code ''.", e.Message);
+        Assert.StartsWith("Error occurred in ResponseMessageCompose", e.Message);
+        Assert.Equal("Undefined code ''.", e.InnerException?.Message);
 
         e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(["notInSwitch"]));
-        Assert.Equal("Undefined code 'notInSwitch'.", e.Message);
+        Assert.StartsWith("Error occurred in ResponseMessageCompose", e.Message);
+        Assert.Equal("Undefined code 'notInSwitch'.", e.InnerException?.Message);
         ;
     }
 
     [Fact]
     public void T04_ParseError()
     {
-        ArgumentException e = Assert.Throws<ArgumentException>(() => Composer.ComposeMessage(["1", "version", "cannotParseInt"]));
-        Assert.StartsWith("Parse", e.Message);
+        InvalidDataException e = Assert.Throws<InvalidDataException>(() => Composer.ComposeMessage(["1", "version", "cannotParseInt"]));
+        Assert.StartsWith("Error occurred in ResponseMessageCompose", e.Message);
     }
 
     [Fact]

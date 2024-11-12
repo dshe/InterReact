@@ -1,7 +1,11 @@
-﻿#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305, CA1062
-
+﻿using System.Diagnostics.CodeAnalysis;
 namespace InterReact;
 
+[SuppressMessage("Usage", "CA1307", Scope = "member")]
+[SuppressMessage("Usage", "CA1309", Scope = "member")]
+[SuppressMessage("Usage", "CA1310", Scope = "member")]
+[SuppressMessage("Usage", "CA1062", Scope = "member")]
+[SuppressMessage("Usage", "IDE0019", Scope = "member")]
 public abstract class OperatorCondition : OrderCondition
 {
     protected abstract string Value { get; set; }
@@ -73,5 +77,3 @@ public abstract class OperatorCondition : OrderCondition
         message.Write(Value);
     }
 }
-
-#pragma warning restore CA1012, CA1307, CA1309, CA1031, CA1310, CA1305, CA1062

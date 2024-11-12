@@ -2,9 +2,9 @@
 
 public static class OrderFinancialAdvisorMethod
 {
-    public const string None = "";
-    public const string PercentChange = "PctChange";
-    public const string AvailableEquity = "AvailableEquity";
-    public const string NetLiquidity = "NetLiq";
-    public const string EqualQuantity = "EqualQuantity";
+    public static readonly string None = "";
+    public static readonly string PercentChange = "PctChange";
+    public static readonly string AvailableEquity = "AvailableEquity";
+    public static readonly string NetLiquidity = "NetLiq";
+    public static readonly string EqualQuantity = "EqualQuantity";
 }

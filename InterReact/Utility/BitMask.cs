@@ -10,7 +10,6 @@ internal readonly struct BitMask
         {
             if (index is < 0 or >= 32)
                 throw new ArgumentException("Invalid", nameof(index));
-
             return (Mask & (1 << index)) != 0;
         }
     }

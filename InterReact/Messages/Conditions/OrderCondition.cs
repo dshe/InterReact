@@ -1,8 +1,10 @@
-﻿#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
-
+﻿using System.Diagnostics.CodeAnalysis;
 namespace InterReact;
 
-[System.Runtime.InteropServices.ComVisible(true)]
+[SuppressMessage("Usage", "IDE0079", Scope = "member")]
+[SuppressMessage("Usage", "IDE0290", Scope = "member")]
+[SuppressMessage("Usage", "IDE0057", Scope = "member")]
+[SuppressMessage("Usage", "IDE0019", Scope = "member")]
 public abstract class OrderCondition
 {
     public OrderConditionType Type { get; private set; }
@@ -87,6 +89,9 @@ public abstract class OrderCondition
     }
 }
 
+[SuppressMessage("Usage", "CA1310", Scope = "member")]
+[SuppressMessage("Usage", "IDE0290", Scope = "member")]
+[SuppressMessage("Usage", "IDE0057", Scope = "member")]
 sealed class StringSuffixParser
 {
     public StringSuffixParser(string str)
@@ -109,5 +114,3 @@ sealed class StringSuffixParser
 
     public string Rest { get; private set; }
 }
-
-#pragma warning restore CA1012, CA1307, CA1309, CA1031, CA1310, CA1305

@@ -1,9 +1,8 @@
 ﻿using Microsoft.Reactive.Testing;
 using System.Diagnostics;
-
 namespace Extension;
 
-public class ToObservableContinuousWithId(ITestOutputHelper output) : ReactiveUnitTestBase(output)
+public class ToObservableWithId(ITestOutputHelper output) : ReactiveUnitTestBase(output)
 {
     public interface ISomeClass : IHasRequestId { }
     public class SomeClass(int id) : ISomeClass
@@ -42,11 +41,13 @@ public class ToObservableContinuousWithId(ITestOutputHelper output) : ReactiveUn
 
         ITestableObserver<object> observer = testScheduler.CreateObserver<object>();
 
-        IDisposable subscription = source.ToObservableContinuousWithId(() => 42, id => start++, id => stop++)
+        IDisposable subscription = source.ToObservableWithId<object>(() => 42, id => start++, id => stop++)
             .Subscribe(observer);
 
         testScheduler.Start();
         subscription.Dispose();
+
+        Recorded<System.Reactive.Notification<object>> xx = OnNext<object>(10, o1);
 
         observer.Messages.AssertEqual(
                     OnNext<object>(10, o1),

@@ -1,10 +1,17 @@
 ﻿using System.Reflection;
-
 namespace Analysis;
 
 public class Type_Viewer(ITestOutputHelper output) : UnitTestBase(output)
 {
     private static readonly Assembly Assembly = typeof(InterReactClient).Assembly;
+
+    [Fact]
+    public void View_Namespaces()
+    {
+        string[] spaces = Assembly.DefinedTypes.Select(t => t.Namespace ?? "").Distinct().OrderBy(x => x).ToArray();
+        foreach (string? ns in spaces)
+              Write(ns);
+    }
 
     [Fact]
     public void View_Interfaces()
@@ -47,8 +54,8 @@ public class Type_Viewer(ITestOutputHelper output) : UnitTestBase(output)
     {
         foreach (TypeInfo type in Assembly
             .ExportedTypes
-            .OrderBy(x => x.FullName))
-            Write(type.FullName!);
+            .OrderBy(x => x.FullName).Cast<TypeInfo>())
+         Write(type.FullName!);
     }
 
     [Fact]
@@ -60,12 +67,12 @@ public class Type_Viewer(ITestOutputHelper output) : UnitTestBase(output)
             .Select(method => method.Name)
             .ToList();
 
-        foreach (TypeInfo type in Assembly.ExportedTypes.OrderBy(type => type.Name))
+        foreach (TypeInfo type in Assembly.ExportedTypes.OrderBy(type => type.Name).Cast<TypeInfo>())
         {
             type.GetTypeInfo().DeclaredMethods
                 .Where(method => method.IsPublic)
                 .Where(m =>
-                    !(m.Name.StartsWith("<") || m.Name.StartsWith("get_") || m.Name.StartsWith("set_") ||
+                    !(m.Name.StartsWith('<') || m.Name.StartsWith("get_") || m.Name.StartsWith("set_") ||
                       objectMethodNames.Contains(m.Name)))
                 .Select(m => type.Name + "." + m.Name)
                 .Distinct()

@@ -1,5 +1,4 @@
 ﻿using System.Reactive.Subjects;
-
 namespace InterReact;
 
 public partial class Service

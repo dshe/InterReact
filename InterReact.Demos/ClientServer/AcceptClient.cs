@@ -2,7 +2,6 @@
 using RxSockets;
 using System.Diagnostics;
 using System.IO;
-
 namespace ClientServer;
 
 public sealed class AcceptClient(IRxSocketClient socketClient, ILogger logger)
@@ -10,14 +9,13 @@ public sealed class AcceptClient(IRxSocketClient socketClient, ILogger logger)
     private readonly ILogger Logger = logger;
     private readonly IRxSocketClient SocketClient = socketClient;
     private readonly IObservable<ServerRequestMessage> ServerRequestMessages = socketClient
-                .ReceiveAllAsync
-                .ToObservableFromAsyncEnumerable()
+                .ReceiveObservable
                 .ToArraysFromBytesWithLengthPrefix()
                 .ToStringArrays()
                 .ToServerRequestMessages()
                 .Publish()
                 .AutoConnect();
-    private readonly RequestMessage ServerResponseMessage = new(NullLogger<RequestMessage>.Instance, socketClient, new RingLimiter());
+        private readonly RequestMessage ServerResponseMessage = new(NullLogger<RequestMessage>.Instance, socketClient, new RingLimiter());
 
     public async Task Run()
     {

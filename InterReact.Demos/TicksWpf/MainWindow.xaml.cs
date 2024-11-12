@@ -124,7 +124,10 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
 
         // display response messages to the debug window.
-        Client.Response.Subscribe(msg => Debug.WriteLine(msg.Stringify()));
+        Client.Response.Subscribe(
+            msg => Debug.WriteLine(msg.Stringify()),
+            //ex => Utilities.MessageBoxShow(ex.Message, "InterReact"));
+            ex => Debug.WriteLine(ex.Message));
 
         Client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
@@ -156,28 +159,22 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             Exchange = "SMART"
         };
 
-        try
-        {
-            ContractDetails cd = await Client
-                .Service
-                .CreateContractDetailsObservable(contract)
-                .Timeout(TimeSpan.FromSeconds(2))
-                .CastTo<ContractDetails>()
-                .FirstAsync();
+        ContractDetails cd = await Client.Service
+            .CreateContractDetailsObservable(contract)
+            .Timeout(TimeSpan.FromSeconds(5))
+            .Catch<ContractDetails, Exception>(ex =>
+            {
+                // Could be symbol format, not found, error or timeout.
+                Utilities.MessageBoxShow(ex.Message, "InterReact");
+                return Observable.Empty<ContractDetails>();
+            })
+            .FirstOrDefaultAsync();
 
-            // Display the stock name.
-            Description = cd.LongName;
-        }
-        catch (AlertException alertException)
-        {
-            MessageBox.Show($"ContractDetails: {alertException.Message}");
+        if (cd == null)
             return;
-        }
-        catch (TimeoutException)
-        {
-            MessageBox.Show("ContractDetails: Timeout.");
-            return;
-        }
+
+        // Display the stock name.
+        Description = cd.LongName;
 
         SubscribeToTicks(contract);
     }

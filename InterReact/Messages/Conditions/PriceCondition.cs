@@ -1,13 +1,10 @@
-﻿#pragma warning disable CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
-
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-
 namespace InterReact;
 
 public static class CTriggerMethod
 {
-    public static readonly string[] friendlyNames = new string[] { "default", "double bid/ask", "last", "double last", "bid/ask", "", "", "last of bid/ask", "mid-point" };
-
+    public static readonly string[] friendlyNames = [ "default", "double bid/ask", "last", "double last", "bid/ask", "", "", "last of bid/ask", "mid-point" ];
 
     public static string ToFriendlyString(this TriggerMethod th)
     {
@@ -24,6 +21,8 @@ public static class CTriggerMethod
 *  @brief Used with conditional orders to cancel or submit order based on price of an instrument. 
 */
 
+//[SuppressMessage("Usage", "CA1031", Scope = "member")]
+[SuppressMessage("Usage", "CA1310", Scope = "member")]
 public class PriceCondition : ContractCondition
 {
     protected override string Value
@@ -43,6 +42,7 @@ public class PriceCondition : ContractCondition
         return TriggerMethod.ToFriendlyString() + " " + base.ToString();
     }
 
+    [SuppressMessage("Usage", "IDE0019", Scope = "member")]
     public override bool Equals(object? obj)
     {
         var other = obj as PriceCondition;
@@ -76,6 +76,7 @@ public class PriceCondition : ContractCondition
         message.Write((int)TriggerMethod);
     }
 
+    [SuppressMessage("Usage", "IDE0057", Scope = "member")]
     protected override bool TryParse(string cond)
     {
         ArgumentNullException.ThrowIfNull(cond);
@@ -98,5 +99,3 @@ public class PriceCondition : ContractCondition
         }
     }
 }
-
-#pragma warning restore CA1012, CA1307, CA1309, CA1031, CA1310, CA1305
