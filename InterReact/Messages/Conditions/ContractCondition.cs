@@ -32,7 +32,7 @@ public abstract class ContractCondition : OperatorCondition
     {
         var other = obj as ContractCondition;
 
-        if (other == null)
+        if (other is null)
             return false;
 
         return base.Equals(obj)

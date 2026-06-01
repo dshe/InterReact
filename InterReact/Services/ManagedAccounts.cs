@@ -3,31 +3,31 @@ namespace InterReact;
 
 public partial class Service
 {
-    private readonly SemaphoreSlim ManagedAccountsSemaphore = new(1, 1);
+    private readonly SemaphoreSlim _managedAccountsSemaphore = new(1, 1);
 
     public async Task<IReadOnlyList<string>> GetManagedAccountsAsync(TimeSpan? timeout = null, CancellationToken ct = default)
     {
-        await ManagedAccountsSemaphore.WaitAsync(ct).ConfigureAwait(false);
+        await _managedAccountsSemaphore.WaitAsync(ct).ConfigureAwait(false);
         try
         {
-            if (Options.ManagedAccounts.Count == 0)
+            if (_options.ManagedAccounts.Count == 0)
             {
                 // Options.ManagedAccounts is updated whenever a ManagedAccounts message is received.
-                await Response
+                await _response
                     .OfType<ManagedAccounts>()
-                    .ToObservable(Request.RequestManagedAccounts)
+                    .ToObservable<ManagedAccounts>(_request.RequestManagedAccounts)
                     .Select(x => x.Accounts)
                     .WithTimeout(timeout, ct)
                     .SingleAsync();
             }
 
-            Debug.Assert(Options.ManagedAccounts.Count > 0);
+            Debug.Assert(_options.ManagedAccounts.Count > 0);
 
-            return Options.ManagedAccounts;
+            return _options.ManagedAccounts;
         }
         finally
         {
-            ManagedAccountsSemaphore.Release();
+            _managedAccountsSemaphore.Release();
         }
     }
 }

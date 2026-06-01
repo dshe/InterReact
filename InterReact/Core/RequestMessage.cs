@@ -1,5 +1,4 @@
-﻿using RxSockets;
-using System.Globalization;
+﻿using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 namespace InterReact;
@@ -7,26 +6,22 @@ namespace InterReact;
 public sealed class RequestMessage
 {
     private ILogger Logger { get; }
-    private IRxSocketClient RxSocket { get; }
-    private RingLimiter Limiter { get; }
+    private Connection Connection { get; }
     internal List<string> Strings { get; } = []; // internal for testing
-    public RequestMessage(ILogger<RequestMessage> logger, IRxSocketClient rxSocket, RingLimiter limiter)
+    public RequestMessage(ILogger<RequestMessage> logger, Connection connection)
     {
         ArgumentNullException.ThrowIfNull(logger);
         Logger = logger;
-        RxSocket = rxSocket;
-        Limiter = limiter;
+        Connection = connection;
     }
 
-    internal void Send([CallerMemberName] string memberName = "")
+    internal async Task SendAsync([CallerMemberName] string memberName = "")
     {
         Logger.LogDebug("Request: {Method}", memberName);
         if (Strings.Count == 0)
             throw new InvalidOperationException("Empty send message.");
-        // V100Plus format: 4 byte message length prefix plus payload of null-terminated strings.
-        byte[] bytes = Strings.ToByteArray().ToByteArrayWithLengthPrefix();
+        await Connection.SendMessageAsync(Strings).ConfigureAwait(false);
         Strings.Clear(); // allows the message to be reused
-        Limiter.Limit(() => RxSocket.Send(bytes));
     }
 
     /////////////////////////////////////////////////////

@@ -28,9 +28,9 @@ public static partial class Extension
 
     public static IObservable<T> ToObservable<T>(
         this IObservable<object> source,
-        Action startRequest, Action? stopRequest = null)
+        Func<ValueTask> startRequest, Func<ValueTask>? stopRequest = null)
     {
-        return Observable.Create<T>(observer =>
+        return Observable.Create<T>(async observer =>
         {
             bool? cancelable = null;
 
@@ -50,26 +50,27 @@ public static partial class Extension
                     }));
 
             if (cancelable is null)
-                startRequest();
+                await startRequest().ConfigureAwait(false);
             cancelable ??= true;
 
-            return Disposable.Create(() =>
+            return Disposable.Create(async () =>
             {
                 if (cancelable is true && stopRequest is not null)
-                    stopRequest();
+                    await stopRequest().ConfigureAwait(false);
                 subscription.Dispose();
             });
         });
     }
 
+    //Func<ValueTask>
     // For continuous results with RequestId: AccountUpdatesMulti, MarketData
     // For multiple   results with RequestId: ContractDetails, MarketDataSnapshot
     public static IObservable<IHasRequestId> ToObservableWithId(
         this IObservable<object> source, 
         Func<int> getRequestId,
-        Action<int> startRequest, Action<int>? stopRequest = null)
+        Func<int,ValueTask> startRequest, Func<int, ValueTask>? stopRequest = null)
     {
-        return Observable.Create<IHasRequestId>(observer =>
+        return Observable.Create<IHasRequestId>(async observer =>
         {
             int id = getRequestId();
             bool? cancelable = null;
@@ -90,13 +91,13 @@ public static partial class Extension
                     }));
 
             if (cancelable is null)
-                startRequest(id);
+                await startRequest(id).ConfigureAwait(false);
             cancelable ??= true;
 
-            return Disposable.Create(() =>
+            return Disposable.Create(async () =>
             {
                 if (cancelable is true && stopRequest is not null)
-                    stopRequest(id);
+                    await stopRequest(id).ConfigureAwait(false);
                 subscription.Dispose();
             });
         });

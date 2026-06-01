@@ -7,8 +7,8 @@ public static partial class Extension
 
 internal sealed class FactoryLogger : ILoggerFactory
 {
-    private readonly ILogger Logger;
-    internal FactoryLogger(ILogger logger) => Logger = logger;
+    private readonly ILogger _logger;
+    internal FactoryLogger(ILogger logger) => _logger = logger;
 
     public void AddProvider(ILoggerProvider provider) => throw new NotImplementedException();
 
@@ -18,7 +18,7 @@ internal sealed class FactoryLogger : ILoggerFactory
     /// </summary>
     /// <param name="ignoredCategoryName"></param>
     /// <returns></returns>
-    public ILogger CreateLogger(string ignoredCategoryName = "") => Logger;
+    public ILogger CreateLogger(string ignoredCategoryName = "") => _logger;
 
     public void Dispose() { }
 }

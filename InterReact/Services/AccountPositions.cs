@@ -1,6 +1,4 @@
-﻿using System.Reactive.Linq;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public partial class Service
 {
@@ -14,8 +12,8 @@ public partial class Service
     public IObservable<AccountPosition> AccountPositionsObservable { get; }
 
     private IObservable<AccountPosition> CreateAccountPositionsObservable() =>
-        Response
-            .ToObservable<AccountPosition>(Request.RequestPositions, Request.CancelPositions)
+        _response
+            .ToObservable<AccountPosition>(_request.RequestPositions, _request.CancelPositions)
             .CacheSource(a => $"{a.Account}:{a.Contract.ContractId}", a => a.IsEndMessage, true);
 
     public async Task<AccountPosition[]> GetAccountPositionsAsync(TimeSpan? timeout = null, CancellationToken ct = default) =>

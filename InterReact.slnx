@@ -1,0 +1,21 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="ARM" />
+    <Platform Name="arm64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/InterReact.Demos/">
+    <Project Path="InterReact.Demos/ClientServer/ClientServer.csproj" />
+    <Project Path="InterReact.Demos/HelloWorld/HelloWorld.csproj" />
+    <Project Path="InterReact.Demos/SimpleExample/SimpleExample.csproj" />
+    <Project Path="InterReact.Demos/TicksWpf/TicksWpf.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="InterReact.Tests/InterReact.Tests.csproj" Id="4c827bd2-a4ac-4c26-b250-d5c2d8433154" />
+  <Project Path="InterReact/InterReact.csproj" />
+</Solution>

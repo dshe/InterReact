@@ -20,8 +20,6 @@ public static class CTriggerMethod
 /** 
 *  @brief Used with conditional orders to cancel or submit order based on price of an instrument. 
 */
-
-//[SuppressMessage("Usage", "CA1031", Scope = "member")]
 [SuppressMessage("Usage", "CA1310", Scope = "member")]
 public class PriceCondition : ContractCondition
 {
@@ -47,7 +45,7 @@ public class PriceCondition : ContractCondition
     {
         var other = obj as PriceCondition;
 
-        if (other == null)
+        if (other is null)
             return false;
 
         return base.Equals(obj)
@@ -83,7 +81,7 @@ public class PriceCondition : ContractCondition
 
         var fName = CTriggerMethod.friendlyNames.Where(n => cond.StartsWith(n)).OrderByDescending(n => n.Length).FirstOrDefault();
 
-        if (fName == null)
+        if (fName is null)
             return false;
 
         try

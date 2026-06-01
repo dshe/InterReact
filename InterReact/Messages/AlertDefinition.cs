@@ -1,5 +1,4 @@
 ﻿namespace InterReact;
-
 //https://ibkrcampus.com/campus/ibkr-api-page/twsapi-doc/#api-error-codes
 
 public sealed class AlertDefinition

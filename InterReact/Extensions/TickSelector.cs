@@ -23,28 +23,28 @@ public static partial class Extension
 
 public sealed class TickEnumerableSelector(IEnumerable<IHasRequestId> source)
 {
-    private readonly IEnumerable<IHasRequestId> Source = source;
-    public IEnumerable<PriceTick> PriceTick => Source.OfType<PriceTick>();
-    public IEnumerable<SizeTick> SizeTick => Source.OfType<SizeTick>();
-    public IEnumerable<StringTick> StringTick => Source.OfType<StringTick>();
-    public IEnumerable<TimeTick> TimeTick => Source.OfType<TimeTick>();
-    public IEnumerable<RealtimeVolumeTick> RealtimeVolumeTick => Source.OfType<RealtimeVolumeTick>();
-    public IEnumerable<GenericTick> GenericTick => Source.OfType<GenericTick>();
-    public IEnumerable<ExchangeForPhysicalTick> ExchangeForPhysicalTick => Source.OfType<ExchangeForPhysicalTick>();
-    public IEnumerable<OptionComputationTick> OptionComputationTick => Source.OfType<OptionComputationTick>();
-    public IEnumerable<Alert> Alert => Source.OfType<Alert>();
+    private readonly IEnumerable<IHasRequestId> _source = source;
+    public IEnumerable<PriceTick> PriceTick => _source.OfType<PriceTick>();
+    public IEnumerable<SizeTick> SizeTick => _source.OfType<SizeTick>();
+    public IEnumerable<StringTick> StringTick => _source.OfType<StringTick>();
+    public IEnumerable<TimeTick> TimeTick => _source.OfType<TimeTick>();
+    public IEnumerable<RealtimeVolumeTick> RealtimeVolumeTick => _source.OfType<RealtimeVolumeTick>();
+    public IEnumerable<GenericTick> GenericTick => _source.OfType<GenericTick>();
+    public IEnumerable<ExchangeForPhysicalTick> ExchangeForPhysicalTick => _source.OfType<ExchangeForPhysicalTick>();
+    public IEnumerable<OptionComputationTick> OptionComputationTick => _source.OfType<OptionComputationTick>();
+    public IEnumerable<Alert> Alert => _source.OfType<Alert>();
 }
 
 public sealed class TickObservableSelector(IObservable<IHasRequestId> source)
 {
-    private readonly IObservable<IHasRequestId> Source = source;
-    public IObservable<PriceTick> PriceTick => Source.OfType<PriceTick>();
-    public IObservable<SizeTick> SizeTick => Source.OfType<SizeTick>();
-    public IObservable<StringTick> StringTick => Source.OfType<StringTick>();
-    public IObservable<TimeTick> TimeTick => Source.OfType<TimeTick>();
-    public IObservable<RealtimeVolumeTick> RealtimeVolumeTick => Source.OfType<RealtimeVolumeTick>();
-    public IObservable<GenericTick> GenericTick => Source.OfType<GenericTick>();
-    public IObservable<ExchangeForPhysicalTick> ExchangeForPhysicalTick => Source.OfType<ExchangeForPhysicalTick>();
-    public IObservable<OptionComputationTick> OptionComputationTick => Source.OfType<OptionComputationTick>();
-    public IObservable<Alert> Alert => Source.OfType<Alert>();
+    private readonly IObservable<IHasRequestId> _source = source;
+    public IObservable<PriceTick> PriceTick => _source.OfType<PriceTick>();
+    public IObservable<SizeTick> SizeTick => _source.OfType<SizeTick>();
+    public IObservable<StringTick> StringTick => _source.OfType<StringTick>();
+    public IObservable<TimeTick> TimeTick => _source.OfType<TimeTick>();
+    public IObservable<RealtimeVolumeTick> RealtimeVolumeTick => _source.OfType<RealtimeVolumeTick>();
+    public IObservable<GenericTick> GenericTick => _source.OfType<GenericTick>();
+    public IObservable<ExchangeForPhysicalTick> ExchangeForPhysicalTick => _source.OfType<ExchangeForPhysicalTick>();
+    public IObservable<OptionComputationTick> OptionComputationTick => _source.OfType<OptionComputationTick>();
+    public IObservable<Alert> Alert => _source.OfType<Alert>();
 }

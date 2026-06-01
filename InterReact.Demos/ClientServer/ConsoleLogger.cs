@@ -4,23 +4,27 @@ namespace ClientServer;
 public sealed class ConsoleLogger(
     string categoryName, LogLevel logLevel, ConsoleColor color) : ILogger
 {
-    private readonly string CategoryName = categoryName;
-    private readonly LogLevel LogLevel = logLevel;
-    private readonly ConsoleColor Color = color;
+    private static object _gate = new();
+    private readonly string _categoryName = categoryName;
+    private readonly LogLevel _logLevel = logLevel;
+    private readonly ConsoleColor _color = color;
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
         if (!IsEnabled(logLevel))
             return;
-        Console.ForegroundColor = Color;
-        Console.WriteLine(CategoryName + formatter(state, exception));
+        lock (_gate)
+        {
+            Console.ForegroundColor = _color;
+            Console.WriteLine(_categoryName + formatter(state, exception));
+        }
     }
 
     public bool IsEnabled(LogLevel logLevel)
     {
         if (logLevel == LogLevel.None)
             return false;
-        return logLevel >= LogLevel;
+        return logLevel >= _logLevel;
     }
 
     public IDisposable BeginScope<TState>(TState state) where TState : notnull

@@ -9,11 +9,11 @@ public partial class Service
     /// The latest messages are cached for replay to new subscribers.
     /// </summary>
     public IObservable<IHasRequestId> CreateAccountUpdatesMultiObservable(string account = "ALL", string modelCode = "", bool ledgerAndNLV = false) =>
-        Response
+        _response
             .ToObservableWithId(
-                Request.GetNextId,
-                id => Request.RequestAccountUpdatesMulti(id, account, modelCode, ledgerAndNLV),
-                Request.CancelAccountUpdatesMulti)
+                _request.GetNextId,
+                id => _request.RequestAccountUpdatesMulti(id, account, modelCode, ledgerAndNLV),
+                _request.CancelAccountUpdatesMulti)
             .CacheSource(m => m switch
             {
                 AccountUpdateMulti a => $"{a.Account}:{a.ModelCode}:{a.Key}:{a.Currency}",
@@ -26,11 +26,11 @@ public partial class Service
         if (!string.IsNullOrEmpty(errorMessage))
             throw new ArgumentException(errorMessage);
 
-        return await Response
+        return await _response
             .ToObservableWithId(
-                Request.GetNextId,
-                id => Request.RequestAccountUpdatesMulti(id, account, modelCode, ledgerAndNLV),
-                Request.CancelAccountUpdatesMulti)
+                _request.GetNextId,
+                id => _request.RequestAccountUpdatesMulti(id, account, modelCode, ledgerAndNLV),
+                _request.CancelAccountUpdatesMulti)
             .OfTypeOnly<AccountUpdateMulti>()
             .TakeUntil(m => m.IsEndMessage)
             .WithTimeout(timeout, ct)

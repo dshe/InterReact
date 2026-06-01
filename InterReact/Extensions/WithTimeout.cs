@@ -10,7 +10,7 @@ public static partial class Extension
             IDisposable subscription = source.Subscribe(observer);
 
             CancellationTokenSource cts = new();
-            if (timeSpan != null)
+            if (timeSpan is not null)
                 cts.CancelAfter(timeSpan.Value);
 
             CancellationTokenRegistration cancellationDisposable = ct.Register(() =>

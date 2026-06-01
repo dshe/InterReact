@@ -11,17 +11,17 @@ public partial class Service
     public IObservable<IHasRequestId> CreateMarketDataObservable(
         Contract contract,
         IList<GenericTickType>? genericTickTypes = null,
-        IList<Tag>? options = null) => Response
+        IList<Tag>? options = null) => _response
             .ToObservableWithId(
-                Request.GetNextId,
-                id => Request.RequestMarketData(
+                _request.GetNextId,
+                id => _request.RequestMarketData(
                     id,
                     contract,
                     genericTickTypes,
                     false,
                     false,
                     options),
-                Request.CancelMarketData)
+                _request.CancelMarketData)
             .CacheSource(m => m switch
             {
                 TickBase tick => tick.TickType.ToString(),
@@ -33,17 +33,17 @@ public partial class Service
         Contract contract,
         IList<GenericTickType>? genericTickTypes = null,
         bool isRegulatorySnapshot = false,
-        IList<Tag>? options = null) => Response
+        IList<Tag>? options = null) => _response
             .ToObservableWithId(
-                Request.GetNextId,
-                id => Request.RequestMarketData(
+                _request.GetNextId,
+                id => _request.RequestMarketData(
                     id,
                     contract,
                     genericTickTypes,
                     true,
                     isRegulatorySnapshot,
                     options),
-                Request.CancelMarketData)
+                _request.CancelMarketData)
             .TakeUntil(m => m is TickSnapshotEnd);
 
 

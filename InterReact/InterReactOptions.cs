@@ -1,7 +1,5 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
-using System.Net;
+﻿using System.Net;
 using System.Security.Cryptography;
-using System.Security.Principal;
 namespace InterReact;
 
 public sealed class InterReactOptions
@@ -17,15 +15,13 @@ public sealed class InterReactOptions
     /// Specify the port(s) used to attempt connection to TWS/Gateway.
     /// If unspecified, connection will be attempted on ports 7496 and 7497, 4001, 4002.
     /// </summary>
-    public IReadOnlyList<int> IBPortAddresses { get; set; } = Extension.IBDefaultPorts;
+    public IReadOnlyList<int> TwsPortAddresses { get; set; } = Extension.TwsDefaultPorts;
     /// <summary>
     /// Specify a client id. Up to 8 clients can attach to TWS/Gateway.
     /// Each client requires a unique Id. The default Id is random.
     /// </summary>
     public int TwsClientId { get; set; } = RandomNumberGenerator.GetInt32(100000, 1000000);
     public bool AllowOrderPlacement { get; set; }
-
-    public int MaxRequestsPerSecond { get; set; } = 50;
     public string OptionalCapabilities { get; set; } = "";
     /// <summary>
     /// If UseDelayedTicks is true (default), delayed ticks are used for delayed market data.
@@ -55,9 +51,5 @@ public sealed class InterReactOptions
         action?.Invoke(this);
         if (LogFactory == NullLoggerFactory.Instance && Logger != NullLogger.Instance)
             LogFactory = Logger.ToLoggerFactory();
-        if (!IBPortAddresses.Any())
-            throw new InvalidOperationException("InterReactOptions: missing port address.");
-        if (MaxRequestsPerSecond <= 0)
-            throw new InvalidOperationException("InterReactOptions: invalid MaxRequestsPerSecond.");
     }
 }

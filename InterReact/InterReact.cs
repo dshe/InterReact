@@ -1,5 +1,4 @@
-﻿using RxSockets;
-using System.Net;
+﻿using System.Net;
 namespace InterReact;
 
 public interface IInterReactClient : IAsyncDisposable
@@ -11,18 +10,18 @@ public interface IInterReactClient : IAsyncDisposable
 }
 
 public sealed class InterReactClient(
-    IRxSocketClient rxSocketClient, Request request, Response response, Service service) : IInterReactClient
+    Connection connection, Request request, Response response, Service service) : IInterReactClient
 {
-    private readonly IRxSocketClient RxSocketClient = rxSocketClient;
-    public IPEndPoint RemoteIpEndPoint => (IPEndPoint)RxSocketClient.RemoteEndPoint;
+    private readonly Connection _connection = connection;
+    public IPEndPoint RemoteIpEndPoint => _connection.RemoteEndPoint;
     public Request Request { get; } = request;
     public IObservable<object> Response { get; } = response;
     public Service Service { get; } = service;
     public async ValueTask DisposeAsync() =>
-        await RxSocketClient.DisposeAsync().ConfigureAwait(false);
-    public static async Task<IInterReactClient> ConnectAsync(
+        await _connection.DisposeAsync().ConfigureAwait(false);
+    public static async Task<IInterReactClient> CreateAsync(
         Action<InterReactOptions>? action = null, CancellationToken ct = default) =>
-            await Connector.ConnectAsync(action, ct).ConfigureAwait(false);
+            await Connector.CreateClientAsync(new InterReactOptions(action), ct).ConfigureAwait(false);
 }
 
 public sealed class NullInterReactClient : IInterReactClient

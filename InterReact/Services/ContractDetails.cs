@@ -1,6 +1,4 @@
-﻿using System.Threading;
-
-namespace InterReact;
+﻿namespace InterReact;
 
 public partial class Service
 {
@@ -23,10 +21,10 @@ public partial class Service
         if (contract.SecurityIdType.Length == 0 ^ string.IsNullOrEmpty(contract.SecurityId))
             throw new ArgumentException("Invalid SecurityId/SecurityIdType combination.");
 
-        return Response
+        return _response
             .ToObservableWithId(
-                Request.GetNextId,
-                id => Request.RequestContractDetails(id, contract, includeExpired),
+                _request.GetNextId,
+                id => _request.RequestContractDetails(id, contract, includeExpired),
                 null)
             .TakeUntil(m => m is ContractDetailsEnd);
     }

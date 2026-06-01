@@ -1,5 +1,4 @@
-﻿using System.Reactive.Threading.Tasks;
-namespace InterReact;
+﻿namespace InterReact;
 
 public partial class Service
 {
@@ -11,9 +10,9 @@ public partial class Service
     // IMPORTANT: The result is updated in the constructor of the NextOrderId response message.
     /// </summary>
     public async Task UpdateNextIdAsync(TimeSpan? timeout = null, CancellationToken ct = default) =>
-        await Response
+        await _response
             .OfType<NextIdMessage>()
-            .ToObservable(Request.RequestNextOrderId)
+            .ToObservable<NextIdMessage>(_request.RequestNextOrderId)
             .WithTimeout(timeout, ct)
             .SingleAsync();
 }

@@ -22,7 +22,7 @@ public abstract class OperatorCondition : OrderCondition
     {
         var other = obj as OperatorCondition;
 
-        if (other == null)
+        if (other is null)
             return false;
 
         return base.Equals(obj)

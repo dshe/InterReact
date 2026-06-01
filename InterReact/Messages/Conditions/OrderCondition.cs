@@ -41,7 +41,7 @@ public abstract class OrderCondition
                 break;
         }
 
-        if (rval != null)
+        if (rval is not null)
             rval.Type = type;
 
         return rval ?? throw new InvalidOperationException("Invalid OrderConditionType.");
@@ -69,7 +69,9 @@ public abstract class OrderCondition
     public static OrderCondition? Parse(string cond)
     {
         ArgumentNullException.ThrowIfNull(cond);
-        var conditions = Enum.GetValues(typeof(OrderConditionType)).OfType<OrderConditionType>().Select(t => Create(t)).ToList();
+        //var conditions = Enum.GetValues(typeof(OrderConditionType)).OfType<OrderConditionType>().Select(t => Create(t)).ToList();
+        var conditions = Enum.GetValues<OrderConditionType>().Select(t => Create(t)).ToList();
+
         return conditions.FirstOrDefault(c => c.TryParse(cond));
     }
 
@@ -77,7 +79,7 @@ public abstract class OrderCondition
     {
         var other = obj as OrderCondition;
 
-        if (other == null)
+        if (other is null)
             return false;
 
         return IsConjunctionConnection == other.IsConjunctionConnection && Type == other.Type;

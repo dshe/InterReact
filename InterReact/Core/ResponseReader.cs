@@ -9,14 +9,15 @@ public sealed class ResponseReader(ILogger<ResponseReader> logger, InterReactOpt
     internal ILogger Logger { get; } = logger;
     internal ResponseParser Parser { get; } = parser;
     internal InterReactOptions Options { get; } = options;
-    private string CallerInfo = "";
+    private string _callerInfo = "";
+    private int _index;
     internal string[] Strings = [];
-    private int Index;
+
 
     internal void SetStrings(string[] strings)
     {
         Strings = strings;
-        Index = 0;
+        _index = 0;
     }
 
     private static string GetCallerInfo(string member, string file, int l)
@@ -30,29 +31,29 @@ public sealed class ResponseReader(ILogger<ResponseReader> logger, InterReactOpt
     
     internal void VerifyEnumerationEnd()
     {
-        if (Index == Strings.Length)
+        if (_index == Strings.Length)
             return;
-        string[] extra = Strings.Skip(Index).Select(x => $"'{x}'").ToArray();
-        string msg = $"ResponseReader: long message => [{extra.JoinStrings(", ")}]\r\n{CallerInfo}";
+        string[] extra = Strings.Skip(_index).Select(x => $"'{x}'").ToArray();
+        string msg = $"ResponseReader: long message => [{extra.JoinStrings(", ")}]\r\n{_callerInfo}";
         throw new InvalidDataException(msg);
     }
     
     private T Read<T>(Func<string, T> convert, string member, string file, int l)
     {
-        if (Index >= Strings.Length)
+        if (_index >= Strings.Length)
         {   // find line in source that attempts to retrieve missing data
             throw new InvalidDataException(
                 $"ResponseReader: short message => [{Strings.JoinStrings(", ")}]" +
                 $"\r\n{GetCallerInfo(member, file, l)}");
         }
 
-        string input = Strings[Index++];
+        string input = Strings[_index++];
         T output = convert(input);
 
         if (Logger.IsEnabled(LogLevel.Debug))
         {
-            CallerInfo = GetCallerInfo(member, file, l); // slow!
-            Logger.LogResponseString(CallerInfo, input, output?.ToString() ?? "", typeof(T).Name);
+            _callerInfo = GetCallerInfo(member, file, l); // slow!
+            Logger.LogResponseString(_callerInfo, input, output?.ToString() ?? "", typeof(T).Name);
         }
 
         return output;

@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reactive.Linq;
 using System.Windows.Media;
-
 namespace TicksWpf;
 
 public static class Extensions

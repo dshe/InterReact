@@ -1,13 +1,14 @@
-﻿using System.Reactive.Subjects;
+﻿using System.Diagnostics.Contracts;
+using System.Reactive.Subjects;
 namespace InterReact;
 
-public partial class Service
+public partial class Service : IDisposable
 {
     /// <summary>
     /// Places an order and returns an OrderMonitor object (below) which can be used to monitor the order.
     /// </summary>
-    public OrderMonitor PlaceOrder(Order order, Contract contract) =>
-        new(order, contract, Request, Response);
+    public async ValueTask<OrderMonitor> PlaceOrder(Order order, Contract contract) =>
+        await OrderMonitor.PlaceOrder(order, contract, _request, _response).ConfigureAwait(false);
 }
 
 /// <summary>
@@ -18,11 +19,11 @@ public partial class Service
 /// This observable completes when the object is disposed.
 /// Use Take(Timespan) operator to return an observable that contains the latest Values.
 /// </summary>
-public sealed class OrderMonitor : IDisposable
+public sealed class OrderMonitor : IAsyncDisposable
 {
-    private readonly ReplaySubject<IHasOrderId> Subject = new();
-    private readonly Request Request;
-    private readonly Contract Contract;
+    private readonly ReplaySubject<IHasOrderId> _subject = new();
+    private readonly Request _request;
+    private readonly Contract _contract;
     public Order Order { get; }
     public int OrderId { get; }
     public IObservable<IHasOrderId> Messages { get; }
@@ -30,26 +31,31 @@ public sealed class OrderMonitor : IDisposable
     internal OrderMonitor(Order order, Contract contract, Request request, IObservable<object> response)
     {
         Order = order;
-        Contract = contract;
-        Request = request;
-        OrderId = Request.GetNextId();
+        _contract = contract;
+        _request = request;
+        OrderId = _request.GetNextId();
         Order.OrderId = OrderId;
-        Messages = Subject.AsObservable();
+        Messages = _subject.AsObservable();
 
         response
             .WithOrderId(OrderId)
-            .Subscribe(Subject);
-
-        Request.PlaceOrder(OrderId, Order, contract);
+            .Subscribe(_subject);
     }
 
-    public void ReplaceOrder() => Request.PlaceOrder(OrderId, Order, Contract);
-
-    public void CancelOrder() => Request.CancelOrder(OrderId);
-
-    public void Dispose()
+    internal static async ValueTask<OrderMonitor> PlaceOrder(Order order, Contract contract, Request request, IObservable<object> response)
     {
-        CancelOrder();
-        Subject.Dispose();
+        OrderMonitor orderMonitor = new(order, contract, request, response);
+        await request.PlaceOrder(orderMonitor.OrderId, order, contract).ConfigureAwait(false);
+        return orderMonitor;
+    }
+
+    public async ValueTask ReplaceOrder() => await _request.PlaceOrder(OrderId, Order, _contract).ConfigureAwait(false);
+
+    public async ValueTask CancelOrder() => await _request.CancelOrder(OrderId).ConfigureAwait(false);
+
+    public async ValueTask DisposeAsync()
+    {
+        await CancelOrder().ConfigureAwait(false);
+        _subject.Dispose();
     }
 }

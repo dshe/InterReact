@@ -16,14 +16,14 @@ ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder
     .SetMinimumLevel(LogLevel.Information));
 
 // Create the InterReact client by connecting to TWS/Gateway on your local machine.
-IInterReactClient client = await InterReactClient.ConnectAsync(options =>
+IInterReactClient client = await InterReactClient.CreateAsync(options =>
 {
     options.AllowOrderPlacement = true; // IMPORTANT!
     options.UseDelayedTicks = true;
     options.LogFactory = loggerFactory;
 });
 
-if (!client.RemoteIpEndPoint.IsUsingIBDemoPort())
+if (!client.RemoteIpEndPoint.IsUsingTwsDemoPort())
 {
     Console.WriteLine("TWS demo account is required since an order will be placed. Please first login to the demo account.");
     return;
@@ -63,10 +63,11 @@ Order order = new()
 
 Console.WriteLine($"Placing a buy order at price: {order.LimitPrice}.\n");
 
-OrderMonitor orderMonitor = client.Service.PlaceOrder(order, contract);
+OrderMonitor orderMonitor = await client.Service.PlaceOrder(order, contract);
 
 // Display all the types of messages received for the order.
-orderMonitor.Messages.OfType<Alert>().Subscribe(AlertMessage => Console.WriteLine(AlertMessage.Message));
+orderMonitor.Messages.OfType<Alert>()
+    .Subscribe(AlertMessage => Console.WriteLine(AlertMessage.Message));
 
 try
 {
@@ -79,7 +80,7 @@ try
         .FirstAsync();
 
     // Wait for order completion, or until timeout
-    //OrderStatusReport orderStatusReport = await orderTask;
+    // OrderStatusReport orderStatusReport = await orderTask;
     if (osr.Status == OrderStatus.Filled)
         Console.WriteLine($"\nOrder was filled at price: {osr.AverageFillPrice}.\n");
     else if (osr.Status == OrderStatus.Cancelled || osr.Status == OrderStatus.ApiCancelled)
@@ -87,11 +88,11 @@ try
 }
 catch (TimeoutException)
 {
-    orderMonitor.CancelOrder();
+    await orderMonitor.CancelOrder();
     Console.WriteLine("\nTimeout! Order cancelled. Perhaps try again.\n");
 }
 
 Console.WriteLine(Environment.NewLine + "press a key to exit..." + Environment.NewLine);
-Console.ReadKey();
+await Console.In.ReadLineAsync();
 
 await client.DisposeAsync();

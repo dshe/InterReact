@@ -14,95 +14,95 @@ namespace TicksWpf;
 public partial class MainWindow : Window, INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
-    private readonly Subject<string> SymbolSubject = new();
+    private readonly Subject<string> _symbolSubject = new();
 
     public string Symbol
     {
-        set => SymbolSubject.OnNext(value);
+        set => _symbolSubject.OnNext(value);
     }
 
-    private string description = "";
+    private string _description = "";
     public string Description
     {
-        get => description;
+        get => _description;
         private set
         {
-            if (value == description)
+            if (value == _description)
                 return;
-            description = value;
+            _description = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Description)));
         }
     }
 
-    private double bidPrice;
+    private double _bidPrice;
     public double BidPrice
     {
-        get => bidPrice;
+        get => _bidPrice;
         private set
         {
-            if (value == bidPrice)
+            if (value == _bidPrice)
                 return;
-            bidPrice = value;
+            _bidPrice = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BidPrice)));
         }
     }
 
-    private double askPrice;
+    private double _askPrice;
     public double AskPrice
     {
-        get => askPrice;
+        get => _askPrice;
         private set
         {
-            if (value == askPrice)
+            if (value == _askPrice)
                 return;
-            askPrice = value;
+            _askPrice = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AskPrice)));
         }
     }
 
-    private double lastPrice;
+    private double _lastPrice;
     public double LastPrice
     {
-        get => lastPrice;
+        get => _lastPrice;
         private set
         {
-            if (value == lastPrice)
+            if (value == _lastPrice)
                 return;
-            lastPrice = value;
+            _lastPrice = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastPrice)));
         }
     }
 
-    private double changePrice;
+    private double _changePrice;
     public double ChangePrice
     {
-        get => changePrice;
+        get => _changePrice;
         private set
         {
-            if (value == changePrice)
+            if (value == _changePrice)
                 return;
-            changePrice = value;
+            _changePrice = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ChangePrice)));
         }
     }
 
-    private SolidColorBrush changeColor = Brushes.Transparent;
+    private SolidColorBrush _changeColor = Brushes.Transparent;
     public SolidColorBrush ChangeColor
     {
-        get => changeColor;
+        get => _changeColor;
         private set
         {
-            if (value == changeColor)
+            if (value == _changeColor)
                 return;
-            changeColor = value;
+            _changeColor = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ChangeColor)));
         }
     }
 
     ////////////////////////////////////////////////////////////////////
 
-    private IInterReactClient Client = NullInterReactClient.Instance;
-    private IDisposable TicksConnection = Disposable.Empty;
+    private IInterReactClient _client = NullInterReactClient.Instance;
+    private IDisposable _ticksConnection = Disposable.Empty;
 
     public MainWindow()
     {
@@ -114,7 +114,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     {
         try
         {
-            Client = await InterReactClient.ConnectAsync(options => options.UseDelayedTicks = false);
+            _client = await InterReactClient.CreateAsync(options => options.UseDelayedTicks = false);
         }
         catch (Exception exception)
         {
@@ -123,17 +123,17 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
 
         // Display response messages to the debug window.
-        Client.Response.Subscribe(
+        _client.Response.Subscribe(
             msg => Debug.WriteLine(msg.Stringify()),
             ex => Utilities.MessageBoxShow(ex.Message, "InterReact"));
 
         // Use delayed market data in case there is no real-time data subscription.
         // Delayed data is notmally received through delayed data ticks. 
         // However, delayed data is received through notmal ticks due to the setting above: "options.UseDelayedTicks = false"
-        Client.Request.RequestMarketDataType(MarketDataType.Delayed);
+        await _client.Request.RequestMarketDataType(MarketDataType.Delayed);
 
         // Subscribe to changes of the text in the SymbolTextBox.
-        SymbolSubject
+        _symbolSubject
             .Throttle(TimeSpan.FromMilliseconds(500))
             .DistinctUntilChanged()
             .ObserveOnDispatcher()
@@ -147,7 +147,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
         // Disposing the connection cancels the previous IB data subscription
         // and conveniently disposes all subscriptions to the observable (below).
-        TicksConnection.Dispose();
+        _ticksConnection.Dispose();
 
         if (string.IsNullOrWhiteSpace(symbol))
             return;
@@ -160,7 +160,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             Exchange = "SMART"
         };
 
-        IHasRequestId message = await Client.Service
+        IHasRequestId message = await _client.Service
             .CreateContractDetailsObservable(contract)
             .FirstAsync();
 
@@ -178,7 +178,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
     private void SubscribeToTicks(Contract contract)
     {
         // Create a connectable observable which will emit updates.
-        IConnectableObservable<IHasRequestId> ticks = Client
+        IConnectableObservable<IHasRequestId> ticks = _client
             .Service
             .CreateMarketDataObservable(contract)
             .Publish();
@@ -204,13 +204,13 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         changes.ToColor().Subscribe(color => ChangeColor = color);
 
         // Activate the subsciptions to the observable.
-        TicksConnection = ticks.Connect();
+        _ticksConnection = ticks.Connect();
     }
 
     private async void MainWindow_OnClosing(object sender, CancelEventArgs e)
     {
-        TicksConnection.Dispose();
-        await Client.DisposeAsync();
+        _ticksConnection.Dispose();
+        await _client.DisposeAsync();
     }
 
 }

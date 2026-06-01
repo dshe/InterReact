@@ -13,7 +13,7 @@ public sealed class Tag // input + output
         if (tags is null)
             return "";
 
-        Tag[] tagsList = tags.ToArray();
+        Tag[] tagsList = [.. tags];
         if (tagsList.Length == 0)
             return "";
 

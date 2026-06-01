@@ -80,7 +80,7 @@ public class ExecutionCondition : OrderCondition
     {
         var other = obj as ExecutionCondition;
 
-        if (other == null)
+        if (other is null)
             return false;
 
         return base.Equals(obj)

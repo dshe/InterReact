@@ -2,66 +2,79 @@
 using System.Net;
 namespace ClientServer;
 
-public sealed class Client : IAsyncDisposable
+public static partial class Program
 {
-    private readonly ILogger Logger;
-    private readonly IInterReactClient IRClient;
-
-    private Client(IInterReactClient irClient, ILogger logger)
+    public static async Task RunClientAsync(IPEndPoint endPoint, ILogger logger, ILogger libLogger)
     {
-        IRClient = irClient;
-        Logger = logger;
-    }
+        logger.LogCritical("Connecting.");
 
-    public static async Task<Client> CreateAsync(IPEndPoint ipEndPoint, ILogger logger, ILogger libLogger)
-    {
-        IInterReactClient client = await InterReactClient.ConnectAsync(options =>
+        IInterReactClient client = await InterReactClient.CreateAsync(options =>
         {
             options.Logger = libLogger;
-            options.TwsIpAddress = ipEndPoint.Address;
-            options.IBPortAddresses = [ipEndPoint.Port];
+            options.TwsIpAddress = endPoint.Address;
+            options.TwsPortAddresses = [endPoint.Port];
         });
 
-        logger.LogCritical("Connected to server.");
+        logger.LogCritical("Connected.");
 
-        return new Client(client, logger);
+        int id = client.Request.GetNextId();
+        logger.LogInformation("NextId = {Id}.", id);
+
+        IDisposable subscription = client.Response.Subscribe(
+            // OnNext
+            x => logger.LogCritical("Received: " + string.Join(", ", x) + "."),
+            ex =>
+            {   // OnError
+                logger.LogError(ex, "Socket error.");
+            },
+            () =>
+            {   // OnCompleted
+                logger.LogInformation("Socket disconnected.");
+            }
+        );
+
+        await Task.Delay(100);
+
+        subscription.Dispose();
+        logger.LogInformation("Disconnected.");
+
+        await client.DisposeAsync();
+        logger.LogInformation("Disposed.");
     }
+}
 
-    public void SendControlMessage(string message) => IRClient.Request.RequestControl(message);
+
+public sealed class Client
+{
+    //private readonly ILogger Logger;
+    //private readonly IInterReactClient IRClient;
+
+    //public async Task SendControlMessage(string message) => await IRClient.Request.RequestControl(message);
 
     public async Task MeasurePerformance()
     {
-        SendControlMessage("Measure Performance");
-
-        Logger.LogCritical("Sending some messages...");
-        Enumerable.Range(0, 50).ToList().ForEach(IRClient.Request.CancelMarketData);
+        //Logger.LogCritical("Sending some messages...");
+        //Enumerable.Range(0, 50).ToList().ForEach(await Client.Request.CancelMarketDataAsync());
 
         // Indicate test stop by sending any other message
-        IRClient.Request.RequestControl("End Test");
+        //IRClient.Request.RequestControl("End Test");
         //Client.Request.CancelNewsBulletins();
 
         // wait to get the first tickSize message, indicating receive test start
-        await IRClient.Response.OfType<SizeTick>().FirstAsync();
+        //await IRClient.Response.OfType<SizeTick>().FirstAsync();
 
-        Logger.LogCritical("Receiving...");
+        //Logger.LogCritical("Receiving...");
 
         // receive some messages to measure throughput
-        Stopwatch watch = new();
-        watch.Start();
-        int count = await IRClient.Response.TakeWhile(m => m is SizeTick).Count();
-        watch.Stop();
+        //Stopwatch watch = new();
+        //watch.Start();
+        //int count = await IRClient.Response.TakeWhile(m => m is SizeTick).Count();
+        //watch.Stop();
 
-        long frequency = Stopwatch.Frequency * count / watch.ElapsedTicks;
-        Logger.LogCritical("Received {Frequency:N0} messages/second.", frequency);
+        //long frequency = Stopwatch.Frequency * count / watch.ElapsedTicks;
+        //Logger.LogCritical("Received {Frequency:N0} messages/second.", frequency);
 
         // send another message to signal test end.
-        IRClient.Request.RequestMarketData(42, new Contract());
-    }
 
-    public async ValueTask DisposeAsync()
-    {
-        Logger.LogCritical("Disconnecting...");
-        await IRClient.DisposeAsync();
-        Logger.LogCritical("Disconnected.");
     }
 }

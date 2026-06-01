@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 namespace InterReact;
@@ -23,7 +22,7 @@ public static partial class Extension
         Subject<T[]>? subject = null;
         IDisposable? sourceSubscription = null;
         // Wait until all messages are received to return result.
-        bool waitForEndMessage = (isEndMessage != null);
+        bool waitForEndMessage = (isEndMessage is not null);
 
         return Observable.Create<T[]>(observer =>
         {
@@ -39,7 +38,7 @@ public static partial class Extension
                 {
                     lock (cache)
                     {
-                        if (waitForEndMessage && isEndMessage != null && isEndMessage(m))
+                        if (waitForEndMessage && isEndMessage is not null && isEndMessage(m))
                         {
                             waitForEndMessage = false;
                             subject.OnNext(cache.Values.ToArray());
@@ -62,7 +61,7 @@ public static partial class Extension
                     {
                         subscription.Dispose();
 
-                        if (subject == null || subject.HasObservers || maintainSourceSubscription || sourceSubscription == null)
+                        if (subject is null || subject.HasObservers || maintainSourceSubscription || sourceSubscription is null)
                             return;
 
                         sourceSubscription.Dispose();
@@ -72,7 +71,7 @@ public static partial class Extension
                         subject = null;
 
                         cache.Clear();
-                        waitForEndMessage = (isEndMessage != null);
+                        waitForEndMessage = (isEndMessage is not null);
                     }
                 });
             }

@@ -1,5 +1,4 @@
-﻿using RxSockets;
-using Stringification;
+﻿using Stringification;
 using System.Diagnostics;
 using System.Reactive.Concurrency;
 namespace InterReact;
@@ -8,15 +7,12 @@ public sealed class Response : IObservable<object>
 {
     private IObservable<object> Observable { get; }
 
-    public Response(ILogger<Response> logger, IRxSocketClient socketClient, ResponseMessageComposer composer, Stringifier stringifier)
+    public Response(ILogger<Response> logger, Connection connection, ResponseMessageComposer composer, Stringifier stringifier)
     {
-        ArgumentNullException.ThrowIfNull(socketClient);
+        ArgumentNullException.ThrowIfNull(connection, nameof(connection));
 
-        Observable = socketClient
-            .ReceiveObservable
-            .SubscribeOn(NewThreadScheduler.Default.BackgroundThread("SubscriberThread"))
-            .ToArraysFromBytesWithLengthPrefix()
-            .ToStringArrays()
+        Observable = connection.Observable
+            .SubscribeOn(NewThreadScheduler.Default)
             .ComposeMessage(composer)
             .Do(msg => logger.LogResponseMessage(stringifier.Stringify(msg)))
             .Publish()
