@@ -1,0 +1,53 @@
+name: Build & Test
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: 'Publish NuGet package?'
+        required: true
+        default: 'false'
+
+jobs:
+  build-and-publish:
+    runs-on: windows-latest
+    env:
+      PROJECT_NAME: InterReact
+
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: "10.0.x"
+
+      - name: Restore
+        run: dotnet restore --no-cache
+
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+
+     #- name: Test
+        #run: dotnet test --configuration Release --no-build
+
+      - name: Pack
+        shell: pwsh
+        run: dotnet pack ${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj `
+          --configuration Release `
+          --no-restore --no-build `
+          -o ./artifacts
+
+      - name: List artifacts
+        shell: pwsh
+        run: Get-ChildItem ./artifacts
+
+      - name: Publish to NuGet
+        if: github.event.inputs.publish == 'true'
+        shell: pwsh
+        run: |
+          $pkg = Get-ChildItem ./artifacts/*.nupkg | Select-Object -First 1
+          dotnet nuget push $pkg.FullName `
+            --api-key ${{ secrets.NUGET_API_KEY }} `
+            --source https://api.nuget.org/v3/index.json
