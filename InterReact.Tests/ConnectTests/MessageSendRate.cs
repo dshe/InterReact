@@ -5,7 +5,7 @@ namespace ConnectTests;
 public class MessageSendRate(ITestOutputHelper output) : OutputHelperTestBase(output, LogLevel.Debug)
 {
     [Fact]
-    public async Task SendRateTest()
+    public async Task SendRateTestAsync()
     {
         IInterReactClient client = await InterReactClient.CreateAsync(options => 
             options.LogFactory = LogFactory, TestContext.Current.CancellationToken);
@@ -14,7 +14,7 @@ public class MessageSendRate(ITestOutputHelper output) : OutputHelperTestBase(ou
         long start = Stopwatch.GetTimestamp();
         while (Stopwatch.GetTimestamp() - start < Stopwatch.Frequency)
         {
-            await client.Request.SetServerLogLevel(LogEntryLevel.Warning); // arbitrary request
+            await client.Request.SetServerLogLevelAsync(LogEntryLevel.Warning); // arbitrary request
             count++;
         }
         Write($"message send rate: {count:0} messages/second.");

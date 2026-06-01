@@ -6,7 +6,7 @@ namespace Temp;
 public sealed class ObservableTests(ITestOutputHelper output) : OutputHelperTestBase(output)
 {
     [Fact]
-    public async Task TestObservableEmpty()
+    public async Task TestObservableEmptyAsync()
     {
         // string? str
         string str = await Observable.Empty<string>().FirstOrDefaultAsync();
@@ -14,7 +14,7 @@ public sealed class ObservableTests(ITestOutputHelper output) : OutputHelperTest
     }
 
     [Fact]
-    public async Task TestObservableNeverTimeout()
+    public async Task TestObservableNeverTimeoutAsync()
     {
         // string? str
         string str = await Observable.Never<string>().Take(TimeSpan.FromMilliseconds(1)).FirstOrDefaultAsync();
@@ -22,7 +22,7 @@ public sealed class ObservableTests(ITestOutputHelper output) : OutputHelperTest
     }
 
     [Fact]
-    public async Task TestTaskCancellation()
+    public async Task TestTaskCancellationAsync()
     {
         CancellationTokenSource cts = new();
         Task<string?> task = Observable.Never<string>().FirstOrDefaultAsync().ToTask(cts.Token);
@@ -40,7 +40,7 @@ public sealed class ObservableTests(ITestOutputHelper output) : OutputHelperTest
     }
 
     [Fact]
-    public async Task TestListObservable()
+    public async Task TestListObservableAsync()
     {
         IList<string> list = await Observable.Never<string>().ToList().Take(TimeSpan.FromSeconds(3)).FirstOrDefaultAsync();
         Assert.Null(list);
@@ -48,7 +48,7 @@ public sealed class ObservableTests(ITestOutputHelper output) : OutputHelperTest
    
 
     [Fact]
-    public async Task TestTake()
+    public async Task TestTakeAsync()
     {
         int[] sourceArray = [1, 2, 3, 4];
         IObservable<int> o = sourceArray.ToObservable();
@@ -96,7 +96,7 @@ public sealed class ObservableTests(ITestOutputHelper output) : OutputHelperTest
     }
 
     [Fact]
-    public async Task Cancellation()
+    public async Task CancellationAsync()
     {
         //await Observable.Throw<string>(new IndexOutOfRangeException());
         //await Observable.Return("a").Timeout(TimeSpan.Zero);

@@ -8,7 +8,7 @@ namespace ConnectTests;
 public class SimplestExample
 {
     [Fact]
-    public async Task Test()
+    public async Task TestAsync()
     {
         // Create the InterReact client by first connecting to TWS/Gateway on the local host.
         IInterReactClient interReact = await InterReactClient.CreateAsync(null, TestContext.Current.CancellationToken);

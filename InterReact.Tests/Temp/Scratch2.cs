@@ -21,7 +21,7 @@ public sealed class ObservableTests2(ITestOutputHelper output) : OutputHelperTes
     }
 
     [Fact]
-    public async Task Cancellation()
+    public async Task CancellationAsync()
     {
         var cts = new CancellationTokenSource();
         cts.CancelAfter(200);

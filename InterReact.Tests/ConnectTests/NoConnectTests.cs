@@ -4,7 +4,7 @@ namespace ConnectTests;
 public class NoConnect(ITestOutputHelper output) : OutputHelperTestBase(output, LogLevel.Debug)
 {
     [Fact]
-    public async Task CancelTest()
+    public async Task CancelTestAsync()
     {
         CancellationToken ct = new(true);
 
@@ -19,7 +19,7 @@ public class NoConnect(ITestOutputHelper output) : OutputHelperTestBase(output, 
     }
 
     [Fact]
-    public async Task TimeoutTest()
+    public async Task TimeoutTestAsync()
     {
         CancellationTokenSource cts = new(TimeSpan.FromMilliseconds(100));
 
@@ -34,7 +34,7 @@ public class NoConnect(ITestOutputHelper output) : OutputHelperTestBase(output, 
     }
 
     [Fact]
-    public async Task ConnectionRefusedTest()
+    public async Task ConnectionRefusedTestAsync()
     {
         Task<IInterReactClient> task = InterReactClient.CreateAsync(options =>
         {

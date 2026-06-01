@@ -20,7 +20,7 @@ Contract contract = new()
     Exchange = "IDEALPRO"
 };
 
-await client.Request.RequestMarketDataType(MarketDataType.Delayed);
+await client.Request.RequestMarketDataTypeAsync(MarketDataType.Delayed);
 
 // Display the alert messages which are not associated with a particular request.
 client

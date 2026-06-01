@@ -12,7 +12,7 @@ public partial class Service
     public async Task UpdateNextIdAsync(TimeSpan? timeout = null, CancellationToken ct = default) =>
         await _response
             .OfType<NextIdMessage>()
-            .ToObservable<NextIdMessage>(_request.RequestNextOrderId)
+            .ToObservable<NextIdMessage>(_request.RequestNextOrderIdAsync)
             .WithTimeout(timeout, ct)
             .SingleAsync();
 }

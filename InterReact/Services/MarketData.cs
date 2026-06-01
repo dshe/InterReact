@@ -14,14 +14,14 @@ public partial class Service
         IList<Tag>? options = null) => _response
             .ToObservableWithId(
                 _request.GetNextId,
-                id => _request.RequestMarketData(
+                id => _request.RequestMarketDataAsync(
                     id,
                     contract,
                     genericTickTypes,
                     false,
                     false,
                     options),
-                _request.CancelMarketData)
+                _request.CancelMarketDataAsync)
             .CacheSource(m => m switch
             {
                 TickBase tick => tick.TickType.ToString(),
@@ -36,14 +36,14 @@ public partial class Service
         IList<Tag>? options = null) => _response
             .ToObservableWithId(
                 _request.GetNextId,
-                id => _request.RequestMarketData(
+                id => _request.RequestMarketDataAsync(
                     id,
                     contract,
                     genericTickTypes,
                     true,
                     isRegulatorySnapshot,
                     options),
-                _request.CancelMarketData)
+                _request.CancelMarketDataAsync)
             .TakeUntil(m => m is TickSnapshotEnd);
 
 

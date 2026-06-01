@@ -5,24 +5,24 @@ namespace SystemTests;
 public class AccountUpdate(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
 {
     [Fact]
-    public async Task RequestAccountUpdatesMultiTest()
+    public async Task RequestAccountUpdatesMultiTestAsync()
     {
         IReadOnlyList<string> accounts = await Client.Service.GetManagedAccountsAsync(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken);
 
         IDisposable subscription = Client.Response.Subscribe(m => Write(m.Stringify()));
 
-        await Client.Request.RequestAccountUpdatesMulti(119, "All");
+        await Client.Request.RequestAccountUpdatesMultiAsync(119, "All");
         //Client.Request.RequestAccountSummary(123);
 
         await Task.Delay(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken);
 
-        await Client.Request.CancelAccountUpdatesMulti(119);
+        await Client.Request.CancelAccountUpdatesMultiAsync(119);
         //Client.Request.CancelAccountSummary(123);
         subscription.Dispose();
     }
 
     [Fact]
-    public async Task AccountUpdatesMultiObservableTest()
+    public async Task AccountUpdatesMultiObservableTestAsync()
     {
         IReadOnlyList<string> accounts = await Client.Service.GetManagedAccountsAsync(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken);
 
@@ -42,7 +42,7 @@ public class AccountUpdate(ITestOutputHelper output, TestFixture fixture) : Coll
     }
 
     [Fact]
-    public async Task AccountUpdatesMultiObservableCache()
+    public async Task AccountUpdatesMultiObservableCacheAsync()
     {
         IReadOnlyList<string> accounts = await Client.Service.GetManagedAccountsAsync(TimeSpan.FromSeconds(3), TestContext.Current.CancellationToken);
 

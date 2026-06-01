@@ -24,7 +24,7 @@ public partial class Service
         return _response
             .ToObservableWithId(
                 _request.GetNextId,
-                id => _request.RequestContractDetails(id, contract, includeExpired),
+                id => _request.RequestContractDetailsAsync(id, contract, includeExpired),
                 null)
             .TakeUntil(m => m is ContractDetailsEnd);
     }

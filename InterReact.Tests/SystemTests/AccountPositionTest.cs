@@ -5,7 +5,7 @@ namespace SystemTests;
 public class AccountPositions(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
 {
     [Fact]
-    public async Task AccountPositionsObservableTest()
+    public async Task AccountPositionsObservableTestAsync()
     {
 
         AccountPosition[] messages = await Client
@@ -22,7 +22,7 @@ public class AccountPositions(ITestOutputHelper output, TestFixture fixture) : C
     }
 
     [Fact]
-    public async Task AccountPositionsAsyncTest()
+    public async Task AccountPositionsAsyncTestAsync()
     {
         AccountPosition[] messages = await Client
             .Service

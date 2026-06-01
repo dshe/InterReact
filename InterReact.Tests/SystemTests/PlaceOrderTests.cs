@@ -5,7 +5,7 @@ namespace SystemTests;
 public class Place(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
 {
     [Fact]
-    public async Task PlaceOrderTest()
+    public async Task PlaceOrderTestAsync()
     {
         if (!Client.RemoteIpEndPoint.IsUsingTwsDemoPort())
             throw new InvalidOperationException("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
@@ -32,11 +32,11 @@ public class Place(ITestOutputHelper output, TestFixture fixture) : CollectionTe
             .WithOrderId(orderId)
             .Subscribe(m => Write($"Message: {m.Stringify()}"));
 
-        await Client.Request.PlaceOrder(orderId, order, contract);
+        await Client.Request.PlaceOrderAsync(orderId, order, contract);
 
         await Task.Delay(TimeSpan.FromSeconds(7), TestContext.Current.CancellationToken);
 
-        await Client.Request.CancelOrder(orderId);
+        await Client.Request.CancelOrderAsync(orderId);
     }
 }
 

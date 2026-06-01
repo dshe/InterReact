@@ -31,7 +31,7 @@ public sealed class TestFixture : IAsyncLifetime
         // Note that delayed data produces delayed tick types: 
         // TickType.BidPrice => TickType.DelayedBidPrice.
         // unless: options.UseDelayedTicks = false;
-        await Client.Request.RequestMarketDataType(MarketDataType.Delayed);
+        await Client.Request.RequestMarketDataTypeAsync(MarketDataType.Delayed);
     }
 
     public async ValueTask DisposeAsync()

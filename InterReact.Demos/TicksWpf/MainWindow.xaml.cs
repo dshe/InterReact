@@ -130,17 +130,17 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         // Use delayed market data in case there is no real-time data subscription.
         // Delayed data is notmally received through delayed data ticks. 
         // However, delayed data is received through notmal ticks due to the setting above: "options.UseDelayedTicks = false"
-        await _client.Request.RequestMarketDataType(MarketDataType.Delayed);
+        await _client.Request.RequestMarketDataTypeAsync(MarketDataType.Delayed);
 
         // Subscribe to changes of the text in the SymbolTextBox.
         _symbolSubject
             .Throttle(TimeSpan.FromMilliseconds(500))
             .DistinctUntilChanged()
             .ObserveOnDispatcher()
-            .Subscribe(UpdateSymbol);
+            .Subscribe(UpdateSymbolAsync);
     }
 
-    private async void UpdateSymbol(string symbol)
+    private async void UpdateSymbolAsync(string symbol)
     {
         Description = "";
         BidPrice = AskPrice = LastPrice = ChangePrice = 0;

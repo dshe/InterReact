@@ -5,7 +5,7 @@ namespace SystemTests;
 public class Monitor(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
 {
     [Fact]
-    public async Task OrderMonitorTest()
+    public async Task OrderMonitorTestAsync()
     {
         if (!Client.RemoteIpEndPoint.IsUsingTwsDemoPort())
             throw new InvalidOperationException("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
@@ -25,7 +25,7 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
             OrderType = OrderTypes.Market
         };
 
-        OrderMonitor orderMonitor = await Client.Service.PlaceOrder(order, contract);
+        OrderMonitor orderMonitor = await Client.Service.PlaceOrderAsync(order, contract);
 
         orderMonitor
             .Messages
@@ -37,7 +37,7 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
     }
 
     [Fact]
-    public async Task OrderMonitorCancellationTest()
+    public async Task OrderMonitorCancellationTestAsync()
     {
         if (!Client.RemoteIpEndPoint.IsUsingTwsDemoPort())
             throw new InvalidOperationException("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
@@ -57,9 +57,9 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
             OrderType = OrderTypes.Market
         };
 
-        OrderMonitor orderMonitor = await Client.Service.PlaceOrder(order, contract);
+        OrderMonitor orderMonitor = await Client.Service.PlaceOrderAsync(order, contract);
 
-        await orderMonitor.CancelOrder();
+        await orderMonitor.CancelOrderAsync();
 
         orderMonitor
             .Messages
@@ -71,7 +71,7 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
     }
 
     [Fact]
-    public async Task OrderMonitorModificationTest()
+    public async Task OrderMonitorModificationTestAsync()
     {
         if (!Client.RemoteIpEndPoint.IsUsingTwsDemoPort())
             throw new InvalidOperationException("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
@@ -108,7 +108,7 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
         };
 
         // Place the order
-        OrderMonitor orderMonitor = await Client.Service.PlaceOrder(order, contract);
+        OrderMonitor orderMonitor = await Client.Service.PlaceOrderAsync(order, contract);
 
         orderMonitor
             .Messages
@@ -117,7 +117,7 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
         // Change the order
         orderMonitor.Order.LimitPrice = askPrice + .02; // should execute
         // Resubmit the changed order
-        await orderMonitor.ReplaceOrder();
+        await orderMonitor.ReplaceOrderAsync();
 
         // Wait for execution
         Execution? execution = await orderMonitor

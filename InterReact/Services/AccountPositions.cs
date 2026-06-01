@@ -13,7 +13,7 @@ public partial class Service
 
     private IObservable<AccountPosition> CreateAccountPositionsObservable() =>
         _response
-            .ToObservable<AccountPosition>(_request.RequestPositions, _request.CancelPositions)
+            .ToObservable<AccountPosition>(_request.RequestPositionsAsync, _request.CancelPositionsAsync)
             .CacheSource(a => $"{a.Account}:{a.Contract.ContractId}", a => a.IsEndMessage, true);
 
     public async Task<AccountPosition[]> GetAccountPositionsAsync(TimeSpan? timeout = null, CancellationToken ct = default) =>

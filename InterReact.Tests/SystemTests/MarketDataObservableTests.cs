@@ -5,7 +5,7 @@ namespace SystemTests;
 public class MarketData(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
 {
     [Fact]
-    public async Task MarketDataTest()
+    public async Task MarketDataTestAsync()
     {
         Contract contract = new()
         {
@@ -26,7 +26,7 @@ public class MarketData(ITestOutputHelper output, TestFixture fixture) : Collect
     }
 
     [Fact]
-    public async Task MarketDataErrorTest()
+    public async Task MarketDataErrorTestAsync()
     {
         Contract contract = new()
         {

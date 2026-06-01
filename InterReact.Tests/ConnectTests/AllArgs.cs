@@ -4,7 +4,7 @@ namespace ConnectTests;
 public class AllArgs(ITestOutputHelper output) : OutputHelperTestBase(output)
 {
     [Fact]
-    public async Task AllArgsTest()
+    public async Task AllArgsTestAsync()
     {
         IInterReactClient client = await InterReactClient.CreateAsync(options =>
         {

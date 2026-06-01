@@ -15,7 +15,7 @@ public partial class Service
                 // Options.ManagedAccounts is updated whenever a ManagedAccounts message is received.
                 await _response
                     .OfType<ManagedAccounts>()
-                    .ToObservable<ManagedAccounts>(_request.RequestManagedAccounts)
+                    .ToObservable<ManagedAccounts>(_request.RequestManagedAccountsAsync)
                     .Select(x => x.Accounts)
                     .WithTimeout(timeout, ct)
                     .SingleAsync();

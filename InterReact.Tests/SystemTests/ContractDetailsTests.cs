@@ -5,7 +5,7 @@ namespace SystemTests;
 public class ContractDetail(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
 {
     [Fact]
-    public async Task ContractDetailObservableTest()
+    public async Task ContractDetailObservableTestAsync()
     {
         Contract contract = new()
         {
@@ -34,7 +34,7 @@ public class ContractDetail(ITestOutputHelper output, TestFixture fixture) : Col
     }
 
     [Fact]
-    public async Task ContractDetailObservablePushTest()
+    public async Task ContractDetailObservablePushTestAsync()
     {
         Write("Start");
 
@@ -61,7 +61,7 @@ public class ContractDetail(ITestOutputHelper output, TestFixture fixture) : Col
     }
 
     [Fact]
-    public async Task ContractDetailErrorTest()
+    public async Task ContractDetailErrorTestAsync()
     {
         Contract contract = new()
         {
@@ -76,7 +76,7 @@ public class ContractDetail(ITestOutputHelper output, TestFixture fixture) : Col
     }
 
     [Fact]
-    public async Task ContractDetailTimeoutTest()
+    public async Task ContractDetailTimeoutTestAsync()
     {
         Contract contract = new()
         {

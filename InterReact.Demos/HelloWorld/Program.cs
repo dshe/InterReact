@@ -63,7 +63,7 @@ Order order = new()
 
 Console.WriteLine($"Placing a buy order at price: {order.LimitPrice}.\n");
 
-OrderMonitor orderMonitor = await client.Service.PlaceOrder(order, contract);
+OrderMonitor orderMonitor = await client.Service.PlaceOrderAsync(order, contract);
 
 // Display all the types of messages received for the order.
 orderMonitor.Messages.OfType<Alert>()
@@ -88,7 +88,7 @@ try
 }
 catch (TimeoutException)
 {
-    await orderMonitor.CancelOrder();
+    await orderMonitor.CancelOrderAsync();
     Console.WriteLine("\nTimeout! Order cancelled. Perhaps try again.\n");
 }
 

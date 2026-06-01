@@ -4,14 +4,14 @@ namespace ConnectTests;
 public class IpAddressTest(ITestOutputHelper output) : OutputHelperTestBase(output, LogLevel.Debug)
 {
     [Fact]
-    public async Task AllDefaultsTest()
+    public async Task AllDefaultsTestAsync()
     {
         IInterReactClient client = await InterReactClient.CreateAsync(null, TestContext.Current.CancellationToken);
         await client.DisposeAsync();
     }
 
     [Fact]
-    public async Task IPv4Test()
+    public async Task IPv4TestAsync()
     {
         IInterReactClient client = await InterReactClient.CreateAsync(options =>
         {
@@ -23,7 +23,7 @@ public class IpAddressTest(ITestOutputHelper output) : OutputHelperTestBase(outp
     }
 
     [Fact]
-    public async Task IPv6Test()
+    public async Task IPv6TestAsync()
     {
         IInterReactClient client = await InterReactClient.CreateAsync(options =>
         {

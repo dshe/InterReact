@@ -51,7 +51,7 @@ public sealed class Client
 
     //public async Task SendControlMessage(string message) => await IRClient.Request.RequestControl(message);
 
-    public async Task MeasurePerformance()
+    public async Task MeasurePerformanceAsync()
     {
         //Logger.LogCritical("Sending some messages...");
         //Enumerable.Range(0, 50).ToList().ForEach(await Client.Request.CancelMarketDataAsync());

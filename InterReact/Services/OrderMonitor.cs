@@ -7,8 +7,8 @@ public partial class Service : IDisposable
     /// <summary>
     /// Places an order and returns an OrderMonitor object (below) which can be used to monitor the order.
     /// </summary>
-    public async ValueTask<OrderMonitor> PlaceOrder(Order order, Contract contract) =>
-        await OrderMonitor.PlaceOrder(order, contract, _request, _response).ConfigureAwait(false);
+    public async ValueTask<OrderMonitor> PlaceOrderAsync(Order order, Contract contract) =>
+        await OrderMonitor.PlaceOrderAsync(order, contract, _request, _response).ConfigureAwait(false);
 }
 
 /// <summary>
@@ -42,20 +42,20 @@ public sealed class OrderMonitor : IAsyncDisposable
             .Subscribe(_subject);
     }
 
-    internal static async ValueTask<OrderMonitor> PlaceOrder(Order order, Contract contract, Request request, IObservable<object> response)
+    internal static async ValueTask<OrderMonitor> PlaceOrderAsync(Order order, Contract contract, Request request, IObservable<object> response)
     {
         OrderMonitor orderMonitor = new(order, contract, request, response);
-        await request.PlaceOrder(orderMonitor.OrderId, order, contract).ConfigureAwait(false);
+        await request.PlaceOrderAsync(orderMonitor.OrderId, order, contract).ConfigureAwait(false);
         return orderMonitor;
     }
 
-    public async ValueTask ReplaceOrder() => await _request.PlaceOrder(OrderId, Order, _contract).ConfigureAwait(false);
+    public async ValueTask ReplaceOrderAsync() => await _request.PlaceOrderAsync(OrderId, Order, _contract).ConfigureAwait(false);
 
-    public async ValueTask CancelOrder() => await _request.CancelOrder(OrderId).ConfigureAwait(false);
+    public async ValueTask CancelOrderAsync() => await _request.CancelOrderAsync(OrderId).ConfigureAwait(false);
 
     public async ValueTask DisposeAsync()
     {
-        await CancelOrder().ConfigureAwait(false);
+        await CancelOrderAsync().ConfigureAwait(false);
         _subject.Dispose();
     }
 }

@@ -6,7 +6,7 @@ namespace ConnectTests;
 public class BadData(ITestOutputHelper output) : OutputHelperTestBase(output, LogLevel.Debug)
 {
     [Fact]
-    public async Task BadRequestTest()
+    public async Task BadRequestTestAsync()
     {
         IInterReactClient client = await InterReactClient.CreateAsync(options =>
             options.LogFactory = LogFactory, TestContext.Current.CancellationToken);
@@ -25,7 +25,7 @@ public class BadData(ITestOutputHelper output) : OutputHelperTestBase(output, Lo
             Symbol = "InvalidSymbol2", 
             Exchange = "Smart" };
 
-        await client.Request.RequestMarketData(id, contract);
+        await client.Request.RequestMarketDataAsync(id, contract);
 
         object message = await task;
 
@@ -35,7 +35,7 @@ public class BadData(ITestOutputHelper output) : OutputHelperTestBase(output, Lo
     }
 
     [Fact]
-    public async Task BadResponseTest()
+    public async Task BadResponseTestAsync()
     {
         Contract contract = new()
         {
@@ -61,7 +61,7 @@ public class BadData(ITestOutputHelper output) : OutputHelperTestBase(output, Lo
             .Timeout(TimeSpan.FromSeconds(6))
             .ToTask();
 
-        await client.Request.RequestContractDetails(id, contract);
+        await client.Request.RequestContractDetailsAsync(id, contract);
 
         await Assert.ThrowsAnyAsync<Exception>(() => task);
     }

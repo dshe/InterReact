@@ -38,7 +38,7 @@ public class CacheSourceTests(ITestOutputHelper output) : OutputHelperTestBase(o
     }
 
     [Fact]
-    public async Task T01_Empty()
+    public async Task T01_EmptyAsync()
     {
         IObservable<string> observable = Observable.Empty<string>().CacheSource(x => x); // completes
         InvalidOperationException ex = await Assert.ThrowsAsync<InvalidOperationException>(() => observable.ToTask());
@@ -47,7 +47,7 @@ public class CacheSourceTests(ITestOutputHelper output) : OutputHelperTestBase(o
 
 
     [Fact(Skip="Not implemented")]
-    public async Task T03_Cache()
+    public async Task T03_CacheAsync()
     {
         Subject<string> source = new();
         IObservable<string> observable = source.CacheSource(x => x);
@@ -84,7 +84,7 @@ public class CacheSourceTests(ITestOutputHelper output) : OutputHelperTestBase(o
 
 
     [Fact]
-    public async Task T04_Cache_Test()
+    public async Task T04_Cache_TestAsync()
     {
         Subject<string> source = new();
         IObservable<string> observable = source.CacheSource2(x => x);

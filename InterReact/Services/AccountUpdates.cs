@@ -12,8 +12,8 @@ public partial class Service
         _response
             .ToObservableWithId(
                 _request.GetNextId,
-                id => _request.RequestAccountUpdatesMulti(id, account, modelCode, ledgerAndNLV),
-                _request.CancelAccountUpdatesMulti)
+                id => _request.RequestAccountUpdatesMultiAsync(id, account, modelCode, ledgerAndNLV),
+                _request.CancelAccountUpdatesMultiAsync)
             .CacheSource(m => m switch
             {
                 AccountUpdateMulti a => $"{a.Account}:{a.ModelCode}:{a.Key}:{a.Currency}",
@@ -22,22 +22,22 @@ public partial class Service
 
     public async Task<AccountUpdateMulti[]> GetAccountUpdatesMultiAsync(string account = "ALL", string modelCode = "", bool ledgerAndNLV = false, TimeSpan? timeout = null, CancellationToken ct = default)
     {
-        string errorMessage = await VerifyAccountArg(account, timeout).ConfigureAwait(false);
+        string errorMessage = await VerifyAccountArgAsync(account, timeout).ConfigureAwait(false);
         if (!string.IsNullOrEmpty(errorMessage))
             throw new ArgumentException(errorMessage);
 
         return await _response
             .ToObservableWithId(
                 _request.GetNextId,
-                id => _request.RequestAccountUpdatesMulti(id, account, modelCode, ledgerAndNLV),
-                _request.CancelAccountUpdatesMulti)
+                id => _request.RequestAccountUpdatesMultiAsync(id, account, modelCode, ledgerAndNLV),
+                _request.CancelAccountUpdatesMultiAsync)
             .OfTypeOnly<AccountUpdateMulti>()
             .TakeUntil(m => m.IsEndMessage)
             .WithTimeout(timeout, ct)
             .ToArray();
     }
 
-    public async Task<string> VerifyAccountArg(string account, TimeSpan? timeout = null)
+    public async Task<string> VerifyAccountArgAsync(string account, TimeSpan? timeout = null)
     {
         if (string.Equals(account, "ALL", StringComparison.OrdinalIgnoreCase))
             return "";
