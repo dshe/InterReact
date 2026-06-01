@@ -1,4 +1,4 @@
-# InterReact&nbsp;&nbsp; [![Build status](https://ci.appveyor.com/api/projects/status/hy7yfiv7tkqjyoqp?svg=true)](https://ci.appveyor.com/project/dshe/interreact) [![Version](https://img.shields.io/badge/Version-0.6.2-blue)](../..)  [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)  [![Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
+# InterReact&nbsp;&nbsp; [![Build status](https://ci.appveyor.com/api/projects/status/hy7yfiv7tkqjyoqp?svg=true)](https://ci.appveyor.com/project/dshe/interreact) [![Version](https://img.shields.io/badge/Version-0.6.3-blue)](../..)  [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)  [![Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
 ***Reactive C# API to Interactive Brokers Trader Workstation (TWS)***
 - **.NET 8.0** library
