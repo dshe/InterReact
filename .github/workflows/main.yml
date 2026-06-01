@@ -5,11 +5,11 @@ on:
     branches:
       - main
   workflow_dispatch:
-    inputs:
-      publish:
-        description: 'Publish NuGet package?'
-        required: true
-        default: 'false'
+    #inputs:
+      #publish:
+        #description: 'Publish NuGet package?'
+        #required: true
+        #default: 'false'
 
 jobs:
   build-and-publish:
