@@ -1,10 +1,14 @@
-# InterReact&nbsp;&nbsp; [![Build status](https://ci.appveyor.com/api/projects/status/hy7yfiv7tkqjyoqp?svg=true)](https://ci.appveyor.com/project/dshe/interreact) [![Version](https://img.shields.io/badge/Version-0.6.3-blue)](../..)  [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)  [![Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
+# InterReact&nbsp;&nbsp;
+[![Build & Test](https://github.com/dshe/InterReact/actions/workflows/main.yml/badge.svg)](https://github.com/dshe/InterReact/actions/workflows/main.yml)
+[![Version](https://img.shields.io/badge/Version-0.7.0-blue)](../..)
+[![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
 ***Reactive C# API to Interactive Brokers Trader Workstation (TWS)***
-- **.NET 8.0** library
+- **.NET 10.0** library
 - supports IB TWS API Stable **10.19** (Mar 25 2024 )
-- dependencies: RxSockets, Stringification, NodaTime
-- demo applications: Console, WPF
+- dependencies: Stringification, NodaTime
+- demo applications: Console, Client-server, WPF
 
 ```csharp
 interface IInterReactClient : IAsyncDisposable
