@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class IneligibilityReason
+[Message]
+public sealed record IneligibilityReason
 {
     public string Id { get; init; } = "";
 

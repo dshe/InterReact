@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class DisplayGroupUpdate : IHasRequestId
+[Message]
+public sealed record DisplayGroupUpdate : IHasRequestId
 {
     public int RequestId { get; }
     public string ContractInfo { get; }
@@ -12,7 +13,8 @@ public sealed class DisplayGroupUpdate : IHasRequestId
     }
 }
 
-public sealed class DisplayGroups : IHasRequestId
+[Message]
+public sealed record DisplayGroups : IHasRequestId
 {
     public int RequestId { get; }
     public string Groups { get; }

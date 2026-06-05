@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Diagnostics.Tracing;
 using System.Globalization;
 using System.Reactive;
 using System.Reactive.Disposables;
@@ -19,29 +18,20 @@ public static partial class Extension
             Func<T, bool>? isEndMessage = null, bool maintainSourceSubscription = false)
     {
         long index = 0;
-        Dictionary<string, (T Item, long Index)> cache = new();
+        Dictionary<string, (T Item, long Index)> cache = [];
         object cacheLock = new();
 
-        ISubject<T>? subject = null;
-        Subject<T>? innerSubject = null;
+        Subject<T>? subject = null;
         IDisposable? sourceSubscription = null;
 
         return Observable.Create<T>(observer =>
         {
-            List<T> payload = new();
             lock (cacheLock)
             {
                 foreach ((T Item, long Index) value in cache.Values.OrderBy(v => v.Index))
-                    payload.Add(value.Item);
-            }
-            foreach (var value in payload)
-                observer.OnNext(value);
+                    observer.OnNext(value.Item);
+                subject ??= new Subject<T>();
 
-            // create a synchronized wrapper around a concrete Subject<T> we can dispose later
-            lock (cacheLock)
-            {
-                innerSubject ??= new Subject<T>();
-                subject ??= Subject.Synchronize(innerSubject);
                 IDisposable subscription = subject.Subscribe(observer);
 
                 sourceSubscription ??= source.Subscribe(m =>
@@ -86,17 +76,14 @@ public static partial class Extension
 
                         // If there are still observers, keep everything running.
                         // If maintainSourceSubscription is true, keep source subscription even if no observers.
-                        if (innerSubject == null || innerSubject.HasObservers || maintainSourceSubscription || sourceSubscription == null)
+                        if (subject == null || subject.HasObservers || maintainSourceSubscription || sourceSubscription == null)
                             return;
 
                         // No observers and not maintaining source: dispose source and subject and clear cache
                         sourceSubscription.Dispose();
                         sourceSubscription = null;
-
-                        innerSubject.Dispose();
-                        innerSubject = null;
+                        subject.Dispose();
                         subject = null;
-
                         cache.Clear();
                     }
                 });

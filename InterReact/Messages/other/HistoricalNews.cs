@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class HistoricalNews : IHasRequestId
+[Message]
+public sealed record HistoricalNews : IHasRequestId
 {
     public int RequestId { get; }
     public string Time { get; }
@@ -17,7 +18,8 @@ public sealed class HistoricalNews : IHasRequestId
     }
 }
 
-public sealed class HistoricalNewsEnd : IHasRequestId
+[Message]
+public sealed record HistoricalNewsEnd : IHasRequestId
 {
     public int RequestId { get; }
     public bool HasMore { get; }

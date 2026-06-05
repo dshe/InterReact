@@ -3,7 +3,8 @@
 /// <summary>
 /// Delta-Neutral Underlying Component.
 /// </summary>
-public sealed class DeltaNeutralContract : IHasRequestId  // input + output
+[Message]
+public sealed record DeltaNeutralContract : IHasRequestId  // input + output
 {
     public int RequestId { get; init; }
 

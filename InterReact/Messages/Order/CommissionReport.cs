@@ -3,7 +3,8 @@
 /// <summary>
 /// Sent after trades and also after calling RequestExecutions().
 /// </summary>
-public sealed class CommissionReport : IHasExecutionId, IHasOrderId
+[Message]
+public sealed record CommissionReport : IHasExecutionId, IHasOrderId
 {
     public string ExecutionId { get; }
     public double Commission { get; }

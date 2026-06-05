@@ -1,10 +1,12 @@
 ﻿namespace InterReact;
 
-public sealed class HistoricalBidAskTicks : IHasRequestId
+[Message]
+public sealed record HistoricalBidAskTicks : IHasRequestId
 {
-    public int RequestId { get; }
-    public IList<HistoricalBidAskTick> Ticks { get; }
-    public bool Done { get; }
+    public int RequestId { get; init; }
+    public IList<HistoricalBidAskTick> Ticks { get; init; }
+    public bool Done { get; init; }
+    internal HistoricalBidAskTicks() => Ticks = [];
     internal HistoricalBidAskTicks(ResponseReader r)
     {
         RequestId = r.ReadInt();
@@ -17,25 +19,26 @@ public sealed class HistoricalBidAskTicks : IHasRequestId
 
 }
 
-public sealed class HistoricalBidAskTick
+[Message]
+public sealed record HistoricalBidAskTick
 {
     //[return: MarshalAs(UnmanagedType.I8)]
     //[param: MarshalAs(UnmanagedType.I8)]
-    public long Time { get; }
-    public TickAttribBidAsk TickAttribBidAsk { get; }
-    public double PriceBid { get; }
-    public double PriceAsk { get; }
+    public long Time { get; init; }
+    public TickAttribBidAsk TickAttribBidAsk { get; init; }
+    public double PriceBid { get; init; }
+    public double PriceAsk { get; init; }
     //[return: MarshalAs(UnmanagedType.I8)]
     //[param: MarshalAs(UnmanagedType.I8)]
-    public decimal SizeBid { get; }
+    public decimal SizeBid { get; init; }
     //[return: MarshalAs(UnmanagedType.I8)]
     //[param: MarshalAs(UnmanagedType.I8)]
-    public decimal SizeAsk { get; }
-
+    public decimal SizeAsk { get; init; }
+    internal HistoricalBidAskTick() => TickAttribBidAsk = new();
     internal HistoricalBidAskTick(ResponseReader r)
     {
         Time = r.ReadLong();
-        TickAttribBidAsk = new(r.ReadInt());
+        TickAttribBidAsk = new TickAttribBidAsk(r.ReadInt());
         PriceBid = r.ReadDouble();
         PriceAsk = r.ReadDouble();
         SizeBid = r.ReadDecimal();

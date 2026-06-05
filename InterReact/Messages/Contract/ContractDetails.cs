@@ -2,69 +2,70 @@
 using System.Text.RegularExpressions;
 namespace InterReact;
 
-public sealed class ContractDetails : IHasRequestId
+[Message]
+public sealed record ContractDetails : IHasRequestId
 {
     /// <summary>
     /// The Id that was used to make the request to receive this ContractDetails.
     /// </summary>
-    public int RequestId { get; }
+    public int RequestId { get; init; }
 
-    public Contract Contract { get; } = new();
+    public Contract Contract { get; init; } = new();
 
-    public string MarketName { get; } = "";
-    public double MinimumTick { get; }
+    public string MarketName { get; init; } = "";
+    public double MinimumTick { get; init; }
 
     /// <summary>
     /// Allows execution and strike prices to be reported consistently with market data, historical data and the order price,
     /// i.e. Z on LIFFE is reported in index points and not GBP.
     /// </summary>
-    public int PriceMagnifier { get; }
+    public int PriceMagnifier { get; init; }
 
     /// <summary>
     /// The list of valid order types for this contract.
     /// </summary>
-    public string OrderTypes { get; } = "";
+    public string OrderTypes { get; init; } = "";
 
     /// <summary>
     /// The list of exchanges this contract is traded on.
     /// </summary>
-    public string ValidExchanges { get; } = "";
+    public string ValidExchanges { get; init; } = "";
 
-    public int UnderlyingContractId { get; }
+    public int UnderlyingContractId { get; init; }
 
-    public string LongName { get; } = "";
+    public string LongName { get; init; } = "";
 
     /// <summary>
     /// The contract month. Typically the contract month of the underlying for a futures contract.
     /// </summary>
-    public string ContractMonth { get; } = "";
+    public string ContractMonth { get; init; } = "";
 
     /// <summary>
     /// The industry classification of the underlying/product. 
     /// </summary>
-    public string Industry { get; } = "";
+    public string Industry { get; init; } = "";
 
     /// <summary>
     /// The industry category of the underlying.
     /// </summary>
-    public string Category { get; } = "";
+    public string Category { get; init; } = "";
 
-    public string Subcategory { get; } = "";
+    public string Subcategory { get; init; } = "";
 
     /// <summary>
     /// The ID of the time zone for the trading hours of the product. For example, EST.
     /// </summary>
-    public string TimeZoneId { get; private set; } = "";
+    public string TimeZoneId { get; set; } = "";
 
     /// <summary>
     /// The total trading hours of the product. For example, 20090507:0700-1830,1830-2330;20090508:CLOSED.
     /// </summary>
-    public string TradingHours { get; } = "";
+    public string TradingHours { get; init; } = "";
 
     /// <summary>
     /// The liquid trading hours of the product. For example, 20090507:0930-1600;20090508:CLOSED.
     /// </summary>
-    public string LiquidHours { get; } = "";
+    public string LiquidHours { get; init; } = "";
 
     /// <summary>
     /// For products in Australia which trade in non-currency units.
@@ -72,72 +73,73 @@ public sealed class ContractDetails : IHasRequestId
     /// The two Values should be separated by a colon. For example, aussieBond:YearsToExpiration=3. 
     /// When the optional argument is not present, the first value will be followed by a colon.
     /// </summary>
-    public string EconomicValueRule { get; } = "";
+    public string EconomicValueRule { get; init; } = "";
 
     /// <summary>
     /// For products in Australia which trade in non-currency units.
     /// This double attribute tells you approximately how much the market value of a contract would change if the price were to change by 1.
     /// It cannot be used to get market value by multiplying the price by the approximate multiplier.
     /// </summary>
-    public double EconomicValueMultiplier { get; }
+    public double EconomicValueMultiplier { get; init; }
 
     //public int MdSizeMultiplier { get; }
 
-    public int AggGroup { get; }
+    public int AggGroup { get; init; }
 
     /// <summary>
     /// CUSIP, ISIN etc.
     /// </summary>
-    public IList<Tag> SecurityIds { get; } = [];
+    public IList<Tag> SecurityIds { get; init; } = [];
 
-    public string UnderSymbol { get; } = "";
-    public string UnderSecType { get; } = "";
-    public string MarketRuleIds { get; } = "";
-    public string RealExpirationDate { get; } = "";
+    public string UnderSymbol { get; init; } = "";
+    public string UnderSecType { get; init; } = "";
+    public string MarketRuleIds { get; init; } = "";
+    public string RealExpirationDate { get; init; } = "";
     public string LastTradeTime { get; private set; } = "";
-    public string StockType { get; } = "";
+    public string StockType { get; init; } = "";
 
     // BOND Values
 
     /// <summary>
     /// The nine-character bond CUSIP or the 12-character SEDOL.
     /// </summary>
-    public string Cusip { get; } = "";
-    public string CreditRatings { get; } = "";
-    public string DescriptionAppend { get; } = "";
-    public string BondType { get; } = "";
-    public string CouponType { get; } = "";
-    public bool Callable { get; }
-    public bool Putable { get; }
-    public double Coupon { get; }
-    public bool Convertible { get; }
+    public string Cusip { get; init; } = "";
+    public string CreditRatings { get; init; } = "";
+    public string DescriptionAppend { get; init; } = "";
+    public string BondType { get; init; } = "";
+    public string CouponType { get; init; } = "";
+    public bool Callable { get; init; }
+    public bool Putable { get; init; }
+    public double Coupon { get; init; }
+    public bool Convertible { get; init; }
     public string Maturity { get; private set; } = "";
-    public string IssueDate { get; } = "";
-    public string NextOptionDate { get; } = "";
-    public string NextOptionType { get; } = "";
-    public bool NextOptionPartial { get; }
-    public string Notes { get; } = "";
-    public decimal MinSize { get; } = decimal.MaxValue;
-    public decimal SizeIncrement { get; } = decimal.MaxValue;
-    public decimal SuggestedSizeIncrement { get; } = decimal.MaxValue;
-    public string FundName { get; } = "";
-    public string FundFamily { get; } = "";
-    public string FundType { get; } = "";
-    public string FundFrontLoad { get; } = "";
-    public string FundBackLoad { get; } = "";
-    public string FundBackLoadTimeInterval { get; } = "";
-    public string FundManagementFee { get; } = "";
-    public bool FundClosed { get; }
-    public bool FundClosedForNewInvestors { get; }
-    public bool FundClosedForNewMoney { get; }
-    public string FundNotifyAmount { get; } = "";
-    public string FundMinimumInitialPurchase { get; } = "";
-    public string FundSubsequentMinimumPurchase { get; } = "";
-    public string FundBlueSkyStates { get; } = "";
-    public string FundBlueSkyTerritories { get; } = "";
-    public FundDistributionPolicyIndicator FundDistributionPolicyIndicator { get; }
-    public FundAssetType FundAssetType { get; }
-    public IList<IneligibilityReason> IneligibilityReasonList { get; } = [];
+    public string IssueDate { get; init; } = "";
+    public string NextOptionDate { get; init; } = "";
+    public string NextOptionType { get; init; } = "";
+    public bool NextOptionPartial { get; init; }
+    public string Notes { get; init; } = "";
+    public decimal MinSize { get; init; } = decimal.MaxValue;
+    public decimal SizeIncrement { get; init; } = decimal.MaxValue;
+    public decimal SuggestedSizeIncrement { get; init; } = decimal.MaxValue;
+    public string FundName { get; init; } = "";
+    public string FundFamily { get; init; } = "";
+    public string FundType { get; init; } = "";
+    public string FundFrontLoad { get; init; } = "";
+    public string FundBackLoad { get; init; } = "";
+    public string FundBackLoadTimeInterval { get; init; } = "";
+    public string FundManagementFee { get; init; } = "";
+    public bool FundClosed { get; init; }
+    public bool FundClosedForNewInvestors { get; init; }
+    public bool FundClosedForNewMoney { get; init; }
+    public string FundNotifyAmount { get; init; } = "";
+    public string FundMinimumInitialPurchase { get; init; } = "";
+    public string FundSubsequentMinimumPurchase { get; init; } = "";
+    public string FundBlueSkyStates { get; init; } = "";
+    public string FundBlueSkyTerritories { get; init; } = "";
+    public FundDistributionPolicyIndicator FundDistributionPolicyIndicator { get; init; }
+    public FundAssetType FundAssetType { get; init; }
+    public IList<IneligibilityReason> IneligibilityReasonList { get; init; } = [];
+    internal ContractDetails() { }
     internal ContractDetails(ResponseReader r, ContractDetailsType type)
     {
         switch (type)
@@ -309,9 +311,10 @@ public sealed class ContractDetails : IHasRequestId
     }
 }
 
-public sealed class ContractDetailsEnd : IHasRequestId
+[Message]
+public sealed record ContractDetailsEnd : IHasRequestId
 {
-    public int RequestId { get; }
+    public int RequestId { get; init; }
     internal ContractDetailsEnd(ResponseReader r)
     {
         r.IgnoreMessageVersion();

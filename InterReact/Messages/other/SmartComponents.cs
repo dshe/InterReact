@@ -5,7 +5,8 @@
 /// The tick types 'bidExch', 'askExch', 'lastExch' are used to identify the source of a quote.
 /// This result provides a map relating single letters to exchange names.
 /// </summary>
-public sealed class SmartComponents : IHasRequestId
+[Message]
+public sealed record SmartComponents : IHasRequestId
 {
     public int RequestId { get; }
     public Dictionary<int, KeyValuePair<string, char>> Map { get; }

@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using Microsoft.Extensions.DependencyInjection;
-using Stringification;
 namespace InterReact;
 
 public interface IInterReactClient : IAsyncDisposable
@@ -47,7 +46,6 @@ public sealed class InterReactClient(
                 .AddSingleton(options.LogFactory) // add LoggerFactor before AddLogging()
                 .AddLogging() // so that LogFactory is used rather than the LoggerFactory.
                 .AddSingleton(connection) // instance
-                .AddSingleton<Stringifier>()
                 .AddSingleton<Request>()
                 .AddTransient<RequestMessage>() // transient!
                 .AddSingleton<Func<RequestMessage>>(s => () => s.GetRequiredService<RequestMessage>()) // factory

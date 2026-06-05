@@ -1,9 +1,11 @@
 ﻿namespace InterReact;
 
-public sealed class NewsProviders
+[Message]
+public sealed record NewsProviders
 {
     public IList<NewsProvider> Providers { get; }
 
+    internal NewsProviders() => Providers = [];
     internal NewsProviders(ResponseReader r)
     {
         int n = r.ReadInt();
@@ -13,7 +15,8 @@ public sealed class NewsProviders
     }
 }
 
-public sealed class NewsProvider
+[Message]
+public sealed record NewsProvider
 {
     public string Code { get; }
     public string Name { get; }

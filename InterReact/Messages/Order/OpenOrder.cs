@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class OpenOrder : IHasOrderId
+[Message]
+public sealed record OpenOrder : IHasOrderId
 {
     public int OrderId { get; }
     public Order Order { get; } = new();
@@ -86,7 +87,7 @@ public sealed class OpenOrder : IHasOrderId
     }
 }
 
-public sealed class OpenOrderEnd
+public sealed record OpenOrderEnd
 {
     internal OpenOrderEnd(ResponseReader r) => r.IgnoreMessageVersion();
 }

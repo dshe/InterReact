@@ -7,7 +7,8 @@
 /// <summary>
 /// A trade/bid/ask at a price which is different from the previous trade/bid/ask price.
 /// </summary>
-public sealed class PriceTick : TickBase
+[Message]
+public sealed record PriceTick : TickBase
 {
     public double Price { get; }
     public TickAttrib TickAttrib { get; }
@@ -54,7 +55,8 @@ public sealed class PriceTick : TickBase
         };
 }
 
-public sealed class TickAttrib
+[Message]
+public sealed record TickAttrib
 {
     public bool CanAutoExecute { get; }
     public bool PastLimit { get; }

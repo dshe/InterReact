@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class TickNews : IHasRequestId
+[Message]
+public sealed record TickNews : IHasRequestId
 {
     public int RequestId { get; }
     public long TimeStamp { get; }

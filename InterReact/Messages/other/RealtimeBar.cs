@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class RealtimeBar : IHasRequestId
+[Message]
+public sealed record RealtimeBar : IHasRequestId
 {
     public int RequestId { get; }
     public long Time { get; }

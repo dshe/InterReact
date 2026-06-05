@@ -1,7 +1,7 @@
-﻿using Stringification;
-namespace InterReact;
+﻿namespace InterReact;
 
-public sealed class Tag // input + output
+[Message]
+public sealed record Tag // input + output
 {
     public string Name { get; }
     public string Value { get; }

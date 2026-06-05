@@ -1,5 +1,6 @@
 ﻿namespace InterReact;
 
+[Message]
 public sealed class ScannerSubscription // input
 {
     /// <summary>

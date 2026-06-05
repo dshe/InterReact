@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class MarketDepth : IHasRequestId
+[Message]
+public sealed record MarketDepth : IHasRequestId
 {
     public int RequestId { get; }
     public int Position { get; }

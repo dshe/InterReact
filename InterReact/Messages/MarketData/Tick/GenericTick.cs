@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class GenericTick : TickBase
+[Message]
+public sealed record GenericTick : TickBase
 {
     public double Value { get; }
 

@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class ExecutionFilter // input
+[Message]
+public sealed record ExecutionFilter // input
 {
     /// <summary>
     /// Zero means no filtering on this field.

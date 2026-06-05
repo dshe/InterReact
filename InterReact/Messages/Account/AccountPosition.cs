@@ -1,19 +1,20 @@
 ﻿namespace InterReact;
 
-public sealed class AccountPosition
+[Message]
+public sealed record AccountPosition
 {
-    public bool IsEndMessage { get; }
-    public string Account { get; }
-    public Contract Contract { get; }
-    public decimal Position { get; }
-    public double AverageCost { get; }
+    public bool IsEndMessage { get; init; }
+    public string Account { get; init; } = "";
+    public Contract Contract { get; init; }
+    public decimal Position { get; init; }
+    public double AverageCost { get; init;  }
+    internal AccountPosition() => Contract = new();
     internal AccountPosition(ResponseReader r, bool isEndMessage)
     {
         if (isEndMessage)
         {
             r.IgnoreMessageVersion();
             IsEndMessage = true;
-            Account = "";
             Contract = new();
             return;
         }

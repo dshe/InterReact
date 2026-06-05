@@ -6,6 +6,7 @@ namespace InterReact;
 [SuppressMessage("Usage", "CA1310", Scope = "member")]
 [SuppressMessage("Usage", "CA1062", Scope = "member")]
 [SuppressMessage("Usage", "IDE0019", Scope = "member")]
+[SuppressMessage("Usage", "IDE1006", Scope = "member")]
 public abstract class OperatorCondition : OrderCondition
 {
     protected abstract string Value { get; set; }

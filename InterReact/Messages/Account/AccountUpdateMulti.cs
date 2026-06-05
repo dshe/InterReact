@@ -1,14 +1,16 @@
 ﻿namespace InterReact;
 
-public sealed class AccountUpdateMulti : IHasRequestId
+[Message]
+public sealed record AccountUpdateMulti : IHasRequestId
 {
-    public int RequestId { get; }
-    public bool IsEndMessage { get; }
-    public string Account { get; }
-    public string ModelCode { get; }
-    public string Key { get; }
-    public string Currency { get; }
-    public string Value { get; }
+    public int RequestId { get; init; }
+    public bool IsEndMessage { get; init; }
+    public string Account { get; init; } = "";
+    public string ModelCode { get; init; } = "";
+    public string Key { get; init; } = "";
+    public string Currency { get; init; } = "";
+    public string Value { get; init; } = "";
+    internal AccountUpdateMulti() { }
     internal AccountUpdateMulti(ResponseReader r, bool isEndMessage)
     {
         r.IgnoreMessageVersion();

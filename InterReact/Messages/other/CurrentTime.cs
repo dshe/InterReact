@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class CurrentTime
+[Message]
+public sealed record CurrentTime
 {
     public long Seconds { get; }
     internal CurrentTime(ResponseReader r)

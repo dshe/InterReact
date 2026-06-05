@@ -1,10 +1,12 @@
 ﻿namespace InterReact;
 
-public sealed class HistoricalLastTicks : IHasRequestId
+[Message]
+public sealed record HistoricalLastTicks : IHasRequestId
 {
-    public int RequestId { get; }
-    public IList<HistoricalLastTick> Ticks { get; }
-    public bool Done { get; }
+    public int RequestId { get; init; }
+    public IList<HistoricalLastTick> Ticks { get; init; }
+    public bool Done { get; init; }
+    internal HistoricalLastTicks() => Ticks = [];
     internal HistoricalLastTicks(ResponseReader r)
     {
         RequestId = r.ReadInt();
@@ -16,23 +18,24 @@ public sealed class HistoricalLastTicks : IHasRequestId
     }
 }
 
-public sealed class HistoricalLastTick
+[Message]
+public sealed record HistoricalLastTick
 {
     //[return: MarshalAs(UnmanagedType.I8)]
     //[param: MarshalAs(UnmanagedType.I8)]
-    public long Time { get; }
-    public TickAttribLast TickAttribLast { get; }
-    public double Price { get; }
+    public long Time { get; init; }
+    public TickAttribLast TickAttribLast { get; init; }
+    public double Price { get; init; }
     //[return: MarshalAs(UnmanagedType.I8)]
     //[param: MarshalAs(UnmanagedType.I8)]
-    public decimal Size { get; }
-    public string Exchange { get; }
-    public string SpecialConditions { get; }
-
+    public decimal Size { get; init; }
+    public string Exchange { get; init; } = "";
+    public string SpecialConditions { get; init; } = "";
+    internal HistoricalLastTick() => TickAttribLast = new();
     internal HistoricalLastTick(ResponseReader r)
     {
         Time = r.ReadLong();
-        TickAttribLast = new(r.ReadInt());
+        TickAttribLast = new TickAttribLast(r.ReadInt());
         Price = r.ReadDouble();
         Size = r.ReadDecimal();
         Exchange = r.ReadString();

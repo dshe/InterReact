@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class WshEventData // input
+[Message]
+public sealed record WshEventData // input
 {
     public int ContractId { get; init; } = int.MaxValue;
     public string Filter { get; init; } = "";

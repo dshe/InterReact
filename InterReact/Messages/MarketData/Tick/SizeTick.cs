@@ -3,7 +3,8 @@
 /// <summary>
 /// Size only. For example, a trade/bid/ask at the previous trade/bid/ask price.
 /// </summary>
-public sealed class SizeTick : TickBase
+[Message]
+public sealed record SizeTick : TickBase
 {
     public decimal Size { get; }
     internal SizeTick()

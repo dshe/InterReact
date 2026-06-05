@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class UserInfo : IHasRequestId
+[Message]
+public sealed record UserInfo : IHasRequestId
 {
     public int RequestId { get; }
     public string WhiteBrandingId { get; }

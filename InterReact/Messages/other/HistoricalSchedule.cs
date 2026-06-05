@@ -1,12 +1,14 @@
 ﻿namespace InterReact;
 
-public sealed class HistoricalSchedule : IHasRequestId
+[Message]
+public sealed record HistoricalSchedule : IHasRequestId
 {
     public int RequestId { get; }
-    public string StartDate { get; }
-    public string EndDate { get; }
-    public string Timezone { get; }
+    public string StartDate { get; } = "";
+    public string EndDate { get; } = "";
+    public string Timezone { get; } = "";
     public IList<HistoricalSession> Sessions { get; }
+    internal HistoricalSchedule() => Sessions = [];
     internal HistoricalSchedule(ResponseReader r)
     {
         RequestId = r.ReadInt();
@@ -20,7 +22,8 @@ public sealed class HistoricalSchedule : IHasRequestId
     }
 }
 
-public sealed class HistoricalSession
+[Message]
+public sealed record HistoricalSession
 {
     public string SessionStartTime { get; }
     public string SessionEndTime { get; }

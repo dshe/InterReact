@@ -5,6 +5,7 @@ namespace InterReact;
 [SuppressMessage("Usage", "CA1307", Scope = "member")]
 [SuppressMessage("Usage", "CA1309", Scope = "member")]
 [SuppressMessage("Usage", "CA1310", Scope = "member")]
+[SuppressMessage("Usage", "IDE1006", Scope = "member")]
 public class ExecutionCondition : OrderCondition
 {
     /**

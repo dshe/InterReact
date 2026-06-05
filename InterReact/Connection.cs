@@ -13,7 +13,7 @@ public sealed class Connection : IAsyncDisposable
     private readonly Socket _socket;
     private readonly Task _senderTask;
     private readonly Channel<byte[]> _outgoing = Channel.CreateBounded<byte[]>
-        (new BoundedChannelOptions(1000)
+        (new BoundedChannelOptions(100)
         {
             SingleReader = true,
             SingleWriter = false,

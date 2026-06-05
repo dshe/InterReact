@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.Contracts;
-using System.Reactive.Subjects;
+﻿using System.Reactive.Subjects;
 namespace InterReact;
 
 public partial class Service : IDisposable

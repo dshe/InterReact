@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class OrderCancel // input
+[Message]
+public sealed record OrderCancel // input
 {
     //public static readonly OrderCancel Default = new();
 

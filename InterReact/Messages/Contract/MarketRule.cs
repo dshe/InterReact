@@ -1,10 +1,11 @@
 ﻿namespace InterReact;
 
-public sealed class MarketRule
+[Message]
+public sealed record MarketRule
 {
-    public int MarketRuleId { get; }
-    public IList<PriceIncrement> PriceIncrements { get; }
-
+    public int MarketRuleId { get; init; }
+    public IList<PriceIncrement> PriceIncrements { get; init; }
+    internal MarketRule() => PriceIncrements = [];
     internal MarketRule(ResponseReader r)
     {
         MarketRuleId = r.ReadInt();
@@ -15,11 +16,12 @@ public sealed class MarketRule
     }
 }
 
-public sealed class PriceIncrement
+[Message]
+public sealed record PriceIncrement
 {
-    public double LowEdge { get; }
-    public double Increment { get; }
-
+    public double LowEdge { get; init; }
+    public double Increment { get; init; }
+    internal PriceIncrement() { }
     internal PriceIncrement(ResponseReader r)
     {
         LowEdge = r.ReadDouble();

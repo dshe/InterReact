@@ -1,5 +1,4 @@
-﻿using Stringification;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security;
@@ -7,11 +6,97 @@ namespace Analysis;
 
 public class Types_Viewer(ITestOutputHelper output) : OutputHelperTestBase(output)
 {
+    private static readonly Assembly _assembly = typeof(InterReactClient).Assembly;
+
     private static readonly List<TypeInfo> _types = typeof(InterReactClient)
         .Assembly
         .DefinedTypes
         .Where(t => !t.Name.Contains("<>"))
         .ToList();
+
+    [Fact]
+    public void List_Namespaces()
+    {
+        List<Type> types = _assembly
+            .GetTypes()
+            .Where(t => t.IsClass)
+            .Where(t => t.Namespace != null)
+            .DistinctBy(t => t.Namespace)
+            .OrderBy(x => x.Name)
+            .ToList();
+
+        foreach (TypeInfo type in types)
+            Write($"Namespace: {type.Namespace}  Type: {type.Name}");
+    }
+
+    [Fact]
+    public void View_Interfaces()
+    {
+        foreach (TypeInfo type in _assembly.DefinedTypes
+            .Where(t => t.IsInterface)
+            .OrderBy(x => x.FullName))
+            Write(type.FullName!);
+    }
+
+    [Fact]
+    public void View_Abstract()
+    {
+        foreach (TypeInfo type in _assembly.DefinedTypes
+            .Where(t => t is { IsAbstract: true, IsSealed: false, IsInterface: false })
+            .OrderBy(x => x.FullName))
+            Write(type.FullName!);
+    }
+
+    [Fact]
+    public void View_Static_Types()
+    {
+        foreach (TypeInfo type in _assembly.DefinedTypes
+            .Where(t => t is { IsAbstract: true, IsSealed: true })
+            .OrderBy(x => x.FullName))
+            Write(type.FullName!);
+    }
+
+    [Fact]
+    public void View_NonSealed_Types()
+    {
+        foreach (TypeInfo type in _assembly.DefinedTypes
+            .Where(t => t is { IsSealed: false, IsInterface: false, IsAbstract: false })
+            .OrderBy(x => x.FullName))
+            Write(type.FullName!);
+    }
+
+    [Fact]
+    public void View_Exported_Types()
+    {
+        foreach (TypeInfo type in _assembly
+            .ExportedTypes
+            .OrderBy(x => x.FullName).Cast<TypeInfo>())
+            Write(type.FullName!);
+    }
+
+    [Fact]
+    public void View_Public_Methods()
+    {
+        List<string> objectMethodNames = typeof(object)
+            .GetTypeInfo()
+            .DeclaredMethods
+            .Select(method => method.Name)
+            .ToList();
+
+        foreach (TypeInfo type in _assembly.ExportedTypes.OrderBy(type => type.Name).Cast<TypeInfo>())
+        {
+            type.GetTypeInfo().DeclaredMethods
+                .Where(method => method.IsPublic)
+                .Where(m =>
+                    !(m.Name.StartsWith('<') || m.Name.StartsWith("get_") || m.Name.StartsWith("set_") ||
+                      objectMethodNames.Contains(m.Name)))
+                .Select(m => type.Name + "." + m.Name)
+                .Distinct()
+                .OrderBy(s => s)
+                .ToList()
+                .ForEach(x => Write(x));
+        }
+    }
 
     [Fact]
     public void List_Type_Attributes()
@@ -55,56 +140,4 @@ public class Types_Viewer(ITestOutputHelper output) : OutputHelperTestBase(outpu
         }
     }
 
-    [Fact]
-    public void Auto_Type_And_Stringify_One()
-    {
-        Stringifier s = new(Logger);
-        var tick = new PriceTick(0, TickType.Undefined, 0, new TickAttrib());
-        Write(s.Stringify(tick));
-        //TypeInfo type = typeof(PriceTick).GetTypeInfo();
-        //object instance = s.CreateInstance(type);
-        //Assert.NotNull(instance);
-        //Write(s.Stringify(instance));
-    }
-
-    [Fact]
-    public void Auto_Type_And_Stringify_All() // sometimes fails?
-    {
-        IEnumerable<TypeInfo> types = _types
-            .Where(t =>
-                t is
-                {
-                    IsClass: true,
-                    IsPublic: true,
-                    IsSealed: true,
-                    IsAbstract: false,
-                    ContainsGenericParameters: false,
-                    Namespace: "InterReact"
-                })
-            .OrderBy(x => x.Name);            ;
-
-        foreach (TypeInfo type in types)
-        {
-            if (type == typeof(Request) ||
-                type == typeof(OrderMonitor) ||
-                type == typeof(TickEnumerableSelector) ||
-                type == typeof(TickObservableSelector) ||
-                type == typeof(InterReactOptions) ||
-                type == typeof(NullInterReactClient) ||
-                type == typeof(InterReactClient))
-                continue;
-            try
-            {
-                object instance = Stringifier.Instance.CreateInstance(type);
-                Assert.NotNull(instance);
-                string str = Stringifier.Instance.Stringify(instance);
-                Write($"Value: {str}");
-            }
-            catch (Exception e)
-            {
-                Write($"Type: {type.Name} EXCEPTION: {e.Message}");
-                throw;
-            }
-        }
-    }
 }

@@ -5,8 +5,7 @@ namespace InterReact;
 public static partial class Extension
 {
     public static IObservable<T> ToObservable<T>(
-        this IObservable<T> source,
-        Action startRequest)
+        this IObservable<T> source, Action startRequest)
     {
         return Observable.Create<T>(observer =>
         {
@@ -68,7 +67,7 @@ public static partial class Extension
     public static IObservable<IHasRequestId> ToObservableWithId(
         this IObservable<object> source, 
         Func<int> getRequestId,
-        Func<int,ValueTask> startRequest, Func<int, ValueTask>? stopRequest = null)
+        Func<int, ValueTask> startRequest, Func<int, ValueTask>? stopRequest = null)
     {
         return Observable.Create<IHasRequestId>(async observer =>
         {
@@ -102,5 +101,4 @@ public static partial class Extension
             });
         });
     }
-
 }

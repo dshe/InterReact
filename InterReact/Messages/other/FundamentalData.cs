@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class FundamentalData : IHasRequestId
+[Message]
+public sealed record FundamentalData : IHasRequestId
 {
     public int RequestId { get; }
 

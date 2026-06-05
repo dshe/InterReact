@@ -1,14 +1,20 @@
 ﻿namespace InterReact;
 
-public sealed class SecurityDefinitionOptionParameter : IHasRequestId
+[Message]
+public sealed record SecurityDefinitionOptionParameter : IHasRequestId
 {
     public int RequestId { get; }
-    public string Exchange { get; }
+    public string Exchange { get; } = "";
     public int UnderlyingContractId { get; }
-    public string TradingClass { get; }
-    public string Multiplier { get; }
+    public string TradingClass { get; } = "";
+    public string Multiplier { get; } = "";
     public IList<string> Expirations { get; }
     public IList<double> Strikes { get; }
+    internal SecurityDefinitionOptionParameter()
+    {
+        Expirations = [];
+        Strikes = [];
+    }
 
     internal SecurityDefinitionOptionParameter(ResponseReader r)
     {
@@ -28,6 +34,7 @@ public sealed class SecurityDefinitionOptionParameter : IHasRequestId
     }
 }
 
+[Message]
 public sealed class SecurityDefinitionOptionParameterEnd : IHasRequestId
 {
     public int RequestId { get; }

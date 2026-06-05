@@ -41,11 +41,12 @@ public class ToObservableWithId(ITestOutputHelper output) : OutputHelperTestBase
 
         ITestableObserver<object> observer = testScheduler.CreateObserver<object>();
 
-        //IDisposable subscription = source.ToObservableWithId(() => 42, id => start++, id => stop++)
-        //    .Subscribe(observer);
+        IDisposable subscription = source
+            .ToObservableWithId(() =>42, async x => start++, async x => stop++)
+            .Subscribe(observer);
 
         testScheduler.Start();
-        //subscription.Dispose();
+        subscription.Dispose();
 
         Recorded<System.Reactive.Notification<object>> xx = OnNext<object>(10, o1);
 

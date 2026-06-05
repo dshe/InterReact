@@ -1,9 +1,10 @@
 ﻿namespace InterReact;
 
-public sealed class MarketDepthExchanges
+[Message]
+public sealed record MarketDepthExchanges
 {
     public IList<MarketDepthExchange> Exchanges { get; }
-
+    internal MarketDepthExchanges() => Exchanges = [];
     internal MarketDepthExchanges(ResponseReader r)
     {
         int n = r.ReadInt();
@@ -13,7 +14,8 @@ public sealed class MarketDepthExchanges
     }
 }
 
-public sealed class MarketDepthExchange
+[Message]
+public sealed record MarketDepthExchange
 {
     public string Exchange { get; }
     public string SecType { get; }

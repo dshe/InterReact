@@ -1,14 +1,16 @@
 ﻿namespace InterReact;
 
-public sealed class AccountPositionsMulti : IHasRequestId
+[Message]
+public sealed record AccountPositionsMulti : IHasRequestId
 {
-    public int RequestId { get; }
-    public bool IsEndMessage { get; }
-    public string Account { get; }
-    public string ModelCode { get; }
-    public Contract Contract { get; }
-    public decimal Position { get; }
-    public double AverageCost { get; }
+    public int RequestId { get; init; }
+    public bool IsEndMessage { get; init; }
+    public string Account { get; init; } = "";
+    public string ModelCode { get; init; } = "";
+    public Contract Contract { get; init; }
+    public decimal Position { get; init; }
+    public double AverageCost { get; init; }
+    internal AccountPositionsMulti() => Contract = new();
     internal AccountPositionsMulti(ResponseReader r, bool isEndMessage)
     {
         r.IgnoreMessageVersion();

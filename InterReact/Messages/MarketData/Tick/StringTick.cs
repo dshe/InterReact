@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class StringTick : TickBase
+[Message]
+public sealed record StringTick : TickBase
 {
     public string Value { get; private init; } = "";
     private StringTick(int requestId, TickType tickType, string value) 

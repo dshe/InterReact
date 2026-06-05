@@ -1,9 +1,11 @@
 ﻿namespace InterReact;
 
-public sealed class HistogramData : IHasRequestId
+[Message]
+public sealed record HistogramData : IHasRequestId
 {
     public int RequestId { get; }
     public IList<HistogramEntry> Items { get; }
+    internal HistogramData() => Items = [];
     internal HistogramData(ResponseReader r)
     {
         RequestId = r.ReadInt();
@@ -14,7 +16,8 @@ public sealed class HistogramData : IHasRequestId
     }
 }
 
-public sealed class HistogramEntry
+[Message]
+public sealed record HistogramEntry
 {
     public double Price { get; }
     public decimal Size { get; }

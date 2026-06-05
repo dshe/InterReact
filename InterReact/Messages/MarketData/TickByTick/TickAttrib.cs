@@ -1,9 +1,11 @@
 ﻿namespace InterReact;
 
-public sealed class TickAttribBidAsk
+[Message]
+public sealed record TickAttribBidAsk
 {
     public bool BidPastLow { get; }
     public bool AskPastHigh { get; }
+    internal TickAttribBidAsk() { }
     internal TickAttribBidAsk(int value)
     {
         BitMask mask = new(value);
@@ -12,10 +14,12 @@ public sealed class TickAttribBidAsk
     }
 }
 
-public sealed class TickAttribLast
+[Message]
+public sealed record TickAttribLast
 {
     public bool PastLimit { get; internal set; }
     public bool Unreported { get; internal set; }
+    internal TickAttribLast() { }
     internal TickAttribLast(int value)
     {
         BitMask mask = new(value);

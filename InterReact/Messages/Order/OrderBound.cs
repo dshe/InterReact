@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class OrderBound
+[Message]
+public sealed record OrderBound
 {
     public long PermId { get; }
     public int ApiClientId { get; }

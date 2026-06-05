@@ -17,7 +17,8 @@ internal static class TickByTick
     }
 }
 
-public sealed class TickByTickAllLast : TickByTickBase
+[Message]
+public sealed record TickByTickAllLast : TickByTickBase
 {
     public long Time { get; }
     public double Price { get; }
@@ -38,7 +39,8 @@ public sealed class TickByTickAllLast : TickByTickBase
     }
 }
 
-public sealed class TickByTickBidAsk : TickByTickBase
+[Message]
+public sealed record TickByTickBidAsk : TickByTickBase
 {
     public long Time { get; }
     public double BidPrice { get; }
@@ -59,7 +61,8 @@ public sealed class TickByTickBidAsk : TickByTickBase
     }
 }
 
-public sealed class TickByTickMidpoint : TickByTickBase
+[Message]
+public sealed record TickByTickMidpoint : TickByTickBase
 {
     public long Time { get; }
     public double Midpoint { get; }

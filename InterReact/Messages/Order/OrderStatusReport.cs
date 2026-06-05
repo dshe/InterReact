@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class OrderStatusReport : IHasOrderId
+[Message]
+public sealed record OrderStatusReport : IHasOrderId
 {
     /// <summary>
     /// The order Id that was specified previously in the call to PlaceOrder.

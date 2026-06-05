@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class WshEventDataReceived : IHasRequestId // output
+[Message]
+public sealed record WshEventDataReceived : IHasRequestId // output
 {
     public int RequestId { get; }
     public string Data { get; }

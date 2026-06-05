@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class NewsBulletin
+[Message]
+public sealed record NewsBulletin
 {
     public int MessageId { get; }
 

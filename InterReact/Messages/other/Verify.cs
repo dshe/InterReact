@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class VerifyMessageApi
+[Message]
+public sealed record VerifyMessageApi
 {
     public string Data { get; }
     internal VerifyMessageApi(ResponseReader r)
@@ -10,7 +11,8 @@ public sealed class VerifyMessageApi
     }
 }
 
-public sealed class VerifyCompleted
+[Message]
+public sealed record VerifyCompleted
 {
     public bool IsSuccessful { get; }
     public string ErrorText { get; }
@@ -22,7 +24,8 @@ public sealed class VerifyCompleted
     }
 }
 
-public sealed class VerifyAndAuthorizeMessageApi
+[Message]
+public sealed record VerifyAndAuthorizeMessageApi
 {
     public string ApiData { get; }
     public string XyzChallenge { get; }
@@ -34,7 +37,8 @@ public sealed class VerifyAndAuthorizeMessageApi
     }
 }
 
-public sealed class VerifyAndAuthorizeCompleted
+[Message]
+public sealed record VerifyAndAuthorizeCompleted
 {
     public bool IsSuccessful { get; }
     public string ErrorText { get; }

@@ -1,12 +1,14 @@
 ﻿namespace InterReact;
 
-public sealed class AccountSummary : IHasRequestId
+[Message]
+public sealed record AccountSummary : IHasRequestId
 {
-    public int RequestId { get; }
-    public string Account { get; }
-    public string Tag { get; }
-    public string Currency { get; }
-    public string Value { get; }
+    public int RequestId { get; init; }
+    public string Account { get; init; } = "";
+    public string Tag { get; init; } = "";
+    public string Currency { get; init; } = "";
+    public string Value { get; init; } = "";
+    internal AccountSummary() { }
     internal AccountSummary(ResponseReader r)
     {
         r.IgnoreMessageVersion();
@@ -18,9 +20,11 @@ public sealed class AccountSummary : IHasRequestId
     }
 }
 
-public sealed class AccountSummaryEnd : IHasRequestId
+[Message]
+public sealed record AccountSummaryEnd : IHasRequestId
 {
-    public int RequestId { get; }
+    public int RequestId { get; init; }
+    internal AccountSummaryEnd() { }
     internal AccountSummaryEnd(ResponseReader r)
     {
         r.IgnoreMessageVersion();

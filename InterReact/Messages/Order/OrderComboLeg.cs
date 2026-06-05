@@ -1,6 +1,9 @@
 ﻿namespace InterReact;
 
-public sealed class OrderComboLeg(double price) // input + output
+[Message]
+public sealed record OrderComboLeg // input + output
 {
-    public double Price { get; } = price;
+    public double Price { get; init;  }
+    internal OrderComboLeg(double price) => Price = price;
+
 }

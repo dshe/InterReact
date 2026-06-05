@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class TickSnapshotEnd : IHasRequestId
+[Message]
+public sealed record TickSnapshotEnd : IHasRequestId
 {
     public int RequestId { get; }
     internal TickSnapshotEnd(ResponseReader r)

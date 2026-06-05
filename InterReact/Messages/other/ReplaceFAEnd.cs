@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class ReplaceFAEnd : IHasRequestId
+[Message]
+public sealed record ReplaceFAEnd : IHasRequestId
 {
     public int RequestId { get; }
     public string Text { get; }

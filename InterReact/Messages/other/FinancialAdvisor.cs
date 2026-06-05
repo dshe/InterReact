@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class FinancialAdvisor
+[Message]
+public sealed record FinancialAdvisor
 {
     public FinancialAdvisorDataType DataType { get; }
     public string Data { get; }

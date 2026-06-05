@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class ContractComboLeg // input + output
+[Message]
+public sealed record ContractComboLeg // input + output
 {
     /// <summary>
     /// The unique contract identifier.

@@ -1,11 +1,13 @@
 ﻿namespace InterReact;
 
-public sealed class AccountValue
+[Message]
+public sealed record AccountValue
 {
-    public string Account { get; }
-    public string Key { get; }
-    public string Value { get; } = "0";
-    public string Currency { get; }
+    public string Account { get; init; } = "";
+    public string Key { get; init; } = "";
+    public string Value { get; init; } = "0";
+    public string Currency { get; init; } = "";
+    internal AccountValue() { }
     internal AccountValue(ResponseReader r)
     {
         r.RequireMessageVersion(2);
@@ -16,16 +18,18 @@ public sealed class AccountValue
     }
 }
 
-public sealed class PortfolioValue
+[Message]
+public sealed record PortfolioValue
 {
-    public string Account { get; }
-    public Contract Contract { get; }
-    public decimal Position { get; }
-    public double MarketPrice { get; }
-    public double MarketValue { get; }
-    public double AverageCost { get; }
-    public double UnrealizedPnl { get; }
-    public double RealizedPnl { get; }
+    public string Account { get; init; } = "";
+    public Contract Contract { get; init; }
+    public decimal Position { get; init; }
+    public double MarketPrice { get; init; }
+    public double MarketValue { get; init; }
+    public double AverageCost { get; init; }
+    public double UnrealizedPnl { get; init; }
+    public double RealizedPnl { get; init; }
+    internal PortfolioValue() => Contract = new();
     internal PortfolioValue(ResponseReader r)
     {
         r.RequireMessageVersion(8);
@@ -40,9 +44,11 @@ public sealed class PortfolioValue
     }
 }
 
-public sealed class AccountUpdateTime
+[Message]
+public sealed record AccountUpdateTime
 {
-    public string Time { get; }
+    public string Time { get; init; } = "";
+    internal AccountUpdateTime() { }
     internal AccountUpdateTime(ResponseReader r)
     {
         r.IgnoreMessageVersion();
@@ -50,9 +56,11 @@ public sealed class AccountUpdateTime
     }
 }
 
-public sealed class AccountUpdateEnd
+[Message]
+public sealed record AccountUpdateEnd
 {
-    public string Account { get; }
+    public string Account { get; init; } = "";
+    internal AccountUpdateEnd() { }
     internal AccountUpdateEnd(ResponseReader r)
     {
         r.IgnoreMessageVersion();

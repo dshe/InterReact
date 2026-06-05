@@ -1,5 +1,4 @@
-﻿using Stringification;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Reactive.Concurrency;
 namespace InterReact;
 
@@ -7,14 +6,14 @@ public sealed class Response : IObservable<object>
 {
     private IObservable<object> Observable { get; }
 
-    public Response(ILogger<Response> logger, Connection connection, ResponseMessageComposer composer, Stringifier stringifier)
+    public Response(ILogger<Response> logger, Connection connection, ResponseMessageComposer composer)
     {
         ArgumentNullException.ThrowIfNull(connection, nameof(connection));
 
         Observable = connection.Observable
             .SubscribeOn(NewThreadScheduler.Default)
             .ComposeMessage(composer)
-            .Do(msg => logger.LogResponseMessage(stringifier.Stringify(msg)))
+            .Do(msg => logger.LogResponseMessage(msg.Stringify()))
             .Publish()
             .AutoConnect(); // connect on first observer
     }

@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class RerouteMktData : IHasRequestId
+[Message]
+public sealed record RerouteMktData : IHasRequestId
 {
     public int RequestId { get; }
     public int ContractId { get; }
@@ -14,6 +15,7 @@ public sealed class RerouteMktData : IHasRequestId
     }
 }
 
+[Message]
 public sealed class RerouteMktDepth : IHasRequestId
 {
     public int RequestId { get; }

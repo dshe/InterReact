@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
+[Message]
+public sealed record Execution : IHasRequestId, IHasOrderId, IHasExecutionId
 {
     // associate OrderIds with ExecutionIds
     internal readonly static Dictionary<string, int> ExecutionIds = [];
@@ -117,7 +118,8 @@ public sealed class Execution : IHasRequestId, IHasOrderId, IHasExecutionId
     }
 }
 
-public sealed class ExecutionEnd : IHasRequestId
+[Message]
+public sealed record ExecutionEnd : IHasRequestId
 {
     public int RequestId { get; }
     internal ExecutionEnd(ResponseReader r)

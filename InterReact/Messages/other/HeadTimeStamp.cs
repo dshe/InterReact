@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class HeadTimestamp : IHasRequestId
+[Message]
+public sealed record HeadTimestamp : IHasRequestId
 {
     public int RequestId { get; }
     public string HeadTimeStamp { get; }

@@ -1,8 +1,10 @@
 ﻿namespace InterReact;
 
-public sealed class FamilyCodes
+[Message]
+public sealed record FamilyCodes
 {
     public IList<FamilyCode> Codes { get; }
+    internal FamilyCodes() => Codes = [];
     internal FamilyCodes(ResponseReader r)
     {
         int n = r.ReadInt();
@@ -12,7 +14,8 @@ public sealed class FamilyCodes
     }
 }
 
-public sealed class FamilyCode
+[Message]
+public sealed record FamilyCode
 {
     public string AccountId { get; }
     public string FamilyCodeStr { get; }

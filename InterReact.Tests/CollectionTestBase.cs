@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Net;
+﻿using System.Net;
 namespace Tests;
 
 public sealed class TestFixture : IAsyncLifetime
@@ -53,31 +52,31 @@ public sealed class TestCollection : ICollectionFixture<TestFixture>
 [Collection("Test Collection")]
 public abstract class CollectionTestBase : IDisposable
 {
-    private readonly ITestOutputHelper Output;
-    private bool disposed;
-    private readonly Action RemoveWriter;
+    private readonly ITestOutputHelper _output;
+    private bool _disposed;
+    private readonly Action _removeWriter;
     protected readonly IInterReactClient Client;
     protected void Write(string format, params object[] args) =>
-        Output.WriteLine(string.Format(format, args) + Environment.NewLine);
+        _output.WriteLine(string.Format(format, args) + Environment.NewLine);
     protected void Write(string str) =>
-        Output.WriteLine(str);
+        _output.WriteLine(str);
 
     protected CollectionTestBase(ITestOutputHelper output, TestFixture fixture)
     {
-        Output = output;
+        _output = output;
         fixture.SharedWriter.Add(output.WriteLine);
-        RemoveWriter = () => fixture.SharedWriter.Remove(output.WriteLine);
+        _removeWriter = () => fixture.SharedWriter.Remove(output.WriteLine);
         Client = fixture.Client ?? throw new NullReferenceException("Client");
     }
 
     protected virtual void Dispose(bool disposing)
     {
-        if (disposed)
+        if (_disposed)
             return;
-        disposed = true;
+        _disposed = true;
         if (disposing)
         {   // dispose managed objects
-            RemoveWriter();
+            _removeWriter();
         }
         // free unmanaged resources and override finalizer
     }

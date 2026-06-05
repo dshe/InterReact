@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class ExchangeForPhysicalTick : TickBase
+[Message]
+public sealed record ExchangeForPhysicalTick : TickBase
 {
     public double BasisPoints { get; }
     public string FormattedBasisPoints { get; }

@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
-
 namespace InterReact;
 
-public sealed class TimeTick : TickBase // from StringTick
+[Message]
+public sealed record TimeTick : TickBase // from StringTick
 {
     /// <summary>
     /// Seconds precision.

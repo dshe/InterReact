@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class NewsArticle : IHasRequestId
+[Message]
+public sealed record NewsArticle : IHasRequestId
 {
     public int RequestId { get; }
     public int ArticleType { get; }

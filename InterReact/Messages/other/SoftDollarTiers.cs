@@ -1,9 +1,11 @@
 ﻿namespace InterReact;
 
-public sealed class SoftDollarTiers : IHasRequestId
+[Message]
+public sealed record SoftDollarTiers : IHasRequestId
 {
     public int RequestId { get; }
     public IList<SoftDollarTier> Tiers { get; }
+    internal SoftDollarTiers() => Tiers = [];
     internal SoftDollarTiers(ResponseReader r)
     {
         RequestId = r.ReadInt();
@@ -14,7 +16,8 @@ public sealed class SoftDollarTiers : IHasRequestId
     }
 }
 
-public sealed class SoftDollarTier
+[Message]
+public sealed record SoftDollarTier
 {
     public string Name { get; internal set; } = "";
     public string Value { get; internal set; } = "";

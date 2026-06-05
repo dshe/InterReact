@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 namespace InterReact;
+[SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "<Pending>")]
 
 public static class CTriggerMethod
 {
     public static readonly string[] friendlyNames = [ "default", "double bid/ask", "last", "double last", "bid/ask", "", "", "last of bid/ask", "mid-point" ];
-
     public static string ToFriendlyString(this TriggerMethod th)
     {
         return friendlyNames[(int)th];

@@ -1,4 +1,4 @@
-global using Microsoft.Extensions.Logging;
+﻿global using Microsoft.Extensions.Logging;
 global using InterReact;
 global using NodaTime;
 global using Xunit;

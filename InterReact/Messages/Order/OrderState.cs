@@ -1,7 +1,8 @@
 ﻿
 namespace InterReact;
 
-public sealed class OrderState
+[Message]
+public sealed record OrderState
 {
     public string Status { get; internal set; } = OrderStatus.Unknown;
 

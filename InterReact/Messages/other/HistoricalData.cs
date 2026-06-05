@@ -2,12 +2,15 @@
 
 //https://ibkrcampus.com/campus/ibkr-api-page/twsapi-doc/#hist-step-size
 
-public sealed class HistoricalData : IHasRequestId
+[Message]
+public sealed record HistoricalData : IHasRequestId
 {
     public int RequestId { get; }
-    public string Start { get; }
-    public string End { get; }
+    public string Start { get; } = "";
+    public string End { get; } = "";
     public IList<HistoricalDataBar> Bars { get; }
+
+    internal HistoricalData() => Bars = [];
     internal HistoricalData(ResponseReader r) // a one-shot deal
     {
         RequestId = r.ReadInt();
@@ -20,7 +23,8 @@ public sealed class HistoricalData : IHasRequestId
     }
 }
 
-public sealed class HistoricalDataBar : IHasRequestId
+[Message]
+public sealed record HistoricalDataBar : IHasRequestId
 {
     public int RequestId { get; init; }
     public required string Time { get; init; }

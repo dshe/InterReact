@@ -1,7 +1,8 @@
 ﻿namespace InterReact;
 
 // some of these properties require public setter to allow changing orders.
-public sealed class Order : IHasOrderId  // input + output
+[Message]
+public sealed record Order : IHasOrderId  // input + output
 {
     /// <summary>
     /// The OrderId property identifies the order.

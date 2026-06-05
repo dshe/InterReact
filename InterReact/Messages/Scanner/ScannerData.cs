@@ -1,10 +1,11 @@
 ﻿namespace InterReact;
 
-public sealed class ScannerData : IHasRequestId
+[Message]
+public sealed record ScannerData : IHasRequestId
 {
     public int RequestId { get; }
     public IList<ScannerDataItem> Items { get; }
-
+    internal ScannerData() => Items = [];
     internal ScannerData(ResponseReader r)
     {
         r.RequireMessageVersion(3);
@@ -16,7 +17,8 @@ public sealed class ScannerData : IHasRequestId
     }
 }
 
-public sealed class ScannerDataItem
+[Message]
+public sealed record ScannerDataItem
 {
     public int Rank { get; }
     public ContractDetails ContractDetails { get; }

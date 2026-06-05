@@ -8,6 +8,7 @@ namespace InterReact;
 [SuppressMessage("Usage", "CA1031", Scope = "member")]
 [SuppressMessage("Usage", "IDE0057", Scope = "member")]
 [SuppressMessage("Usage", "IDE0018", Scope = "member")]
+[SuppressMessage("Usage", "IDE1006", Scope = "member")]
 public abstract class ContractCondition : OperatorCondition
 {
     public int ConId { get; set; }

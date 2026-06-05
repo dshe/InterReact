@@ -6,7 +6,6 @@ internal sealed class OrderDecoder
     private Contract Contract { get; }
     private Order Order { get; }
     private OrderState OrderState { get; }
-
     internal OrderDecoder(ResponseReader reader, Contract contract, Order order, OrderState orderState)
     {
         R = reader;

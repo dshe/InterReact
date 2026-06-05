@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class CompletedOrder // does not have OrderId!
+[Message]
+public sealed record CompletedOrder // does not have OrderId!
 {
     public Contract Contract { get; } = new();
     public Order Order { get; } = new();
@@ -75,4 +76,5 @@ public sealed class CompletedOrder // does not have OrderId!
     }
 }
 
-public sealed class CompletedOrdersEnd { }
+[Message]
+public sealed record CompletedOrdersEnd { }

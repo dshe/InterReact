@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class Contract // input + output OK
+[Message]
+public sealed record Contract // input + output OK
 {
     /// <summary>
     /// The unique contract identifier.

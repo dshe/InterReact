@@ -1,6 +1,7 @@
 ﻿namespace InterReact;
 
-public sealed class NextIdMessage
+[Message]
+public sealed record NextIdMessage
 {
     public int NextId { get; }
 

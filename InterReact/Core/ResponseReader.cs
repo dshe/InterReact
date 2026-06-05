@@ -1,5 +1,4 @@
-﻿using Stringification;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 namespace InterReact;

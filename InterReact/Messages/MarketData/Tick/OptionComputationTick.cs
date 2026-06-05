@@ -4,7 +4,8 @@
 /// Missing Values are indicated with null.
 /// Missing Values are indicated with double.MaxValue.
 /// </summary>
-public sealed class OptionComputationTick : TickBase
+[Message]
+public sealed record OptionComputationTick : TickBase
 {
     public int TickAttrib { get; }
     public double ImpliedVolatility { get; }

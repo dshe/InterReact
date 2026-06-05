@@ -1,9 +1,11 @@
 ﻿namespace InterReact;
 
-public sealed class WshMetaData : IHasRequestId
+[Message]
+public sealed record WshMetaData : IHasRequestId
 {
     public int RequestId { get; }
     public string Data { get; }
+    internal WshMetaData() => Data = "";
     internal WshMetaData(ResponseReader r)
     {
         RequestId = r.ReadInt();
