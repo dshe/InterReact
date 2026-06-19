@@ -53,10 +53,11 @@ public sealed record OrderStatusReport : IHasOrderId
     /// This field is used to identify an order held when TWS is trying to locate shares for a short sell.
     /// The value used to indicate this is 'locate'.
     /// </summary>
-    public string WhyHeld { get; }
+    public string WhyHeld { get; } = "";
 
     public double MktCapPrice { get; }
 
+    internal OrderStatusReport() { }
     internal OrderStatusReport(ResponseReader r)
     {
         OrderId = r.ReadInt();

@@ -3,15 +3,15 @@
 [Message]
 public sealed record MarketDepth : IHasRequestId
 {
-    public int RequestId { get; }
-    public int Position { get; }
-    public string MarketMaker { get; } = "";
-    public MarketDepthOperation Operation { get; }
-    public MarketDepthSide Side { get; }
-    public double Price { get; }
-    public decimal Size { get; }
-    public bool IsSmartDepth { get; }
-
+    public int RequestId { get; init; }
+    public int Position { get; init; }
+    public string MarketMaker { get; init; } = "";
+    public MarketDepthOperation Operation { get; init; } = MarketDepthOperation.Undefined;
+    public MarketDepthSide Side { get; init; } = MarketDepthSide.Undefined;
+    public double Price { get; init; }
+    public decimal Size { get; init; }
+    public bool IsSmartDepth { get; init; }
+    internal MarketDepth() { }
     internal MarketDepth(ResponseReader r, bool isLevel2)
     {
         r.IgnoreMessageVersion();

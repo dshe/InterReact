@@ -8,7 +8,7 @@ public class ResponseComposerTests : OutputHelperTestBase
     public ResponseComposerTests(ITestOutputHelper output) : base(output)
     {
         ResponseParser parser = new(NullLogger<ResponseParser>.Instance);
-        ResponseReader reader = new(NullLogger<ResponseReader>.Instance, new(null), parser);
+        ResponseReader reader = new(new(null), parser, NullLogger<ResponseReader>.Instance);
         _composer = new ResponseMessageComposer(SystemClock.Instance, reader);
     }
 

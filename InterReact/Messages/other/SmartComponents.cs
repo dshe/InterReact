@@ -8,14 +8,13 @@
 [Message]
 public sealed record SmartComponents : IHasRequestId
 {
-    public int RequestId { get; }
-    public Dictionary<int, KeyValuePair<string, char>> Map { get; }
-
+    public int RequestId { get; init; }
+    public Dictionary<int, KeyValuePair<string, char>> Map { get; } = [];
+    internal SmartComponents() { }
     internal SmartComponents(ResponseReader r)
     {
         RequestId = r.ReadInt();
         int n = r.ReadInt();
-        Map = new Dictionary<int, KeyValuePair<string, char>>(n);
         for (int i = 0; i < n; i++)
         {
             int bitNumber = r.ReadInt();

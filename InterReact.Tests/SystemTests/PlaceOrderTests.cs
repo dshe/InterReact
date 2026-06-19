@@ -6,7 +6,7 @@ public class Place(ITestOutputHelper output, TestFixture fixture) : CollectionTe
     [Fact]
     public async Task PlaceOrderTestAsync()
     {
-        if (!Client.RemoteIpEndPoint.IsUsingTwsDemoPort())
+        if (!Client.RemoteIpEndPoint.IsTwsDemoAccountPort())
             throw new InvalidOperationException("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
 
         Contract contract = new()

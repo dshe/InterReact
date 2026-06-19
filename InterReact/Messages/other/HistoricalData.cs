@@ -5,19 +5,17 @@
 [Message]
 public sealed record HistoricalData : IHasRequestId
 {
-    public int RequestId { get; }
-    public string Start { get; } = "";
-    public string End { get; } = "";
-    public IList<HistoricalDataBar> Bars { get; }
-
-    internal HistoricalData() => Bars = [];
+    public int RequestId { get; init; }
+    public string Start { get; init; } = "";
+    public string End { get; init; } = "";
+    public IList<HistoricalDataBar> Bars { get; } = [];
+    internal HistoricalData() { }
     internal HistoricalData(ResponseReader r) // a one-shot deal
     {
         RequestId = r.ReadInt();
         Start = r.ReadString();
         End = r.ReadString();
         int n = r.ReadInt();
-        Bars = new List<HistoricalDataBar>(n);
         for (int i = 0; i < n; i++)
             Bars.Add(HistoricalDataBar.CreateHistoricalBar(r, RequestId));
     }
@@ -35,7 +33,6 @@ public sealed record HistoricalDataBar : IHasRequestId
     public decimal Volume { get; init; }
     public decimal WAP { get; init; }
     public int Count { get; init; }
-
     internal static HistoricalDataBar CreateHistoricalBar(ResponseReader r, int requestId)
     {
         return new HistoricalDataBar()
@@ -51,7 +48,6 @@ public sealed record HistoricalDataBar : IHasRequestId
             Count = r.ReadInt()
         };
     }
-
     internal static HistoricalDataBar CreateUpdateBar(ResponseReader r)
     {
         return new HistoricalDataBar()

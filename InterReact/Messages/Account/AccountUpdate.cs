@@ -22,18 +22,18 @@ public sealed record AccountValue
 public sealed record PortfolioValue
 {
     public string Account { get; init; } = "";
-    public Contract Contract { get; init; }
+    public Contract Contract { get; init; } = new();
     public decimal Position { get; init; }
     public double MarketPrice { get; init; }
     public double MarketValue { get; init; }
     public double AverageCost { get; init; }
     public double UnrealizedPnl { get; init; }
     public double RealizedPnl { get; init; }
-    internal PortfolioValue() => Contract = new();
+    internal PortfolioValue() { }
     internal PortfolioValue(ResponseReader r)
     {
         r.RequireMessageVersion(8);
-        Contract = new(r, includeExchange:false);
+        Contract.Read(r, includeExchange: false);
         Position = r.ReadDecimal();
         MarketPrice = r.ReadDouble();
         MarketValue = r.ReadDouble();

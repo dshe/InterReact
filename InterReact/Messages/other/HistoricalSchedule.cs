@@ -7,8 +7,8 @@ public sealed record HistoricalSchedule : IHasRequestId
     public string StartDate { get; } = "";
     public string EndDate { get; } = "";
     public string Timezone { get; } = "";
-    public IList<HistoricalSession> Sessions { get; }
-    internal HistoricalSchedule() => Sessions = [];
+    public IList<HistoricalSession> Sessions { get; } = [];
+    internal HistoricalSchedule() { }
     internal HistoricalSchedule(ResponseReader r)
     {
         RequestId = r.ReadInt();
@@ -16,7 +16,6 @@ public sealed record HistoricalSchedule : IHasRequestId
         EndDate = r.ReadString();
         Timezone = r.ReadString();
         int n = r.ReadInt();
-        Sessions = new List<HistoricalSession>(n);
         for (int i = 0; i < n; i++)
             Sessions.Add(new HistoricalSession(r));
     }
@@ -25,9 +24,10 @@ public sealed record HistoricalSchedule : IHasRequestId
 [Message]
 public sealed record HistoricalSession
 {
-    public string SessionStartTime { get; }
-    public string SessionEndTime { get; }
-    public string SessionRefDate { get; }
+    public string SessionStartTime { get; init; } = "";
+    public string SessionEndTime { get; init; } = "";
+    public string SessionRefDate { get; init; } = "";
+    internal HistoricalSession() { }
     internal HistoricalSession(ResponseReader r)
     {
         SessionStartTime = r.ReadString();

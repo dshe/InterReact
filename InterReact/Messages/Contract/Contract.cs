@@ -81,7 +81,8 @@ public sealed record Contract // input + output OK
     public DeltaNeutralContract? DeltaNeutralContract { get; set; }
 
     public Contract() { }
-    internal Contract(ResponseReader r, bool includeExchange = true, bool includePrimaryExchange = true)
+
+    internal void Read(ResponseReader r, bool includeExchange = true, bool includePrimaryExchange = true)
     {
         ContractId = r.ReadInt();
         Symbol = r.ReadString();

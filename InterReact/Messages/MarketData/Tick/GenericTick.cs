@@ -3,8 +3,8 @@
 [Message]
 public sealed record GenericTick : TickBase
 {
-    public double Value { get; }
-
+    public double Value { get; init; }
+    internal GenericTick() { }
     internal GenericTick(ResponseReader r)
     {
         r.IgnoreMessageVersion();

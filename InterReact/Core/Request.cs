@@ -13,10 +13,6 @@ public sealed class Request(InterReactOptions Options, Func<RequestMessage> Crea
     /// </summary>
     public int GetNextId() => Interlocked.Increment(ref Options.Id);
 
-    /// For testing with mock server.
-    internal async ValueTask RequestControlAsync(string message) => 
-        await CreateMessage().Write(RequestCode.Control, message).SendAsync().ConfigureAwait(false);
-
     public async ValueTask RequestMarketDataAsync(
         int requestId,
         Contract contract,

@@ -15,7 +15,7 @@ public sealed class RequestMessage
         Connection = connection;
     }
 
-    internal async Task SendAsync([CallerMemberName] string memberName = "")
+    internal async ValueTask SendAsync([CallerMemberName] string memberName = "")
     {
         Logger.LogDebug("Request: {Method}", memberName);
         if (Strings.Count == 0)

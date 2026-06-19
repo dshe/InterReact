@@ -3,10 +3,11 @@
 internal class SharedWriter
 {
     private readonly HashSet<Action<string>> _writers = [];
+    private readonly Lock _writersLock = new();
 
     internal void Add(Action<string> writer)
     {
-        lock (_writers)
+        lock (_writersLock)
         {
             if (!_writers.Add(writer))
                 throw new InvalidOperationException("Add");
@@ -15,7 +16,7 @@ internal class SharedWriter
 
     internal void Remove(Action<string> writer)
     {
-        lock (_writers)
+        lock (_writersLock)
         {
             if (!_writers.Remove(writer))
                 throw new InvalidOperationException("Remove");
@@ -24,7 +25,7 @@ internal class SharedWriter
 
     internal void Write(string text)
     {
-        lock (_writers)
+        lock (_writersLock)
         {
             foreach (Action<string> write in _writers)
                 write(text);

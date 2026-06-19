@@ -3,14 +3,13 @@
 [Message]
 public sealed record SoftDollarTiers : IHasRequestId
 {
-    public int RequestId { get; }
-    public IList<SoftDollarTier> Tiers { get; }
-    internal SoftDollarTiers() => Tiers = [];
+    public int RequestId { get; init; }
+    public IList<SoftDollarTier> Tiers { get; } = [];
+    internal SoftDollarTiers() { }
     internal SoftDollarTiers(ResponseReader r)
     {
         RequestId = r.ReadInt();
         int n = r.ReadInt();
-        Tiers = new List<SoftDollarTier>(n);
         for (int i = 0; i < n; i++)
             Tiers.Add(new SoftDollarTier(r));
     }

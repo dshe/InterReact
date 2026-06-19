@@ -21,7 +21,7 @@ public sealed class Response : IObservable<object>
     public IDisposable Subscribe(IObserver<object> observer) => Observable.Subscribe(observer);
 }
 
-public static partial class Extension
+public static partial class Extensions
 {
     internal static IObservable<object> ComposeMessage(this IObservable<string[]> source, ResponseMessageComposer composer)
     {

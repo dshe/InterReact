@@ -3,12 +3,12 @@
 [Message]
 public sealed record ReplaceFAEnd : IHasRequestId
 {
-    public int RequestId { get; }
-    public string Text { get; }
-
-    internal ReplaceFAEnd(ResponseReader reader)
+    public int RequestId { get; init; }
+    public string Text { get; init; } = "";
+    internal ReplaceFAEnd() { }
+    internal ReplaceFAEnd(ResponseReader r)
     {
-        RequestId = reader.ReadInt();
-        Text = reader.ReadString();
+        RequestId = r.ReadInt();
+        Text = r.ReadString();
     }
 }

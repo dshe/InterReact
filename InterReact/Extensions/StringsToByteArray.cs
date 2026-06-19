@@ -1,38 +1,44 @@
-﻿using System;
-using System.Buffers.Binary;
-using System.Collections.Generic;
+﻿using System.Buffers.Binary;
 using System.Text;
 namespace InterReact;
 
-internal static partial class Extensions
+public static partial class Extensions
 {
-    internal static byte[] ToByteArrayWithLengthPrefix(this IEnumerable<string> strings) =>
-        strings.ToByteArray().ToByteArrayWithLengthPrefix();
-
-    private static byte[] ToByteArray(this IEnumerable<string> source)
+    extension(string str)
     {
-        ArgumentNullException.ThrowIfNull(source);
-        return [..source.SelectMany(s =>
+        internal byte[] ToByteArray()
         {
-            ArgumentNullException.ThrowIfNull(s);
-            return s.ToByteArray();
-        })];
+            ArgumentNullException.ThrowIfNull(str);
+            byte[] bytes = Encoding.UTF8.GetBytes(str);
+            Array.Resize(ref bytes, bytes.Length + 1); // null terminator
+            return bytes;
+        }
     }
 
-    internal static byte[] ToByteArray(this string source)
+    extension(IEnumerable<string> strings)
     {
-        ArgumentNullException.ThrowIfNull(source);
-        byte[] bytes = Encoding.UTF8.GetBytes(source);
-        Array.Resize(ref bytes, bytes.Length + 1); // null terminator
-        return bytes;
+        internal byte[] ToByteArrayWithLengthPrefix() => strings.ToByteArray().ToByteArrayWithLengthPrefix();
+        private byte[] ToByteArray()
+        {
+            ArgumentNullException.ThrowIfNull(strings);
+            return [..strings.SelectMany(s =>
+            {
+                ArgumentNullException.ThrowIfNull(s);
+                return s.ToByteArray();
+            })];
+        }
     }
 
-    private static byte[] ToByteArrayWithLengthPrefix(this byte[] source)
+    extension(byte[] bytes)
     {
-        ArgumentNullException.ThrowIfNull(source);
-        byte[] buffer = new byte[source.Length + 4];
-        BinaryPrimitives.WriteInt32BigEndian(buffer, source.Length);
-        source.CopyTo(buffer, 4);
-        return buffer;
+        private byte[] ToByteArrayWithLengthPrefix()
+        {
+            ArgumentNullException.ThrowIfNull(bytes);
+            byte[] buffer = new byte[bytes.Length + 4];
+            BinaryPrimitives.WriteInt32BigEndian(buffer, bytes.Length);
+            bytes.CopyTo(buffer, 4);
+            return buffer;
+        }
     }
+
 }

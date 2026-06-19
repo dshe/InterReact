@@ -6,6 +6,7 @@ public sealed record CompletedOrder // does not have OrderId!
     public Contract Contract { get; } = new();
     public Order Order { get; } = new();
     public OrderState OrderState { get; } = new();
+    internal CompletedOrder() { }
     internal CompletedOrder(ResponseReader reader)
     {
         OrderDecoder decoder = new(reader, Contract, Order, OrderState);

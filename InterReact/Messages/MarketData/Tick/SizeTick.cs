@@ -6,17 +6,8 @@
 [Message]
 public sealed record SizeTick : TickBase
 {
-    public decimal Size { get; }
-    internal SizeTick()
-    {
-        TickType = TickType.Undefined;
-    }
-    internal SizeTick(int requestId, TickType tickType, decimal size)
-    {
-        RequestId = requestId;
-        TickType = tickType;
-        Size = size;
-    }
+    public decimal Size { get; init; }
+    internal SizeTick() { }
     internal SizeTick(ResponseReader r)
     {
         r.IgnoreMessageVersion();

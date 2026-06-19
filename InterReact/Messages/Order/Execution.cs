@@ -9,82 +9,83 @@ public sealed record Execution : IHasRequestId, IHasOrderId, IHasExecutionId
     /// <summary>
     /// RequestId will be -1 if this object sent due to an execution rather than a request for executions.
     /// </summary>
-    public int RequestId { get; }
+    public int RequestId { get; init; }
 
-    public int OrderId { get; }
+    public int OrderId { get; init; }
 
     /// <summary>
     /// Unique order execution id.
     /// </summary>
-    public string ExecutionId { get; } = "";
+    public string ExecutionId { get; init; } = "";
 
     /// <summary>
     /// The Id of the client which placed the order.
     /// Note: TWS orders have a fixed client id of "0."
     /// </summary>
-    public int ClientId { get; }
+    public int ClientId { get; init; }
 
     /// <summary>
     /// The order execution time.
     /// </summary>
-    public string Time { get; } = "";
+    public string Time { get; init; } = "";
 
     /// <summary>
     /// Cusomer account number.
     /// </summary>
-    public string Account { get; } = "";
+    public string Account { get; init; } = "";
 
-    public string Exchange { get; } = "";
-    public string Side { get; } = "";
+    public string Exchange { get; init; } = "";
+    public string Side { get; init; } = "";
 
     /// <summary>
     /// The number of shares filled.
     /// </summary>
-    public decimal Shares { get; }
+    public decimal Shares { get; init; }
 
     /// <summary>
     /// The order execution price, not including commissions.
     /// </summary>
-    public double Price { get; }
+    public double Price { get; init; }
 
     /// <summary>
     /// The TWS id used to identify orders, which remains the same over TWS sessions.
     /// </summary>
-    public int PermanentId { get; }
+    public int PermanentId { get; init; }
 
     /// <summary>
     /// Identifies the position as one to be liquidated last should the need arise.
     /// </summary>
-    public int Liquidation { get; }
-    public decimal CumulativeQuantity { get; }
+    public int Liquidation { get; init; }
+    public decimal CumulativeQuantity { get; init; }
 
     /// <summary>
     /// The average price, which includes commissions.
     /// </summary>
-    public double AveragePrice { get; }
-    public string OrderReference { get; } = "";
+    public double AveragePrice { get; init; }
+    public string OrderReference { get; init; } = "";
 
     /// <summary>
     /// IncludeAll the Economic Value Rule name and the respective optional argument. The two Values should be separated by a colon. For example, aussieBond:YearsToExpiration=3. When the optional argument is not present, the first value will be followed by a colon.
     /// </summary>
-    public string EconomicValueRule { get; } = "";
+    public string EconomicValueRule { get; init; } = "";
 
     /// <summary>
     /// Tells you approximately how much the market value of a contract would change if the price were to change by 1. It cannot be used to get market value by multiplying the price by the approximate multiplier.
     /// </summary>
-    public double EconomicValueMultiplier { get; }
+    public double EconomicValueMultiplier { get; init; }
 
-    public string ModelCode { get; } = "";
+    public string ModelCode { get; init; } = "";
 
-    public Liquidity LastLiquidity { get; } = Liquidity.None;
+    public Liquidity LastLiquidity { get; init; } = Liquidity.None;
 
-    public Contract Contract { get; }
+    public Contract Contract { get; init; } = new();
 
+    internal Execution() { }
     internal Execution(ResponseReader r)
     {
         RequestId = r.ReadInt();
         OrderId = r.ReadInt();
-        Contract = new(r, includePrimaryExchange: false);
+        Contract.Read(r, includePrimaryExchange: false);
         ExecutionId = r.ReadString();
         Time = r.ReadString();
         Account = r.ReadString();
@@ -121,7 +122,8 @@ public sealed record Execution : IHasRequestId, IHasOrderId, IHasExecutionId
 [Message]
 public sealed record ExecutionEnd : IHasRequestId
 {
-    public int RequestId { get; }
+    public int RequestId { get; init; }
+    internal ExecutionEnd() { }
     internal ExecutionEnd(ResponseReader r)
     {
         r.IgnoreMessageVersion();

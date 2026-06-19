@@ -10,35 +10,38 @@
 [Message]
 public sealed record PriceTick : TickBase
 {
-    public double Price { get; }
-    public TickAttrib TickAttrib { get; }
-    internal PriceTick()
-    {
-        TickType = TickType.Undefined;
-        TickAttrib = new TickAttrib();
-    }
-    internal PriceTick(int requestId, TickType tickType, double price, TickAttrib tickAttrib)
-    {
-        RequestId = requestId;
-        TickType = tickType;
-        Price = price;
-        TickAttrib = tickAttrib;
-    }
+    public double Price { get; init; }
+    public TickAttrib TickAttrib { get; init; }
+    internal PriceTick() => TickAttrib = new TickAttrib(0);
     internal static object Create(ResponseReader r)
     {
         r.RequireMessageVersion(3);
+
         int requestId = r.ReadInt();
         TickType priceTickType = r.ReadEnum<TickType>();
         double price = r.ReadDouble();
         decimal size = r.ReadDecimal();
         TickAttrib tickAttrib = new(r.ReadInt());
-        PriceTick priceTick = new(requestId, priceTickType, price, tickAttrib);
+
+        PriceTick priceTick = new()
+        {
+            RequestId = requestId,
+            TickType = priceTickType,
+            Price = price,
+            TickAttrib = tickAttrib
+        };
 
         TickType sizeTickType = GetSizeTickType(priceTickType);
         if (sizeTickType == TickType.Undefined)
             return priceTick;
 
-        SizeTick sizeTick = new(requestId, sizeTickType, size);
+        SizeTick sizeTick = new()
+        {
+            RequestId = requestId,
+            TickType = sizeTickType,
+            Size = size
+        };
+
         return new object[] { priceTick, sizeTick };
     }
 
@@ -55,7 +58,6 @@ public sealed record PriceTick : TickBase
         };
 }
 
-[Message]
 public sealed record TickAttrib
 {
     public bool CanAutoExecute { get; }
@@ -64,7 +66,6 @@ public sealed record TickAttrib
     public bool Unreported { get; }
     public bool BidPastLow { get; }
     public bool AskPastHigh { get; }
-    internal TickAttrib() { }
     internal TickAttrib(int value)
     {
         BitMask mask = new(value);

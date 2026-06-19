@@ -55,7 +55,7 @@ public sealed class InterReactClient(
                 .AddSingleton<ResponseMessageComposer>()
                 .AddSingleton<Service>()
                 .AddSingleton<IInterReactClient, InterReactClient>()
-                .BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true })
+                .BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true })
                 .GetRequiredService<IInterReactClient>();
         }
         catch (Exception)

@@ -3,7 +3,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Subjects;
 namespace InterReact;
 
-public static partial class Extension
+public static partial class Extensions
 {
     /// <summary>
     /// Returns an observable which shares a single subscription to the source observable.
@@ -19,6 +19,7 @@ public static partial class Extension
     {
         long index = 0;
         Dictionary<string, T> cache = [];
+        Lock cacheLock = new();
         Subject<T[]>? subject = null;
         IDisposable? sourceSubscription = null;
         // Wait until all messages are received to return result.
@@ -26,7 +27,7 @@ public static partial class Extension
 
         return Observable.Create<T[]>(observer =>
         {
-            lock (cache)
+            lock (cacheLock)
             {
                 if (!waitForEndMessage)
                     observer.OnNext(cache.Values.ToArray());
@@ -36,7 +37,7 @@ public static partial class Extension
 
                 sourceSubscription ??= source.Subscribe(m =>
                 {
-                    lock (cache)
+                    lock (cacheLock)
                     {
                         if (waitForEndMessage && isEndMessage is not null && isEndMessage(m))
                         {
@@ -57,7 +58,7 @@ public static partial class Extension
 
                 return Disposable.Create(() =>
                 {
-                    lock (cache)
+                    lock (cacheLock)
                     {
                         subscription.Dispose();
 

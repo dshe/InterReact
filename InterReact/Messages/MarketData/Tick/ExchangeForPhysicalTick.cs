@@ -4,12 +4,13 @@
 public sealed record ExchangeForPhysicalTick : TickBase
 {
     public double BasisPoints { get; }
-    public string FormattedBasisPoints { get; }
+    public string FormattedBasisPoints { get; } = "";
     public double ImpliedFuturesPrice { get; }
     public int HoldDays { get; }
-    public string FutureLastTradeDate { get; }
+    public string FutureLastTradeDate { get; } = "";
     public double DividendImpact { get; }
     public double DividendsToLastTradeDate { get; }
+    internal ExchangeForPhysicalTick() { }
     internal ExchangeForPhysicalTick(ResponseReader r)
     {
         r.IgnoreMessageVersion();

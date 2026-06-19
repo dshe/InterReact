@@ -1,13 +1,11 @@
 ﻿namespace InterReact;
 
-[Message]
 public sealed record Tag // input + output
 {
     public string Name { get; }
     public string Value { get; }
-
     public Tag(string name, string value) => (Name, Value) = (name, value);
-
+    internal Tag(ResponseReader r) : this(r.ReadString(), r.ReadString()) { }
     internal static string Combine(IEnumerable<Tag>? tags)
     {
         if (tags is null)

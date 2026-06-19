@@ -23,7 +23,7 @@ IInterReactClient client = await InterReactClient.CreateAsync(options =>
     options.LogFactory = loggerFactory;
 });
 
-if (!client.RemoteIpEndPoint.IsUsingTwsDemoPort())
+if (!client.RemoteIpEndPoint.IsTwsDemoAccountPort())
 {
     Console.WriteLine("TWS demo account is required since an order will be placed. Please first login to the demo account.");
     return;

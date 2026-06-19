@@ -3,8 +3,8 @@
 [Message]
 public sealed record ManagedAccounts
 {
-    public IReadOnlyList<string> Accounts { get; }
-    internal ManagedAccounts() => Accounts = [];
+    public IReadOnlyList<string> Accounts { get; } = [];
+    internal ManagedAccounts() { }
     internal ManagedAccounts(ResponseReader r)
     {
         r.IgnoreMessageVersion();

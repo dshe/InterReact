@@ -26,15 +26,26 @@ public sealed class Connection : IAsyncDisposable
     private Connection(Socket socket, InterReactOptions options, ILogger logger)
     {
         _socket = socket;
-        _senderTask = SenderLoopAsync();
-        _logger = logger;
-        RemoteEndPoint = (IPEndPoint)socket.RemoteEndPoint!;
         _options = options;
+        _logger = logger;
+        _senderTask = SenderLoopAsync();
         Observable = _socket.CreateObservable().Publish().AutoConnect();
+        RemoteEndPoint = (IPEndPoint)socket.RemoteEndPoint!;
     }
 
-    internal async Task<string[]> ReadMessageAsync(CancellationToken ct) =>
-        await _socket.ReadMessageAsync(ct).ConfigureAwait(false);
+    internal async Task<string[]> ReadOneMessageAsync(CancellationToken ct)
+    {
+        using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        cts.CancelAfter(TimeSpan.FromSeconds(2));
+        try
+        {
+            return await _socket.ReadOneMessageAsync(ct).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException e) when (cts.IsCancellationRequested)
+        {
+            throw new TimeoutException("Timeout waiting for response from TWS/Gateway. Try restarting.", e);
+        }
+    }
 
     internal ValueTask SendStringAsync(string str, CancellationToken ct = default)
     {
@@ -55,7 +66,7 @@ public sealed class Connection : IAsyncDisposable
             await SendAllAsync(message).ConfigureAwait(false);
     }
 
-    private async Task SendAllAsync(ReadOnlyMemory<byte> buffer)
+    private async ValueTask SendAllAsync(ReadOnlyMemory<byte> buffer)
     {
         while (!buffer.IsEmpty)
         {
@@ -69,7 +80,7 @@ public sealed class Connection : IAsyncDisposable
     private async Task LoginAsync(CancellationToken ct)
     {
         // Send without prefix
-        await SendStringAsync("API", default).ConfigureAwait(false);
+        await SendStringAsync("API", ct).ConfigureAwait(false);
 
         // Send with prefix. Report a range of supported API versions to TWS.
         string s = $"v{(int)_options.ServerVersionMin}..{(int)_options.ServerVersionMax}";
@@ -82,8 +93,7 @@ public sealed class Connection : IAsyncDisposable
                 _options.OptionalCapabilities
             ], ct).ConfigureAwait(false);
 
-        string[] firstMessage = await ReadMessageAsync(ct).ConfigureAwait(false);
-
+        string[] firstMessage = await ReadOneMessageAsync(ct).ConfigureAwait(false);
         // ServerVersion is the highest supported API version within the range specified.
         if (!Enum.TryParse(firstMessage[0], out ServerVersion version))
             throw new InvalidDataException($"Could not parse server version '{firstMessage[0]}'.");
@@ -94,7 +104,6 @@ public sealed class Connection : IAsyncDisposable
 
         _logger.LogInformation("Logged into TWS/Gateway version {ServerVersionCurrent} with ClientId {ClientId}.",
             (int)_options.ServerVersionCurrent, _options.TwsClientId);
-
     }
 
     public async ValueTask DisposeAsync()

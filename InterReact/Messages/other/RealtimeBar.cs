@@ -3,16 +3,16 @@
 [Message]
 public sealed record RealtimeBar : IHasRequestId
 {
-    public int RequestId { get; }
-    public long Time { get; }
-    public double Open { get; }
-    public double High { get; }
-    public double Low { get; }
-    public double Close { get; }
-    public decimal Volume { get; }
-    public decimal Wap { get; }
-    public int Count { get; }
-
+    public int RequestId { get; init; }
+    public long Time { get; init; }
+    public double Open { get; init; }
+    public double High { get; init; }
+    public double Low { get; init; }
+    public double Close { get; init; }
+    public decimal Volume { get; init; }
+    public decimal Wap { get; init; }
+    public int Count { get; init; }
+    internal RealtimeBar() { }
     internal RealtimeBar(ResponseReader r)
     {
         r.IgnoreMessageVersion();

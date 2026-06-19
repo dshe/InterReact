@@ -4,14 +4,13 @@
 public sealed record HistoricalBidAskTicks : IHasRequestId
 {
     public int RequestId { get; init; }
-    public IList<HistoricalBidAskTick> Ticks { get; init; }
+    public IList<HistoricalBidAskTick> Ticks { get; } = [];
     public bool Done { get; init; }
-    internal HistoricalBidAskTicks() => Ticks = [];
+    internal HistoricalBidAskTicks() { }
     internal HistoricalBidAskTicks(ResponseReader r)
     {
         RequestId = r.ReadInt();
         int n = r.ReadInt();
-        Ticks = new List<HistoricalBidAskTick>(n);
         for (int i = 0; i < n; i++)
             Ticks.Add(new HistoricalBidAskTick(r));
         Done = r.ReadBool();

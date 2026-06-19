@@ -7,7 +7,8 @@ public sealed record TimeTick : TickBase // from StringTick
     /// <summary>
     /// Seconds precision.
     /// </summary>
-    public Instant Time { get; }
+    public Instant Time { get; set; }
+    internal TimeTick() { }
     internal TimeTick(int requestId, TickType tickType, string str) 
     {
         RequestId = requestId;

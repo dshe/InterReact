@@ -5,11 +5,11 @@ namespace InterReact;
 [SuppressMessage("Usage", "CA1822", Scope = "member")]
 public sealed class ResponseParser(ILogger<ResponseParser> logger)
 {
-    private const string MaxInt = "2147483647";
-    private const string MaxLong = "9223372036854775807";
-    private const string MaxDouble = "1.7976931348623157E308";
-    private Dictionary<Type, Dictionary<string, object>> EnumCache { get; } = [];
+    private const string _maxInt = "2147483647";
+    private const string _maxLong = "9223372036854775807";
+    private const string _maxDouble = "1.7976931348623157E308";
     private ILogger Logger { get; } = logger;
+    private Dictionary<Type, Dictionary<string, object>> EnumCache { get; } = [];
 
     internal char ParseChar(string s)
     {
@@ -69,7 +69,7 @@ public sealed class ResponseParser(ILogger<ResponseParser> logger)
 
     internal decimal ParseDecimal(string s) // ok
     {
-        if (s.Length == 0 || s == MaxInt || s == MaxLong || s == MaxDouble)
+        if (s.Length == 0 || s == _maxInt || s == _maxLong || s == _maxDouble)
             return decimal.MaxValue;
         if (s == "0")
             return 0M;

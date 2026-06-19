@@ -6,7 +6,7 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
     [Fact]
     public async Task OrderMonitorTestAsync()
     {
-        if (!Client.RemoteIpEndPoint.IsUsingTwsDemoPort())
+        if (!Client.RemoteIpEndPoint.IsTwsDemoAccountPort())
             throw new InvalidOperationException("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
 
         Contract contract = new()
@@ -38,7 +38,7 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
     [Fact]
     public async Task OrderMonitorCancellationTestAsync()
     {
-        if (!Client.RemoteIpEndPoint.IsUsingTwsDemoPort())
+        if (!Client.RemoteIpEndPoint.IsTwsDemoAccountPort())
             throw new InvalidOperationException("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
 
         Contract contract = new()
@@ -72,7 +72,7 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
     [Fact]
     public async Task OrderMonitorModificationTestAsync()
     {
-        if (!Client.RemoteIpEndPoint.IsUsingTwsDemoPort())
+        if (!Client.RemoteIpEndPoint.IsTwsDemoAccountPort())
             throw new InvalidOperationException("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
 
         Contract contract = new()

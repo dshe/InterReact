@@ -3,11 +3,12 @@
 [Message]
 public sealed record OpenOrder : IHasOrderId
 {
-    public int OrderId { get; }
+    public int OrderId { get; init; }
     public Order Order { get; } = new();
     public Contract Contract { get; } = new();
     public OrderState OrderState { get; } = new();
 
+    internal OpenOrder() { }
     internal OpenOrder(ResponseReader reader)
     {
         OrderDecoder eOrderDecoder = new(reader, Contract, Order, OrderState);
@@ -89,5 +90,6 @@ public sealed record OpenOrder : IHasOrderId
 
 public sealed record OpenOrderEnd
 {
+    internal OpenOrderEnd() { }
     internal OpenOrderEnd(ResponseReader r) => r.IgnoreMessageVersion();
 }

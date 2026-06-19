@@ -2,103 +2,106 @@
 using System.Reactive.Disposables;
 namespace InterReact;
 
-public static partial class Extension
+public static partial class Extensions
 {
-    public static IObservable<T> ToObservable<T>(
-        this IObservable<T> source, Action startRequest)
+    extension<T>(IObservable<T> source)
     {
-        return Observable.Create<T>(observer =>
+        public IObservable<T> ToObservable(Action startRequest)
         {
-            IDisposable subscription = source
-                .SubscribeSafe(Observer.Create<T>(
-                    onNext: m =>
-                    {
-                        observer.OnNext(m);
-                        observer.OnCompleted();
-                    },
-                    onError: observer.OnError,
-                    onCompleted: observer.OnCompleted));
+            return Observable.Create<T>(observer =>
+            {
+                IDisposable subscription = source
+                    .SubscribeSafe(Observer.Create<T>(
+                        onNext: m =>
+                        {
+                            observer.OnNext(m);
+                            observer.OnCompleted();
+                        },
+                        onError: observer.OnError,
+                        onCompleted: observer.OnCompleted));
 
-            startRequest();
+                startRequest();
 
-            return subscription;
-        });
+                return subscription;
+            });
+        }
     }
 
-    public static IObservable<T> ToObservable<T>(
-        this IObservable<object> source,
-        Func<ValueTask> startRequest, Func<ValueTask>? stopRequest = null)
+    extension<T>(IObservable<object> source)
     {
-        return Observable.Create<T>(async observer =>
+        public IObservable<T> ToObservable(Func<ValueTask> startRequest, Func<ValueTask>? stopRequest = null)
         {
-            bool? cancelable = null;
-
-            IDisposable subscription = source
-                .OfType<T>()
-                .SubscribeSafe(Observer.Create<T>(
-                    onNext: observer.OnNext,
-                    onError: e =>
-                    {
-                        cancelable = false;
-                        observer.OnError(e);
-                    },
-                    onCompleted: () =>
-                    {
-                        cancelable = false;
-                        observer.OnCompleted();
-                    }));
-
-            if (cancelable is null)
-                await startRequest().ConfigureAwait(false);
-            cancelable ??= true;
-
-            return Disposable.Create(async () =>
+            return Observable.Create<T>(async observer =>
             {
-                if (cancelable is true && stopRequest is not null)
-                    await stopRequest().ConfigureAwait(false);
-                subscription.Dispose();
+                bool? cancelable = null;
+
+                IDisposable subscription = source
+                    .OfType<T>()
+                    .SubscribeSafe(Observer.Create<T>(
+                        onNext: observer.OnNext,
+                        onError: e =>
+                        {
+                            cancelable = false;
+                            observer.OnError(e);
+                        },
+                        onCompleted: () =>
+                        {
+                            cancelable = false;
+                            observer.OnCompleted();
+                        }));
+
+                if (cancelable is null)
+                    await startRequest().ConfigureAwait(false);
+                cancelable ??= true;
+
+                return Disposable.Create(async () =>
+                {
+                    if (cancelable is true && stopRequest is not null)
+                        await stopRequest().ConfigureAwait(false);
+                    subscription.Dispose();
+                });
             });
-        });
+        }
     }
 
-    //Func<ValueTask>
-    // For continuous results with RequestId: AccountUpdatesMulti, MarketData
-    // For multiple   results with RequestId: ContractDetails, MarketDataSnapshot
-    public static IObservable<IHasRequestId> ToObservableWithId(
-        this IObservable<object> source, 
-        Func<int> getRequestId,
-        Func<int, ValueTask> startRequest, Func<int, ValueTask>? stopRequest = null)
+    extension(IObservable<object> source)
     {
-        return Observable.Create<IHasRequestId>(async observer =>
+        //Func<ValueTask>
+        // For continuous results with RequestId: AccountUpdatesMulti, MarketData
+        // For multiple   results with RequestId: ContractDetails, MarketDataSnapshot
+        public IObservable<IHasRequestId> ToObservableWithId(Func<int> getRequestId, Func<int, ValueTask> startRequest, Func<int, ValueTask>? stopRequest = null)
         {
-            int id = getRequestId();
-            bool? cancelable = null;
-
-            IDisposable subscription = source
-                .WithRequestId(id)
-                .SubscribeSafe(Observer.Create<IHasRequestId>(
-                    onNext: observer.OnNext,
-                    onError: e =>
-                    {
-                        cancelable = false;
-                        observer.OnError(e);
-                    },
-                    onCompleted: () =>
-                    {
-                        cancelable = false;
-                        observer.OnCompleted();
-                    }));
-
-            if (cancelable is null)
-                await startRequest(id).ConfigureAwait(false);
-            cancelable ??= true;
-
-            return Disposable.Create(async () =>
+            return Observable.Create<IHasRequestId>(async observer =>
             {
-                if (cancelable is true && stopRequest is not null)
-                    await stopRequest(id).ConfigureAwait(false);
-                subscription.Dispose();
+                int id = getRequestId();
+                bool? cancelable = null;
+
+                IDisposable subscription = source
+                    .WithRequestId(id)
+                    .SubscribeSafe(Observer.Create<IHasRequestId>(
+                        onNext: observer.OnNext,
+                        onError: e =>
+                        {
+                            cancelable = false;
+                            observer.OnError(e);
+                        },
+                        onCompleted: () =>
+                        {
+                            cancelable = false;
+                            observer.OnCompleted();
+                        }));
+
+                if (cancelable is null)
+                    await startRequest(id).ConfigureAwait(false);
+                cancelable ??= true;
+
+                return Disposable.Create(async () =>
+                {
+                    if (cancelable is true && stopRequest is not null)
+                        await stopRequest(id).ConfigureAwait(false);
+                    subscription.Dispose();
+                });
             });
-        });
+        }
     }
 }

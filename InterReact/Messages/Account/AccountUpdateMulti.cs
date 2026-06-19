@@ -17,14 +17,7 @@ public sealed record AccountUpdateMulti : IHasRequestId
         RequestId = r.ReadInt();
         IsEndMessage = isEndMessage;
         if (isEndMessage)
-        {
-            Account = "";
-            ModelCode = "";
-            Key = "";
-            Value = "";
-            Currency = "";
             return;
-        }
         Account = r.ReadString();
         ModelCode = r.ReadString();
         Key = r.ReadString();

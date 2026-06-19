@@ -7,8 +7,9 @@
 [Message]
 public sealed record MarketDataTypeMessage : IHasRequestId
 {
-    public int RequestId { get; }
-    public MarketDataType Type { get; }
+    public int RequestId { get; init; }
+    public MarketDataType Type { get; init; }
+    internal MarketDataTypeMessage() { }
     internal MarketDataTypeMessage(ResponseReader r)
     {
         r.IgnoreMessageVersion();

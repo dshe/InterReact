@@ -3,8 +3,9 @@
 [Message]
 public sealed record FinancialAdvisor
 {
-    public FinancialAdvisorDataType DataType { get; }
-    public string Data { get; }
+    public FinancialAdvisorDataType DataType { get; init; }
+    public string Data { get; init; } = "";
+    internal FinancialAdvisor() { }
     internal FinancialAdvisor(ResponseReader r)
     {
         r.IgnoreMessageVersion();

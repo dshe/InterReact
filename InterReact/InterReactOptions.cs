@@ -15,7 +15,7 @@ public sealed class InterReactOptions
     /// Specify the port(s) used to attempt connection to TWS/Gateway.
     /// If unspecified, connection will be attempted on ports 7496 and 7497, 4001, 4002.
     /// </summary>
-    public IReadOnlyList<int> TwsPortAddresses { get; set; } = Extension.TwsDefaultPorts;
+    public IReadOnlyList<int> TwsPortAddresses { get; set; } = TwsDefaultPorts.All;
     /// <summary>
     /// Specify a client id. Up to 8 clients can attach to TWS/Gateway.
     /// Each client requires a unique Id. The default Id is random.

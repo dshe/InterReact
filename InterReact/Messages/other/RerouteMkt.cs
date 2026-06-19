@@ -3,10 +3,10 @@
 [Message]
 public sealed record RerouteMktData : IHasRequestId
 {
-    public int RequestId { get; }
-    public int ContractId { get; }
-    public string Exchange { get; }
-
+    public int RequestId { get; init; }
+    public int ContractId { get; init; }
+    public string Exchange { get; } = "";
+    internal RerouteMktData() { }
     internal RerouteMktData(ResponseReader r)
     {
         RequestId = r.ReadInt();
@@ -18,10 +18,10 @@ public sealed record RerouteMktData : IHasRequestId
 [Message]
 public sealed class RerouteMktDepth : IHasRequestId
 {
-    public int RequestId { get; }
-    public int ContractId { get; }
-    public string Exchange { get; }
-
+    public int RequestId { get; init; }
+    public int ContractId { get; init; }
+    public string Exchange { get; init; } = "";
+    internal RerouteMktDepth() { }
     internal RerouteMktDepth(ResponseReader r)
     {
         RequestId = r.ReadInt();

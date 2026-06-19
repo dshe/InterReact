@@ -10,7 +10,7 @@ public sealed record ContractDetails : IHasRequestId
     /// </summary>
     public int RequestId { get; init; }
 
-    public Contract Contract { get; init; } = new();
+    public Contract Contract { get; } = new();
 
     public string MarketName { get; init; } = "";
     public double MinimumTick { get; init; }
@@ -315,6 +315,7 @@ public sealed record ContractDetails : IHasRequestId
 public sealed record ContractDetailsEnd : IHasRequestId
 {
     public int RequestId { get; init; }
+    internal ContractDetailsEnd() { }
     internal ContractDetailsEnd(ResponseReader r)
     {
         r.IgnoreMessageVersion();

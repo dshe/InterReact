@@ -7,46 +7,89 @@ using System.Reactive.Disposables;
 using System.Text;
 namespace InterReact;
 
-public static partial class Extension
+public static partial class Extensions
 {
-    internal static IObservable<string[]> CreateObservable(this Socket socket)
+    extension(Socket socket)
     {
-        return Observable.Create<string[]>(observer =>
+        internal async Task<string> ReadOneStringAsync(CancellationToken ct)
         {
-            CancellationTokenSource cts = new();
-            int terminated = 0;
-
-            _ = Task.Run(async () =>
+            using var ms = new MemoryStream();
+            byte[] buffer = new byte[1];
+            while (true)
             {
-                try
+                int read = await socket.ReceiveAsync(buffer, SocketFlags.None, ct).ConfigureAwait(false);
+                if (read == 0)
+                    throw new EndOfStreamException();
+                if (buffer[0] == 0)
+                    break;
+                ms.WriteByte(buffer[0]);
+            }
+            return Encoding.UTF8.GetString(ms.ToArray());
+        }
+
+        internal async Task<string[]> ReadOneMessageAsync(CancellationToken ct)
+        {
+            byte[] header = new byte[4];
+            await ReadExactlyAsync(socket, header, ct).ConfigureAwait(false);
+            int length = BinaryPrimitives.ReadInt32BigEndian(header);
+            if (length <= 0 || length > 4096)
+                throw new InvalidDataException();
+            byte[] payload = new byte[length];
+            await ReadExactlyAsync(socket, payload, ct).ConfigureAwait(false);
+            string[] strings = DecodeStrings(payload).ToArray();
+            return strings;
+        }
+
+        private async Task ReadExactlyAsync(Memory<byte> buffer, CancellationToken ct)
+        {
+            while (!buffer.IsEmpty)
+            {
+                int read = await socket.ReceiveAsync(buffer, SocketFlags.None, ct).ConfigureAwait(false); ;
+                if (read == 0)
+                    throw new EndOfStreamException();
+                buffer = buffer[read..];
+            }
+        }
+
+        internal IObservable<string[]> CreateObservable()
+        {
+            return Observable.Create<string[]>(observer =>
+            {
+                CancellationTokenSource cts = new();
+                int terminated = 0;
+
+                _ = Task.Run(async () =>
                 {
-                    await RunAsync(socket, observer, cts.Token).ConfigureAwait(false);
-                    Complete();
-                }
-                catch (OperationCanceledException)
-                {
-                }
-                catch (Exception ex)
-                {
-                    Error(ex);
-                }
-                finally
-                {
-                }
-                void Complete()
-                {
-                    if (TryTerminate())
-                        observer.OnCompleted();
-                }
-                void Error(Exception ex)
-                {
-                    if (TryTerminate())
-                        observer.OnError(ex);
-                }
-                bool TryTerminate() => Interlocked.Exchange(ref terminated, 1) == 0;
+                    try
+                    {
+                        await RunAsync(socket, observer, cts.Token).ConfigureAwait(false);
+                        Complete();
+                    }
+                    catch (OperationCanceledException)
+                    {
+                    }
+                    catch (Exception ex)
+                    {
+                        Error(ex);
+                    }
+                    finally
+                    {
+                    }
+                    void Complete()
+                    {
+                        if (TryTerminate())
+                            observer.OnCompleted();
+                    }
+                    void Error(Exception ex)
+                    {
+                        if (TryTerminate())
+                            observer.OnError(ex);
+                    }
+                    bool TryTerminate() => Interlocked.Exchange(ref terminated, 1) == 0;
+                });
+                return Disposable.Create(() => cts.Cancel()); // don't bother disposing cts
             });
-            return Disposable.Create(() => cts.Cancel()); // don't bother disposing cts
-        });
+        }
     }
 
     private static async Task RunAsync(Socket socket, IObserver<string[]> observer, CancellationToken ct)
@@ -72,7 +115,6 @@ public static partial class Extension
                 try
                 {
                     FlushResult result = await writer.FlushAsync(ct).ConfigureAwait(false);
-
                     if (result.IsCompleted)
                         break;
                 }
@@ -154,51 +196,4 @@ public static partial class Extension
             throw new InvalidDataException("Incomplete null-terminated string.");
     }
 
-    internal static async Task<string> ReadStringAsync(this Socket socket, CancellationToken ct)
-    {
-        using var ms = new MemoryStream();
-        byte[] buffer = new byte[1];
-        while (true)
-        {
-            int read = await socket.ReceiveAsync(buffer, SocketFlags.None, ct).ConfigureAwait(false);
-            if (read == 0)
-                throw new EndOfStreamException();
-            if (buffer[0] == 0)
-                break;
-            ms.WriteByte(buffer[0]);
-        }
-        return Encoding.UTF8.GetString(ms.ToArray());
-    }
-
-    internal static async Task<string[]> ReadMessageAsync(this Socket socket, CancellationToken ct)
-    {
-        using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        cts.CancelAfter(TimeSpan.FromSeconds(2));
-        try
-        {
-            byte[] header = new byte[4];
-            await ReadExactlyAsync(socket, header, ct).ConfigureAwait(false);
-            int length = BinaryPrimitives.ReadInt32BigEndian(header);
-            if (length <= 0 || length > 4096)
-                throw new InvalidDataException();
-            byte[] payload = new byte[length];
-            await ReadExactlyAsync(socket, payload, ct).ConfigureAwait(false);
-            string[] strings = DecodeStrings(payload).ToArray();
-            return strings;
-        }
-        catch (OperationCanceledException e) when (cts.IsCancellationRequested)
-        {
-            throw new TimeoutException("Timeout waiting for response from TWS/Gateway. Try restarting.", e);
-        }
-    }
-    private static async Task ReadExactlyAsync(Socket socket, Memory<byte> buffer, CancellationToken ct)
-    {
-        while (!buffer.IsEmpty)
-        {
-            int read = await socket.ReceiveAsync(buffer, SocketFlags.None, ct).ConfigureAwait(false); ;
-            if (read == 0)
-                throw new EndOfStreamException();
-            buffer = buffer[read..];
-        }
-    }
 }

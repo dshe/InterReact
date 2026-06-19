@@ -2,6 +2,6 @@
 
 public abstract record TickByTickBase : IHasRequestId
 {
-    public int RequestId { get; protected set; }
-    public TickByTickType TickByTickType { get; protected set; }
+    public int RequestId { get; init; }
+    public TickByTickType TickByTickType { get; init; }
 }

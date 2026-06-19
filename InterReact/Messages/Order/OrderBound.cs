@@ -3,10 +3,10 @@
 [Message]
 public sealed record OrderBound
 {
-    public long PermId { get; }
-    public int ApiClientId { get; }
-    public int ApiOrderId { get; }
-
+    public long PermId { get; init; }
+    public int ApiClientId { get; init; }
+    public int ApiOrderId { get; init; }
+    internal OrderBound() { }
     internal OrderBound(ResponseReader r)
     {
         PermId = r.ReadLong(); // permId?

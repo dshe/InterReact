@@ -9,8 +9,9 @@ namespace ClientServer;
 
 public static partial class Program
 {
-    public static async Task RunServerAsync(IPEndPoint endPoint, ILogger logger)
+    public static async Task RunServerAsync(IPEndPoint endPoint, ILogger logger, CancellationToken ct)
     {
+        CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         Socket serverSocket = new(SocketType.Stream, ProtocolType.Tcp);
         try
         {
@@ -21,35 +22,44 @@ public static partial class Program
             Socket clientSocket = serverSocket.Accept();
             logger.LogCritical("Client connection accepted.");
 
-            string str = await clientSocket.ReadStringAsync(default);
+            string str = await clientSocket.ReadOneStringAsync(ct);
+            logger.LogCritical("Received string: {0}", str.Stringify(false));
             Trace.Assert(str == "API");
 
-            string[] message1 = await clientSocket.ReadMessageAsync(default);
+            string[] message1 = await clientSocket.ReadOneMessageAsync(ct);
+            logger.LogCritical("Received message: {0}", message1.Stringify(false));
             Trace.Assert(message1.Length == 1);
 
-            string[] message2 = await clientSocket.ReadMessageAsync(default);
+            string[] message2 = await clientSocket.ReadOneMessageAsync(ct);
+            logger.LogCritical("Received message: {0}", message2.Stringify(false));
             Trace.Assert(message2.Length == 4);
 
             await clientSocket.WriteMessageAsync(ServerVersion.BOND_ISSUERID.ToString(), "the date");
-            logger.LogCritical("Handshake completed.");
 
-            CancellationTokenSource cts = new();
+            await clientSocket.WriteMessageAsync("9", "0", "1"); // NextId Message
+
+            logger.LogCritical("Handshake completed.");
 
             IObservable<string[]> observable = clientSocket.CreateObservable();
             observable.Subscribe(
-                // OnNext
-                x => logger.LogCritical("Client received: " + string.Join(", ", x)),
+                x => logger.LogCritical("Received: " + x.Stringify(false)),
                 ex =>
-                {   // OnError
+                {
                     logger.LogError(ex, "Socket error: " + ex.Message);
                     cts.Cancel();
                 },
                 () =>
-                {   // OnCompleted
+                {
                     logger.LogInformation("Disconnecting.");
                     cts.Cancel();
                 }
             );
+
+            await Task.Delay(1000, ct);
+
+            await clientSocket.WriteMessageAsync("1", "3", "1", ((int)TickType.LastPrice).ToString(), "10.01", "200", "0");
+            await clientSocket.WriteMessageAsync("1", "3", "1", ((int)TickType.LastPrice).ToString(), "10.02", "200", "0");
+            await clientSocket.WriteMessageAsync("1", "3", "1", ((int)TickType.LastPrice).ToString(), "10.03", "200", "0");
 
             await Task.Delay(Timeout.Infinite, cts.Token);
         }

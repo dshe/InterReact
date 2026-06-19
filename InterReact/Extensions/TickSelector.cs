@@ -2,22 +2,24 @@
 
 // This extension method provides an alternative to source.OfType<T>, with intellisense support.
 // So that, for example, source.OfType<PriceTick>() can be replaced with OfTickClass(selector => selector.PriceTick).
-public static partial class Extension
+public static partial class Extensions
 {
-    public static IEnumerable<T> OfTickClass<T>(
-        this IEnumerable<IHasRequestId> source,
-        Func<TickEnumerableSelector, IEnumerable<T>> selector)
+    extension<T>(IEnumerable<IHasRequestId> source)
     {
-        ArgumentNullException.ThrowIfNull(selector);
-        return selector(new TickEnumerableSelector(source));
+        public IEnumerable<T> OfTickClass(Func<TickEnumerableSelector, IEnumerable<T>> selector)
+        {
+            ArgumentNullException.ThrowIfNull(selector);
+            return selector(new TickEnumerableSelector(source));
+        }
     }
 
-    public static IObservable<T> OfTickClass<T>(
-        this IObservable<IHasRequestId> source,
-        Func<TickObservableSelector, IObservable<T>> selector)
+    extension<T>(IObservable<IHasRequestId> source)
     {
-        ArgumentNullException.ThrowIfNull(selector);
-        return selector(new TickObservableSelector(source));
+        public IObservable<T> OfTickClass(Func<TickObservableSelector, IObservable<T>> selector)
+        {
+            ArgumentNullException.ThrowIfNull(selector);
+            return selector(new TickObservableSelector(source));
+        }
     }
 }
 

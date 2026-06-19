@@ -5,7 +5,19 @@ namespace InterReact;
 
 public static class Strings
 {
+    public static string JoinStrings(this IEnumerable<string> strings, string separator = "") => string.Join(separator, strings);
+
+    public static string Stringify<T>(this T instance, bool includeTypeName = true)
+    {
+        var tx = JsonSerializer.Serialize(instance, _options);
+        if (includeTypeName)
+            return $"{typeof(T).Name}: {tx}";
+        else
+            return tx;
+    }
+
     private static readonly JsonSerializerOptions _options = CreateOptions();
+
     private static JsonSerializerOptions CreateOptions()
     {
         var resolver = new DefaultJsonTypeInfoResolver();
@@ -34,15 +46,4 @@ public static class Strings
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingDefault
         };
     }
-
-    public static string Stringify<T>(this T instance, bool includeTypeName = true)
-    {
-        var tx = JsonSerializer.Serialize(instance, _options);
-        if (includeTypeName)
-            return $"{typeof(T).Name}: {tx}";
-        else
-            return tx;
-    }
-
-    public static string JoinStrings(this IEnumerable<string> strings, string separator = "") => string.Join(separator, strings);
 }

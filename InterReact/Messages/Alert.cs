@@ -11,18 +11,13 @@ namespace InterReact;
 [Message]
 public sealed record Alert : IHasRequestId, IHasOrderId
 {
-    public int RequestId { get; init; }
-    public int OrderId { get; init; }
+    public int RequestId { get; init; } = -1;
+    public int OrderId { get; init; } = -1;
     public int Code { get; init; }
-    public string Message { get; init; }
-    public string AdvancedOrderRejectJson { get; }
+    public string Message { get; init; } = "";
+    public string AdvancedOrderRejectJson { get; init; } = "";
     internal Instant Time { get; init; }
-    internal Alert() 
-    {
-        RequestId = OrderId = -1;
-        Message = "";
-        AdvancedOrderRejectJson = "";
-    }
+    internal Alert() { }
     internal Alert(ResponseReader r, IClock clock)
     {
         r.RequireMessageVersion(2);

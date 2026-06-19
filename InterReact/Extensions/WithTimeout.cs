@@ -1,23 +1,26 @@
 ﻿using System.Reactive.Disposables;
 namespace InterReact;
 
-public static partial class Extension
+public static partial class Extensions
 {
-    public static IObservable<T> WithTimeout<T>(this IObservable<T> source, TimeSpan? timeSpan, CancellationToken ct = default)
+    extension<T>(IObservable<T> source)
     {
-        return Observable.Create<T>(observer =>
+        public IObservable<T> WithTimeout(TimeSpan? timeSpan, CancellationToken ct = default)
         {
-            IDisposable subscription = source.Subscribe(observer);
+            return Observable.Create<T>(observer =>
+            {
+                IDisposable subscription = source.Subscribe(observer);
 
-            CancellationTokenSource cts = new();
-            if (timeSpan is not null)
-                cts.CancelAfter(timeSpan.Value);
+                CancellationTokenSource cts = new();
+                if (timeSpan is not null)
+                    cts.CancelAfter(timeSpan.Value);
 
-            CancellationTokenRegistration cancellationDisposable = ct.Register(() =>
-                observer.OnError(new OperationCanceledException("The operation was canceled.")));
+                CancellationTokenRegistration cancellationDisposable = ct.Register(() =>
+                    observer.OnError(new OperationCanceledException("The operation was canceled.")));
 
-            return new CompositeDisposable(subscription, cts, cancellationDisposable);
-        });
+                return new CompositeDisposable(subscription, cts, cancellationDisposable);
+            });
+        }
     }
 
 }

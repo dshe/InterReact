@@ -3,10 +3,9 @@
 [Message]
 public sealed record FundamentalData : IHasRequestId
 {
-    public int RequestId { get; }
-
-    public string Data { get; }
-
+    public int RequestId { get; init; }
+    public string Data { get; init; } = "";
+    internal FundamentalData() { }
     internal FundamentalData(ResponseReader r)
     {
         r.IgnoreMessageVersion();

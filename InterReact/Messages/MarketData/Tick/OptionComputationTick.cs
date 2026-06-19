@@ -7,15 +7,16 @@
 [Message]
 public sealed record OptionComputationTick : TickBase
 {
-    public int TickAttrib { get; }
-    public double ImpliedVolatility { get; }
-    public double Delta { get; }
-    public double OptPrice { get; } = double.MaxValue;
-    public double PvDividend { get; } = double.MaxValue;
-    public double Gamma { get; } = double.MaxValue;
-    public double Vega { get; } = double.MaxValue;
-    public double Theta { get; } = double.MaxValue;
-    public double UndPrice { get; } = double.MaxValue;
+    public int TickAttrib { get; init; }
+    public double ImpliedVolatility { get; init; }
+    public double Delta { get; init; }
+    public double OptPrice { get; init; } = double.MaxValue;
+    public double PvDividend { get; init; } = double.MaxValue;
+    public double Gamma { get; init; } = double.MaxValue;
+    public double Vega { get; init; } = double.MaxValue;
+    public double Theta { get; init; } = double.MaxValue;
+    public double UndPrice { get; init; } = double.MaxValue;
+    internal OptionComputationTick() { }
     internal OptionComputationTick(ResponseReader r)
     {
         RequestId = r.ReadInt();

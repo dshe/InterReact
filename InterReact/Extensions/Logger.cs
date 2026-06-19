@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-public static partial class Extension
+public static partial class Extensions
 {
     [LoggerMessage(EventId = 1, EventName = "ResponseMessage", Level = LogLevel.Debug, Message = "Response received: {Message}.")]
     internal static partial void LogResponseMessage(this ILogger logger, string message);

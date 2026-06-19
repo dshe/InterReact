@@ -3,9 +3,9 @@
 [Message]
 public sealed record SymbolSamples : IHasRequestId
 {
-    public int RequestId { get; }
-    public IList<ContractDescription> Descriptions { get; }
-    internal SymbolSamples() => Descriptions = [];
+    public int RequestId { get; init; }
+    public IList<ContractDescription> Descriptions { get; } = [];
+    internal SymbolSamples() { }
     internal SymbolSamples(ResponseReader r)
     {
         RequestId = r.ReadInt();

@@ -3,12 +3,11 @@
 [Message]
 public sealed record MarketDepthExchanges
 {
-    public IList<MarketDepthExchange> Exchanges { get; }
-    internal MarketDepthExchanges() => Exchanges = [];
+    public IList<MarketDepthExchange> Exchanges { get; } = [];
+    internal MarketDepthExchanges() { }
     internal MarketDepthExchanges(ResponseReader r)
     {
         int n = r.ReadInt();
-        Exchanges = new List<MarketDepthExchange>(n);
         for (int i = 0; i < n; i++)
             Exchanges.Add(new MarketDepthExchange(r));
     }
@@ -17,12 +16,12 @@ public sealed record MarketDepthExchanges
 [Message]
 public sealed record MarketDepthExchange
 {
-    public string Exchange { get; }
-    public string SecType { get; }
-    public string ListingExch { get; }
-    public string ServiceDataTyp { get; }
-    public int AggGroup { get; } // The aggregated group
-
+    public string Exchange { get; init; } = "";
+    public string SecType { get; init; } = "";
+    public string ListingExch { get; init; } = "";
+    public string ServiceDataTyp { get; init; } = "";
+    public int AggGroup { get; init; } // The aggregated group
+    internal MarketDepthExchange() { }
     internal MarketDepthExchange(ResponseReader r)
     {
         Exchange = r.ReadString();

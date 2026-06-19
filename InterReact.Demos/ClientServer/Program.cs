@@ -13,7 +13,7 @@ public static partial class Program
 
         IPEndPoint endPoint = new(IPAddress.Loopback, 111);
         
-        _ = Task.Run(() => RunServerAsync(endPoint, serverLogger));
+        _ = Task.Run(() => RunServerAsync(endPoint, serverLogger, default));
         await Task.Delay(100);
 
         await RunClientAsync(endPoint, clientLogger, clientLibLogger);

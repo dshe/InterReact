@@ -3,13 +3,13 @@
 [Message]
 public sealed record TickNews : IHasRequestId
 {
-    public int RequestId { get; }
-    public long TimeStamp { get; }
-    public string ProviderCode { get; }
-    public string ArticleId { get; }
-    public string Headline { get; }
-    public string ExtraData { get; }
-
+    public int RequestId { get; init; }
+    public long TimeStamp { get; init; }
+    public string ProviderCode { get; init; } = "";
+    public string ArticleId { get; init; } = "";
+    public string Headline { get; init; } = "";
+    public string ExtraData { get; init; } = "";
+    internal TickNews() { }
     internal TickNews(ResponseReader r)
     {
         RequestId = r.ReadInt();

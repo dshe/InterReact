@@ -3,15 +3,14 @@
 [Message]
 public sealed record ScannerData : IHasRequestId
 {
-    public int RequestId { get; }
-    public IList<ScannerDataItem> Items { get; }
-    internal ScannerData() => Items = [];
+    public int RequestId { get; init; }
+    public IList<ScannerDataItem> Items { get; } = [];
+    internal ScannerData() { }
     internal ScannerData(ResponseReader r)
     {
         r.RequireMessageVersion(3);
         RequestId = r.ReadInt();
         int n = r.ReadInt();
-        Items = new List<ScannerDataItem>(n);
         for (int i = 0; i < n; i++)
             Items.Add(new ScannerDataItem(r));
     }
@@ -20,13 +19,14 @@ public sealed record ScannerData : IHasRequestId
 [Message]
 public sealed record ScannerDataItem
 {
-    public int Rank { get; }
+    public int Rank { get; init; }
     public ContractDetails ContractDetails { get; }
-    public string Distance { get; }
-    public string Benchmark { get; }
-    public string Projection { get; }
-    public string ComboLegs { get; }
+    public string Distance { get; init; } = "";
+    public string Benchmark { get; init; } = "";
+    public string Projection { get; init; } = "";
+    public string ComboLegs { get; init; } = "";
 
+    internal ScannerDataItem() => ContractDetails = new();
     internal ScannerDataItem(ResponseReader r)
     {
         Rank = r.ReadInt();

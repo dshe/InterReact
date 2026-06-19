@@ -24,8 +24,9 @@ public sealed record TickByTickAllLast : TickByTickBase
     public double Price { get; }
     public decimal Size { get; }
     public TickAttribLast TickAttribLast { get; }
-    public string Exchange { get; }
-    public string SpecialConditions { get; }
+    public string Exchange { get; } = "";
+    public string SpecialConditions { get; } = "";
+    internal TickByTickAllLast() => TickAttribLast = new();
     internal TickByTickAllLast(int requestId, TickByTickType type, ResponseReader r)
     {
         RequestId = requestId;
@@ -48,6 +49,7 @@ public sealed record TickByTickBidAsk : TickByTickBase
     public decimal BidSize { get; }
     public decimal AskSize { get; }
     public TickAttribBidAsk TickAttribBidAsk { get; }
+    internal TickByTickBidAsk() => TickAttribBidAsk = new();
     internal TickByTickBidAsk(int requestId, TickByTickType type, ResponseReader r)
     {
         RequestId = requestId;
@@ -64,8 +66,9 @@ public sealed record TickByTickBidAsk : TickByTickBase
 [Message]
 public sealed record TickByTickMidpoint : TickByTickBase
 {
-    public long Time { get; }
-    public double Midpoint { get; }
+    public long Time { get; init; }
+    public double Midpoint { get; init; }
+    internal TickByTickMidpoint() { }
     internal TickByTickMidpoint(int requestId, TickByTickType type, ResponseReader r)
     {
         RequestId = requestId;

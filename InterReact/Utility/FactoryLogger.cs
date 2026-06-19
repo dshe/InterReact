@@ -1,8 +1,11 @@
 ﻿namespace InterReact;
 
-public static partial class Extension
+public static partial class Extensions
 {
-    public static ILoggerFactory ToLoggerFactory(this ILogger logger) => new FactoryLogger(logger);
+    extension(ILogger logger)
+    {
+        internal ILoggerFactory ToLoggerFactory() => new FactoryLogger(logger);
+    }
 }
 
 internal sealed class FactoryLogger : ILoggerFactory

@@ -6,14 +6,15 @@
 [Message]
 public sealed record CommissionReport : IHasExecutionId, IHasOrderId
 {
-    public string ExecutionId { get; }
-    public double Commission { get; }
-    public string Currency { get; }
-    public double RealizedPnl { get; }
-    public double Yield { get; }
+    public string ExecutionId { get; init; } = "";
+    public double Commission { get; init; }
+    public string Currency { get; init; } = "";
+    public double RealizedPnl { get; init; }
+    public double Yield { get; init; }
     // Yet another date format: YYYYMMDD as integer.
-    public int YieldRedemptionDate { get; }
-    public int OrderId { get; } // OrderId may be set below
+    public int YieldRedemptionDate { get; init; }
+    public int OrderId { get; init; } // OrderId may be set below
+    internal CommissionReport() { }
     internal CommissionReport(ResponseReader r)
     {
         r.IgnoreMessageVersion();

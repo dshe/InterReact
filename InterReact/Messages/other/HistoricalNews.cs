@@ -3,11 +3,12 @@
 [Message]
 public sealed record HistoricalNews : IHasRequestId
 {
-    public int RequestId { get; }
-    public string Time { get; }
-    public string ProviderCode { get; }
-    public string ArticleId { get; }
-    public string Headline { get; }
+    public int RequestId { get; init; }
+    public string Time { get; init; } = "";
+    public string ProviderCode { get; init; } = "";
+    public string ArticleId { get; init; } = "";
+    public string Headline { get; init; } = "";
+    internal HistoricalNews() { }
     internal HistoricalNews(ResponseReader r)
     {
         RequestId = r.ReadInt();
@@ -21,8 +22,8 @@ public sealed record HistoricalNews : IHasRequestId
 [Message]
 public sealed record HistoricalNewsEnd : IHasRequestId
 {
-    public int RequestId { get; }
-    public bool HasMore { get; }
+    public int RequestId { get; init; }
+    public bool HasMore { get; init; }
     internal HistoricalNewsEnd() { }
     internal HistoricalNewsEnd(ResponseReader r)
     {

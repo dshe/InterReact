@@ -3,10 +3,8 @@
 [Message]
 public sealed record StringTick : TickBase
 {
-    public string Value { get; private init; } = "";
-    private StringTick(int requestId, TickType tickType, string value) 
-        => (RequestId, TickType, Value) = (requestId, tickType, value);
-
+    public string Value { get; init; } = "";
+    private StringTick() { }
     internal static TickBase Create(ResponseReader r)
     {
         r.IgnoreMessageVersion();
@@ -17,6 +15,11 @@ public sealed record StringTick : TickBase
             return new TimeTick(requestId, tickType, str);
         if (tickType == TickType.RealtimeVolume) // there is no delayed RealTimeVolue
             return new RealtimeVolumeTick(requestId, tickType, r.Parser, str);
-        return new StringTick(requestId, tickType, str);
+        return new StringTick()
+        {
+            RequestId = requestId,
+            TickType = tickType,
+            Value = str
+        };
     }
 }

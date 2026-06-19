@@ -33,70 +33,65 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         }
     }
 
-    private double _bidPrice;
     public double BidPrice
     {
-        get => _bidPrice;
+        get;
         private set
         {
-            if (value == _bidPrice)
+            if (value == field)
                 return;
-            _bidPrice = value;
+            field = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(BidPrice)));
         }
     }
 
-    private double _askPrice;
     public double AskPrice
     {
-        get => _askPrice;
+        get;
         private set
         {
-            if (value == _askPrice)
+            if (value == field)
                 return;
-            _askPrice = value;
+            field = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AskPrice)));
         }
     }
 
-    private double _lastPrice;
     public double LastPrice
     {
-        get => _lastPrice;
+        get;
         private set
         {
-            if (value == _lastPrice)
+            if (value == field)
                 return;
-            _lastPrice = value;
+            field = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(LastPrice)));
         }
     }
 
-    private double _changePrice;
     public double ChangePrice
     {
-        get => _changePrice;
+        get;
         private set
         {
-            if (value == _changePrice)
+            if (value == field)
                 return;
-            _changePrice = value;
+            field = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ChangePrice)));
         }
     }
 
-    private SolidColorBrush _changeColor = Brushes.Transparent;
     public SolidColorBrush ChangeColor
     {
-        get => _changeColor;
+        get;
         private set
         {
-            if (value == _changeColor)
+            if (value == field)
                 return;
-            _changeColor = value;
+            field = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ChangeColor)));
         }
-    }
+    } = Brushes.Transparent;
 
     ////////////////////////////////////////////////////////////////////
 

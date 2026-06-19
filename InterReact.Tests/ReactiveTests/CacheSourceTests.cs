@@ -64,13 +64,12 @@ public class CacheSourceTests(ITestOutputHelper output) : OutputHelperTestBase(o
         IList<string> list1 = await observable.Take(1).ToList();
 
         IList<string> list = await observable.Take(TimeSpan.FromMilliseconds(100)).ToList();
-        //Assert.Equal(3, list.Count);
         Assert.Equal(4, list.Count);
 
         source.OnNext("10");
-        ;
+
         list = await observable.Take(TimeSpan.FromMilliseconds(100)).ToList();
-        //Assert.Equal(4, list.Count);
+        Assert.Equal(4, list.Count);
     }
 
 
@@ -87,13 +86,15 @@ public class CacheSourceTests(ITestOutputHelper output) : OutputHelperTestBase(o
     public async Task T04_Cache_TestAsync()
     {
         Subject<string> source = new();
-        IObservable<string> observable = source.CacheSource2(x => x);
+        IObservable<string> observable = source.CacheSource(x => x);
         IDisposable subscription = observable.Subscribe(); // start cache
 
-        IList<string> list1 = await observable.Take(TimeSpan.FromMilliseconds(100)).ToList();
-        Assert.Equal(0, list1.Count);
-
         source.OnNext("1");
+
+        IList<string> list1 = await observable.Take(TimeSpan.FromMilliseconds(1000)).ToList();
+        Assert.Equal(1, list1.Count);
+
+        source.OnNext("2");
 
         IList<string> list2 = await observable.Take(TimeSpan.FromMilliseconds(100)).ToList();
         Assert.Equal(14, list2.Count);

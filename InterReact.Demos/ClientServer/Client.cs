@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Net;
+﻿using System.Net;
 namespace ClientServer;
 
 public static partial class Program
@@ -17,23 +16,15 @@ public static partial class Program
 
         logger.LogCritical("Connected.");
 
-        int id = client.Request.GetNextId();
-        logger.LogInformation("NextId = {Id}.", id);
-
         IDisposable subscription = client.Response.Subscribe(
-            // OnNext
-            x => logger.LogCritical("Received: " + string.Join(", ", x) + "."),
-            ex =>
-            {   // OnError
-                logger.LogError(ex, "Socket error.");
-            },
-            () =>
-            {   // OnCompleted
-                logger.LogInformation("Socket disconnected.");
-            }
-        );
+            x => logger.LogInformation("Received: " + x.Stringify(false)),
+            ex => logger.LogError(ex, "Socket error."),
+            () => logger.LogInformation("Socket disconnected."));
 
-        await Task.Delay(100);
+        Contract contract = new() { Symbol = "AAPL", SecurityType = ContractSecurityType.Stock, Currency = "USD", Exchange = "SMART" };
+        await client.Request.RequestMarketDataAsync(1, contract);
+
+        await Task.Delay(1000);
 
         subscription.Dispose();
         logger.LogInformation("Disconnected.");

@@ -5,21 +5,19 @@
 public sealed record HistoricalTicks : IHasRequestId
 {
     public int RequestId { get; init; }
-    public IList<HistoricalTick> Ticks { get; init; }
+    public IList<HistoricalTick> Ticks { get; init; } = [];
     public bool Done { get; init; }
-    internal HistoricalTicks() => Ticks = [];
+    internal HistoricalTicks() { }
     internal HistoricalTicks(ResponseReader r)
     {
         RequestId = r.ReadInt();
         int n = r.ReadInt();
-        Ticks = new List<HistoricalTick>(n);
         for (int i = 0; i < n; i++)
             Ticks.Add(new HistoricalTick(r));
         Done = r.ReadBool();
     }
 }
 
-[Message]
 public sealed record HistoricalTick
 {
     //[return: MarshalAs(UnmanagedType.I8)]

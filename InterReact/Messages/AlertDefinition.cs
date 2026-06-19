@@ -1,9 +1,7 @@
 ﻿namespace InterReact;
 //https://ibkrcampus.com/campus/ibkr-api-page/twsapi-doc/#api-error-codes
 
-[Message]
 public sealed record AlertDefinition
-
 {
     public int Code { get; }
     public string Message { get; }
@@ -11,12 +9,11 @@ public sealed record AlertDefinition
     {
         Code = code;
         Message = message;
-        Alerts.Add(code, this);
+        _alerts.Add(code, this);
     }
 
-    private static readonly Dictionary<int, AlertDefinition> Alerts = [];
-    public static AlertDefinition? GetAlert(int code) => Alerts.TryGetValue(code, out AlertDefinition? alert) ? alert : null;
-
+    private static readonly Dictionary<int, AlertDefinition> _alerts = [];
+    public static AlertDefinition? GetAlert(int code) => _alerts.TryGetValue(code, out AlertDefinition? alert) ? alert : null;
     // No market data permissions
     // Time length exceed max
     // Invalid step

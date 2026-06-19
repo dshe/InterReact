@@ -4,13 +4,12 @@
 public sealed record MarketRule
 {
     public int MarketRuleId { get; init; }
-    public IList<PriceIncrement> PriceIncrements { get; init; }
-    internal MarketRule() => PriceIncrements = [];
+    public IList<PriceIncrement> PriceIncrements { get; } = [];
+    internal MarketRule() { }
     internal MarketRule(ResponseReader r)
     {
         MarketRuleId = r.ReadInt();
         int n = r.ReadInt();
-        PriceIncrements = new List<PriceIncrement>(n);
         for (int i = 0; i < n; i++)
             PriceIncrements.Add(new PriceIncrement(r));
     }

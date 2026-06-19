@@ -3,8 +3,8 @@
 [Message]
 public sealed record TickAttribBidAsk
 {
-    public bool BidPastLow { get; }
-    public bool AskPastHigh { get; }
+    public bool BidPastLow { get; init; }
+    public bool AskPastHigh { get; init; }
     internal TickAttribBidAsk() { }
     internal TickAttribBidAsk(int value)
     {
@@ -17,8 +17,8 @@ public sealed record TickAttribBidAsk
 [Message]
 public sealed record TickAttribLast
 {
-    public bool PastLimit { get; internal set; }
-    public bool Unreported { get; internal set; }
+    public bool PastLimit { get; init; }
+    public bool Unreported { get; init; }
     internal TickAttribLast() { }
     internal TickAttribLast(int value)
     {
