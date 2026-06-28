@@ -25,8 +25,8 @@ public class ToObservableWithId(ITestOutputHelper output) : OutputHelperTestBase
 
         SomeClass o1 = new(42);
         SomeClass o2 = new(100);
-        Alert o3 = new() { RequestId = 42, Time = now };
-        Alert o4 = new() { RequestId = 42, Time = now };
+        Alert o3 = new() { RequestId = 42 };
+        Alert o4 = new() { RequestId = 42 };
         SomeClass o5 = new(42);
         SomeClass o6 = new(99);
 

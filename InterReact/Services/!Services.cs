@@ -4,7 +4,7 @@ public partial class Service : IDisposable
 {
     private readonly InterReactOptions _options;
     private readonly Request _request;
-    private readonly Response _response;
+    private readonly IObservable<object> _response;
     private bool _disposed;
 
     public Service(InterReactOptions options, Request request, Response response)

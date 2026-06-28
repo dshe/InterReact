@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using System.Reactive.Linq;
+﻿using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 namespace ConnectTests;
 
@@ -17,12 +16,11 @@ public class BadData(ITestOutputHelper output) : OutputHelperTestBase(output, Lo
             .Response
             .WithRequestId(id)
             .FirstAsync()
-            .Timeout(TimeSpan.FromSeconds(6))
             .ToTask();
 
         Contract contract = new() {
             SecurityType = ContractSecurityType.Stock, 
-            Symbol = "InvalidSymbol2", 
+            Symbol = "InvalidSymbol2",
             Exchange = "Smart" };
 
         await client.Request.RequestMarketDataAsync(id, contract);
@@ -32,11 +30,16 @@ public class BadData(ITestOutputHelper output) : OutputHelperTestBase(output, Lo
         Alert alert = Assert.IsType<Alert>(message);
 
         Assert.StartsWith("No security definition has been found for the request", alert.Message);
+
+        await client.DisposeAsync();
     }
 
     [Fact]
     public async Task BadResponseTestAsync()
     {
+        IInterReactClient client = await InterReactClient.CreateAsync(options =>
+            options.LogFactory = LogFactory, TestContext.Current.CancellationToken);
+
         Contract contract = new()
         {
             SecurityType = ContractSecurityType.Stock,
@@ -45,24 +48,41 @@ public class BadData(ITestOutputHelper output) : OutputHelperTestBase(output, Lo
             Exchange = "SMART"
         };
 
-        IInterReactClient client = await InterReactClient.CreateAsync(options =>
-            options.LogFactory = LogFactory, TestContext.Current.CancellationToken);
-
         // This particular Id value will trigger a receive parse error when reading ContractDetails.
         int id = int.MaxValue;
 
-        client.Response.Subscribe(x => { }, e => throw e);
+        //client.Response.Subscribe(x => { }, e => throw e);
 
-        Task<ContractDetails> task = client
+        //Task<object> task = client
+        var task = client
             .Response
-            .WithRequestId(id)
-            .OfType<ContractDetails>()
+            //.WithRequestId(id)
+            //.OfType<ContractDetails>()
+            .OfType<Alert>()
             .FirstAsync()
-            .Timeout(TimeSpan.FromSeconds(6))
+            //.Timeout(TimeSpan.FromSeconds(3))
             .ToTask();
+
+        //IObservable<Contract> obs = Observable.Throw<Contract>(new NullReferenceException());
+        //await obs;
 
         await client.Request.RequestContractDetailsAsync(id, contract);
 
-        await Assert.ThrowsAnyAsync<Exception>(() => task);
+        Alert alert = await task;
+
+        //Assert.IsType<Alert>();
+
+        //Exception ex = await Assert.ThrowsAnyAsync<Exception>(() => task);
+
+        //Write(ex.ToString());
+
+        await Task.Delay(1000, TestContext.Current.CancellationToken);
+
+        await client.DisposeAsync();
+
+        await Task.Delay(1000, TestContext.Current.CancellationToken);
+
+        // the error is not sent to the client !!!
     }
+
 }

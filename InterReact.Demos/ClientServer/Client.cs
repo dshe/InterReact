@@ -17,7 +17,7 @@ public static partial class Program
         logger.LogCritical("Connected.");
 
         IDisposable subscription = client.Response.Subscribe(
-            x => logger.LogInformation("Received: " + x.Stringify(false)),
+            x => logger.LogInformation("Received: " + x.Stringify(true)),
             ex => logger.LogError(ex, "Socket error."),
             () => logger.LogInformation("Socket disconnected."));
 

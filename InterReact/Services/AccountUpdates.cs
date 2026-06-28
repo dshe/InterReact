@@ -33,7 +33,8 @@ public partial class Service
                 _request.CancelAccountUpdatesMultiAsync)
             .OfTypeOnly<AccountUpdateMulti>()
             .TakeUntil(m => m.IsEndMessage)
-            .WithTimeout(timeout, ct)
+            .TakeUntil(ct)
+            .Timeout(timeout ?? TimeSpan.MaxValue)
             .ToArray();
     }
 

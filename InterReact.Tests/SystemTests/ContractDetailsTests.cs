@@ -17,7 +17,8 @@ public class ContractDetail(ITestOutputHelper output, TestFixture fixture) : Col
             .Service
             .CreateContractDetailsObservable(contract)
             .OfTypeOnly<ContractDetails>()
-            .WithTimeout(TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken)
+            .TakeUntil(TestContext.Current.CancellationToken)
+            .Timeout(TimeSpan.FromSeconds(5))
             .Catch<ContractDetails, Exception>(ex =>
             {
                 // Could be symbol not found, timout or other error

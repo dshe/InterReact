@@ -1,11 +1,12 @@
 ﻿namespace InterReact;
 
-public static partial class Extensions
+// This C# 14 extension method syntax is not currently compatible with LoggerMessage source generation.
+
+public static partial class Xtensions
 {
-    [LoggerMessage(EventId = 1, EventName = "ResponseMessage", Level = LogLevel.Debug, Message = "Response received: {Message}.")]
+    [LoggerMessage(EventId = 2, EventName = "ResponseMessage", Level = LogLevel.Debug, Message = "{Message}.")]
     internal static partial void LogResponseMessage(this ILogger logger, string message);
 
-    [LoggerMessage(EventId = 2, EventName = "ResponseString", Level = LogLevel.Debug, Message = "Response string received: {CallerInfo}\r\n\t\"{Input}\" => {Output} ({TypeName}).")]
+    [LoggerMessage(EventId = 1, EventName = "ResponseString", Level = LogLevel.Trace, Message = "{CallerInfo}\r\n\t\"{Input}\" => {Output} ({TypeName}).")]
     internal static partial void LogResponseString(this ILogger logger, string callerInfo, string input, string output, string typeName);
 }
-

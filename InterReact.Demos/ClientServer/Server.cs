@@ -23,15 +23,15 @@ public static partial class Program
             logger.LogCritical("Client connection accepted.");
 
             string str = await clientSocket.ReadOneStringAsync(ct);
-            logger.LogCritical("Received string: {0}", str.Stringify(false));
+            logger.LogCritical("Received: [{0}]", str.Stringify(false));
             Trace.Assert(str == "API");
 
             string[] message1 = await clientSocket.ReadOneMessageAsync(ct);
-            logger.LogCritical("Received message: {0}", message1.Stringify(false));
+            logger.LogCritical("Received: {0}", message1.Stringify(false));
             Trace.Assert(message1.Length == 1);
 
             string[] message2 = await clientSocket.ReadOneMessageAsync(ct);
-            logger.LogCritical("Received message: {0}", message2.Stringify(false));
+            logger.LogCritical("Received: {0}", message2.Stringify(false));
             Trace.Assert(message2.Length == 4);
 
             await clientSocket.WriteMessageAsync(ServerVersion.BOND_ISSUERID.ToString(), "the date");
@@ -40,7 +40,9 @@ public static partial class Program
 
             logger.LogCritical("Handshake completed.");
 
-            IObservable<string[]> observable = clientSocket.CreateObservable();
+            var connection = new Connection(clientSocket, new(), logger);
+
+            IObservable<string[]> observable = connection.CreateObservable();
             observable.Subscribe(
                 x => logger.LogCritical("Received: " + x.Stringify(false)),
                 ex =>
@@ -61,7 +63,7 @@ public static partial class Program
             await clientSocket.WriteMessageAsync("1", "3", "1", ((int)TickType.LastPrice).ToString(), "10.02", "200", "0");
             await clientSocket.WriteMessageAsync("1", "3", "1", ((int)TickType.LastPrice).ToString(), "10.03", "200", "0");
 
-            await Task.Delay(Timeout.Infinite, cts.Token);
+            await Task.Delay(Timeout.Infinite, ct);
         }
         catch (TaskCanceledException)
         {
@@ -77,25 +79,28 @@ public static partial class Program
         }
     }
 
-    private static async Task WriteMessageAsync(this Socket socket, params string[] message)
+    extension(Socket socket)
     {
-        // Encode each string as UTF-8 with a null terminator
-        using var ms = new MemoryStream();
-        foreach (string s in message)
+        private async Task WriteMessageAsync(params string[] message)
         {
-            byte[] bytes = Encoding.UTF8.GetBytes(s);
-            ms.Write(bytes, 0, bytes.Length);
-            ms.WriteByte(0); // null terminator
+            // Encode each string as UTF-8 with a null terminator
+            using var ms = new MemoryStream();
+            foreach (string s in message)
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(s);
+                ms.Write(bytes, 0, bytes.Length);
+                ms.WriteByte(0); // null terminator
+            }
+
+            byte[] payload = ms.ToArray();
+
+            // Write length prefix (big-endian 4-byte integer)
+            byte[] header = new byte[4];
+            BinaryPrimitives.WriteInt32BigEndian(header, payload.Length);
+
+            // Send header then payload
+            await socket.SendAsync(header, SocketFlags.None).ConfigureAwait(false);
+            await socket.SendAsync(payload, SocketFlags.None).ConfigureAwait(false);
         }
-
-        byte[] payload = ms.ToArray();
-
-        // Write length prefix (big-endian 4-byte integer)
-        byte[] header = new byte[4];
-        BinaryPrimitives.WriteInt32BigEndian(header, payload.Length);
-
-        // Send header then payload
-        await socket.SendAsync(header, SocketFlags.None).ConfigureAwait(false);
-        await socket.SendAsync(payload, SocketFlags.None).ConfigureAwait(false);
     }
 }

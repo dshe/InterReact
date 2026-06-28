@@ -45,11 +45,4 @@ public sealed class InterReactOptions
 
     // ManagedAccounts is set in the ManagedAccounts message which is often received at startup.
     internal IReadOnlyList<string> ManagedAccounts { get; set; } = [];
-
-    internal InterReactOptions(Action<InterReactOptions>? action)
-    {
-        action?.Invoke(this);
-        if (LogFactory == NullLoggerFactory.Instance && Logger != NullLogger.Instance)
-            LogFactory = Logger.ToLoggerFactory();
-    }
 }

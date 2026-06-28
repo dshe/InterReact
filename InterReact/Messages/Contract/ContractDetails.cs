@@ -147,14 +147,14 @@ public sealed record ContractDetails : IHasRequestId
             case ContractDetailsType.GeneralContractType:
                 RequestId = r.ReadInt();
                 Contract.Symbol = r.ReadString();
-                Contract.SecurityType = r.ReadString();
+                Contract.SecurityType = r.ReadStringEnum<ContractSecurityType>();
 
                 ReadLastTradeDate(r.ReadString(), false);
                 if (r.Options.ServerVersionCurrent >= ServerVersion.LAST_TRADE_DATE)
                     Contract.LastTradeDateOrContractMonth = r.ReadString(); // ???
 
                 Contract.Strike = r.ReadDouble();
-                Contract.Right = r.ReadString();
+                Contract.Right = r.ReadStringEnum<ContractOptionRight>();
                 Contract.Exchange = r.ReadString();
                 Contract.Currency = r.ReadString();
                 Contract.LocalSymbol = r.ReadString();
@@ -232,7 +232,7 @@ public sealed record ContractDetails : IHasRequestId
             case ContractDetailsType.BondContractType:
                 RequestId = r.ReadInt();
                 Contract.Symbol = r.ReadString();
-                Contract.SecurityType = r.ReadString();
+                Contract.SecurityType = r.ReadStringEnum<ContractSecurityType>();
                 Cusip = r.ReadString();
                 Coupon = r.ReadDouble();
                 ReadLastTradeDate(r.ReadString(), true);
@@ -272,10 +272,10 @@ public sealed record ContractDetails : IHasRequestId
             case ContractDetailsType.ScannerContractType:
                 Contract.ContractId = r.ReadInt();
                 Contract.Symbol = r.ReadString();
-                Contract.SecurityType = r.ReadString();
+                Contract.SecurityType = r.ReadStringEnum<ContractSecurityType>();
                 Contract.LastTradeDateOrContractMonth = r.ReadString();
                 Contract.Strike = r.ReadDouble();
-                Contract.Right = r.ReadString();
+                Contract.Right = r.ReadStringEnum<ContractOptionRight>();
                 Contract.Exchange = r.ReadString();
                 Contract.Currency = r.ReadString();
                 Contract.LocalSymbol = r.ReadString();

@@ -1,54 +1,65 @@
 ﻿using System.Diagnostics;
-using System.Reactive.Concurrency;
 namespace InterReact;
 
 public sealed class Response : IObservable<object>
 {
-    private IObservable<object> Observable { get; }
+    private readonly IObservable<object> _observable;
 
-    public Response(ILogger<Response> logger, Connection connection, ResponseMessageComposer composer)
+    public Response(Connection connection, ResponseComposer responseComposer, ILogger<Response> logger)
     {
         ArgumentNullException.ThrowIfNull(connection, nameof(connection));
 
-        Observable = connection.Observable
-            .SubscribeOn(NewThreadScheduler.Default)
-            .ComposeMessage(composer)
-            .Do(msg => logger.LogResponseMessage(msg.Stringify()))
+        _observable = connection
+            .Observable
+            .ComposeMessage(responseComposer, logger)
             .Publish()
             .AutoConnect(); // connect on first observer
     }
 
-    public IDisposable Subscribe(IObserver<object> observer) => Observable.Subscribe(observer);
+    public IDisposable Subscribe(IObserver<object> observer) => _observable.Subscribe(observer);
 }
 
-public static partial class Extensions
+public static class Xtension
 {
-    internal static IObservable<object> ComposeMessage(this IObservable<string[]> source, ResponseMessageComposer composer)
+    extension(IObservable<string[]> source)
     {
-        return Observable.Create<object>(observer =>
+        internal IObservable<object> ComposeMessage(ResponseComposer responseComposer, ILogger logger)
         {
-            return source.Subscribe(onNext: strings =>
+            return Observable.Create<object>(observer =>
             {
-                try
+                return source.Subscribe(onNext: strings =>
                 {
-                    object result = composer.ComposeMessage(strings);
-                    if (result is object[] results)
+                    try
                     {
-                        Debug.Assert(strings[0] == "1");
-                        Debug.Assert(results.Length == 2);
-                        observer.OnNext(results[0]); // priceTick
-                        observer.OnNext(results[1]); // sizeTick
-                        return;
+                        object message = responseComposer.Compose(strings);
+                        if (message is object[] messages)
+                        {
+                            Debug.Assert(strings[0] == "1");
+                            Debug.Assert(messages.Length == 2);
+                            if (logger.IsEnabled(LogLevel.Debug))
+                                logger.LogResponseMessage(messages[0].Stringify());
+                            observer.OnNext(messages[0]); // priceTick
+                            if (logger.IsEnabled(LogLevel.Debug))
+                                logger.LogResponseMessage(messages[1].Stringify());
+                            observer.OnNext(messages[1]); // sizeTick
+                            return;
+                        }
+                        if (logger.IsEnabled(LogLevel.Debug))
+                            logger.LogResponseMessage(message.Stringify());
+                        observer.OnNext(message);
                     }
-                    observer.OnNext(result);
-                }
-                catch (Exception ex)
-                {
-                    observer.OnError(ex);
-                }
-            },
-            onError: observer.OnError,
-            onCompleted: observer.OnCompleted);
-        });
+                    catch (Exception ex)
+                    {
+                        string msg = $"Response({strings[0]}): {ex.Message}.";
+                        logger.LogError(ex, "{Msg}", msg);
+                        Alert alert = new() { Message = msg };
+                        observer.OnNext(alert);
+                        throw new InvalidOperationException(msg, ex);
+                    }
+                },
+                onError: observer.OnError,
+                onCompleted: observer.OnCompleted);
+            });
+        }
     }
 }

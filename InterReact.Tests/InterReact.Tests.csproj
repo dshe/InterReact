@@ -15,16 +15,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Reactive.Testing" Version="6.1.0" />
-    <PackageReference Include="MXLogger" Version="2.1.4" />
+    <PackageReference Include="MXLogger" Version="2.1.5" />
     <PackageReference Include="xunit.v3" Version="3.2.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\InterReact\InterReact.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="UnitTests\" />
   </ItemGroup>
 
 </Project>

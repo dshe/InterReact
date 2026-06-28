@@ -5,4 +5,5 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-[assembly: SuppressMessage("Design", "CA1034:Nested types should not be visible", Justification = "<Pending>", Scope = "type", Target = "~T:InterReact.Extensions")]
+[assembly: SuppressMessage("Performance", "CA1873:Avoid potentially expensive logging")]
+[assembly: SuppressMessage("Usage", "CA2254:Template should be a static expression")]

@@ -13,7 +13,7 @@ public sealed record Contract // input + output OK
     /// </summary>
     public string Symbol { get; set; } = "";
 
-    public string SecurityType { get; set; } = ContractSecurityType.Undefined;
+    public ContractSecurityType SecurityType { get; set; } = ContractSecurityType.Undefined;
 
     /// <summary>
     /// The contract's last trading day or contract month (for Options and Futures). 
@@ -23,7 +23,9 @@ public sealed record Contract // input + output OK
     public string LastTradeDateOrContractMonth { get; set; } = "";  // Expiry: YYYYMM or YYYYMMDD
 
     public double Strike { get; set; }
-    public string Right { get; set; } = ContractOptionRight.Undefined;
+
+    //public string Right { get; set; } = ContractOptionRight.Undefined;
+    public ContractOptionRight Right { get; set; } = ContractOptionRight.Undefined;
     public string Multiplier { get; set; } = ""; // options and futures
 
     /// <summary>
@@ -86,10 +88,10 @@ public sealed record Contract // input + output OK
     {
         ContractId = r.ReadInt();
         Symbol = r.ReadString();
-        SecurityType = r.ReadString();
+        SecurityType = r.ReadStringEnum<ContractSecurityType>();
         LastTradeDateOrContractMonth = r.ReadString();
         Strike = r.ReadDouble();
-        Right = r.ReadString();
+        Right = r.ReadStringEnum<ContractOptionRight>();
         Multiplier = r.ReadString();
         if (includeExchange)
             Exchange = r.ReadString();

@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Reactive.Testing;
+﻿using Microsoft.Reactive.Testing;
 namespace Tests;
 
 public abstract class OutputHelperTestBase : ReactiveTest
@@ -15,7 +14,7 @@ public abstract class OutputHelperTestBase : ReactiveTest
     {
         _output = output;
         LogFactory = LoggerFactory.Create(builder => builder
-            .AddMXLogger(output.WriteLine)
+            .AddMXLogger(output.WriteLine, MXLogFormatType.SingleLine)
             .SetMinimumLevel(logLevel));
         Logger = LogFactory.CreateLogger(name);
     }

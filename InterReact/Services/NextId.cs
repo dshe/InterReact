@@ -13,6 +13,7 @@ public partial class Service
         await _response
             .OfType<NextIdMessage>()
             .ToObservable<NextIdMessage>(_request.RequestNextOrderIdAsync)
-            .WithTimeout(timeout, ct)
+            .TakeUntil(ct)
+            .Timeout(timeout ?? TimeSpan.MaxValue)
             .SingleAsync();
 }

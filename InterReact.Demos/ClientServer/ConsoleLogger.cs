@@ -5,7 +5,7 @@ namespace ClientServer;
 public sealed class ConsoleLogger(
     string categoryName, LogLevel logLevel, ConsoleColor color) : ILogger
 {
-    private static Lock _gate = new();
+    private static readonly Lock _gate = new();
     private readonly string _categoryName = categoryName;
     private readonly LogLevel _logLevel = logLevel;
     private readonly ConsoleColor _color = color;

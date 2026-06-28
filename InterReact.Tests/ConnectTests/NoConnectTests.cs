@@ -16,6 +16,7 @@ public class NoConnect(ITestOutputHelper output) : OutputHelperTestBase(output, 
 
         OperationCanceledException ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => task);
         Write(ex.ToString());
+
     }
 
     [Fact]

@@ -4,7 +4,7 @@ namespace InterReact;
 [Message]
 public sealed record OrderState
 {
-    public string Status { get; internal set; } = OrderStatus.Unknown;
+    public OrderStatus Status { get; internal set; } = OrderStatus.Unknown;
 
     /// <summary>
     /// Initial margin requirement for the order.

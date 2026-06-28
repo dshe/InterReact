@@ -7,7 +7,7 @@ using System.Reactive.Disposables;
 using System.Text;
 namespace InterReact;
 
-public static partial class Extensions
+public static partial class Xtensions
 {
     extension(Socket socket)
     {
@@ -44,119 +44,64 @@ public static partial class Extensions
         {
             while (!buffer.IsEmpty)
             {
-                int read = await socket.ReceiveAsync(buffer, SocketFlags.None, ct).ConfigureAwait(false); ;
+                int read = await socket.ReceiveAsync(buffer, SocketFlags.None, ct).ConfigureAwait(false);
                 if (read == 0)
                     throw new EndOfStreamException();
                 buffer = buffer[read..];
             }
         }
 
-        internal IObservable<string[]> CreateObservable()
+        internal async Task RunAsync(IObserver<string[]> observer, ILogger logger, CancellationToken ct)
         {
-            return Observable.Create<string[]>(observer =>
+            logger.LogDebug("Pipeline started.");
+            Pipe pipe = new();
+            try
             {
-                CancellationTokenSource cts = new();
-                int terminated = 0;
-
-                _ = Task.Run(async () =>
+                while (!ct.IsCancellationRequested)
                 {
-                    try
-                    {
-                        await RunAsync(socket, observer, cts.Token).ConfigureAwait(false);
-                        Complete();
-                    }
-                    catch (OperationCanceledException)
-                    {
-                    }
-                    catch (Exception ex)
-                    {
-                        Error(ex);
-                    }
-                    finally
-                    {
-                    }
-                    void Complete()
-                    {
-                        if (TryTerminate())
-                            observer.OnCompleted();
-                    }
-                    void Error(Exception ex)
-                    {
-                        if (TryTerminate())
-                            observer.OnError(ex);
-                    }
-                    bool TryTerminate() => Interlocked.Exchange(ref terminated, 1) == 0;
-                });
-                return Disposable.Create(() => cts.Cancel()); // don't bother disposing cts
-            });
-        }
-    }
+                    // Fill pipe from socket.
+                    Memory<byte> memory = pipe.Writer.GetMemory(1024);
+                    int bytesRead = await socket.ReceiveAsync(memory, SocketFlags.None, ct).ConfigureAwait(false);
+                    if (bytesRead == 0)
+                        break;
+                    pipe.Writer.Advance(bytesRead);
 
-    private static async Task RunAsync(Socket socket, IObserver<string[]> observer, CancellationToken ct)
-    {
-        Pipe pipe = new();
-        Task writing = FillPipeAsync(socket, pipe.Writer, ct);
-        Task reading = ReadPipeAsync(pipe.Reader, observer, ct);
-        await Task.WhenAll(writing, reading).ConfigureAwait(false);
-    }
+                    FlushResult flush = await pipe.Writer.FlushAsync(ct).ConfigureAwait(false);
+                    if (flush.IsCompleted)
+                        break;
 
-    private static async Task FillPipeAsync(Socket socket, PipeWriter writer, CancellationToken ct)
-    {
-        const int minimumBufferSize = 1024;
-        try
-        {
-            while (true)
-            {
-                Memory<byte> memory = writer.GetMemory(minimumBufferSize);
-                int bytesRead = await socket.ReceiveAsync(memory, SocketFlags.None, ct).ConfigureAwait(false);
-                if (bytesRead == 0)
-                    break;
-                writer.Advance(bytesRead);
-                try
-                {
-                    FlushResult result = await writer.FlushAsync(ct).ConfigureAwait(false);
+                    // Drain pipe immediately.
+                    ReadResult result = await pipe.Reader.ReadAsync(ct).ConfigureAwait(false);
+                    ReadOnlySequence<byte> buffer = result.Buffer;
+                    ReadOnlySequence<byte> remaining = buffer;
+
+                    while (TryReadMessage(ref remaining, out ReadOnlySequence<byte> payload))
+                    {
+                        string[] strings = payload.IsSingleSegment ? DecodeStrings(payload.FirstSpan) : DecodeStrings(payload.ToArray());
+                        observer.OnNext(strings);
+                    }
+                    pipe.Reader.AdvanceTo(remaining.Start, buffer.End);
                     if (result.IsCompleted)
                         break;
                 }
-                catch (OperationCanceledException)
-                {
-                    break;
-                }
-            }
-        }
-        finally
-        {
-            await writer.CompleteAsync().ConfigureAwait(false);
-        }
-    }
 
-    private static async Task ReadPipeAsync(PipeReader reader, IObserver<string[]> observer, CancellationToken ct)
-    {
-        try
-        {
-            while (true)
+                observer.OnCompleted();
+            }
+            catch (OperationCanceledException)
             {
-                ReadResult result = await reader.ReadAsync(ct).ConfigureAwait(false);
-
-                ReadOnlySequence<byte> buffer = result.Buffer;
-                ReadOnlySequence<byte> remaining = buffer;
-
-                while (TryReadMessage(ref remaining, out ReadOnlySequence<byte> payload))
-                    observer.OnNext(DecodeStrings(payload.ToArray()).ToArray());
-
-                reader.AdvanceTo(remaining.Start, remaining.End);
-
-                if (result.IsCompleted)
-                {
-                    if (!remaining.IsEmpty)
-                        throw new InvalidDataException("Incomplete message.");
-                    break;
-                }
+                observer.OnCompleted();
             }
-        }
-        finally
-        {
-            await reader.CompleteAsync().ConfigureAwait(false);
+            catch (Exception ex)
+            {
+                observer.OnError(ex);
+                logger.LogError(ex, "Pipeline failure: {Message}.", ex.Message);
+            }
+            finally
+            {
+                logger.LogDebug("Pipeline shutdown.");
+                await pipe.Writer.CompleteAsync().ConfigureAwait(false);
+                await pipe.Reader.CompleteAsync().ConfigureAwait(false);
+            }
         }
     }
 
@@ -180,20 +125,24 @@ public static partial class Extensions
         return true;
     }
 
-    private static IEnumerable<string> DecodeStrings(byte[] bytes)
+    private static string[] DecodeStrings(ReadOnlySpan<byte> bytes)
     {
+        List<string> strings = [];
         int start = 0;
 
         for (int i = 0; i < bytes.Length; i++)
         {
-            if (bytes[i] != 0)
-                continue;
-            yield return Encoding.UTF8.GetString(bytes, start, i - start);
-            start = i + 1;
+            if (bytes[i] == 0)
+            {
+                strings.Add(Encoding.UTF8.GetString(bytes[start..i]));
+                start = i + 1;
+            }
         }
 
         if (start != bytes.Length)
             throw new InvalidDataException("Incomplete null-terminated string.");
+
+        return strings.ToArray();
     }
 
 }

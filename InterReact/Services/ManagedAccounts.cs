@@ -17,7 +17,8 @@ public partial class Service
                     .OfType<ManagedAccounts>()
                     .ToObservable<ManagedAccounts>(_request.RequestManagedAccountsAsync)
                     .Select(x => x.Accounts)
-                    .WithTimeout(timeout, ct)
+                    .TakeUntil(ct)
+                    .Timeout(timeout ?? TimeSpan.MaxValue)
                     .SingleAsync();
             }
 

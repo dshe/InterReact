@@ -33,7 +33,8 @@ public partial class Service
     {
         return await CreateContractDetailsObservable(contract, includeExpired)
             .OfTypeOnly<ContractDetails>()
-            .WithTimeout(timeout, ct)
+            .TakeUntil(ct)
+            .Timeout(timeout ?? TimeSpan.MaxValue)
             .ToArray();
     }
 }

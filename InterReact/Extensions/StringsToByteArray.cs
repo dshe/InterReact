@@ -2,7 +2,7 @@
 using System.Text;
 namespace InterReact;
 
-public static partial class Extensions
+public static partial class Xtensions
 {
     extension(string str)
     {

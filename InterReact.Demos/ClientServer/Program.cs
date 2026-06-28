@@ -7,9 +7,9 @@ public static partial class Program
     {
         Console.Title = "InterReact";
 
-        ConsoleLogger clientLogger    = new("Client:     ", LogLevel.Trace, ConsoleColor.DarkYellow);
-        ConsoleLogger clientLibLogger = new("InterReact: ", LogLevel.Information, ConsoleColor.Magenta);
-        ConsoleLogger serverLogger    = new("Server:     ", LogLevel.Trace, ConsoleColor.DarkCyan);
+        ConsoleLogger clientLogger    = new("Client:     ", LogLevel.Trace, ConsoleColor.DarkMagenta);
+        ConsoleLogger clientLibLogger = new("InterReact: ", LogLevel.Information, ConsoleColor.DarkGreen);
+        ConsoleLogger serverLogger    = new("Server:     ", LogLevel.Trace, ConsoleColor.Blue);
 
         IPEndPoint endPoint = new(IPAddress.Loopback, 111);
         

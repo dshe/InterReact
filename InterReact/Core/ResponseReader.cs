@@ -5,53 +5,44 @@ namespace InterReact;
 
 public sealed class ResponseReader(InterReactOptions options, ResponseParser parser, ILogger<ResponseReader> logger)
 {
-    private string _callerInfo = "";
+    private string _lastCallerInfo = "";
     private int _index;
-    internal string[] Strings = [];
+    private string[] _strings = [];
     internal ILogger Logger { get; } = logger;
     internal ResponseParser Parser { get; } = parser;
     internal InterReactOptions Options { get; } = options;
 
     internal void SetStrings(string[] strings)
     {
-        Strings = strings;
+        _strings = strings;
         _index = 0;
     }
 
-    private static string GetCallerInfo(string member, string file, int l)
-    {
-        string line = File.ReadLines(file).Skip(l - 1).First().Trim();
-        string projectName = Assembly.GetExecutingAssembly().GetName().Name ?? throw new InvalidOperationException("ProjectName not found");
-        int pos = file.LastIndexOf('\\' + projectName + '\\', StringComparison.Ordinal);
-        string path = file[(pos + projectName.Length + 2)..];
-        return $"{path}:{l} {member}\r\n\t{line}";
-    }
-    
     internal void VerifyEnumerationEnd()
     {
-        if (_index == Strings.Length)
+        if (_index == _strings.Length)
             return;
-        string[] extra = Strings.Skip(_index).Select(x => $"'{x}'").ToArray();
-        string msg = $"ResponseReader: long message => [{extra.JoinStrings(", ")}]\r\n{_callerInfo}";
+        string[] extra = _strings.Skip(_index).Select(x => $"'{x}'").ToArray();
+        string msg = $"ResponseReader: long message => [{extra.JoinStrings(", ")}]\r\n{_lastCallerInfo}";
         throw new InvalidDataException(msg);
     }
     
     private T Read<T>(Func<string, T> convert, string member, string file, int l)
     {
-        if (_index >= Strings.Length)
+        if (_index >= _strings.Length)
         {   // find line in source that attempts to retrieve missing data
             throw new InvalidDataException(
-                $"ResponseReader: short message => [{Strings.JoinStrings(", ")}]" +
+                $"ResponseReader: short message => [{_strings.JoinStrings(", ")}]" +
                 $"\r\n{GetCallerInfo(member, file, l)}");
         }
 
-        string input = Strings[_index++];
+        string input = _strings[_index++];
         T output = convert(input);
 
-        if (Logger.IsEnabled(LogLevel.Debug))
+        if (Logger.IsEnabled(LogLevel.Trace))
         {
-            _callerInfo = GetCallerInfo(member, file, l); // slow!
-            Logger.LogResponseString(_callerInfo, input, output?.ToString() ?? "", typeof(T).Name);
+            _lastCallerInfo = GetCallerInfo(member, file, l); // slow!
+            Logger.LogResponseString(_lastCallerInfo, input, output?.ToString() ?? "", typeof(T).Name);
         }
 
         return output;
@@ -84,16 +75,16 @@ public sealed class ResponseReader(InterReactOptions options, ResponseParser par
     internal decimal ReadDecimal([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
         Read(Parser.ParseDecimal, member, file, line);
 
-    //internal LocalTime ReadLocalTime(LocalTimePattern p) => p.Parse(Read()).GetValueOrThrow();
-    //internal ZonedDateTime ReadZonedDateTime(ZonedDateTimePattern p) => p.Parse(Read()).GetValueOrThrow();
-
-    internal T ReadEnum<T>([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) where T : Enum
+    internal T ReadEnum<T>([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) where T:struct,Enum
     {
         T t = Read(Parser.ParseEnum<T>, member, file, line);
         if (!Options.UseDelayedTicks && t is TickType tickType)
             return (T)(object)tickType.UndelayTick();
         return t;
     }
+
+    internal T ReadStringEnum<T>([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) where T:class =>
+        Read(Parser.ParseStringEnum<T>, member, file, line);
 
     internal void IgnoreMessageVersion([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
         Read(x => x, member, file, line);
@@ -124,5 +115,14 @@ public sealed class ResponseReader(InterReactOptions options, ResponseParser par
             tags.Add(new Tag(
                 Read(x => x, member, file, line),
                 Read(x => x, member, file, line)));
+    }
+
+    private static string GetCallerInfo(string member, string file, int l)
+    {
+        string line = File.ReadLines(file).Skip(l - 1).First().Trim();
+        string projectName = Assembly.GetExecutingAssembly().GetName().Name ?? throw new InvalidOperationException("ProjectName not found");
+        int pos = file.LastIndexOf('\\' + projectName + '\\', StringComparison.Ordinal);
+        string path = file[(pos + projectName.Length + 2)..];
+        return $"{path}:{l} {member}\r\n\t{line}";
     }
 }

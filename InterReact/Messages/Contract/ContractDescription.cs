@@ -10,7 +10,7 @@ public sealed record ContractDescription
     {
         Contract.ContractId = r.ReadInt();
         Contract.Symbol = r.ReadString();
-        Contract.SecurityType = r.ReadString();
+        Contract.SecurityType = r.ReadStringEnum<ContractSecurityType>();
         Contract.PrimaryExchange = r.ReadString();
         Contract.Currency = r.ReadString();
         DerivativeSecTypes = r.GetStringList();

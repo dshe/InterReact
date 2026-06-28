@@ -16,9 +16,8 @@ public sealed record Alert : IHasRequestId, IHasOrderId
     public int Code { get; init; }
     public string Message { get; init; } = "";
     public string AdvancedOrderRejectJson { get; init; } = "";
-    internal Instant Time { get; init; }
     internal Alert() { }
-    internal Alert(ResponseReader r, IClock clock)
+    internal Alert(ResponseReader r)
     {
         r.RequireMessageVersion(2);
         RequestId = OrderId = r.ReadInt();
@@ -26,7 +25,6 @@ public sealed record Alert : IHasRequestId, IHasOrderId
         Message = Regex.Unescape(r.ReadString());
         string tempStr = r.ReadString();
         AdvancedOrderRejectJson = string.IsNullOrEmpty(tempStr) ? "" : Regex.Unescape(tempStr);
-        Time = clock.GetCurrentInstant();
     }
     public AlertException ToAlertException() => new(this);
 }

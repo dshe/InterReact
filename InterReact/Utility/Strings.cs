@@ -3,17 +3,24 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 namespace InterReact;
 
-public static class Strings
+public static partial class Xtensions
 {
-    public static string JoinStrings(this IEnumerable<string> strings, string separator = "") => string.Join(separator, strings);
-
-    public static string Stringify<T>(this T instance, bool includeTypeName = true)
+    extension(IEnumerable<string> strings)
     {
-        var tx = JsonSerializer.Serialize(instance, _options);
-        if (includeTypeName)
-            return $"{typeof(T).Name}: {tx}";
-        else
-            return tx;
+        public string JoinStrings(string separator = "") => string.Join(separator, strings);
+    }
+
+    extension(object instance)
+    {
+        public string Stringify(bool includeTypeName = true)
+        {
+            string str = JsonSerializer.Serialize(instance, _options);
+            Type type = instance.GetType();
+            if (includeTypeName)
+                return $"{type.Name} {str}";
+            else
+                return str;
+        }
     }
 
     private static readonly JsonSerializerOptions _options = CreateOptions();

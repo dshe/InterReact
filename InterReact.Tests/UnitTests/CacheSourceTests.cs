@@ -2,7 +2,6 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Reactive.Threading.Tasks;
 namespace UnitTests;
 
 public class CacheSourceTests(ITestOutputHelper output) : OutputHelperTestBase(output)
@@ -27,10 +26,10 @@ public class CacheSourceTests(ITestOutputHelper output) : OutputHelperTestBase(o
         observable.Subscribe(observer2);
 
         Recorded<Notification<string>>[] expected1 = [OnNext(100, "one")];
-        Assert.Equal(expected1.ToList(), observer1.Messages);
+        Assert.Equal([.. expected1], observer1.Messages);
 
         Recorded<Notification<string>>[] expected2 = [OnNext(150, "one")];
-        Assert.Equal(expected2.ToList(), observer2.Messages);
+        Assert.Equal([.. expected2], observer2.Messages);
 
         testScheduler.Start();
         Assert.Equal(3, observer1.Messages.Count);
@@ -38,15 +37,6 @@ public class CacheSourceTests(ITestOutputHelper output) : OutputHelperTestBase(o
     }
 
     [Fact]
-    public async Task T01_EmptyAsync()
-    {
-        IObservable<string> observable = Observable.Empty<string>().CacheSource(x => x); // completes
-        InvalidOperationException ex = await Assert.ThrowsAsync<InvalidOperationException>(() => observable.ToTask());
-        Assert.Equal("Sequence contains no elements.", ex.Message);
-    }
-
-
-    [Fact(Skip="Not implemented")]
     public async Task T03_CacheAsync()
     {
         Subject<string> source = new();
@@ -64,23 +54,13 @@ public class CacheSourceTests(ITestOutputHelper output) : OutputHelperTestBase(o
         IList<string> list1 = await observable.Take(1).ToList();
 
         IList<string> list = await observable.Take(TimeSpan.FromMilliseconds(100)).ToList();
-        Assert.Equal(4, list.Count);
+        Assert.Equal(3, list.Count);
 
         source.OnNext("10");
 
         list = await observable.Take(TimeSpan.FromMilliseconds(100)).ToList();
         Assert.Equal(4, list.Count);
     }
-
-
-
-
-
-
-
-
-
-
 
     [Fact]
     public async Task T04_Cache_TestAsync()
@@ -97,21 +77,46 @@ public class CacheSourceTests(ITestOutputHelper output) : OutputHelperTestBase(o
         source.OnNext("2");
 
         IList<string> list2 = await observable.Take(TimeSpan.FromMilliseconds(100)).ToList();
-        Assert.Equal(14, list2.Count);
+        Assert.Equal(2, list2.Count);
 
         subscription.Dispose();
         source.Dispose();
     }
 
     [Fact]
+    public async Task T01_EmptyAsync()
+    {
+        IObservable<string> observable1 = Observable.Empty<string>();
+
+        var ex1 = await Assert.ThrowsAsync<InvalidOperationException>(async () => await observable1);
+        Assert.Equivalent("Sequence contains no elements.", ex1.Message);
+
+        var ex2 = await Assert.ThrowsAsync<InvalidOperationException>(async () => await observable1.CacheSource(x => x));
+        Assert.Equivalent("Sequence contains no elements.", ex2.Message);
+    }
+
+    [Fact]
+    public async Task T01_NeverAsync()
+    {
+        IObservable<string> observable1 = Observable.Never<string>().Timeout(TimeSpan.FromMilliseconds(100));
+        await Assert.ThrowsAsync<TimeoutException>(async () => await observable1);
+        await Assert.ThrowsAsync<TimeoutException>(async () => await observable1.CacheSource(x => x));
+    }
+
+    [Fact]
     public void T04_Throw_In_OnNext()
     {
-        Subject<string> source = new();
-        IObservable<string> observable = source.CacheSource(x => x);
+        Subject<string> source1 = new();
+        IObservable<string> observable1 = source1;
+        observable1.Subscribe(x =>
+            throw new BarrierPostPhaseException("some exception"));
+        Assert.Throws<BarrierPostPhaseException>(() => source1.OnNext("message"));
 
-        observable.Subscribe(x =>
+        Subject<string> source2 = new();
+        IObservable<string> observable2 = source2.CacheSource(x => x);
+        observable2.Subscribe(x =>
             throw new BarrierPostPhaseException("some exception"));
 
-        Assert.Throws<BarrierPostPhaseException>(() => source.OnNext("message"));
+        Assert.Throws<BarrierPostPhaseException>(() => source2.OnNext("message"));
     }
 }

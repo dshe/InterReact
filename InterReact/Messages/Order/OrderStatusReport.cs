@@ -8,7 +8,7 @@ public sealed record OrderStatusReport : IHasOrderId
     /// </summary>
     public int OrderId { get; }
 
-    public string Status { get; } = OrderStatus.Unknown;
+    public OrderStatus Status { get; } = OrderStatus.Unknown;
 
     /// <summary>
     /// Specifies the number of shares that have been executed.
@@ -61,7 +61,7 @@ public sealed record OrderStatusReport : IHasOrderId
     internal OrderStatusReport(ResponseReader r)
     {
         OrderId = r.ReadInt();
-        Status = r.ReadString();
+        Status = r.ReadStringEnum<OrderStatus>();
         Filled = r.ReadDecimal();
         Remaining = r.ReadDecimal();
         AverageFillPrice = r.ReadDouble();

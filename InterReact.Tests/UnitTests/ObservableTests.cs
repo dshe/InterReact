@@ -1,7 +1,8 @@
-﻿using System.Reactive.Disposables;
+﻿using System.Collections.Immutable;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-namespace Temp;
+namespace UnitTests;
 
 public sealed class ObservableTests(ITestOutputHelper output) : OutputHelperTestBase(output)
 {
@@ -42,10 +43,9 @@ public sealed class ObservableTests(ITestOutputHelper output) : OutputHelperTest
     [Fact]
     public async Task TestListObservableAsync()
     {
-        IList<string> list = await Observable.Never<string>().ToList().Take(TimeSpan.FromSeconds(3)).FirstOrDefaultAsync();
+        IList<string> list = await Observable.Never<string>().ToList().Take(TimeSpan.FromSeconds(2)).FirstOrDefaultAsync();
         Assert.Null(list);
     }
-   
 
     [Fact]
     public async Task TestTakeAsync()
@@ -63,14 +63,14 @@ public sealed class ObservableTests(ITestOutputHelper output) : OutputHelperTest
     [Fact]
     public void TestCatchErrorHandlingObservable()
     {
-        IObservable<string> o = Observable.Create<string>(observer =>
+        IObservable<string> obs = Observable.Create<string>(observer =>
         {
             observer.OnNext("a");
             observer.OnError(new InvalidOperationException("error message"));
             return Disposable.Empty;
         });
 
-        var xx = o.Catch<string, Exception>(ex =>
+        obs.Catch<string, Exception>(ex =>
         {
             Console.WriteLine(ex.Message);
             return Observable.Empty<string>(); // Completes
@@ -81,40 +81,6 @@ public sealed class ObservableTests(ITestOutputHelper output) : OutputHelperTest
             Console.WriteLine(ex.Message);
             return Observable.Empty<string>(); // Completes
         }
-        var xy = o.Catch<string, Exception>(ErrorFunction);
+        obs.Catch<string, Exception>(ErrorFunction);
     }
-
-    private IObservable<string> CreateObservable()
-    {
-        return Observable.Create<string>(async (obs, ct) =>
-        {
-            Write("Subscribing");
-            await Task.Delay(500, ct);
-            obs.OnNext("a");
-            obs.OnCompleted();
-        });
-    }
-
-    [Fact]
-    public async Task CancellationAsync()
-    {
-        //await Observable.Throw<string>(new IndexOutOfRangeException());
-        //await Observable.Return("a").Timeout(TimeSpan.Zero);
-
-        CancellationTokenSource cts = new();
-        cts.Cancel();
-        //await Observable.Return("a").CancelOn(cts.Token);
-
-        string s = await CreateObservable()
-            .FirstAsync()
-            .WithTimeout(TimeSpan.FromSeconds(3), cts.Token)
-            //.Catch(Observable.Empty<string>())
-            .Catch<string, Exception>(ex =>
-            {
-                return Observable.Return("");
-            });
-        ;
-    }
-
-
 }

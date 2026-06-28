@@ -2,7 +2,7 @@
 
 // This extension method provides an alternative to source.OfType<T>, with intellisense support.
 // So that, for example, source.OfType<PriceTick>() can be replaced with OfTickClass(selector => selector.PriceTick).
-public static partial class Extensions
+public static partial class Xtensions
 {
     extension<T>(IEnumerable<IHasRequestId> source)
     {

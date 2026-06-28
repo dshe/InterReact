@@ -19,6 +19,7 @@ public partial class Service
     public async Task<AccountPosition[]> GetAccountPositionsAsync(TimeSpan? timeout = null, CancellationToken ct = default) =>
         await AccountPositionsObservable
             .TakeWhile(a => !a.IsEndMessage)
-            .WithTimeout(timeout, ct)
+            .TakeUntil(ct)
+            .Timeout(timeout ?? TimeSpan.MaxValue)
             .ToArray();
 }

@@ -11,6 +11,6 @@ public sealed record NextIdMessage
         NextId = r.ReadInt();
         int oldId = r.Options.Id;
         r.Options.Id = Math.Max(NextId - 1, oldId);
-        r.Logger.LogInformation("NextOrderId: {NextId}[{Id1}->{Id2}].", NextId, oldId, r.Options.Id);
+        //r.Logger.LogDebug("{NextId}[{Id1}->{Id2}].", NextId, oldId, r.Options.Id);
     }
 }

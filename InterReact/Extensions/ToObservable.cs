@@ -2,7 +2,7 @@
 using System.Reactive.Disposables;
 namespace InterReact;
 
-public static partial class Extensions
+public static partial class Xtensions
 {
     extension<T>(IObservable<T> source)
     {

@@ -55,6 +55,7 @@ public partial class Service
         TimeSpan? timeout = null,
         CancellationToken ct = default) =>
             await CreateMarketDataSnapshotObservable(contract, genericTickTypes, isRegulatorySnapshot, options)
-                .WithTimeout(timeout, ct)
+                .TakeUntil(ct)
+                .Timeout(timeout ?? TimeSpan.MaxValue)
                 .ToArray();
 }

@@ -9,7 +9,6 @@ public sealed class ResponseParser(ILogger<ResponseParser> logger)
     private const string _maxLong = "9223372036854775807";
     private const string _maxDouble = "1.7976931348623157E308";
     private ILogger Logger { get; } = logger;
-    private Dictionary<Type, Dictionary<string, object>> EnumCache { get; } = [];
 
     internal char ParseChar(string s)
     {
@@ -39,6 +38,7 @@ public sealed class ResponseParser(ILogger<ResponseParser> logger)
             return n;
         throw new ArgumentException($"ParseInt('{s}') failure.");
     }
+
     internal int ParseIntMax(string s) => s.Length == 0 ? int.MaxValue : ParseInt(s);
 
     internal long ParseLong(string s)
@@ -78,25 +78,20 @@ public sealed class ResponseParser(ILogger<ResponseParser> logger)
         throw new ArgumentException($"ParseDecimal('{s}') failure.");
     }
 
-    internal T ParseEnum<T>(string numberString) where T : Enum
+    internal T ParseEnum<T>(string numberString) where T:struct, Enum
     {
-        Type type = typeof(T);
-        if (!EnumCache.TryGetValue(type, out Dictionary<string, object>? enumValues))
-        {
-            enumValues = Enum
-                .GetValues(type)
-                .OfType<object>()
-                .ToDictionary(x => ((int)x).ToString(CultureInfo.InvariantCulture));
-            EnumCache.Add(type, enumValues);
-        }
-        if (!enumValues.TryGetValue(numberString, out object? e))
-        {
-            if (!int.TryParse(numberString, out int number))
-                throw new ArgumentException($"ParseEnum<{type.Name}>('{numberString}') is not an integer.");
-            e = Enum.ToObject(type, number);
-            enumValues.Add(numberString, e);
-            Logger.LogTrace("ParseEnum<{Name}>('{NumberString}') new value.", type.Name, numberString);
-        }
-        return (T)e;
+        if (!long.TryParse(numberString, CultureInfo.InvariantCulture, out long number))
+            throw new ArgumentException($"ParseEnum<{typeof(T).Name}>('{numberString}') is not a number.");
+        if (!EnumCache<T>.IsDefined(number))
+            Logger.LogWarning("ParseEnum<{Name}>('{NumberString}') is unexpected.", typeof(T).Name, numberString);
+        return (T)Enum.ToObject(typeof(T), number);
+    }
+
+    internal T ParseStringEnum<T>(string codeString) where T:class
+    {
+        if (StringEnumCache<T>.Values.TryGetValue(codeString, out T? value))
+            return value;
+        Logger.LogWarning("GetStringEnum<{Type}>({Code}) is unexpected.", typeof(T).Name, codeString);
+        return StringEnumCache<T>.Factory(codeString);
     }
 }

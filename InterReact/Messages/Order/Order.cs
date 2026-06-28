@@ -23,7 +23,7 @@ public sealed record Order : IHasOrderId  // input + output
     /// <summary>
     /// Identifies the order side.
     /// </summary>
-    public string Action { get; set; } = OrderAction.Undefined;
+    public OrderAction Action { get; set; } = OrderAction.Undefined;
 
     /// <summary>
     /// The number of units to trade.
@@ -33,7 +33,7 @@ public sealed record Order : IHasOrderId  // input + output
     /// <summary>
     /// The order type: Market, Limit...
     /// </summary>
-    public string OrderType { get; set; } = OrderTypes.Undefined;
+    public OrderTypes OrderType { get; set; } = OrderTypes.Undefined;
 
     /// <summary>
     /// The limit price, used for limit, stop-limit and relative orders.
@@ -49,7 +49,7 @@ public sealed record Order : IHasOrderId  // input + output
     /// <summary>
     /// The Time-In-Force. For example: GTC (good-till-cancelled).
     /// </summary>
-    public string TimeInForce { get; set; } = OrderTimeInForce.Day;
+    public OrderTimeInForce TimeInForce { get; set; } = OrderTimeInForce.Day;
 
     /// <summary>
     /// The One-Cancels-All group identifier.
@@ -122,7 +122,7 @@ public sealed record Order : IHasOrderId  // input + output
     /// </summary>
     public bool OverridePercentageConstraints { get; set; }
 
-    public string Rule80A { get; set; } = OrderRule80.None;
+    public OrderRule80 Rule80A { get; set; } = OrderRule80.None;
 
     /// <summary>
     /// Indicates whether all the order has to be filled in a single execution.
@@ -150,10 +150,10 @@ public sealed record Order : IHasOrderId  // input + output
 
     public string FinancialAdvisorGroup { get; set; } = "";
     public string FinancialAdvisorProfile { get; set; } = "";
-    public string FinancialAdvisorMethod { get; set; } = OrderFinancialAdvisorMethod.None;
+    public OrderFinancialAdvisorMethod FinancialAdvisorMethod { get; set; } = OrderFinancialAdvisorMethod.None;
     public string FinancialAdvisorPercentage { get; set; } = "";
 
-    public string OpenClose { get; set; } = OrderOpenClose.Undefined;
+    public OrderOpenClose OpenClose { get; set; } = OrderOpenClose.Undefined;
     public OrderOrigin Origin { get; set; } = OrderOrigin.Customer;
 
     /// <summary>
@@ -254,7 +254,7 @@ public sealed record Order : IHasOrderId  // input + output
     public int ScaleInitFillQty { get; set; } = int.MaxValue;
     public bool ScaleRandomPercent { get; set; }
 
-    public string HedgeType { get; set; } = OrderHedgeType.Undefined;
+    public OrderHedgeType HedgeType { get; set; } = OrderHedgeType.Undefined;
 
     /// <summary>
     /// Beta value for beta hedge (in range 0-1), ratio for pair hedge.
@@ -270,7 +270,7 @@ public sealed record Order : IHasOrderId  // input + output
     /// </summary>
     public string ClearingAccount { get; set; } = "";
 
-    public string ClearingIntent { get; set; } = OrderClearingIntent.Default;
+    public OrderClearingIntent ClearingIntent { get; set; } = OrderClearingIntent.Default;
 
     public string AlgoStrategy { get; set; } = "";
     public IList<Tag> AlgoParams { get; } = []; // input + output

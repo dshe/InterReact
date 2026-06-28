@@ -4,14 +4,18 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Threading.Channels;
+using System.Reactive.Disposables;
 namespace InterReact;
 
+// Connection instance is added to the container.
+// Write to the socket using a channel.
+// Read from the socket using a pipeline.
 public sealed class Connection : IAsyncDisposable
 {
+    internal static readonly Connection NullInstance =
+        new(new(SocketType.Stream, ProtocolType.Tcp), new InterReactOptions(), NullLogger.Instance);
     private readonly ILogger _logger;
     private readonly InterReactOptions _options;
-    private readonly Socket _socket;
-    private readonly Task _senderTask;
     private readonly Channel<byte[]> _outgoing = Channel.CreateBounded<byte[]>
         (new BoundedChannelOptions(100)
         {
@@ -19,40 +23,32 @@ public sealed class Connection : IAsyncDisposable
             SingleWriter = false,
             AllowSynchronousContinuations = false
         });
+    private readonly Socket _socket;
+    private readonly CancellationTokenSource _receiverCts = new();
+    private readonly Task _senderTask;
+    private Task? _receiverTask;
     private int _disposed;
     internal IPEndPoint RemoteEndPoint { get; }
     internal IObservable<string[]> Observable { get; }
 
-    private Connection(Socket socket, InterReactOptions options, ILogger logger)
+    internal Connection(Socket socket, InterReactOptions options, ILogger logger)
     {
         _socket = socket;
         _options = options;
         _logger = logger;
         _senderTask = SenderLoopAsync();
-        Observable = _socket.CreateObservable().Publish().AutoConnect();
+        Observable = CreateObservable();
         RemoteEndPoint = (IPEndPoint)socket.RemoteEndPoint!;
     }
 
-    internal async Task<string[]> ReadOneMessageAsync(CancellationToken ct)
-    {
-        using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        cts.CancelAfter(TimeSpan.FromSeconds(2));
-        try
-        {
-            return await _socket.ReadOneMessageAsync(ct).ConfigureAwait(false);
-        }
-        catch (OperationCanceledException e) when (cts.IsCancellationRequested)
-        {
-            throw new TimeoutException("Timeout waiting for response from TWS/Gateway. Try restarting.", e);
-        }
-    }
-
+    // Write a string to the channel.
     internal ValueTask SendStringAsync(string str, CancellationToken ct = default)
     {
         byte[] message = str.ToByteArray();
         return _outgoing.Writer.WriteAsync(message, ct);
     }
 
+    // Write strings to channel.
     // V100Plus format: payload of null-terminated strings with 4 byte message length prefix.
     internal ValueTask SendMessageAsync(IEnumerable<string> strings, CancellationToken ct = default)
     {
@@ -60,10 +56,19 @@ public sealed class Connection : IAsyncDisposable
         return _outgoing.Writer.WriteAsync(message, ct);
     }
 
+    // Read from channel, write to socket.
     private async Task SenderLoopAsync()
     {
-        await foreach (byte[] message in _outgoing.Reader.ReadAllAsync().ConfigureAwait(false))
-            await SendAllAsync(message).ConfigureAwait(false);
+        try
+        {
+            await foreach (byte[] message in _outgoing.Reader.ReadAllAsync().ConfigureAwait(false))
+                await SendAllAsync(message).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "SenderLoopAsync() error.");
+            throw;
+        }
     }
 
     private async ValueTask SendAllAsync(ReadOnlyMemory<byte> buffer)
@@ -106,27 +111,57 @@ public sealed class Connection : IAsyncDisposable
             (int)_options.ServerVersionCurrent, _options.TwsClientId);
     }
 
+    internal async Task<string[]> ReadOneMessageAsync(CancellationToken ct)
+    {
+        using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        cts.CancelAfter(TimeSpan.FromSeconds(2));
+        try
+        {
+            return await _socket.ReadOneMessageAsync(cts.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException e) when (cts.IsCancellationRequested)
+        {
+            throw new TimeoutException("Timeout waiting for response from TWS/Gateway. Try restarting.", e);
+        }
+    }
+
+    internal IObservable<string[]> CreateObservable()
+    {
+        return System.Reactive.Linq.Observable.Create<string[]>(observer =>
+        {
+            _logger.LogInformation("Startup.");
+
+            if (_receiverTask != null)
+                throw new InvalidOperationException("Observable already subscribed.");
+            _receiverTask = _socket.RunAsync(observer, _logger, _receiverCts.Token);
+
+            return Disposable.Create(() => _receiverCts.Cancel());
+        });
+    }
+
     public async ValueTask DisposeAsync()
     {
         if (Interlocked.Exchange(ref _disposed, 1) != 0)
             return;
-        _outgoing.Writer.TryComplete();
+
+        await _receiverCts.CancelAsync().ConfigureAwait(false);
         try
         {
-            await _senderTask.ConfigureAwait(false);
+            _socket.Shutdown(SocketShutdown.Both);
         }
-        catch (OperationCanceledException)
+        catch { }
+        try
         {
+            _outgoing.Writer.TryComplete();
+            await Task.WhenAll(_senderTask, _receiverTask ?? Task.CompletedTask).ConfigureAwait(false);
         }
-        finally
+        catch (Exception ex)
         {
-            try
-            {
-                _socket?.Shutdown(SocketShutdown.Send);
-            } 
-            catch { }
-            _socket?.Dispose();
+            _logger.LogDebug(ex, "Error while disposing connection.");
         }
+        _socket.Dispose();
+        _receiverCts.Dispose();
+        _logger.LogInformation("Dispose.");
     }
   
     internal static async Task<Connection> CreateAsync(InterReactOptions options, CancellationToken ct)
@@ -136,14 +171,23 @@ public sealed class Connection : IAsyncDisposable
         logger.LogInformation("{Name} v{Version}.", name.Name, name.Version);
 
         Socket socket = await ConnectSocketAsync(options.TwsIpAddress, options.TwsPortAddresses, logger, ct).ConfigureAwait(false);
-        Connection connection = new(socket, options, logger);
-        await connection.LoginAsync(ct).ConfigureAwait(false);
-        return connection;
+        try
+        {
+            Connection connection = new(socket, options, logger);
+            await connection.LoginAsync(ct).ConfigureAwait(false);
+            return connection;
+        }
+        catch (Exception)
+        {
+            socket.Dispose();
+            throw;
+        }
     }
 
     private static async Task<Socket> ConnectSocketAsync(IPAddress ipAddress, IReadOnlyList<int> ports, ILogger logger, CancellationToken ct)
     {
         TimeSpan connectTimeout = TimeSpan.FromSeconds(3);
+
         if (ports.Count == 0)
             throw new ArgumentException("No ports specified.", nameof(ports));
 
@@ -183,6 +227,4 @@ public sealed class Connection : IAsyncDisposable
         throw new InvalidOperationException(message);
     }
 
-    // for testing
-    internal static Connection NullInstance => new(new(SocketType.Stream, ProtocolType.Tcp), new InterReactOptions(null), NullLogger.Instance);
 }

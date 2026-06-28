@@ -3,21 +3,15 @@ using System.IO;
 using System.Runtime.CompilerServices;
 namespace InterReact;
 
-public sealed class RequestMessage
+public sealed class RequestMessage(Connection connection, ILogger<Request> logger)
 {
-    private ILogger Logger { get; }
-    private Connection Connection { get; }
+    private ILogger Logger { get; } = logger;
+    private Connection Connection { get; } = connection;
     internal List<string> Strings { get; } = []; // internal for testing
-    public RequestMessage(ILogger<RequestMessage> logger, Connection connection)
-    {
-        ArgumentNullException.ThrowIfNull(logger);
-        Logger = logger;
-        Connection = connection;
-    }
 
     internal async ValueTask SendAsync([CallerMemberName] string memberName = "")
     {
-        Logger.LogDebug("Request: {Method}", memberName);
+        Logger.LogDebug("{Method}({Strings}]).", memberName, Strings.JoinStrings(", "));
         if (Strings.Count == 0)
             throw new InvalidOperationException("Empty send message.");
         await Connection.SendMessageAsync(Strings).ConfigureAwait(false);
@@ -45,40 +39,23 @@ public sealed class RequestMessage
     {
         switch (o)
         {
-            case null: // includes nullable
-                return "";
-            case string s:
-                return s;
-            case bool b:
-                return b ? "1" : "0";
+            case null:             return "";
+            case string s:         return s;
+            case bool b:           return b ? "1" : "0";
+            case int i:            return i.ToString(CultureInfo.InvariantCulture);
+            case long l:           return l.ToString(CultureInfo.InvariantCulture);
+            case double d:         return d.ToString(CultureInfo.InvariantCulture);
+            case decimal m:        return m == decimal.MaxValue ? "" : m.ToString(CultureInfo.InvariantCulture);
+            case IHasCode hasCode: return hasCode.Code;
         }
-
-        Type type = o.GetType();
 
         if (o is Enum e)
         {
-            Type ut = Enum.GetUnderlyingType(type);
-            return Convert.ChangeType(e, ut, CultureInfo.InvariantCulture).ToString() ?? "";
+            Type ut = Enum.GetUnderlyingType(o.GetType());
+            return Convert.ChangeType(e, ut, CultureInfo.InvariantCulture)!.ToString()!;
         }
 
-        Type? utype = Nullable.GetUnderlyingType(type);
-        if (utype is not null)
-        {
-            if (utype != typeof(int) && utype != typeof(long) && utype != typeof(double))
-                throw new InvalidDataException($"Nullable '{utype.Name}' is not supported.");
-            o = Convert.ChangeType(o, utype, CultureInfo.InvariantCulture);
-        }
-
-        return o switch
-        {
-            bool b => b ? "1" : "0",
-            int i => i.ToString(NumberFormatInfo.InvariantInfo),
-            long l => l.ToString(NumberFormatInfo.InvariantInfo),
-            double d => d.ToString(NumberFormatInfo.InvariantInfo),
-            decimal m =>
-                m is decimal.MaxValue ? "" : m.ToString(NumberFormatInfo.InvariantInfo),
-            _ => throw new InvalidDataException($"RequestMessage: unsupported data type = {o.GetType().Name}."),
-        };
+        throw new InvalidDataException($"Cannot serialize type = '{o.GetType().FullName}'.");
     }
 
     internal RequestMessage WriteEnumValuesString<T>(IEnumerable<T>? enums) where T : Enum

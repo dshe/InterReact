@@ -1,17 +1,17 @@
 ﻿namespace InterReact;
 
-public static partial class Extensions
+public static partial class Xtensions
 {
     extension(ILogger logger)
     {
-        internal ILoggerFactory ToLoggerFactory() => new FactoryLogger(logger);
+        internal ILoggerFactory ToLoggerFactory() => new LoggerFactory1(logger);
     }
 }
 
-internal sealed class FactoryLogger : ILoggerFactory
+internal sealed class LoggerFactory1 : ILoggerFactory
 {
     private readonly ILogger _logger;
-    internal FactoryLogger(ILogger logger) => _logger = logger;
+    internal LoggerFactory1(ILogger logger) => _logger = logger;
 
     public void AddProvider(ILoggerProvider provider) => throw new NotImplementedException();
 

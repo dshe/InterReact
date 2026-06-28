@@ -1,11 +1,12 @@
 ﻿using Microsoft.Extensions.Logging.Abstractions;
 using System.Globalization;
+using System.Net.Sockets;
 namespace UnitTests;
 
 public class RequestMessageTests(ITestOutputHelper output) : OutputHelperTestBase(output)
 {
     private readonly RequestMessage _requestMessage =
-        new(NullLogger<RequestMessage>.Instance, Connection.NullInstance);
+        new(Connection.NullInstance, NullLogger<Request>.Instance);
 
     private void AssertResult(params string[] strings)
     {
@@ -94,7 +95,5 @@ public class RequestMessageTests(ITestOutputHelper output) : OutputHelperTestBas
             return o.ToString() ?? throw new ArgumentException("Could not get enum value.");
         }
     }
-
-
 
 }

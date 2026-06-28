@@ -5,7 +5,7 @@ namespace InterReact;
 /// Methods which send request messages to TWS/Gateway.
 /// Request methods are serialized, thread-safe and limited to a specified number of messages per second.
 /// </summary>
-public sealed class Request(InterReactOptions Options, Func<RequestMessage> CreateMessage)
+public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOptions Options)
 {
     /// <summary>
     /// Returns successive ids to uniquely identify requests and orders.
@@ -178,7 +178,7 @@ public sealed class Request(InterReactOptions Options, Func<RequestMessage> Crea
             order.ActiveStopTime);
 
         m.Write(order.HedgeType);
-        if (order.HedgeType.Length != 0)
+        if (order.HedgeType.Code.Length != 0)
             m.Write(order.HedgeParam);
 
         m.Write(
@@ -781,18 +781,25 @@ public sealed class Request(InterReactOptions Options, Func<RequestMessage> Crea
 
 file static class RequestExtensions
 {
-    internal static string ToMax(this double val)
+    extension(double val)
     {
-        if (val == double.MaxValue)
-            return "";
-        if (val == double.PositiveInfinity)
-            return ("Infinity");
-        return val.ToString(CultureInfo.InvariantCulture);
+        internal string ToMax()
+        {
+            if (val == double.MaxValue)
+                return "";
+            if (val == double.PositiveInfinity)
+                return ("Infinity");
+            return val.ToString(CultureInfo.InvariantCulture);
+        }
     }
-    internal static string ToMax(this int val)
+
+    extension(int val)
     {
-        if (val == int.MaxValue)
-            return "";
-        return val.ToString(CultureInfo.InvariantCulture);
+        internal string ToMax()
+        {
+            if (val == int.MaxValue)
+                return "";
+            return val.ToString(CultureInfo.InvariantCulture);
+        }
     }
 }

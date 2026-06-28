@@ -23,5 +23,4 @@ public enum ComboOpenClose
     /// Institutional Accounts Only.
     /// </summary>
     Unknown = 3
-
 }

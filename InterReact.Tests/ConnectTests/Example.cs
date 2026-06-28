@@ -1,44 +1,84 @@
 ﻿using System.Reactive.Linq;
-/*
-* Be sure that Trader Workstation (TWS) is running on your machine and that the following is set:
-* File / GlobalConfiguration / API / Settings/ "Enable ActiveX and Socket Clients".
-*/
 namespace ConnectTests;
 
-public class SimplestExample
+public class SimplestExample(ITestOutputHelper output) : OutputHelperTestBase(output, LogLevel.Debug, "MyTest")
 {
-    [Fact]
-    public async Task TestAsync()
+    public readonly Contract Contract = new()
     {
-        // Create the InterReact client by first connecting to TWS/Gateway on the local host.
-        IInterReactClient interReact = await InterReactClient.CreateAsync(null, TestContext.Current.CancellationToken);
+        SecurityType = ContractSecurityType.Cash,
+        Symbol = "EUR",
+        Currency = "USD",
+        Exchange = "IDEALPRO"
+    };
 
-        // Create a contract object.
-        Contract contract = new()
-        {
-            SecurityType = ContractSecurityType.Stock,
-            Symbol = "SPY",
-            Currency = "USD",
-            Exchange = "SMART"
-        };
+    [Fact]
+    public async Task Test1Async()
+    {
+        IInterReactClient client = await InterReactClient.CreateAsync(
+            x => x.LogFactory = LogFactory, TestContext.Current.CancellationToken);
 
-        // Create and then subscribe to the observable which can observe ticks for the contract.
-        IDisposable subscription = interReact
-            .Service
-            .CreateMarketDataObservable(contract)
-            .OfTickClass(selector => selector.PriceTick)
-            .Where(tick => tick.TickType == TickType.LastPrice)
-            .Subscribe(onNext: priceTick => Console.WriteLine($"Last Price = {priceTick.Price}"));
+        int id = client.Request.GetNextId();
 
-        //Console.WriteLine(Environment.NewLine + "press a key to exit...");
-        //Console.ReadKey();
-        //Console.Clear();
+        IDisposable subscription = client
+            .Response
+            .WithRequestId(id)
+            .OfType<PriceTick>()
+            .Subscribe(onNext: priceTick => Write($"Price = {priceTick.Price}"));
 
-        // Dispose the subscription to stop receiving ticks.
+        await client.Request.RequestMarketDataAsync(id, Contract);
+
+        await Task.Delay(3000, TestContext.Current.CancellationToken);
+
         subscription.Dispose();
 
-        // Disconnect from TWS/Gateway.
+        await client.DisposeAsync();
+    }
+
+
+    [Fact]
+    public async Task Test2Async()
+    {
+        IInterReactClient interReact = await InterReactClient.CreateAsync(
+            x => x.LogFactory = LogFactory, TestContext.Current.CancellationToken);
+
+        IDisposable subscription = interReact
+            .Service
+            .CreateMarketDataObservable(Contract)
+            .OfTickClass(selector => selector.PriceTick)
+            .Subscribe(onNext: priceTick => Write($"Price = {priceTick.Price}"));
+
+        await Task.Delay(3000, TestContext.Current.CancellationToken);
+
+        subscription.Dispose();
+
         await interReact.DisposeAsync();
     }
+
+    [Fact]
+    public async Task Test3Async()
+    {
+        IInterReactClient interReact = await InterReactClient.CreateAsync(
+            x => x.LogFactory = LogFactory, TestContext.Current.CancellationToken);
+
+        IHasRequestId[] messages = await interReact
+            .Service
+            .CreateMarketDataObservable(Contract)
+            .Take(8)
+            .ToArray()
+            .FirstAsync();
+
+        Assert.Equal(8, messages.Length);
+
+        await interReact.DisposeAsync();
+    }
+
+    /*
+    Logger.LogCritical("Logger.LogCritical");
+    Logger.LogError("Logger.LogError");
+    Logger.LogWarning("Logger.LogWarning");
+    Logger.LogInformation("Logger.LogInformation");
+    Logger.LogDebug("Logger.LogDebug");
+    Logger.LogTrace("Logger.LogTrace");
+    */
 }
 

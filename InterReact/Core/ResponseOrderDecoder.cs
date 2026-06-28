@@ -15,16 +15,16 @@ internal sealed class OrderDecoder
     }
 
     internal void ReadOrderId() => Order.OrderId = R.ReadInt();
-    internal void ReadAction() => Order.Action = R.ReadString();
+    internal void ReadAction() => Order.Action = R.ReadStringEnum<OrderAction>();
 
     internal void ReadContract()
     {
         Contract.ContractId = R.ReadInt();
         Contract.Symbol = R.ReadString();
-        Contract.SecurityType = R.ReadString();
+        Contract.SecurityType = R.ReadStringEnum<ContractSecurityType>();
         Contract.LastTradeDateOrContractMonth = R.ReadString();
         Contract.Strike = R.ReadDouble();
-        Contract.Right = R.ReadString();
+        Contract.Right = R.ReadStringEnum<ContractOptionRight>();
         Contract.Multiplier = R.ReadString();
         Contract.Exchange = R.ReadString();
         Contract.Currency = R.ReadString();
@@ -33,13 +33,13 @@ internal sealed class OrderDecoder
     }
 
     internal void ReadTotalQuantity() => Order.TotalQuantity = R.ReadDecimal();
-    internal void ReadOrderType() => Order.OrderType = R.ReadString();
+    internal void ReadOrderType() => Order.OrderType = R.ReadStringEnum<OrderTypes>();
     internal void ReadLmtPrice() => Order.LimitPrice = R.ReadDoubleMax();
     internal void ReadAuxPrice() => Order.AuxPrice = R.ReadDoubleMax();
-    internal void ReadTif() => Order.TimeInForce = R.ReadString();
+    internal void ReadTif() => Order.TimeInForce = R.ReadStringEnum<OrderTimeInForce>();
     internal void ReadOcaGroup() => Order.OcaGroup = R.ReadString();
     internal void ReadAccount() => Order.Account = R.ReadString();
-    internal void ReadOpenClose() => Order.OpenClose = R.ReadString();
+    internal void ReadOpenClose() => Order.OpenClose = R.ReadStringEnum<OrderOpenClose>();
     internal void ReadOrigin() => Order.Origin = R.ReadEnum<OrderOrigin>();
     internal void ReadOrderRef() => Order.OrderRef = R.ReadString();
     internal void ReadClientId() => Order.ClientId = R.ReadInt();
@@ -53,14 +53,14 @@ internal sealed class OrderDecoder
     internal void ReadFaParams()
     {
         Order.FinancialAdvisorGroup = R.ReadString();
-        Order.FinancialAdvisorMethod = R.ReadString();
+        Order.FinancialAdvisorMethod = R.ReadStringEnum<OrderFinancialAdvisorMethod>();
         Order.FinancialAdvisorPercentage = R.ReadString();
         Order.FinancialAdvisorProfile = R.ReadString();
     }
 
     internal void ReadModelCode() => Order.ModelCode = R.ReadString();
     internal void ReadGoodTillDate() => Order.GoodUntilDate = R.ReadString();
-    internal void ReadRule80A() => Order.Rule80A = R.ReadString();
+    internal void ReadRule80A() => Order.Rule80A = R.ReadStringEnum<OrderRule80>();
     internal void ReadPercentOffset() => Order.PercentOffset = R.ReadDoubleMax();
     internal void ReadSettlingFirm() => Order.SettlingFirm = R.ReadString();
 
@@ -188,8 +188,8 @@ internal sealed class OrderDecoder
 
     internal void ReadHedgeParams()
     {
-        Order.HedgeType = R.ReadString();
-        if (Order.HedgeType.Length != 0)
+        Order.HedgeType = R.ReadStringEnum<OrderHedgeType>();
+        if (Order.HedgeType.Code.Length != 0)
             Order.HedgeParam = R.ReadString();
     }
 
@@ -198,7 +198,7 @@ internal sealed class OrderDecoder
     internal void ReadClearingParams()
     {
         Order.ClearingAccount = R.ReadString();
-        Order.ClearingIntent = R.ReadString();
+        Order.ClearingIntent = R.ReadStringEnum<OrderClearingIntent>();
     }
 
     internal void ReadNotHeld() => Order.NotHeld = R.ReadBool();
@@ -247,7 +247,7 @@ internal sealed class OrderDecoder
         OrderState.WarningText = R.ReadString();
     }
 
-    internal void ReadOrderStatus() => OrderState.Status = R.ReadString();
+    internal void ReadOrderStatus() => OrderState.Status = R.ReadStringEnum<OrderStatus>();
 
     internal void ReadVolRandomizeFlags()
     {
