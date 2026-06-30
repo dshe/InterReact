@@ -3,7 +3,7 @@
 /// <summary>
 /// Used for Rule 80A. Describes the type of trader.
 /// </summary>
-public sealed record OrderRule80(string Code) : IHasCode
+public sealed record OrderRule80(string StringCode) : IHasStringCode
 {
     public static readonly OrderRule80 None  = new("");
     public static readonly OrderRule80 Individual  = new("I");

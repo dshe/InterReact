@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-public sealed record OrderTypes(string Code) : IHasCode
+public sealed record OrderTypes(string StringCode) : IHasStringCode
 {
     public static readonly OrderTypes Undefined = new("");
 

@@ -1,20 +1,11 @@
 ﻿using System.Text.Json.Serialization.Metadata;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.CompilerServices;
-using System.Security;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Microsoft.CodeAnalysis;
 namespace Analysis;
 
 public class StringifyMessages(ITestOutputHelper output) : OutputHelperTestBase(output)
 {
     [Fact]
-    public void Stringify_Messages() // sometimes fails?
+    public void Stringify_Messages()
     {
         DefaultJsonTypeInfoResolver resolver = new();
         resolver.Modifiers.Add(typeInfo =>
@@ -34,27 +25,19 @@ public class StringifyMessages(ITestOutputHelper output) : OutputHelperTestBase(
             }
         });
 
-        Assembly assembly = typeof(InterReactClient).Assembly;
-
-        List<Type> types = assembly
+        Type[] types = [.. typeof(InterReactClient)
+            .Assembly
             .GetTypes()
             .Where(t => t.GetCustomAttribute<MessageAttribute>() != null)
-            .OrderBy(x => x.Name)
-            .ToList();
+            .OrderBy(x => x.Name)];
 
         foreach (TypeInfo type in types)
         {
             try
             {
-                //object instance = Stringifier.Instance.CreateInstance(type);
-                //Assert.NotNull(instance);
-                //string str = Stringifier.Instance.Stringify(instance);
-                //Write($"Value: {str}");
                 var instance = Activator.CreateInstance(type, nonPublic: true);
-
                 string str = instance.Stringify();
                 Write($"{type.Name} = {str}");
-
             }
             catch (Exception e)
             {
@@ -63,5 +46,4 @@ public class StringifyMessages(ITestOutputHelper output) : OutputHelperTestBase(
             }
         }
     }
-
 }

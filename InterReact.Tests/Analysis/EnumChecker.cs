@@ -3,7 +3,7 @@ namespace Analysis;
 
 public class Enum_Checker(ITestOutputHelper output) : OutputHelperTestBase(output)
 {
-    private static readonly List<TypeInfo> _enumTypes = [.. typeof(InterReactClient)
+    private static readonly TypeInfo[] _enumTypes = [.. typeof(InterReactClient)
         .Assembly
         .DefinedTypes
         .Where(type => type.IsEnum)

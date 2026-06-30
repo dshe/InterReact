@@ -5,16 +5,14 @@ namespace InterReact;
 
 public sealed class RequestMessage(Connection connection, ILogger<Request> logger)
 {
-    private ILogger Logger { get; } = logger;
-    private Connection Connection { get; } = connection;
     internal List<string> Strings { get; } = []; // internal for testing
 
     internal async ValueTask SendAsync([CallerMemberName] string memberName = "")
     {
-        Logger.LogDebug("{Method}({Strings}]).", memberName, Strings.JoinStrings(", "));
+        logger.LogDebug("{Method}({Strings}]).", memberName, Strings.JoinStrings(", "));
         if (Strings.Count == 0)
             throw new InvalidOperationException("Empty send message.");
-        await Connection.SendMessageAsync(Strings).ConfigureAwait(false);
+        await connection.SendMessageAsync(Strings).ConfigureAwait(false);
         Strings.Clear(); // allows the message to be reused
     }
 
@@ -46,7 +44,7 @@ public sealed class RequestMessage(Connection connection, ILogger<Request> logge
             case long l:           return l.ToString(CultureInfo.InvariantCulture);
             case double d:         return d.ToString(CultureInfo.InvariantCulture);
             case decimal m:        return m == decimal.MaxValue ? "" : m.ToString(CultureInfo.InvariantCulture);
-            case IHasCode hasCode: return hasCode.Code;
+            case IHasStringCode hasCode: return hasCode.StringCode;
         }
 
         if (o is Enum e)
@@ -64,7 +62,6 @@ public sealed class RequestMessage(Connection connection, ILogger<Request> logge
             return Write("");
         return Write(string.Join(",", enums.Select(GetEnumValueString)));
 
-        // local
         static string GetEnumValueString(T en)
         {
             Type underlyingType = Enum.GetUnderlyingType(typeof(T));

@@ -3,33 +3,68 @@ namespace Analysis;
 
 public class Interface_Checker(ITestOutputHelper output) : OutputHelperTestBase(output)
 {
-    private static readonly List<TypeInfo> _types = typeof(InterReactClient)
-        .Assembly
-        .DefinedTypes.Where(t => t.IsClass)
-        .ToList();
+    private static TypeInfo[] GetTypes(Func<TypeInfo, bool> predicate) =>
+        [.. typeof(InterReactClient).Assembly.DefinedTypes.Where(predicate).OrderBy(t => t.Name)];
+
+    private static T[] SymmetricExcept<T>(IEnumerable<T> first, IEnumerable<T> second) =>
+        [.. first.Except(second).Union(second.Except(first))];
 
     [Fact]
-    public void Find_Classes_With_RequestId_But_Not_Interface()
+    public void Find_Classes_With_RequestId()
     {
-        Assert.Empty(_types.Where(t =>
-                t.GetProperty("RequestId") is not null &&
-                t.GetInterface("IHasRequestId") is null));
+        TypeInfo[] types1 = GetTypes(t => t.GetInterface("IHasRequestId") is not null);
+        Assert.Empty(types1.Where(t => t.GetCustomAttribute<MessageAttribute>() == null && !t.IsAbstract));
+
+        TypeInfo[] types2 = GetTypes(t => t.GetProperty("RequestId") is not null && !t.IsInterface);
+        TypeInfo[] except = SymmetricExcept(types1, types2);
+
+        Assert.Empty(except);
+
+        foreach (Type t in types1)
+            Write(t.FullName!);
     }
 
     [Fact]
-    public void Find_Classes_With_OrderId_But_Not_Interface()
+    public void Find_Classes_With_OrderId()
     {
-        Assert.Empty(_types.Where(t =>
-                t != typeof(OrderMonitor) &&
-                t.GetProperty("OrderId") is not null &&
-                t.GetInterface("IHasOrderId") is null));
+        TypeInfo[] types1 = GetTypes(t => t.GetInterface("IHasOrderId") is not null);
+        Assert.Empty(types1.Where(t => t.GetCustomAttribute<MessageAttribute>() == null && !t.IsAbstract));
+
+        TypeInfo[] types2 = GetTypes(t => t.GetProperty("OrderId") is not null && !t.IsInterface);
+        TypeInfo[] except = SymmetricExcept(types1, types2);
+        Assert.Empty(except.Where(t => t.Name != "OrderMonitor"));
+
+        foreach (Type t in types1)
+            Write(t.FullName!);
     }
 
     [Fact]
-    public void Find_Classes_With_ExecutionId_But_Not_Interface()
+    public void Find_Classes_With_ExecutionId()
     {
-        Assert.Empty(_types.Where(t =>
-                t.GetProperty("ExecutionId") is not null &&
-                t.GetInterface("IHasExecutionId") is null));
+        TypeInfo[] types1 = GetTypes(t => t.GetInterface("IHasExecutionId") is not null);
+        Assert.Empty(types1.Where(t => t.GetCustomAttribute<MessageAttribute>() == null && !t.IsAbstract));
+
+        TypeInfo[] types2 = GetTypes(t => t.GetProperty("ExecutionId") is not null && !t.IsInterface);
+        TypeInfo[] except = SymmetricExcept(types1, types2);
+        Assert.Empty(except);
+
+        foreach (Type t in types1)
+            Write(t.FullName!);
     }
+
+    [Fact]
+    public void Find_Classes_With_Code()
+    {
+        TypeInfo[] types1 = GetTypes(t => t.GetInterface("IHasStringCode") is not null);
+        Assert.Empty(types1.Where(t => t.GetCustomAttribute<MessageAttribute>() != null));
+
+        TypeInfo[] types2 = GetTypes(t => t.GetProperty("StringCode") is not null && !t.IsInterface);
+        TypeInfo[] except = SymmetricExcept(types1, types2);
+        Assert.Empty(except);
+
+        foreach (Type t in types1)
+            Write(t.FullName!);
+    }
+
+
 }

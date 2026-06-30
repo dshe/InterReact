@@ -14,10 +14,10 @@ internal static class StringEnumCache<T> where T : class
     {
         Type type = typeof(T);
 
-        PropertyInfo codeProperty = type.GetProperty("Code") ??
-            throw new InvalidOperationException($"Type '{type.Name}' does not expose a Code property.");
+        PropertyInfo codeProperty = type.GetProperty("StringCode") ??
+            throw new InvalidOperationException($"Type '{type.Name}' does not expose a StringCode property.");
         if (codeProperty.PropertyType != typeof(string))
-            throw new InvalidOperationException($"Type '{type.Name}', 'Code' property is not a string.");
+            throw new InvalidOperationException($"Type '{type.Name}', 'StringCode' property is not a string.");
 
         return type.GetFields(BindingFlags.Public | BindingFlags.Static)
             .Where(f => f.IsInitOnly && f.FieldType == type) // readonly

@@ -22,13 +22,13 @@ public class EnumTests(ITestOutputHelper output) : OutputHelperTestBase(output)
         ResponseParser parser = new(LogFactory.CreateLogger<ResponseParser>());
 
         ContractOptionRight x = parser.ParseStringEnum<ContractOptionRight>("P");
-        Write(x.Code);
+        Write(x.StringCode);
 
         ContractOptionRight y = parser.ParseStringEnum<ContractOptionRight>("p");
-        Write(y.Code);
+        Write(y.StringCode);
 
         ContractOptionRight z = parser.ParseStringEnum<ContractOptionRight>("Zz");
-        Write(z.Code);
+        Write(z.StringCode);
     }
 }
 

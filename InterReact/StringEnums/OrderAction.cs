@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-public sealed record OrderAction(string Code) : IHasCode
+public sealed record OrderAction(string StringCode) : IHasStringCode
 {
     public static readonly OrderAction Undefined = new("");
 

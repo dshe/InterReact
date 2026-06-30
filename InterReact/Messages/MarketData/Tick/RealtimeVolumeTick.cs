@@ -7,6 +7,7 @@ namespace InterReact;
 /// TickRealtimeVolume ticks are obtained by parsing TickString.
 /// When TickRealtimeVolume is used, redundant Tick messages (above) can be removed using the TickRedundantRealtimeVolumeFilter.
 /// </summary>
+[Message]
 public sealed record RealtimeVolumeTick : TickBase // from StringTick
 {
     public double Price { get; init; }
@@ -15,6 +16,7 @@ public sealed record RealtimeVolumeTick : TickBase // from StringTick
     public double Vwap { get; init; }
     public bool SingleTrade { get; init; }
     public Instant Instant { get; init; }
+    internal RealtimeVolumeTick() { }
     internal RealtimeVolumeTick(int requestId, TickType tickType, ResponseParser parser, string str)
     {
         RequestId = requestId;

@@ -67,7 +67,7 @@ public sealed class ResponseParser(ILogger<ResponseParser> logger)
         return ParseDouble(s);
     }
 
-    internal decimal ParseDecimal(string s) // ok
+    internal decimal ParseDecimal(string s)
     {
         if (s.Length == 0 || s == _maxInt || s == _maxLong || s == _maxDouble)
             return decimal.MaxValue;

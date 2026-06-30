@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-public sealed record OrderTimeInForce(string Code) : IHasCode
+public sealed record OrderTimeInForce(string StringCode) : IHasStringCode
 {
     /// <summary>
     /// Order valid for the current day. This is the default;

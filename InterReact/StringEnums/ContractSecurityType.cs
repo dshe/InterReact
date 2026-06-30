@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-public sealed record ContractSecurityType(string Code) : IHasCode
+public sealed record ContractSecurityType(string StringCode) : IHasStringCode
 {
     public static readonly ContractSecurityType Undefined = new("");
 

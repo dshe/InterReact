@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-public sealed record OrderClearingIntent(string Code) : IHasCode
+public sealed record OrderClearingIntent(string StringCode) : IHasStringCode
 {
     public static readonly OrderClearingIntent Default = new("");
     public static readonly OrderClearingIntent Ib = new("IB");

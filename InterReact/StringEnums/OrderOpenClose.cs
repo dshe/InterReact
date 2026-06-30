@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-public sealed record OrderOpenClose(string Code) : IHasCode
+public sealed record OrderOpenClose(string StringCode) : IHasStringCode
 {
     public static readonly OrderOpenClose Undefined = new("");
     public static readonly OrderOpenClose Open = new("O");

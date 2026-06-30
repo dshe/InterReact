@@ -61,7 +61,7 @@ public class ResponseComposerTests : OutputHelperTestBase
     [Fact]
     public void T03_Ok()
     {
-        object message = _composer.Compose([
+        object[] message = _composer.Compose([
             "2",  // code = size
             "99", // version
             "2",  // requestId
@@ -69,6 +69,6 @@ public class ResponseComposerTests : OutputHelperTestBase
             "100" // size
             ]);
 
-        Assert.IsType<SizeTick>(message);
+        Assert.IsType<SizeTick>(message.Single());
     }
 }

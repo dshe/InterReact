@@ -5,13 +5,13 @@ namespace InterReact;
 /// Methods which send request messages to TWS/Gateway.
 /// Request methods are serialized, thread-safe and limited to a specified number of messages per second.
 /// </summary>
-public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOptions Options)
+public sealed class Request(Func<RequestMessage> createMessage, InterReactOptions options)
 {
     /// <summary>
     /// Returns successive ids to uniquely identify requests and orders.
     /// The initial value is set during connection and may be greater than 0 in case there are previous orders.
     /// </summary>
-    public int GetNextId() => Interlocked.Increment(ref Options.Id);
+    public int GetNextId() => Interlocked.Increment(ref options.Id);
 
     public async ValueTask RequestMarketDataAsync(
         int requestId,
@@ -22,7 +22,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        RequestMessage m = CreateMessage()
+        RequestMessage m = createMessage()
 
         .Write(RequestCode.RequestMarketData, "11", requestId)
         .WriteContract(contract);
@@ -46,17 +46,17 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
     }
 
     public async ValueTask CancelMarketDataAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.CancelMarketData, "1", requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelMarketData, "1", requestId).SendAsync().ConfigureAwait(false);
 
     public async ValueTask PlaceOrderAsync(int orderId, Order order, Contract contract) // monster
     {
-        if (Options.AllowOrderPlacement == false)
+        if (options.AllowOrderPlacement == false)
             throw new InvalidOperationException("To place orders, first set Options.AllowOrderPlacement to true.");
 
         ArgumentNullException.ThrowIfNull(order);
         ArgumentNullException.ThrowIfNull(contract);
 
-        RequestMessage m = CreateMessage()
+        RequestMessage m = createMessage()
             .Write(RequestCode.PlaceOrder, orderId)
             .WriteContract(contract)
             .Write(contract.SecurityIdType, contract.SecurityId)
@@ -178,7 +178,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
             order.ActiveStopTime);
 
         m.Write(order.HedgeType);
-        if (order.HedgeType.Code.Length != 0)
+        if (order.HedgeType.StringCode.Length != 0)
             m.Write(order.HedgeParam);
 
         m.Write(
@@ -283,10 +283,10 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
     }
 
     public async ValueTask CancelOrderAsync(int orderId, string manualOrderCancelTime = "") =>
-        await CreateMessage().Write(RequestCode.CancelOrder, "1", orderId, manualOrderCancelTime).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelOrder, "1", orderId, manualOrderCancelTime).SendAsync().ConfigureAwait(false);
 
     public async ValueTask RequestOpenOrdersAsync() => 
-        await CreateMessage().Write(RequestCode.RequestOpenOrders, "1").SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestOpenOrders, "1").SendAsync().ConfigureAwait(false);
 
     /// <summary>
     /// Call this function to start receiving account updates.
@@ -296,7 +296,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
     /// This information is updated every three minutes.
     /// </summary>
     public async ValueTask RequestAccountUpdatesAsync(bool subscribe, string accountCode = "") =>
-        await CreateMessage().Write(RequestCode.RequestAccountData, "2", subscribe, accountCode).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestAccountData, "2", subscribe, accountCode).SendAsync().ConfigureAwait(false);
 
     /// <summary>
     /// When this method is called, execution reports from the last 24 hours that meet the filter criteria are retrieved.
@@ -306,7 +306,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
     /// </summary>
     public async ValueTask RequestExecutionsAsync(int requestId, ExecutionFilter? filter = null)
     {
-        RequestMessage m = CreateMessage()
+        RequestMessage m = createMessage()
             .Write(RequestCode.RequestExecutions, "3", requestId);
         if (filter is not null)
         {
@@ -326,12 +326,12 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
     /// Call this function to request the next available Id.
     /// (the numids parameter has been deprecated)
     /// </summary>
-    public async ValueTask RequestNextOrderIdAsync() => await CreateMessage().Write(RequestCode.RequestIds, "1", 1).SendAsync().ConfigureAwait(false);
+    public async ValueTask RequestNextOrderIdAsync() => await createMessage().Write(RequestCode.RequestIds, "1", 1).SendAsync().ConfigureAwait(false);
 
     public async ValueTask RequestContractDetailsAsync(int requestId, Contract contract, bool includeExpired = false)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.RequestContractData, "8", requestId)
             .WriteContract(contract)
             .Write(
@@ -350,7 +350,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.RequestMarketDepth, "5", requestId)
             .WriteContract(contract)
             .Write(numRows, isSmartDepth, Tag.Combine(options))
@@ -358,23 +358,23 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
     }
 
     public async ValueTask CancelMarketDepthAsync(int requestId, bool isSmartDepth = false) => 
-        await CreateMessage().Write(RequestCode.CancelMarketDepth, "1", requestId, isSmartDepth).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelMarketDepth, "1", requestId, isSmartDepth).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestNewsBulletinsAsync(bool all = true) => 
-        await CreateMessage().Write(RequestCode.RequestNewsBulletins, "1", all).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestNewsBulletins, "1", all).SendAsync().ConfigureAwait(false);
     public async ValueTask CancelNewsBulletinsAsync() => 
-        await CreateMessage().Write(RequestCode.CancelNewsBulletin, "1").SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelNewsBulletin, "1").SendAsync().ConfigureAwait(false);
     public async ValueTask SetServerLogLevelAsync(LogEntryLevel logLevel) => 
-        await CreateMessage().Write(RequestCode.ChangeServerLog, "1", logLevel).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.ChangeServerLog, "1", logLevel).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestAutoOpenOrdersAsync(bool autoBind) => 
-        await CreateMessage().Write(RequestCode.RequestAutoOpenOrders, "1", autoBind).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestAutoOpenOrders, "1", autoBind).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestAllOpenOrdersAsync() => 
-        await CreateMessage().Write(RequestCode.RequestAllOpenOrders, "1").SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestAllOpenOrders, "1").SendAsync().ConfigureAwait(false);
     public async ValueTask RequestManagedAccountsAsync() => 
-        await CreateMessage().Write(RequestCode.RequestManagedAccounts, "1").SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestManagedAccounts, "1").SendAsync().ConfigureAwait(false);
     public async ValueTask RequestFinancialAdvisorConfigurationAsync(FinancialAdvisorDataType dataType) => 
-        await CreateMessage().Write(RequestCode.RequestFA, "1", dataType).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestFA, "1", dataType).SendAsync().ConfigureAwait(false);
     public async ValueTask ReplaceFinancialAdvisorConfigurationAsync(int requestId, FinancialAdvisorDataType dataType, string xml) =>
-        await CreateMessage().Write(RequestCode.ReplaceFA, "1", dataType, xml, requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.ReplaceFA, "1", dataType, xml, requestId).SendAsync().ConfigureAwait(false);
 
     public async ValueTask RequestHistoricalDataAsync(
         int requestId,
@@ -393,7 +393,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         if (endDateTime.Length != 0 && keepUpToDate)
             throw new InvalidOperationException("RequestHistoricalData: endDate many not be specified when keepUpToDate = true.");
 
-        RequestMessage m = CreateMessage()
+        RequestMessage m = createMessage()
             .Write(RequestCode.RequestHistoricalData, requestId)
             .WriteContract(contract)
             .Write(true) // include expired
@@ -428,7 +428,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         //bool professionalCustomer)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        RequestMessage m = CreateMessage()
+        RequestMessage m = createMessage()
             .Write(RequestCode.ExerciseOptions, "2", requestId)
             .WriteContract(contract, includePrimaryExchange: false)
             .Write(exerciseAction, exerciseQuantity, account, overrideOrder);
@@ -448,7 +448,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         string subscriptionFilterOptions = "")
     {
         ArgumentNullException.ThrowIfNull(subscription);
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.RequestScannerSubscription, requestId)
             .Write(
                 subscription.NumberOfRows.ToMax(),
@@ -478,13 +478,13 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
     }
 
     public async ValueTask CancelScannerSubscriptionAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.CancelScannerSubscription, "1", requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelScannerSubscription, "1", requestId).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestScannerParametersAsync() => 
-        await CreateMessage().Write(RequestCode.RequestScannerParameters, "1").SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestScannerParameters, "1").SendAsync().ConfigureAwait(false);
     public async ValueTask CancelHistoricalDataAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.CancelHistoricalData, "1", requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelHistoricalData, "1", requestId).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestCurrentTimeAsync() =>
-        await CreateMessage().Write(RequestCode.RequestCurrentTime, "1").SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestCurrentTime, "1").SendAsync().ConfigureAwait(false);
 
     public async ValueTask RequestRealTimeBarsAsync(
         int requestId,
@@ -495,7 +495,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.RequestRealTimeBars, "3", requestId)
             .WriteContract(contract)
             .Write(barSize,
@@ -506,7 +506,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
     }
 
     public async ValueTask CancelRealTimeBarsAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.CancelRealTimeBars, "1", requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelRealTimeBars, "1", requestId).SendAsync().ConfigureAwait(false);
 
     public async ValueTask RequestFundamentalDataAsync(
         int requestId,
@@ -515,7 +515,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.RequestFundamentalData, "3", requestId)
             .Write(
                 contract.ContractId,
@@ -530,7 +530,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
     }
 
     public async ValueTask CancelFundamentalDataAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.CancelFundamentalData, "1", requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelFundamentalData, "1", requestId).SendAsync().ConfigureAwait(false);
 
     public async ValueTask CalculateImpliedVolatilityAsync(
         int requestId,
@@ -540,7 +540,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.ReqCalcImpliedVolat, "3", requestId)
             .WriteContract(contract)
             .Write(optionPrice, underlyingPrice, Tag.Combine(options))
@@ -555,7 +555,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.ReqCalcOptionPrice, "3", requestId)
             .WriteContract(contract)
             .Write(volatility, underlyingPrice, Tag.Combine(options))
@@ -563,15 +563,15 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
     }
 
     public async ValueTask CancelCalculateImpliedVolatilityAsync(int requestId) =>
-        await CreateMessage().Write(RequestCode.CancelImpliedVolatility, "1", requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelImpliedVolatility, "1", requestId).SendAsync().ConfigureAwait(false);
     public async ValueTask CancelCalculateOptionPriceAsync(int requestId) =>
-        await CreateMessage().Write(RequestCode.CancelOptionPrice, "1", requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelOptionPrice, "1", requestId).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestGlobalCancelAsync() =>
-        await CreateMessage().Write(RequestCode.RequestGlobalCancel, "1").SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestGlobalCancel, "1").SendAsync().ConfigureAwait(false);
     public async ValueTask RequestMarketDataTypeAsync(MarketDataType marketDataType) =>
-        await CreateMessage().Write(RequestCode.RequestMarketDataType, "1", marketDataType).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestMarketDataType, "1", marketDataType).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestPositionsAsync() =>
-        await CreateMessage().Write(RequestCode.RequestPositions, "1").SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestPositions, "1").SendAsync().ConfigureAwait(false);
 
     public async ValueTask RequestAccountSummaryAsync(
         int requestId,
@@ -582,40 +582,40 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
             tags = [.. Enum.GetValues<AccountSummaryTag>()];
         List<string> tagNames = tags.Select(tag => tag.ToString()).ToList();
         tagNames.Add("$LEDGER:ALL");
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.RequestAccountSummary, "1", requestId)
             .Write(group, string.Join(",", tagNames))
             .SendAsync().ConfigureAwait(false);
     }
 
     public async ValueTask CancelAccountSummaryAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.CancelAccountSummary, "1", requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelAccountSummary, "1", requestId).SendAsync().ConfigureAwait(false);
     public async ValueTask CancelPositionsAsync() => 
-        await CreateMessage().Write(RequestCode.CancelPositions, "1").SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelPositions, "1").SendAsync().ConfigureAwait(false);
 
     // 65, 66: For IB internal use.
 
     public async ValueTask QueryDisplayGroupsAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.QueryDisplayGroups, "1", requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.QueryDisplayGroups, "1", requestId).SendAsync().ConfigureAwait(false);
     public async ValueTask SubscribeToGroupEventsAsync(int requestId, int groupId) =>
-        await CreateMessage().Write(RequestCode.SubscribeToGroupEvents, "1", requestId, groupId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.SubscribeToGroupEvents, "1", requestId, groupId).SendAsync().ConfigureAwait(false);
     public async ValueTask UpdateDisplayGroupAsync(int requestId, string contractInfo) => 
-        await CreateMessage().Write(RequestCode.UpdateDisplayGroup, "1", requestId, contractInfo).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.UpdateDisplayGroup, "1", requestId, contractInfo).SendAsync().ConfigureAwait(false);
     public async ValueTask UnsubscribeFromGroupEventsAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.UnsubscribeFromGroupEvents, "1", requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.UnsubscribeFromGroupEvents, "1", requestId).SendAsync().ConfigureAwait(false);
 
     // 71: StartApi.
     // 72, 73: for IB internal use.
 
     // Note that RequestPositionsMulti and RequestAccountUpdatesMulti require an account code when there are multiple accounts.
     public async ValueTask RequestPositionsMultiAsync(int requestId, string account, string modelCode = "") => 
-        await CreateMessage().Write(RequestCode.RequestPositionsMulti, "1", requestId, account, modelCode).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestPositionsMulti, "1", requestId, account, modelCode).SendAsync().ConfigureAwait(false);
     public async ValueTask CancelPositionsMultiAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.CancelPositionsMulti, "1", requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelPositionsMulti, "1", requestId).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestAccountUpdatesMultiAsync(int requestId, string account, string modelCode = "", bool ledgerAndNlv = false) =>
-        await CreateMessage().Write(RequestCode.RequestAccountUpdatesMulti, "1", requestId, account, modelCode, ledgerAndNlv).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestAccountUpdatesMulti, "1", requestId, account, modelCode, ledgerAndNlv).SendAsync().ConfigureAwait(false);
     public async ValueTask CancelAccountUpdatesMultiAsync(int requestId) =>
-        await CreateMessage().Write(RequestCode.CancelAccountUpdatesMulti, "1", requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelAccountUpdatesMulti, "1", requestId).SendAsync().ConfigureAwait(false);
 
     public async ValueTask RequestSecDefOptParamsAsync(
         int requestId,
@@ -623,34 +623,34 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         string futFopExchange,
         string underlyingSecType,
         int underlyingConId) 
-            => await CreateMessage()
+            => await createMessage()
                 .Write(RequestCode.RequestSecurityDefinitionOptionalParameters, requestId)
                 .Write(underlyingSymbol, futFopExchange, underlyingSecType, underlyingConId)
                 .SendAsync().ConfigureAwait(false);
 
     public async ValueTask RequestSoftDollarTiersAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.RequestSoftDollarTiers, requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestSoftDollarTiers, requestId).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestFamilyCodesAsync() =>
-        await CreateMessage().Write(RequestCode.RequestFamilyCodes).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestFamilyCodes).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestMatchingSymbolsAsync(int requestId, string pattern) => 
-        await CreateMessage().Write(RequestCode.RequestMatchingSymbols, requestId, pattern).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestMatchingSymbols, requestId, pattern).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestMarketDepthExchangesAsync() => 
-        await CreateMessage().Write(RequestCode.RequestMktDepthExchanges).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestMktDepthExchanges).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestSmartComponentsAsync(int requestId, string bboExchange) => 
-        await CreateMessage().Write(RequestCode.RequestSmartComponents, requestId, bboExchange).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestSmartComponents, requestId, bboExchange).SendAsync().ConfigureAwait(false);
 
     public async ValueTask RequestNewsArticleAsync(
         int requestId,
         string providerCode,
         string articleId,
         IList<Tag>? options = null) =>
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.RequestNewsArticle, requestId)
             .Write(providerCode, articleId, options)
             .SendAsync().ConfigureAwait(false);
 
     public async ValueTask RequestNewsProvidersAsync() => 
-        await CreateMessage().Write(RequestCode.RequestNewsProviders).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestNewsProviders).SendAsync().ConfigureAwait(false);
 
     public async ValueTask RequestHistoricalNewsAsync(
         int requestId,
@@ -660,7 +660,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         string endTime,
         int totalResults,
         IList<Tag>? options = null) => 
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.RequestHistoricalNews, requestId)
             .Write(contractId, providerCodes, startTime, endTime, totalResults, options)
             .SendAsync().ConfigureAwait(false);
@@ -673,7 +673,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         int formatDate)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.RequestHeadTimestamp, requestId)
             .WriteContract(contract)
             .Write(true) // includeExpired
@@ -688,7 +688,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         string period)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.RequestHistogramData, requestId)
             .WriteContract(contract)
             .Write(true) // includeExpired
@@ -697,19 +697,19 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
     }
 
     public async ValueTask CancelHistogramDataAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.CancelHistogramData, requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelHistogramData, requestId).SendAsync().ConfigureAwait(false);
     public async ValueTask CancelHeadTimestampAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.CancelHeadTimestamp, requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelHeadTimestamp, requestId).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestMarketRuleAsync(int marketRuleId) =>
-        await CreateMessage().Write(RequestCode.RequestMarketRule, marketRuleId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.RequestMarketRule, marketRuleId).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestPnLAsync(int requestId, string account, string modelCode) => 
-        await CreateMessage().Write(RequestCode.ReqPnL, requestId, account, modelCode).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.ReqPnL, requestId, account, modelCode).SendAsync().ConfigureAwait(false);
     public async ValueTask CancelPnLAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.CancelPnL, requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelPnL, requestId).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestPnLSingleAsync(int requestId, string account, string modelCode, int contractId) =>
-        await CreateMessage().Write(RequestCode.ReqPnLSingle, requestId, account, modelCode, contractId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.ReqPnLSingle, requestId, account, modelCode, contractId).SendAsync().ConfigureAwait(false);
     public async ValueTask CancelPnLSingleAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.CancelPnLSingle, requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelPnLSingle, requestId).SendAsync().ConfigureAwait(false);
 
     public async ValueTask RequestHistoricalTicksAsync(
         int requestId,
@@ -723,7 +723,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         IList<Tag>? options = null)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.ReqHistoricalTicks, requestId)
             .WriteContract(contract)
             .Write(true) // includeExpired
@@ -740,7 +740,7 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
         bool ignoreSize)
     {
         ArgumentNullException.ThrowIfNull(contract);
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.ReqTickByTickData, requestId)
             .WriteContract(contract)
             .Write(tickType, numberOfTicks, ignoreSize)
@@ -748,18 +748,18 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
     }
 
     public async ValueTask CancelTickByTickDataAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.CancelTickByTickData, requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelTickByTickData, requestId).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestCompletedOrdersAsync(bool apiOnly) => 
-        await CreateMessage().Write(RequestCode.ReqCompletedOrders, apiOnly).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.ReqCompletedOrders, apiOnly).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestWshMetaDataAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.ReqWshMetaData, requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.ReqWshMetaData, requestId).SendAsync().ConfigureAwait(false);
     public async ValueTask CancelWshMetaDataAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.CancelWshMetaData, requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelWshMetaData, requestId).SendAsync().ConfigureAwait(false);
 
     public async ValueTask RequestWshEventDataAsync(int requestId, WshEventData wshEventData)
     {
         ArgumentNullException.ThrowIfNull(wshEventData);
-        await CreateMessage()
+        await createMessage()
             .Write(RequestCode.ReqWshEventData, requestId)
             .Write(
                 wshEventData.ContractId,
@@ -774,9 +774,9 @@ public sealed class Request(Func<RequestMessage> CreateMessage, InterReactOption
     }
 
     public async ValueTask CancelWshEventDataAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.CancelWshEventData, requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.CancelWshEventData, requestId).SendAsync().ConfigureAwait(false);
     public async ValueTask RequestUserInformationAsync(int requestId) => 
-        await CreateMessage().Write(RequestCode.ReqUserInfo, requestId).SendAsync().ConfigureAwait(false);
+        await createMessage().Write(RequestCode.ReqUserInfo, requestId).SendAsync().ConfigureAwait(false);
 }
 
 file static class RequestExtensions

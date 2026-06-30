@@ -145,20 +145,17 @@ public sealed class Connection : IAsyncDisposable
             return;
 
         await _receiverCts.CancelAsync().ConfigureAwait(false);
+
+        _outgoing.Writer.TryComplete();
+
+        await Task.WhenAll(_senderTask, _receiverTask ?? Task.CompletedTask).ConfigureAwait(false);
+
         try
         {
             _socket.Shutdown(SocketShutdown.Both);
         }
         catch { }
-        try
-        {
-            _outgoing.Writer.TryComplete();
-            await Task.WhenAll(_senderTask, _receiverTask ?? Task.CompletedTask).ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogDebug(ex, "Error while disposing connection.");
-        }
+
         _socket.Dispose();
         _receiverCts.Dispose();
         _logger.LogInformation("Dispose.");

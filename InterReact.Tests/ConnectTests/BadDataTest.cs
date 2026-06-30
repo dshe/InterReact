@@ -2,7 +2,7 @@
 using System.Reactive.Threading.Tasks;
 namespace ConnectTests;
 
-public class BadData(ITestOutputHelper output) : OutputHelperTestBase(output, LogLevel.Debug)
+public class BadData(ITestOutputHelper output) : OutputHelperTestBase(output, LogLevel.Information)
 {
     [Fact]
     public async Task BadRequestTestAsync()
@@ -51,24 +51,28 @@ public class BadData(ITestOutputHelper output) : OutputHelperTestBase(output, Lo
         // This particular Id value will trigger a receive parse error when reading ContractDetails.
         int id = int.MaxValue;
 
-        //client.Response.Subscribe(x => { }, e => throw e);
+        //client.Response.Subscribe();
+
+        client.Response.Subscribe(x => Write("X" + x.Stringify()), e => Write("XException: " + e.Message), () => Write("XUnsubscribe"));
 
         //Task<object> task = client
-        var task = client
-            .Response
-            //.WithRequestId(id)
-            //.OfType<ContractDetails>()
-            .OfType<Alert>()
-            .FirstAsync()
-            //.Timeout(TimeSpan.FromSeconds(3))
-            .ToTask();
+        //var task = client
+        //.Response
+        //.WithRequestId(id)
+        //.OfType<ContractDetails>()
+        //.OfType<Alert>()
+        //.FirstAsync()
+        //.Timeout(TimeSpan.FromSeconds(3))
+        //.ToTask();
+
+
 
         //IObservable<Contract> obs = Observable.Throw<Contract>(new NullReferenceException());
         //await obs;
 
         await client.Request.RequestContractDetailsAsync(id, contract);
 
-        Alert alert = await task;
+        //Alert alert = await task;
 
         //Assert.IsType<Alert>();
 

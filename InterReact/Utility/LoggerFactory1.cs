@@ -8,7 +8,7 @@ public static partial class Xtensions
     }
 }
 
-internal sealed class LoggerFactory1 : ILoggerFactory
+file sealed class LoggerFactory1 : ILoggerFactory
 {
     private readonly ILogger _logger;
     internal LoggerFactory1(ILogger logger) => _logger = logger;

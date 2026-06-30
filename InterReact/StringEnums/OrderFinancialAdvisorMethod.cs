@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-public sealed record OrderFinancialAdvisorMethod(string Code) : IHasCode
+public sealed record OrderFinancialAdvisorMethod(string StringCode) : IHasStringCode
 {
     public static readonly OrderFinancialAdvisorMethod None = new("");
     public static readonly OrderFinancialAdvisorMethod PercentChange = new("PctChange");

@@ -98,9 +98,9 @@ public static partial class Xtensions
             }
             finally
             {
-                logger.LogDebug("Pipeline shutdown.");
                 await pipe.Writer.CompleteAsync().ConfigureAwait(false);
                 await pipe.Reader.CompleteAsync().ConfigureAwait(false);
+                logger.LogDebug("Pipeline shutdown.");
             }
         }
     }

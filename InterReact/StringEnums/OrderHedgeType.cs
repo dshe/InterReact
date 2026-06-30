@@ -1,6 +1,6 @@
 ﻿namespace InterReact;
 
-public sealed record OrderHedgeType(string Code) : IHasCode
+public sealed record OrderHedgeType(string StringCode) : IHasStringCode
 {
     public static readonly OrderHedgeType Undefined = new("");
     public static readonly OrderHedgeType Delta = new("D");

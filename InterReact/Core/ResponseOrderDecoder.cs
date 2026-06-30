@@ -189,7 +189,7 @@ internal sealed class OrderDecoder
     internal void ReadHedgeParams()
     {
         Order.HedgeType = R.ReadStringEnum<OrderHedgeType>();
-        if (Order.HedgeType.Code.Length != 0)
+        if (Order.HedgeType.StringCode.Length != 0)
             Order.HedgeParam = R.ReadString();
     }
 
