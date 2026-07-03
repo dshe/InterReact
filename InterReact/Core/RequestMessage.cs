@@ -9,9 +9,9 @@ public sealed class RequestMessage(Connection connection, ILogger<Request> logge
 
     internal async ValueTask SendAsync([CallerMemberName] string memberName = "")
     {
-        logger.LogDebug("{Method}({Strings}]).", memberName, Strings.JoinStrings(", "));
         if (Strings.Count == 0)
-            throw new InvalidOperationException("Empty send message.");
+            throw new InvalidOperationException($"Empty send message: {memberName}.");
+        logger.LogDebug("{Method}({Strings}]).", memberName, Strings.JoinStrings(", "));
         await connection.SendMessageAsync(Strings).ConfigureAwait(false);
         Strings.Clear(); // allows the message to be reused
     }

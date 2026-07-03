@@ -13,7 +13,7 @@ public sealed record PriceTick : TickBase
     public double Price { get; init; }
     public TickAttrib TickAttrib { get; init; }
     internal PriceTick() => TickAttrib = new TickAttrib(0);
-    internal static object[] Create(ResponseReader r)
+    internal static object CreatePriceTick(ResponseReader r)
     {
         r.RequireMessageVersion(3);
 
@@ -33,7 +33,7 @@ public sealed record PriceTick : TickBase
 
         TickType sizeTickType = GetSizeTickType(priceTickType);
         if (sizeTickType == TickType.Undefined)
-            return new object[] { priceTick };
+            return priceTick;
 
         SizeTick sizeTick = new()
         {

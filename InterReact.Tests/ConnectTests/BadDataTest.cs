@@ -48,45 +48,15 @@ public class BadData(ITestOutputHelper output) : OutputHelperTestBase(output, Lo
             Exchange = "SMART"
         };
 
-        // This particular Id value will trigger a receive parse error when reading ContractDetails.
-        int id = int.MaxValue;
+        // This particular Id value will trigger an error when reading ContractDetails.
+        // The error will trigger OnError() on the Response observable.
+        await client.Request.RequestContractDetailsAsync(int.MaxValue, contract);
 
-        //client.Response.Subscribe();
+        await Task.Delay(100, TestContext.Current.CancellationToken);
 
-        client.Response.Subscribe(x => Write("X" + x.Stringify()), e => Write("XException: " + e.Message), () => Write("XUnsubscribe"));
-
-        //Task<object> task = client
-        //var task = client
-        //.Response
-        //.WithRequestId(id)
-        //.OfType<ContractDetails>()
-        //.OfType<Alert>()
-        //.FirstAsync()
-        //.Timeout(TimeSpan.FromSeconds(3))
-        //.ToTask();
-
-
-
-        //IObservable<Contract> obs = Observable.Throw<Contract>(new NullReferenceException());
-        //await obs;
-
-        await client.Request.RequestContractDetailsAsync(id, contract);
-
-        //Alert alert = await task;
-
-        //Assert.IsType<Alert>();
-
-        //Exception ex = await Assert.ThrowsAnyAsync<Exception>(() => task);
-
-        //Write(ex.ToString());
-
-        await Task.Delay(1000, TestContext.Current.CancellationToken);
+        await Assert.ThrowsAnyAsync<Exception>(async() => await client.Response);
 
         await client.DisposeAsync();
-
-        await Task.Delay(1000, TestContext.Current.CancellationToken);
-
-        // the error is not sent to the client !!!
     }
 
 }

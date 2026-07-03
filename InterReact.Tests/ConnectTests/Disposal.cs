@@ -1,5 +1,4 @@
-﻿using System.Reactive.Linq;
-namespace ConnectTests;
+﻿namespace ConnectTests;
 
 public class Disposal(ITestOutputHelper output) : OutputHelperTestBase(output, LogLevel.Debug)
 {
@@ -11,7 +10,6 @@ public class Disposal(ITestOutputHelper output) : OutputHelperTestBase(output, L
 
         await client.DisposeAsync();
 
-        Assert.ThrowsAny<Exception>(() => client.Request.RequestCurrentTimeAsync());
-        //await Assert.ThrowsAnyAsync<Exception>(() => client.Service.GetMatchingSymbolsAsync("x", default));
+        await Assert.ThrowsAnyAsync<Exception>(async() => await client.Request.RequestCurrentTimeAsync());
     }
 }

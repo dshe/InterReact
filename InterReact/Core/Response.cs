@@ -10,7 +10,7 @@ public sealed class Response : IObservable<object>
 
         _observable = connection
             .Observable
-            .ComposeMessage(responseComposer, logger)
+            .ComposeMessage(responseComposer)
             .Log(logger)
             .Publish()
             .AutoConnect(); // connect on first observer

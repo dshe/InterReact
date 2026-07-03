@@ -3,7 +3,6 @@ using System.Buffers.Binary;
 using System.IO;
 using System.IO.Pipelines;
 using System.Net.Sockets;
-using System.Reactive.Disposables;
 using System.Text;
 namespace InterReact;
 
@@ -87,7 +86,7 @@ public static partial class Xtensions
 
                 observer.OnCompleted();
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
                 observer.OnCompleted();
             }

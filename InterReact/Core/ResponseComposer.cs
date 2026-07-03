@@ -5,13 +5,17 @@ public static partial class Xtension
 {
     extension(IObservable<string[]> source)
     {
-        internal IObservable<object> ComposeMessage(ResponseComposer responseComposer, ILogger logger)
+        internal IObservable<object> ComposeMessage(ResponseComposer responseComposer)
         {
             return source.SelectMany(strings =>
             {
                 try
                 {
-                    return responseComposer.Compose(strings);
+                    object message = responseComposer.Compose(strings);
+                    if (message is object[] amessage)
+                        return amessage; // PriceTick
+                    else
+                        return [message];
                 }
                 catch (Exception ex)
                 {
@@ -25,21 +29,18 @@ public static partial class Xtension
 
 public sealed class ResponseComposer(ResponseReader reader)
 {
-    internal object[] Compose(string[] strings)
+    internal object Compose(string[] strings)
     {
         reader.SetStrings(strings);
         string code = reader.ReadString();
-        object[] message;
-        if (code == "1")
-            message = PriceTick.Create(reader);
-        else
-            message = [GetResponseMessage(code)];
+        object message = GetResponseMessage(code);
         reader.VerifyEnumerationEnd();
         return message;
     }
 
     private object GetResponseMessage(string code) => code switch
     {
+        "1" => PriceTick.CreatePriceTick(reader),
         "2" => new SizeTick(reader),
         "3" => new OrderStatusReport(reader),
         "4" => new Alert(reader),

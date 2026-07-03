@@ -9,3 +9,5 @@ using System.Diagnostics.CodeAnalysis;
 [assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly)]
 
 [assembly: SuppressMessage("Usage", "IDE0130: Namespace does not match folder structure")]
+[assembly: SuppressMessage("Performance", "CA1873:Avoid potentially expensive logging")]
+[assembly: SuppressMessage("Usage", "CA2254:Template should be a static expression")]

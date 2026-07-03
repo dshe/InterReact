@@ -5,7 +5,6 @@ namespace InterReact;
 
 public sealed class ResponseReader(InterReactOptions options, ResponseParser parser, ILogger<ResponseReader> logger)
 {
-    private string _lastCallerInfo = "";
     private int _index;
     private string[] _strings = [];
     internal ILogger Logger { get; } = logger;
@@ -22,34 +21,29 @@ public sealed class ResponseReader(InterReactOptions options, ResponseParser par
     {
         if (_index == _strings.Length)
             return;
-        string[] extra = _strings.Skip(_index).Select(x => $"'{x}'").ToArray();
-        string msg = $"ResponseReader: long message => [{extra.JoinStrings(", ")}]\r\n{_lastCallerInfo}";
+        string[] extra = [.. _strings.Skip(_index).Select(x => $"'{x}'")];
+        string msg = $"ResponseReader: long message => [{extra.JoinStrings(", ")}]";
         throw new InvalidDataException(msg);
     }
     
     private T Read<T>(Func<string, T> convert, string member, string file, int l)
     {
         if (_index >= _strings.Length)
-        {   // find line in source that attempts to retrieve missing data
-            throw new InvalidDataException(
-                $"ResponseReader: short message => [{_strings.JoinStrings(", ")}]" +
-                $"\r\n{GetCallerInfo(member, file, l)}");
-        }
+            throw new InvalidDataException($"ResponseReader: short message {GetCallerInfo(member, file, l)}");
 
         string input = _strings[_index++];
-        T output = convert(input);
-
-        if (Logger.IsEnabled(LogLevel.Trace))
+        try
         {
-            _lastCallerInfo = GetCallerInfo(member, file, l); // slow!
-            Logger.LogResponseString(_lastCallerInfo, input, output?.ToString() ?? "", typeof(T).Name);
+            return convert(input);
         }
-
-        return output;
+        catch (Exception ex)
+        {
+            throw new InvalidDataException($"ResponseReader: {GetCallerInfo(member, file, l)} {ex.Message}", ex);
+        }
     }
 
     internal string ReadString([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
-        Read(x => x, member, file, line);
+        Read(static x => x, member, file, line);
 
     internal bool ReadBool([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
         Read(Parser.ParseBool, member, file, line);
@@ -87,7 +81,7 @@ public sealed class ResponseReader(InterReactOptions options, ResponseParser par
         Read(Parser.ParseStringEnum<T>, member, file, line);
 
     internal void IgnoreMessageVersion([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
-        Read(x => x, member, file, line);
+        ReadString(member, file, line);
 
     internal int GetMessageVersion([CallerMemberName] string member = "", [CallerFilePath] string file = "", [CallerLineNumber] int line = 0) =>
         Read(Parser.ParseInt, member, file, line);
@@ -117,12 +111,13 @@ public sealed class ResponseReader(InterReactOptions options, ResponseParser par
                 Read(x => x, member, file, line)));
     }
 
-    private static string GetCallerInfo(string member, string file, int l)
+    private string GetCallerInfo(string member, string file, int line)
     {
-        string line = File.ReadLines(file).Skip(l - 1).First().Trim();
-        string projectName = Assembly.GetExecutingAssembly().GetName().Name ?? throw new InvalidOperationException("ProjectName not found");
+        var inn = $"{_strings.Stringify(false)}";
+        string lineText = File.ReadLines(file).Skip(line - 1).First().Trim();
+        string projectName = Assembly.GetExecutingAssembly().GetName().Name!;
         int pos = file.LastIndexOf('\\' + projectName + '\\', StringComparison.Ordinal);
         string path = file[(pos + projectName.Length + 2)..];
-        return $"{path}:{l} {member}\r\n\t{line}";
+        return $"{path}:{line} [{member}]: {_index}->{inn} {lineText}";
     }
 }

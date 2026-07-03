@@ -54,14 +54,17 @@ public class ResponseComposerTests : OutputHelperTestBase
     [Fact]
     public void T04_ParseError()
     {
-        var e = Assert.Throws<ArgumentException>(() => _composer.Compose(["1", "version", "cannotParseInt"]));
-        Assert.StartsWith("ParseInt('version') failure.", e.Message);
+        //ArgumentException e = Assert.Throws<ArgumentException>(() => _composer.Compose(["1", "version", "cannotParseInt"]));
+        var e = Assert.Throws<InvalidDataException>(() => _composer.Compose(["2", "version", "cannotParse"]));
+        Assert.StartsWith("ParseInt('cannotParse') failure.", e.InnerException?.Message);
+        //Write(e.Message);
+        Logger.LogError(e, "");
     }
 
     [Fact]
     public void T03_Ok()
     {
-        object[] message = _composer.Compose([
+        object message = _composer.Compose([
             "2",  // code = size
             "99", // version
             "2",  // requestId
@@ -69,6 +72,6 @@ public class ResponseComposerTests : OutputHelperTestBase
             "100" // size
             ]);
 
-        Assert.IsType<SizeTick>(message.Single());
+        Assert.IsType<SizeTick>(message);
     }
 }

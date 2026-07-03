@@ -11,10 +11,9 @@ public class NoConnect(ITestOutputHelper output) : OutputHelperTestBase(output, 
         Task<IInterReactClient> task = InterReactClient.CreateAsync(options =>
         {
             options.LogFactory = LogFactory;
-            options.TwsPortAddresses = [999];
         }, ct);
 
-        OperationCanceledException ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => task);
+        var ex = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => task);
         Write(ex.ToString());
 
     }

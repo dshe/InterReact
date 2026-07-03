@@ -40,7 +40,7 @@ public static partial class Program
 
             logger.LogCritical("Handshake completed.");
 
-            var connection = new Connection(clientSocket, new(), logger);
+            var connection = new Connection(clientSocket, new(), logger, ct);
 
             IObservable<string[]> observable = connection.CreateObservable();
             observable.Subscribe(

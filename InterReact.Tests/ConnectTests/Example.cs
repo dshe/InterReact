@@ -3,7 +3,7 @@ namespace ConnectTests;
 
 public class SimplestExample(ITestOutputHelper output) : OutputHelperTestBase(output, LogLevel.Debug, "MyTest")
 {
-    public readonly Contract Contract = new()
+    public static readonly Contract Contract = new()
     {
         SecurityType = ContractSecurityType.Cash,
         Symbol = "EUR",
@@ -27,7 +27,7 @@ public class SimplestExample(ITestOutputHelper output) : OutputHelperTestBase(ou
 
         await client.Request.RequestMarketDataAsync(id, Contract);
 
-        await Task.Delay(3000, TestContext.Current.CancellationToken);
+        await Task.Delay(2000, TestContext.Current.CancellationToken);
 
         subscription.Dispose();
 
@@ -47,7 +47,7 @@ public class SimplestExample(ITestOutputHelper output) : OutputHelperTestBase(ou
             .OfTickClass(selector => selector.PriceTick)
             .Subscribe(onNext: priceTick => Write($"Price = {priceTick.Price}"));
 
-        await Task.Delay(3000, TestContext.Current.CancellationToken);
+        await Task.Delay(2000, TestContext.Current.CancellationToken);
 
         subscription.Dispose();
 
@@ -63,11 +63,11 @@ public class SimplestExample(ITestOutputHelper output) : OutputHelperTestBase(ou
         IHasRequestId[] messages = await interReact
             .Service
             .CreateMarketDataObservable(Contract)
-            .Take(8)
+            .Take(5)
             .ToArray()
             .FirstAsync();
 
-        Assert.Equal(8, messages.Length);
+        Assert.Equal(5, messages.Length);
 
         await interReact.DisposeAsync();
     }

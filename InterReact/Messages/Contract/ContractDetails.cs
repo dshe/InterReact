@@ -146,6 +146,11 @@ public sealed record ContractDetails : IHasRequestId
         {
             case ContractDetailsType.GeneralContractType:
                 RequestId = r.ReadInt();
+
+                // Trigger error, for testing
+                if (RequestId == int.MaxValue)
+                    r.ReadString();
+
                 Contract.Symbol = r.ReadString();
                 Contract.SecurityType = r.ReadStringEnum<ContractSecurityType>();
 
@@ -283,9 +288,6 @@ public sealed record ContractDetails : IHasRequestId
                 Contract.TradingClass = r.ReadString();
                 break;
         }
-
-        if (RequestId == int.MaxValue)
-            throw new InvalidDataException("Test Exception!!");
     }
 
     private void ReadLastTradeDate(string lastTradeDateOrContractMonth, bool isBond)

@@ -13,7 +13,7 @@ namespace InterReact;
 public sealed class Connection : IAsyncDisposable
 {
     internal static readonly Connection NullInstance =
-        new(new(SocketType.Stream, ProtocolType.Tcp), new InterReactOptions(), NullLogger.Instance);
+        new(new(SocketType.Stream, ProtocolType.Tcp), new InterReactOptions(), NullLogger.Instance, default);
     private readonly ILogger _logger;
     private readonly InterReactOptions _options;
     private readonly Channel<byte[]> _outgoing = Channel.CreateBounded<byte[]>
@@ -24,36 +24,45 @@ public sealed class Connection : IAsyncDisposable
             AllowSynchronousContinuations = false
         });
     private readonly Socket _socket;
-    private readonly CancellationTokenSource _receiverCts = new();
+    private readonly CancellationTokenSource _cts;
+    private readonly CancellationToken _ct;
     private readonly Task _senderTask;
     private Task? _receiverTask;
     private int _disposed;
     internal IPEndPoint RemoteEndPoint { get; }
     internal IObservable<string[]> Observable { get; }
 
-    internal Connection(Socket socket, InterReactOptions options, ILogger logger)
+    internal Connection(Socket socket, InterReactOptions options, ILogger logger, CancellationToken ct)
     {
         _socket = socket;
         _options = options;
         _logger = logger;
+        _cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+        _ct = _cts.Token;
         _senderTask = SenderLoopAsync();
         Observable = CreateObservable();
         RemoteEndPoint = (IPEndPoint)socket.RemoteEndPoint!;
     }
 
-    // Write a string to the channel.
-    internal ValueTask SendStringAsync(string str, CancellationToken ct = default)
-    {
-        byte[] message = str.ToByteArray();
-        return _outgoing.Writer.WriteAsync(message, ct);
-    }
+    internal ValueTask SendStringAsync(string str) =>
+        SendAsync(str.ToByteArray());
 
-    // Write strings to channel.
     // V100Plus format: payload of null-terminated strings with 4 byte message length prefix.
-    internal ValueTask SendMessageAsync(IEnumerable<string> strings, CancellationToken ct = default)
+    internal ValueTask SendMessageAsync(IEnumerable<string> strings) =>
+        SendAsync(strings.ToByteArrayWithLengthPrefix());
+
+    // Write to the channel.
+    private async ValueTask SendAsync(byte[] bytes)
     {
-        byte[] message = strings.ToByteArrayWithLengthPrefix();
-        return _outgoing.Writer.WriteAsync(message, ct);
+        try
+        {
+            await _outgoing.Writer.WriteAsync(bytes, _ct).ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Send() error.");
+            throw;
+        }
     }
 
     // Read from channel, write to socket.
@@ -66,6 +75,8 @@ public sealed class Connection : IAsyncDisposable
         }
         catch (Exception ex)
         {
+            if (_ct.IsCancellationRequested)
+                return;
             _logger.LogError(ex, "SenderLoopAsync() error.");
             throw;
         }
@@ -75,30 +86,30 @@ public sealed class Connection : IAsyncDisposable
     {
         while (!buffer.IsEmpty)
         {
-            int sent = await _socket.SendAsync(buffer, SocketFlags.None).ConfigureAwait(false);
+            int sent = await _socket.SendAsync(buffer, SocketFlags.None, _ct).ConfigureAwait(false);
             if (sent == 0)
                 throw new IOException("Socket closed.");
             buffer = buffer.Slice(sent);
         }
     }
 
-    private async Task LoginAsync(CancellationToken ct)
+    private async Task LoginAsync()
     {
         // Send without prefix
-        await SendStringAsync("API", ct).ConfigureAwait(false);
+        await SendStringAsync("API").ConfigureAwait(false);
 
         // Send with prefix. Report a range of supported API versions to TWS.
         string s = $"v{(int)_options.ServerVersionMin}..{(int)_options.ServerVersionMax}";
-        await SendMessageAsync([s], ct).ConfigureAwait(false);
+        await SendMessageAsync([s]).ConfigureAwait(false);
 
         await SendMessageAsync([
                 ((int)RequestCode.StartApi).ToString(CultureInfo.InvariantCulture),
                 "2",
                 _options.TwsClientId.ToString(CultureInfo.InvariantCulture),
                 _options.OptionalCapabilities
-            ], ct).ConfigureAwait(false);
+            ]).ConfigureAwait(false);
 
-        string[] firstMessage = await ReadOneMessageAsync(ct).ConfigureAwait(false);
+        string[] firstMessage = await ReadOneMessageAsync().ConfigureAwait(false);
         // ServerVersion is the highest supported API version within the range specified.
         if (!Enum.TryParse(firstMessage[0], out ServerVersion version))
             throw new InvalidDataException($"Could not parse server version '{firstMessage[0]}'.");
@@ -111,15 +122,14 @@ public sealed class Connection : IAsyncDisposable
             (int)_options.ServerVersionCurrent, _options.TwsClientId);
     }
 
-    internal async Task<string[]> ReadOneMessageAsync(CancellationToken ct)
+    internal async Task<string[]> ReadOneMessageAsync()
     {
-        using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-        cts.CancelAfter(TimeSpan.FromSeconds(2));
+        _cts.CancelAfter(TimeSpan.FromSeconds(3));
         try
         {
-            return await _socket.ReadOneMessageAsync(cts.Token).ConfigureAwait(false);
+            return await _socket.ReadOneMessageAsync(_ct).ConfigureAwait(false);
         }
-        catch (OperationCanceledException e) when (cts.IsCancellationRequested)
+        catch (OperationCanceledException e) when (_ct.IsCancellationRequested)
         {
             throw new TimeoutException("Timeout waiting for response from TWS/Gateway. Try restarting.", e);
         }
@@ -133,9 +143,9 @@ public sealed class Connection : IAsyncDisposable
 
             if (_receiverTask != null)
                 throw new InvalidOperationException("Observable already subscribed.");
-            _receiverTask = _socket.RunAsync(observer, _logger, _receiverCts.Token);
+            _receiverTask = _socket.RunAsync(observer, _logger, _ct);
 
-            return Disposable.Create(() => _receiverCts.Cancel());
+            return Disposable.Create(() => _cts.Cancel());
         });
     }
 
@@ -144,7 +154,7 @@ public sealed class Connection : IAsyncDisposable
         if (Interlocked.Exchange(ref _disposed, 1) != 0)
             return;
 
-        await _receiverCts.CancelAsync().ConfigureAwait(false);
+        await _cts.CancelAsync().ConfigureAwait(false);
 
         _outgoing.Writer.TryComplete();
 
@@ -157,7 +167,7 @@ public sealed class Connection : IAsyncDisposable
         catch { }
 
         _socket.Dispose();
-        _receiverCts.Dispose();
+        _cts.Dispose();
         _logger.LogInformation("Dispose.");
     }
   
@@ -170,8 +180,8 @@ public sealed class Connection : IAsyncDisposable
         Socket socket = await ConnectSocketAsync(options.TwsIpAddress, options.TwsPortAddresses, logger, ct).ConfigureAwait(false);
         try
         {
-            Connection connection = new(socket, options, logger);
-            await connection.LoginAsync(ct).ConfigureAwait(false);
+            Connection connection = new(socket, options, logger, ct);
+            await connection.LoginAsync().ConfigureAwait(false);
             return connection;
         }
         catch (Exception)
