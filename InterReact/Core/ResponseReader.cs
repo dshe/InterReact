@@ -3,14 +3,14 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 namespace InterReact;
 
-public sealed class ResponseReader(InterReactOptions options, ResponseParser parser, ILogger<ResponseReader> logger)
+public sealed class ResponseReader(ResponseParser parser, InterReactOptions options, ILogger<ResponseReader> logger)
 {
-    private int _index;
-    private string[] _strings = [];
-    internal ILogger Logger { get; } = logger;
     internal ResponseParser Parser { get; } = parser;
     internal InterReactOptions Options { get; } = options;
+    internal ILogger Logger { get; } = logger;
 
+    private int _index;
+    private string[] _strings = [];
     internal void SetStrings(string[] strings)
     {
         _strings = strings;

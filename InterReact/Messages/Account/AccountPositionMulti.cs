@@ -1,7 +1,7 @@
 ﻿namespace InterReact;
 
 [Message]
-public sealed record AccountPositionsMulti : IHasRequestId
+public sealed record AccountPositionMulti : IHasRequestId
 {
     public int RequestId { get; init; }
     public bool IsEndMessage { get; init; }
@@ -10,8 +10,8 @@ public sealed record AccountPositionsMulti : IHasRequestId
     public Contract Contract { get; } = new();
     public decimal Position { get; init; }
     public double AverageCost { get; init; }
-    internal AccountPositionsMulti() { }
-    internal AccountPositionsMulti(ResponseReader r, bool isEndMessage)
+    internal AccountPositionMulti() { }
+    internal AccountPositionMulti(ResponseReader r, bool isEndMessage)
     {
         r.IgnoreMessageVersion();
         RequestId = r.ReadInt();

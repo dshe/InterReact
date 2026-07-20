@@ -13,7 +13,7 @@ public sealed record PriceTick : TickBase
     public double Price { get; init; }
     public TickAttrib TickAttrib { get; init; }
     internal PriceTick() => TickAttrib = new TickAttrib(0);
-    internal static object CreatePriceTick(ResponseReader r)
+    internal static object Create(ResponseReader r)
     {
         r.RequireMessageVersion(3);
 

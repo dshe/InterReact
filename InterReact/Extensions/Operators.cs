@@ -27,5 +27,16 @@ public static partial class Xtensions
                     observer.OnCompleted);
             });
     }
+    extension<T>(IObservable<T> source)
+    {
+        internal IObservable<T> ThrowOnAlert() =>
+            source.Select(m =>
+            {
+                if (m is Alert a)
+                    throw a.ToAlertException();
+                return m;
+            });
+
+    }
 
 }

@@ -24,3 +24,4 @@ public sealed record AccountPosition
         AverageCost = r.ReadDouble();
     }
 }
+

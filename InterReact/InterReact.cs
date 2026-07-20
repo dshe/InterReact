@@ -10,9 +10,8 @@ public interface IInterReactClient : IAsyncDisposable
     Service Service { get; }
 }
 
-public sealed class NullInterReactClient : IInterReactClient
+file sealed class NullInterReactClient : IInterReactClient
 {
-    public static IInterReactClient Instance { get; } = new NullInterReactClient();
     public IPEndPoint RemoteIpEndPoint => throw new InvalidOperationException();
     public Request Request => throw new InvalidOperationException();
     public IObservable<object> Response => throw new InvalidOperationException();
@@ -23,12 +22,12 @@ public sealed class NullInterReactClient : IInterReactClient
 public sealed class InterReactClient(
     Connection connection, Request request, Response response, Service service) : IInterReactClient
 {
-    private readonly Connection _connection = connection;
-    public IPEndPoint RemoteIpEndPoint => _connection.RemoteEndPoint;
+    public static IInterReactClient NullInstance { get; } = new NullInterReactClient();
+    public IPEndPoint RemoteIpEndPoint => connection.RemoteEndPoint;
     public Request Request { get; } = request;
     public IObservable<object> Response { get; } = response;
     public Service Service { get; } = service;
-    public async ValueTask DisposeAsync() => await _connection.DisposeAsync().ConfigureAwait(false);
+    public async ValueTask DisposeAsync() => await connection.DisposeAsync().ConfigureAwait(false);
     public static async Task<IInterReactClient> CreateAsync(Action<InterReactOptions>? action = null, CancellationToken ct = default)
     {
         InterReactOptions options = new();

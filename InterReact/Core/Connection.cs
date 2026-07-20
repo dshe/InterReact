@@ -193,8 +193,6 @@ public sealed class Connection : IAsyncDisposable
 
     private static async Task<Socket> ConnectSocketAsync(IPAddress ipAddress, IReadOnlyList<int> ports, ILogger logger, CancellationToken ct)
     {
-        TimeSpan connectTimeout = TimeSpan.FromSeconds(3);
-
         if (ports.Count == 0)
             throw new ArgumentException("No ports specified.", nameof(ports));
 
@@ -203,27 +201,22 @@ public sealed class Connection : IAsyncDisposable
         {
             Socket socket = new(SocketType.Stream, ProtocolType.Tcp);
             using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-            cts.CancelAfter(connectTimeout);
+            cts.CancelAfter(TimeSpan.FromSeconds(3));
             try
             {
                 await socket.ConnectAsync(ipAddress, port, cts.Token).ConfigureAwait(false);
                 logger.LogInformation("Connected to TWS/Gateway at {IpAddress}:{Port}.", ipAddress, port);
                 return socket;
-                // token cancel  => OperationCanceledException
-                // token timeout => OperationCanceledException
+                // ct cancel  => OperationCanceledException
+                // cts timeout => OperationCanceledException
                 // socket timeout/error => SocketException
             }
-            catch (OperationCanceledException)
+            catch (Exception)
             {
                 socket.Dispose();
                 if (ct.IsCancellationRequested)
                     throw;
                 // timeout -> try next port
-            }
-            catch (SocketException)
-            {
-                socket.Dispose();
-                // connection failed -> try next port
             }
         }
         string message = $"Could not connect to TWS/Gateway at " +

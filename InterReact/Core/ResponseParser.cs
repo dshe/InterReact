@@ -8,7 +8,6 @@ public sealed class ResponseParser(ILogger<ResponseParser> logger)
     private const string _maxInt = "2147483647";
     private const string _maxLong = "9223372036854775807";
     private const string _maxDouble = "1.7976931348623157E308";
-    private ILogger Logger { get; } = logger;
 
     internal char ParseChar(string s)
     {
@@ -83,7 +82,7 @@ public sealed class ResponseParser(ILogger<ResponseParser> logger)
         if (!long.TryParse(numberString, CultureInfo.InvariantCulture, out long number))
             throw new ArgumentException($"ParseEnum<{typeof(T).Name}>('{numberString}') is not a number.");
         if (!EnumCache<T>.IsDefined(number))
-            Logger.LogWarning("ParseEnum<{Name}>('{NumberString}') is unexpected.", typeof(T).Name, numberString);
+            logger.LogWarning("ParseEnum<{Name}>('{NumberString}') is unexpected.", typeof(T).Name, numberString);
         return (T)Enum.ToObject(typeof(T), number);
     }
 
@@ -91,7 +90,7 @@ public sealed class ResponseParser(ILogger<ResponseParser> logger)
     {
         if (StringEnumCache<T>.Values.TryGetValue(codeString, out T? value))
             return value;
-        Logger.LogWarning("GetStringEnum<{Type}>({Code}) is unexpected.", typeof(T).Name, codeString);
+        logger.LogWarning("GetStringEnum<{Type}>({Code}) is unexpected.", typeof(T).Name, codeString);
         return StringEnumCache<T>.Factory(codeString);
     }
 }

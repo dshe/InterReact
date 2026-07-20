@@ -16,10 +16,9 @@ public partial class Service
             .ToObservable<AccountPosition>(_request.RequestPositionsAsync, _request.CancelPositionsAsync)
             .CacheSource(a => $"{a.Account}:{a.Contract.ContractId}", a => a.IsEndMessage, true);
 
-    public async Task<AccountPosition[]> GetAccountPositionsAsync(TimeSpan? timeout = null, CancellationToken ct = default) =>
+    public async Task<AccountPosition[]> GetAccountPositionsAsync(CancellationToken ct = default) =>
         await AccountPositionsObservable
             .TakeWhile(a => !a.IsEndMessage)
             .TakeUntil(ct)
-            .Timeout(timeout ?? TimeSpan.MaxValue)
             .ToArray();
 }

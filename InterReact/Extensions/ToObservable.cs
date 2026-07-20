@@ -29,7 +29,7 @@ public static partial class Xtensions
 
     extension<T>(IObservable<object> source)
     {
-        public IObservable<T> ToObservable(Func<ValueTask> startRequest, Func<ValueTask>? stopRequest = null)
+        public IObservable<T> ToObservable0(Func<ValueTask> startRequest, Func<ValueTask>? stopRequest = null)
         {
             return Observable.Create<T>(async observer =>
             {
@@ -59,6 +59,36 @@ public static partial class Xtensions
                     if (cancelable is true && stopRequest is not null)
                         await stopRequest().ConfigureAwait(false);
                     subscription.Dispose();
+                });
+            });
+        }
+
+        public IObservable<T> ToObservable(Func<ValueTask> startRequest, Func<ValueTask>? stopRequest = null)
+        {
+            return Observable.Create<T>(observer =>
+            {
+                int started = 0;
+
+                IDisposable subscription = source
+                    .OfType<T>()
+                    .Subscribe(observer);
+
+                Task startTask = Task.Run(async () =>
+                {
+                    if (Interlocked.Exchange(ref started, 1) == 0)
+                        await startRequest().ConfigureAwait(false);
+                });
+
+                return Disposable.Create(() =>
+                {
+                    subscription.Dispose();
+                    _ = Task.Run(async () =>
+                    {
+                        if (stopRequest is not null && Interlocked.Exchange(ref started, 0) == 1)
+                        {
+                            await stopRequest().ConfigureAwait(false);
+                        }
+                    });
                 });
             });
         }

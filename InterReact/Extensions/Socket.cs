@@ -141,7 +141,7 @@ public static partial class Xtensions
         if (start != bytes.Length)
             throw new InvalidDataException("Incomplete null-terminated string.");
 
-        return strings.ToArray();
+        return [.. strings];
     }
 
 }

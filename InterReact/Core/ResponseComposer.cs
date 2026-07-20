@@ -40,7 +40,7 @@ public sealed class ResponseComposer(ResponseReader reader)
 
     private object GetResponseMessage(string code) => code switch
     {
-        "1" => PriceTick.CreatePriceTick(reader),
+        "1" => PriceTick.Create(reader),
         "2" => new SizeTick(reader),
         "3" => new OrderStatusReport(reader),
         "4" => new Alert(reader),
@@ -80,16 +80,16 @@ public sealed class ResponseComposer(ResponseReader reader)
 
         "61" => new AccountPosition(reader, false),
         "62" => new AccountPosition(reader, true),
-        "63" => new AccountSummary(reader),
-        "64" => new AccountSummaryEnd(reader),
+        "63" => new AccountSummary(reader, false),
+        "64" => new AccountSummary(reader, true),
         "65" => new VerifyMessageApi(reader),
         "66" => new VerifyCompleted(reader),
         "67" => new DisplayGroups(reader),
         "68" => new DisplayGroupUpdate(reader),
         "69" => new VerifyAndAuthorizeMessageApi(reader),
         "70" => new VerifyAndAuthorizeCompleted(reader),
-        "71" => new AccountPositionsMulti(reader, false),
-        "72" => new AccountPositionsMulti(reader, true),
+        "71" => new AccountPositionMulti(reader, false),
+        "72" => new AccountPositionMulti(reader, true),
         "73" => new AccountUpdateMulti(reader, false),
         "74" => new AccountUpdateMulti(reader, true),
         "75" => new SecurityDefinitionOptionParameter(reader),
@@ -107,7 +107,7 @@ public sealed class ResponseComposer(ResponseReader reader)
         "87" => new HistoricalNewsEnd(reader),
         "88" => new HeadTimestamp(reader),
         "89" => new HistogramData(reader),
-        "90" => HistoricalDataBar.CreateUpdateBar(reader),
+        "90" => HistoricalDataBar.Create(reader),
         "91" => new RerouteMktData(reader),
         "92" => new RerouteMktDepth(reader),
         "93" => new MarketRule(reader),

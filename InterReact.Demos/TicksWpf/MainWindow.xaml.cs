@@ -95,7 +95,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     ////////////////////////////////////////////////////////////////////
 
-    private IInterReactClient _client = NullInterReactClient.Instance;
+    private IInterReactClient _client = InterReactClient.NullInstance;
     private IDisposable _ticksConnection = Disposable.Empty;
 
     public MainWindow()

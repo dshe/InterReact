@@ -48,7 +48,7 @@ public sealed record HistoricalDataBar : IHasRequestId
             Count = r.ReadInt()
         };
     }
-    internal static HistoricalDataBar CreateUpdateBar(ResponseReader r)
+    internal static HistoricalDataBar Create(ResponseReader r)
     {
         return new HistoricalDataBar()
         {
