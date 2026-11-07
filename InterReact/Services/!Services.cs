@@ -4,10 +4,10 @@ public partial class Service : IDisposable
 {
     private readonly InterReactOptions _options;
     private readonly Request _request;
-    private readonly Response _response;
+    private readonly ResponseObservable _response;
     private bool _disposed;
 
-    public Service(InterReactOptions options, Request request, Response response)
+    public Service(InterReactOptions options, Request request, ResponseObservable response)
     {
         _options = options;
         _request = request;
@@ -23,7 +23,6 @@ public partial class Service : IDisposable
         if (disposing)
         {
             // dispose managed objects
-            _managedAccountsSemaphore.Dispose();
         }
 
         _disposed = true;

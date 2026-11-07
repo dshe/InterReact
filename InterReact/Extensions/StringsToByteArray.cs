@@ -17,7 +17,7 @@ public static partial class Xtensions
 
     extension(IEnumerable<string> strings)
     {
-        internal byte[] ToByteArrayWithLengthPrefix() => strings.ToByteArray().ToByteArrayWithLengthPrefix();
+        internal byte[] ToByteArrayWithLengthPrefix() => strings.ToByteArray().AddLengthPrefix();
         private byte[] ToByteArray()
         {
             ArgumentNullException.ThrowIfNull(strings);
@@ -31,7 +31,7 @@ public static partial class Xtensions
 
     extension(byte[] bytes)
     {
-        private byte[] ToByteArrayWithLengthPrefix()
+        private byte[] AddLengthPrefix()
         {
             ArgumentNullException.ThrowIfNull(bytes);
             byte[] buffer = new byte[bytes.Length + 4];

@@ -1,34 +1,21 @@
-﻿using System.Diagnostics;
+﻿using System.Reactive.Threading.Tasks;
 namespace InterReact;
 
 public partial class Service
 {
-    private readonly SemaphoreSlim _managedAccountsSemaphore = new(1, 1);
-
-    public async Task<IReadOnlyList<string>> GetManagedAccountsAsync(TimeSpan? timeout = null, CancellationToken ct = default)
+    public async Task<IList<string>> GetManagedAccountsAsync(CancellationToken ct = default)
     {
-        await _managedAccountsSemaphore.WaitAsync(ct).ConfigureAwait(false);
-        try
-        {
-            if (_options.ManagedAccounts.Count == 0)
-            {
-                // Options.ManagedAccounts is updated whenever a ManagedAccounts message is received.
-                await _response
-                    .OfType<ManagedAccounts>()
-                    .ToObservable<ManagedAccounts>(_request.RequestManagedAccountsAsync)
-                    .Select(x => x.Accounts)
-                    .TakeUntil(ct)
-                    .Timeout(timeout ?? TimeSpan.MaxValue)
-                    .SingleAsync();
-            }
+        Task<ManagedAccounts> task = _response
+                .OfType<ManagedAccounts>()
+                .FirstAsync()
+                .ToTask(ct);
 
-            Debug.Assert(_options.ManagedAccounts.Count > 0);
+        await _request.RequestManagedAccountsAsync().ConfigureAwait(false);
 
-            return _options.ManagedAccounts;
-        }
-        finally
-        {
-            _managedAccountsSemaphore.Release();
-        }
+        ManagedAccounts managedAccounts = await task.ConfigureAwait(false);
+
+        string[] accounts = managedAccounts.Accounts.Split(',', StringSplitOptions.RemoveEmptyEntries);
+
+        return accounts;
     }
 }

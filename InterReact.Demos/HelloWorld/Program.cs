@@ -38,11 +38,12 @@ Contract contract = new()
 };
 
 // Find the latest ask price for the security.
-PriceTick askPriceTick = await client
-    .Service.CreateMarketDataSnapshotObservable(contract)
+IHasRequestId[] ticks = await client.Service.GetMarketDataSnapshotAsync(contract);
+
+PriceTick askPriceTick = ticks
     .OfTickClass(c => c.PriceTick)
     .Where(priceTick => priceTick.TickType is TickType.AskPrice)
-    .FirstAsync();
+    .Single();
 
 if (askPriceTick.Price > 0)
     Console.WriteLine($"\nFound the latest ask price: {askPriceTick.Price}.\n");

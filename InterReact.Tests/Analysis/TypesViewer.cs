@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Security;
 namespace Analysis;
 
-public class Types_Viewer(ITestOutputHelper output) : OutputHelperTestBase(output)
+public class TypesViewer(ITestOutputHelper output) : OutputHelperTestBase(output)
 {
     private static readonly Assembly _assembly = typeof(InterReactClient).Assembly;
 

@@ -8,7 +8,7 @@ public static class SpyEx
     {
         Write("Create.");
 
-        return Observable.Create<T>(observer =>
+        return System.Reactive.Linq.Observable.Create<T>(observer =>
         {
             Write("Subscribe.");
 

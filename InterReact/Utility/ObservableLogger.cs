@@ -4,7 +4,7 @@ public static partial class Xtension
 {
     extension(IObservable<object> source)
     {
-        internal IObservable<object> Log(ILogger logger)
+        internal IObservable<object> Log(ILogger logger, CancellationToken ct)
         {
             return source.Do(
             m =>
@@ -12,7 +12,11 @@ public static partial class Xtension
                 if (logger.IsEnabled(LogLevel.Debug))
                     logger.LogResponseMessage(m.Stringify());
             },
-            ex => logger.LogError(ex, "Error."),
+            ex =>
+            {
+                if (!ct.IsCancellationRequested)
+                    logger.LogError(ex, "Error: {Exception}", ex.Message);
+            },
             () => logger.LogInformation("OnCompleted."));
         }
     }

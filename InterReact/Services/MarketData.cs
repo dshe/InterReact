@@ -1,7 +1,31 @@
-﻿namespace InterReact;
+﻿using System.Reactive.Threading.Tasks;
+namespace InterReact;
 
 public partial class Service
 {
+    public async Task<IHasRequestId[]> GetMarketDataSnapshotAsync(
+        Contract contract,
+        IList<GenericTickType>? genericTickTypes = null,
+        bool isRegulatorySnapshot = false,
+        IList<Tag>? options = null,
+        CancellationToken ct = default)
+    {
+        int requestId = _request.GetNextId();
+
+        Task<IHasRequestId[]> task = _response
+            .WithRequestId(requestId)
+            .TakeUntil(m => m is Alert || m is TickSnapshotEnd)
+            .Where(m => m is not TickSnapshotEnd)
+            .ToArray()
+            .ToTask(ct);
+
+        await _request.RequestMarketDataAsync(requestId, contract, genericTickTypes, true, isRegulatorySnapshot, options).ConfigureAwait(false);
+
+        IHasRequestId[] ticks = await task.ConfigureAwait(false);
+
+        return ticks;
+    }
+
     /// <summary>
     /// Creates an observable which continually emits market data ticks for the specified contract.
     /// Output messages types are ITick or AlertMessage.
@@ -11,7 +35,9 @@ public partial class Service
     public IObservable<IHasRequestId> CreateMarketDataObservable(
         Contract contract,
         IList<GenericTickType>? genericTickTypes = null,
-        IList<Tag>? options = null) => _response
+        IList<Tag>? options = null)
+    {
+        return _response
             .ToObservableWithId(
                 _request.GetNextId,
                 id => _request.RequestMarketDataAsync(
@@ -27,35 +53,5 @@ public partial class Service
                 TickBase tick => tick.TickType.ToString(),
                 _ => ""
             });
-
-
-    public IObservable<IHasRequestId> CreateMarketDataSnapshotObservable(
-        Contract contract,
-        IList<GenericTickType>? genericTickTypes = null,
-        bool isRegulatorySnapshot = false,
-        IList<Tag>? options = null) => _response
-            .ToObservableWithId(
-                _request.GetNextId,
-                id => _request.RequestMarketDataAsync(
-                    id,
-                    contract,
-                    genericTickTypes,
-                    true,
-                    isRegulatorySnapshot,
-                    options),
-                _request.CancelMarketDataAsync)
-            .TakeUntil(m => m is TickSnapshotEnd);
-
-
-    public async Task<IHasRequestId[]> GetMarketDataSnapshotAsync(
-        Contract contract,
-        IList<GenericTickType>? genericTickTypes = null,
-        bool isRegulatorySnapshot = false,
-        IList<Tag>? options = null,
-        TimeSpan? timeout = null,
-        CancellationToken ct = default) =>
-            await CreateMarketDataSnapshotObservable(contract, genericTickTypes, isRegulatorySnapshot, options)
-                .TakeUntil(ct)
-                .Timeout(timeout ?? TimeSpan.MaxValue)
-                .ToArray();
+    }
 }

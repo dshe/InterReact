@@ -29,14 +29,16 @@ public static partial class Xtensions
     }
     extension<T>(IObservable<T> source)
     {
-        internal IObservable<T> ThrowOnAlert() =>
-            source.Select(m =>
+        // Timeout(TimeSpan) does not accept Timespan.MaxValue or Timeout.InfiniteTimeSpan, so use null.
+        internal IObservable<T> TimeoutIf(TimeSpan? timeout) =>
+            timeout.HasValue ? source.Timeout(timeout.Value) : source;
+
+        public IObservable<T> ThrowOnAlert() =>
+            source.SelectMany(m =>
             {
                 if (m is Alert a)
-                    throw a.ToAlertException();
-                return m;
+                    return Observable.Throw<T>(a.ToAlertException());
+                return Observable.Return(m); // Continues the stream normally
             });
-
     }
-
 }

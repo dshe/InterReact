@@ -19,8 +19,7 @@ public static partial class Xtension
                 }
                 catch (Exception ex)
                 {
-                    throw new InvalidOperationException(
-                        $"Response({strings[0]}): {ex.Message}", ex);
+                    throw new InvalidOperationException($"Response({strings[0]}): {ex.Message}", ex);
                 }
             });
         }

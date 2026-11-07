@@ -1,7 +1,7 @@
 ﻿using System.Reactive.Linq;
-namespace ConnectTests;
+namespace ConnectionTests;
 
-public class SimplestExample(ITestOutputHelper output) : OutputHelperTestBase(output, LogLevel.Debug, "MyTest")
+public class Example(ITestOutputHelper output) : OutputHelperTestBase(output, LogLevel.Debug, "MyTest")
 {
     public static readonly Contract Contract = new()
     {
@@ -34,7 +34,6 @@ public class SimplestExample(ITestOutputHelper output) : OutputHelperTestBase(ou
         await client.DisposeAsync();
     }
 
-
     [Fact]
     public async Task Test2Async()
     {
@@ -63,7 +62,7 @@ public class SimplestExample(ITestOutputHelper output) : OutputHelperTestBase(ou
         IHasRequestId[] messages = await interReact
             .Service
             .CreateMarketDataObservable(Contract)
-            .Take(5)
+            .Take(2)
             .ToArray()
             .FirstAsync();
 
@@ -72,13 +71,5 @@ public class SimplestExample(ITestOutputHelper output) : OutputHelperTestBase(ou
         await interReact.DisposeAsync();
     }
 
-    /*
-    Logger.LogCritical("Logger.LogCritical");
-    Logger.LogError("Logger.LogError");
-    Logger.LogWarning("Logger.LogWarning");
-    Logger.LogInformation("Logger.LogInformation");
-    Logger.LogDebug("Logger.LogDebug");
-    Logger.LogTrace("Logger.LogTrace");
-    */
 }
 

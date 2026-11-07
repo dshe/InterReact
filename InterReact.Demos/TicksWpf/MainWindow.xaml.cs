@@ -20,18 +20,17 @@ public partial class MainWindow : Window, INotifyPropertyChanged
         set => _symbolSubject.OnNext(value);
     }
 
-    private string _description = "";
     public string Description
     {
-        get => _description;
+        get;
         private set
         {
-            if (value == _description)
+            if (value == field)
                 return;
-            _description = value;
+            field = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Description)));
         }
-    }
+    } = "";
 
     public double BidPrice
     {
@@ -95,7 +94,7 @@ public partial class MainWindow : Window, INotifyPropertyChanged
 
     ////////////////////////////////////////////////////////////////////
 
-    private IInterReactClient _client = InterReactClient.NullInstance;
+    private IInterReactClient _client = IInterReactClient.NullInstance;
     private IDisposable _ticksConnection = Disposable.Empty;
 
     public MainWindow()
@@ -154,19 +153,20 @@ public partial class MainWindow : Window, INotifyPropertyChanged
             Exchange = "SMART"
         };
 
-        IHasRequestId message = await _client.Service
-            .CreateContractDetailsObservable(contract)
-            .FirstAsync();
+        IHasRequestId[] messages = await _client.Service
+            .GetContractDetailsAsync(contract);
 
-        if (message is ContractDetails cd)
+        IHasRequestId firstMessage = messages.First();
+
+        if (firstMessage is ContractDetails cd)
         {
             Description = cd.LongName;
             SubscribeToTicks(cd.Contract);
         }
-        else if (message is Alert alert)
+        else if (firstMessage is Alert alert)
             Utilities.MessageBoxShow(alert.Message, "InterReact");
         else
-            Utilities.MessageBoxShow("Unhandled type: " + message.GetType().Name + "", "InterReact");
+            Utilities.MessageBoxShow("Unhandled type: " + firstMessage.GetType().Name + "", "InterReact");
     }
 
     private void SubscribeToTicks(Contract contract)

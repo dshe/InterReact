@@ -2,7 +2,7 @@
 using System.Diagnostics;
 namespace UnitTests;
 
-public class ToObservableWithId(ITestOutputHelper output) : OutputHelperTestBase(output)
+public class ToObservableWithIdTests(ITestOutputHelper output) : OutputHelperTestBase(output)
 {
     public interface ISomeClass : IHasRequestId { }
     public class SomeClass(int id) : ISomeClass

@@ -1,12 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-    <OutputType>Exe</OutputType>
-    <RootNamespace>InterReact.Test</RootNamespace>
-    <TargetFramework>net10.0</TargetFramework>
-    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+	  <TargetFramework>net10.0</TargetFramework>
+	  <Nullable>enable</Nullable>
+	  <OutputType>Exe</OutputType>
+	  <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
+	  <IsTestProject>true</IsTestProject>
+	  <ImplicitUsings>enable</ImplicitUsings>
+      <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
 
   <ItemGroup>
@@ -15,8 +16,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Reactive.Testing" Version="7.0.0" />
-    <PackageReference Include="MXLogger" Version="2.1.5" />
-    <PackageReference Include="xunit.v3" Version="3.2.2" />
+    <PackageReference Include="MXLogger" Version="2.1.6" />
+    <PackageReference Include="xunit.v3" Version="4.0.2" />
   </ItemGroup>
 
   <ItemGroup>

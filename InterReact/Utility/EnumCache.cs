@@ -7,9 +7,7 @@ namespace InterReact;
 internal static class EnumCache<T> where T : struct, Enum
 {
     internal static readonly HashSet<long> Values =
-        [.. Enum.GetValues<T>().Select(v =>
-            Convert.ToInt64(v, CultureInfo.InvariantCulture))];
+        [.. Enum.GetValues<T>().Select(v => Convert.ToInt64(v, CultureInfo.InvariantCulture))];
 
-    internal static bool IsDefined(long value)
-        => Values.Contains(value);
+    internal static bool IsDefined(long value) => Values.Contains(value);
 }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using System.Reactive.Disposables;
+﻿using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
 namespace UnitTests;
@@ -63,23 +62,23 @@ public sealed class ObservableTests(ITestOutputHelper output) : OutputHelperTest
     [Fact]
     public void TestCatchErrorHandlingObservable()
     {
-        IObservable<string> obs = Observable.Create<string>(observer =>
+        IObservable<string> obs = System.Reactive.Linq.Observable.Create<string>(observer =>
         {
             observer.OnNext("a");
             observer.OnError(new InvalidOperationException("error message"));
             return Disposable.Empty;
         });
 
-        obs.Catch<string, Exception>(ex =>
+        obs.Catch((Exception ex) =>
         {
             Console.WriteLine(ex.Message);
-            return Observable.Empty<string>(); // Completes
+            return System.Reactive.Linq.Observable.Empty<string>(); // Completes
         });
 
         static IObservable<string> ErrorFunction(Exception ex)
         {
             Console.WriteLine(ex.Message);
-            return Observable.Empty<string>(); // Completes
+            return System.Reactive.Linq.Observable.Empty<string>(); // Completes
         }
         obs.Catch<string, Exception>(ErrorFunction);
     }

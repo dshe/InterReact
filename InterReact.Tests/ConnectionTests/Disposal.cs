@@ -1,4 +1,4 @@
-﻿namespace ConnectTests;
+﻿namespace ConnectionTests;
 
 public class Disposal(ITestOutputHelper output) : OutputHelperTestBase(output, LogLevel.Debug)
 {

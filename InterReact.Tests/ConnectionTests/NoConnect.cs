@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-namespace ConnectTests;
+﻿namespace ConnectionTests;
 
 public class NoConnect(ITestOutputHelper output) : OutputHelperTestBase(output, LogLevel.Debug)
 {

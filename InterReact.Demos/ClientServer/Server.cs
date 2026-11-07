@@ -1,9 +1,7 @@
-﻿using System.Buffers.Binary;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 namespace ClientServer;
 
@@ -11,8 +9,8 @@ public static partial class Program
 {
     public static async Task RunServerAsync(IPEndPoint endPoint, ILogger logger, CancellationToken ct)
     {
-        CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
         Socket serverSocket = new(SocketType.Stream, ProtocolType.Tcp);
+        SocketWrapper? clientSocketWrapper = null;
         try
         {
             serverSocket.Bind(endPoint);
@@ -20,53 +18,77 @@ public static partial class Program
             logger.LogCritical("Server started, waiting to accept a connection.");
 
             Socket clientSocket = serverSocket.Accept();
+            clientSocketWrapper = new(clientSocket);
             logger.LogCritical("Client connection accepted.");
 
-            string str = await clientSocket.ReadOneStringAsync(ct);
+            string str = await clientSocketWrapper.ReceiveOneNullTerminatedStringAsync(ct);
             logger.LogCritical("Received: [{0}]", str.Stringify(false));
             Trace.Assert(str == "API");
 
-            string[] message1 = await clientSocket.ReadOneMessageAsync(ct);
+            string[] message1 = await clientSocketWrapper.ReceiveOneMessageAsync(ct);
             logger.LogCritical("Received: {0}", message1.Stringify(false));
             Trace.Assert(message1.Length == 1);
 
-            string[] message2 = await clientSocket.ReadOneMessageAsync(ct);
+            string[] message2 = await clientSocketWrapper.ReceiveOneMessageAsync(ct);
             logger.LogCritical("Received: {0}", message2.Stringify(false));
             Trace.Assert(message2.Length == 4);
 
-            await clientSocket.WriteMessageAsync(ServerVersion.BOND_ISSUERID.ToString(), "the date");
-
-            await clientSocket.WriteMessageAsync("9", "0", "1"); // NextId Message
+            await clientSocketWrapper.WriteMessageAsync([ServerVersion.BOND_ISSUERID.ToString(), "the date"], ct);
+            await clientSocketWrapper.WriteMessageAsync(["9", "0", "1"], ct); // NextId Message
 
             logger.LogCritical("Handshake completed.");
 
-            var connection = new Connection(clientSocket, new(), logger, ct);
+            IObservable<string[]> observable = Observable.Create<string[]>(async observer =>
+            {
+                logger.LogInformation("ConnectionObservable Startup.");
+                try
+                {
+                    while (!ct.IsCancellationRequested)
+                    {
+                        string[] message = await clientSocketWrapper.ReceiveOneMessageAsync(ct).ConfigureAwait(false);
+                        observer.OnNext(message);
+                    }
+                    observer.OnCompleted();
+                }
+                catch (EndOfStreamException) // when (ct.IsCancellationRequested)
+                {
+                }
+                catch (OperationCanceledException) when (ct.IsCancellationRequested)
+                {
+                    observer.OnCompleted();
+                }
+                catch (Exception ex)
+                {
+                    observer.OnError(ex);
+                }
+            });
 
-            IObservable<string[]> observable = connection.CreateObservable();
             observable.Subscribe(
                 x => logger.LogCritical("Received: " + x.Stringify(false)),
                 ex =>
                 {
                     logger.LogError(ex, "Socket error: " + ex.Message);
-                    cts.Cancel();
                 },
                 () =>
                 {
                     logger.LogInformation("Disconnecting.");
-                    cts.Cancel();
                 }
             );
 
-            await Task.Delay(1000, ct);
+            await Task.Delay(TimeSpan.FromSeconds(1), ct);
 
-            await clientSocket.WriteMessageAsync("1", "3", "1", ((int)TickType.LastPrice).ToString(), "10.01", "200", "0");
-            await clientSocket.WriteMessageAsync("1", "3", "1", ((int)TickType.LastPrice).ToString(), "10.02", "200", "0");
-            await clientSocket.WriteMessageAsync("1", "3", "1", ((int)TickType.LastPrice).ToString(), "10.03", "200", "0");
+            await clientSocketWrapper.WriteMessageAsync(["1", "3", "1", ((int)TickType.LastPrice).ToString(), "10.01", "200", "0"], ct);
+            await clientSocketWrapper.WriteMessageAsync(["1", "3", "1", ((int)TickType.LastPrice).ToString(), "10.02", "200", "0"], ct);
+            await clientSocketWrapper.WriteMessageAsync(["1", "3", "1", ((int)TickType.LastPrice).ToString(), "10.03", "200", "0"], ct);
 
             await Task.Delay(Timeout.Infinite, ct);
         }
         catch (TaskCanceledException)
         {
+        }
+        catch (EndOfStreamException)
+        {
+            logger.LogCritical("EOS.");
         }
         catch (Exception ex)
         {
@@ -74,33 +96,10 @@ public static partial class Program
         }
         finally
         {
+            if (clientSocketWrapper != null)
+                await clientSocketWrapper.DisposeAsync();
             serverSocket.Dispose();
             logger.LogCritical("Disposed.");
-        }
-    }
-
-    extension(Socket socket)
-    {
-        private async Task WriteMessageAsync(params string[] message)
-        {
-            // Encode each string as UTF-8 with a null terminator
-            using var ms = new MemoryStream();
-            foreach (string s in message)
-            {
-                byte[] bytes = Encoding.UTF8.GetBytes(s);
-                ms.Write(bytes, 0, bytes.Length);
-                ms.WriteByte(0); // null terminator
-            }
-
-            byte[] payload = ms.ToArray();
-
-            // Write length prefix (big-endian 4-byte integer)
-            byte[] header = new byte[4];
-            BinaryPrimitives.WriteInt32BigEndian(header, payload.Length);
-
-            // Send header then payload
-            await socket.SendAsync(header, SocketFlags.None).ConfigureAwait(false);
-            await socket.SendAsync(payload, SocketFlags.None).ConfigureAwait(false);
         }
     }
 }

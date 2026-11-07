@@ -1,12 +1,12 @@
-﻿using Microsoft.Extensions.Logging.Abstractions;
-using System.Globalization;
+﻿using System.Globalization;
 using System.Net.Sockets;
+using Microsoft.Extensions.Logging.Abstractions;
 namespace UnitTests;
 
 public class RequestMessageTests(ITestOutputHelper output) : OutputHelperTestBase(output)
 {
     private readonly RequestMessage _requestMessage =
-        new(Connection.NullInstance, NullLogger<Request>.Instance);
+        new(new(new(new Socket(SocketType.Stream, ProtocolType.Tcp)), new InterReactOptions()), NullLogger<Request>.Instance);
 
     private void AssertResult(params string[] strings)
     {

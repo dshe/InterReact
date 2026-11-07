@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using System.Drawing;
+using System.Net;
+using System.Threading;
 namespace ClientServer;
 
 public static partial class Program
@@ -12,12 +14,18 @@ public static partial class Program
         ConsoleLogger serverLogger    = new("Server:     ", LogLevel.Trace, ConsoleColor.Blue);
 
         IPEndPoint endPoint = new(IPAddress.Loopback, 111);
-        
-        _ = Task.Run(() => RunServerAsync(endPoint, serverLogger, default));
-        await Task.Delay(100);
+
+        CancellationTokenSource serverCt = new();
+        _ = Task.Run(() => RunServerAsync(endPoint, serverLogger, serverCt.Token));
+        await Task.Delay(200);
 
         await RunClientAsync(endPoint, clientLogger, clientLibLogger);
 
+        serverCt.Cancel();
+
+        await Task.Delay(100);
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine("\npress a key to continue...");
         await Console.In.ReadLineAsync();
 
         Console.ResetColor();

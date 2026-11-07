@@ -31,11 +31,12 @@ public class StringifyMessages(ITestOutputHelper output) : OutputHelperTestBase(
             .Where(t => t.GetCustomAttribute<MessageAttribute>() != null)
             .OrderBy(x => x.Name)];
 
-        foreach (TypeInfo type in types)
+        foreach (Type type in types)
         {
             try
             {
-                var instance = Activator.CreateInstance(type, nonPublic: true);
+                object? instance = Activator.CreateInstance(type, nonPublic: true) ??
+                    throw new InvalidOperationException($"Failed to create instance of type {type.Name}.");
                 string str = instance.Stringify();
                 Write($"{type.Name} = {str}");
             }

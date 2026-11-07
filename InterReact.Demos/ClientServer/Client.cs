@@ -18,7 +18,7 @@ public static partial class Program
 
         IDisposable subscription = client.Response.Subscribe(
             x => logger.LogInformation("Received: " + x.Stringify()),
-            ex => logger.LogError(ex, "Socket error."),
+            ex => logger.LogError(ex, "Socket error: {Exception}.", ex.Message),
             () => logger.LogInformation("Socket disconnected."));
 
         Contract contract = new() { Symbol = "AAPL", SecurityType = ContractSecurityType.Stock, Currency = "USD", Exchange = "SMART" };

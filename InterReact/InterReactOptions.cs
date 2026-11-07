@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 namespace InterReact;
 
-public sealed class InterReactOptions
+public sealed class InterReactOptions()
 {
     internal IClock Clock { get; set; } = SystemClock.Instance; // for testing
     public ILogger Logger { get; set; } = NullLogger.Instance;
@@ -42,7 +42,4 @@ public sealed class InterReactOptions
     // Id is updated in the constructor of the NextOrderId message which is received at startup.
     // The NextOrderId message is also received in response to Request.RequestNextOrderId().
     internal int Id;
-
-    // ManagedAccounts is set in the ManagedAccounts message which is often received at startup.
-    internal IReadOnlyList<string> ManagedAccounts { get; set; } = [];
 }

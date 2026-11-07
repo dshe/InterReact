@@ -17,7 +17,6 @@ public class MarketData(ITestOutputHelper output, TestFixture fixture) : Collect
         IObservable<IHasRequestId> observable = Client.Service.CreateMarketDataObservable(contract);
         
         IHasRequestId[] messages = await observable.Take(TimeSpan.FromSeconds(5)).ToArray();
-
         foreach (IHasRequestId m in messages)
             Write(m.Stringify());
 
@@ -25,12 +24,12 @@ public class MarketData(ITestOutputHelper output, TestFixture fixture) : Collect
     }
 
     [Fact]
-    public async Task MarketDataErrorTestAsync()
+    public async Task MarketDataErrorAsync()
     {
         Contract contract = new()
         {
             SecurityType = ContractSecurityType.Stock,
-            Symbol = "InvalidSymbol",
+            Symbol = "InvalidSymbol2",
             Currency = "USD",
             Exchange = "SMART"
         };

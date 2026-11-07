@@ -1,15 +1,15 @@
-﻿namespace InterReact;
+﻿using System.Reactive.Threading.Tasks;
+namespace InterReact;
 
 public partial class Service
 {
     /// <summary>
-    /// Creates an observable tha emits one or more contract details messages using the supplied contract as selector.
     /// For options or futures:
     /// If expiry is not specified, ContractDetails objects are retrieved for all expiries.
     /// If strike is not specified, ContractDetails objects are retrieved for all strikes.
     /// And so on. So beware that calling this method may result in attempting to retrieve a large number of contracts.
     /// </summary>
-    public IObservable<IHasRequestId> CreateContractDetailsObservable(Contract contract, bool includeExpired = false)
+    public async Task<IHasRequestId[]> GetContractDetailsAsync(Contract contract, bool includeExpired = false, CancellationToken ct = default)
     {
         ArgumentNullException.ThrowIfNull(contract);
         if (contract.ComboLegs.Any())
@@ -21,20 +21,19 @@ public partial class Service
         if (contract.SecurityIdType.Length == 0 ^ string.IsNullOrEmpty(contract.SecurityId))
             throw new ArgumentException("Invalid SecurityId/SecurityIdType combination.");
 
-        return _response
-            .ToObservableWithId(
-                _request.GetNextId,
-                id => _request.RequestContractDetailsAsync(id, contract, includeExpired),
-                null)
-            .TakeUntil(m => m is ContractDetailsEnd);
-    }
+        int requestId = _request.GetNextId();
 
-    public async Task<ContractDetails[]> GetContractDetailsAsync(Contract contract, bool includeExpired = false, TimeSpan? timeout = null, CancellationToken ct = default)
-    {
-        return await CreateContractDetailsObservable(contract, includeExpired)
-            .OfTypeOnly<ContractDetails>()
-            .TakeUntil(ct)
-            .Timeout(timeout ?? TimeSpan.MaxValue)
-            .ToArray();
+        Task<IHasRequestId[]> task = _response
+            .WithRequestId(requestId)
+            .TakeUntil(m => m is Alert || m is ContractDetailsEnd)
+            .Where(m => m is not ContractDetailsEnd)
+            .ToArray()
+            .ToTask(ct);
+
+        await _request.RequestContractDetailsAsync(requestId, contract, includeExpired).ConfigureAwait(false);
+
+        IHasRequestId[] messages = await task.ConfigureAwait(false);
+
+        return messages;
     }
 }

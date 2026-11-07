@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 namespace Analysis;
 
-public class Enum_Checker(ITestOutputHelper output) : OutputHelperTestBase(output)
+public class EnumChecker(ITestOutputHelper output) : OutputHelperTestBase(output)
 {
     private static readonly TypeInfo[] _enumTypes = [.. typeof(InterReactClient)
         .Assembly

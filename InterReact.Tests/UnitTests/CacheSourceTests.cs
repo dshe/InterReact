@@ -86,7 +86,7 @@ public class CacheSourceTests(ITestOutputHelper output) : OutputHelperTestBase(o
     [Fact]
     public async Task T01_EmptyAsync()
     {
-        IObservable<string> observable1 = Observable.Empty<string>();
+        IObservable<string> observable1 = System.Reactive.Linq.Observable.Empty<string>();
 
         var ex1 = await Assert.ThrowsAsync<InvalidOperationException>(async () => await observable1);
         Assert.Equivalent("Sequence contains no elements.", ex1.Message);

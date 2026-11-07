@@ -1,19 +1,19 @@
 ﻿namespace InterReact;
 
-public sealed class Response : IObservable<object>
+public sealed class ResponseObservable : IObservable<object>
 {
     private readonly IObservable<object> _observable;
 
-    public Response(Connection connection, ResponseComposer responseComposer, ILogger<Response> logger)
+    public ResponseObservable(Connection connection, ResponseComposer responseComposer, ILogger<ResponseObservable> logger)
     {
         ArgumentNullException.ThrowIfNull(connection, nameof(connection));
 
         _observable = connection
-            .Observable
+            .ConnectionObservable
             .ComposeMessage(responseComposer)
-            .Log(logger)
+            .Log(logger, connection.Ct)
             .Publish()
-            .AutoConnect(); // connect on first observer
+            .AutoConnect(); // Connect on first observer. Never disconnect.
     }
 
     public IDisposable Subscribe(IObserver<object> observer) => _observable.Subscribe(observer);

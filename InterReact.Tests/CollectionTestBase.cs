@@ -1,16 +1,17 @@
-﻿using System.Net;
-namespace Tests;
+﻿namespace Tests;
 
 public sealed class TestFixture : IAsyncLifetime
 {
     internal readonly SharedWriter SharedWriter = new();
-    internal IInterReactClient? Client;
+    internal IInterReactClient Client = IInterReactClient.NullInstance;
 
     public async ValueTask InitializeAsync()
     {
         ILoggerFactory loggerFactory = LoggerFactory.Create(builder => builder
-            .AddMXLogger(SharedWriter.Write)
-            .SetMinimumLevel(LogLevel.Information));
+            .AddMXLogger(SharedWriter.Write, MXLogFormatType.SingleLine)
+            .SetMinimumLevel(LogLevel.Trace));
+
+        bool allowOrderPlacement = true;
 
         Client = await InterReactClient
             .CreateAsync(options =>
@@ -18,13 +19,13 @@ public sealed class TestFixture : IAsyncLifetime
                 options.LogFactory = loggerFactory;
                 options.UseDelayedTicks = false;
                 //options.TwsIpAddress = IPAddress.Parse("192.168.100.15");
-                //options.AllowOrderPlacement = true;
-            })
+                options.AllowOrderPlacement = allowOrderPlacement;
+            }, TestContext.Current.CancellationToken)
             .ConfigureAwait(false);
 
         // Tests should be run with the demo account since orders are submitted.
-        //if (!Client.RemoteIpEndPoint.IsUsingIBDemoPort())
-        //    throw new Exception("The tests may place orders, so use the demo account.");
+        if (allowOrderPlacement && !Client.RemoteIpEndPoint.IsTwsDemoAccountPort())
+            throw new Exception("The tests may place orders, so login to TWS using the demo account.");
 
         // The demo account does not have data subscriptions, so use delayed data.
         // Note that delayed data produces delayed tick types: 
@@ -33,11 +34,7 @@ public sealed class TestFixture : IAsyncLifetime
         await Client.Request.RequestMarketDataTypeAsync(MarketDataType.Delayed);
     }
 
-    public async ValueTask DisposeAsync()
-    {
-        if (Client is not null)
-            await Client.DisposeAsync().ConfigureAwait(false);
-    }
+    public async ValueTask DisposeAsync() => await Client.DisposeAsync().ConfigureAwait(false);
 }
 
 [CollectionDefinition("Test Collection")]
@@ -58,8 +55,7 @@ public abstract class CollectionTestBase : IDisposable
     protected readonly IInterReactClient Client;
     protected void Write(string format, params object[] args) =>
         _output.WriteLine(string.Format(format, args) + Environment.NewLine);
-    protected void Write(string str) =>
-        _output.WriteLine(str);
+    protected void Write(string str) => _output.WriteLine(str);
 
     protected CollectionTestBase(ITestOutputHelper output, TestFixture fixture)
     {

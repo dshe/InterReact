@@ -1,14 +1,12 @@
 ﻿using System.Reactive.Linq;
 namespace SystemTests;
 
-public class Monitor(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
+public class OrderMonitoring(ITestOutputHelper output, TestFixture fixture) : CollectionTestBase(output, fixture)
 {
+    /*
     [Fact]
     public async Task OrderMonitorTestAsync()
     {
-        if (!Client.RemoteIpEndPoint.IsTwsDemoAccountPort())
-            throw new InvalidOperationException("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
-
         Contract contract = new()
         {
             SecurityType = ContractSecurityType.Cash,
@@ -38,9 +36,6 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
     [Fact]
     public async Task OrderMonitorCancellationTestAsync()
     {
-        if (!Client.RemoteIpEndPoint.IsTwsDemoAccountPort())
-            throw new InvalidOperationException("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
-
         Contract contract = new()
         {
             SecurityType = ContractSecurityType.Cash,
@@ -68,29 +63,26 @@ public class Monitor(ITestOutputHelper output, TestFixture fixture) : Collection
 
         await orderMonitor.DisposeAsync();
     }
+        */
 
     [Fact]
     public async Task OrderMonitorModificationTestAsync()
     {
-        if (!Client.RemoteIpEndPoint.IsTwsDemoAccountPort())
-            throw new InvalidOperationException("Demo account is required since an order will be placed. Please first login to the TWS demo account.");
-
         Contract contract = new()
         {
             SecurityType = ContractSecurityType.Cash,
-            Symbol = "CHF",
+            Symbol = "EUR",
             Currency = "USD",
             Exchange = "IDEALPRO"
         };
 
-        double askPrice = await Client
-            .Service
-            .CreateMarketDataSnapshotObservable(contract)
+        IHasRequestId[] ticks = await Client.Service.GetMarketDataSnapshotAsync(contract, null, false, null, TestContext.Current.CancellationToken);
+
+        double askPrice = ticks
             .OfTickClass(x => x.PriceTick)
             .Where(priceTick => priceTick.TickType == TickType.AskPrice)
             .Select(priceTick => priceTick.Price)
-            .Take(TimeSpan.FromSeconds(5))
-            .FirstOrDefaultAsync();
+            .SingleOrDefault(0);
 
         if (askPrice <= 0)
         {

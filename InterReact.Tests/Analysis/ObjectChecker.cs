@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 namespace Analysis;
 
-public class Interface_Checker(ITestOutputHelper output) : OutputHelperTestBase(output)
+public class ObjectChecker(ITestOutputHelper output) : OutputHelperTestBase(output)
 {
     private static TypeInfo[] GetTypes(Func<TypeInfo, bool> predicate) =>
         [.. typeof(InterReactClient).Assembly.DefinedTypes.Where(predicate).OrderBy(t => t.Name)];

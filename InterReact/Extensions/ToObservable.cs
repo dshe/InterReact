@@ -128,7 +128,60 @@ public static partial class Xtensions
                 return Disposable.Create(async () =>
                 {
                     if (cancelable is true && stopRequest is not null)
-                        await stopRequest(id).ConfigureAwait(false);
+                    {
+                        try
+                        {
+                            await stopRequest(id).ConfigureAwait(false);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
+                    subscription.Dispose();
+                });
+            });
+        }
+
+        public IObservable<IHasRequestId> ToObservableWithId2(Func<int> getRequestId, Func<int, ValueTask> startRequest, Func<int, ValueTask>? stopRequest = null)
+        {
+            return Observable.Create<IHasRequestId>(async observer =>
+            {
+                int id = getRequestId();
+                bool? cancelable = null;
+
+                IDisposable subscription = source
+                    .WithRequestId(id)
+                    .Subscribe(
+                        onNext: observer.OnNext,
+                        onError: e =>
+                        {
+                            cancelable = false;
+                            observer.OnError(e);
+                        },
+                        onCompleted: () =>
+                        {
+                            cancelable = false;
+                            observer.OnCompleted();
+                        });
+
+                if (cancelable is null)
+                {
+                    await startRequest(id).ConfigureAwait(false);
+                    cancelable ??= true;
+                }
+
+                return Disposable.Create(async () =>
+                {
+                    if (cancelable is true && stopRequest is not null)
+                    {
+                        try
+                        {
+                            await stopRequest(id).ConfigureAwait(false);
+                        }
+                        catch (Exception)
+                        {
+                        }
+                    }
                     subscription.Dispose();
                 });
             });

@@ -63,20 +63,20 @@ public static partial class Xtensions
 
             return Observable.Create<T>(observer =>
             {
-            lock (gate)
-            {
-                foreach (T item in cache.Values.OrderBy(v => v.Index).Select(v => v.Item).ToArray())
-                    observer.OnNext(item);
-                observers.Add(observer);
+                lock (gate)
+                {
+                    foreach (T item in cache.Values.OrderBy(v => v.Index).Select(v => v.Item).ToArray())
+                        observer.OnNext(item);
+                    observers.Add(observer);
 
-                sourceSubscription ??= source.Subscribe(
-                    m =>
-                    {
-                        lock (gate)
-                            ForAllOnNext(m);
-                    },
-                    ex => ForAllOnError(ex),
-                    ForAllOnCompleted);
+                    sourceSubscription ??= source.Subscribe(
+                        m =>
+                        {
+                            lock (gate)
+                                ForAllOnNext(m);
+                        },
+                        ex => ForAllOnError(ex),
+                        ForAllOnCompleted);
 
                     return Disposable.Create(() =>
                     {

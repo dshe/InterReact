@@ -1,6 +1,6 @@
 ﻿using System.Reactive.Linq;
 using System.Reactive.Threading.Tasks;
-namespace ConnectTests;
+namespace ConnectionTests;
 
 public class BadData(ITestOutputHelper output) : OutputHelperTestBase(output, LogLevel.Information)
 {

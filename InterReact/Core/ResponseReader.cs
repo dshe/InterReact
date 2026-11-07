@@ -5,9 +5,9 @@ namespace InterReact;
 
 public sealed class ResponseReader(ResponseParser parser, InterReactOptions options, ILogger<ResponseReader> logger)
 {
-    internal ResponseParser Parser { get; } = parser;
-    internal InterReactOptions Options { get; } = options;
-    internal ILogger Logger { get; } = logger;
+    internal ResponseParser Parser => parser;
+    internal InterReactOptions Options => options;
+    internal ILogger Logger => logger;
 
     private int _index;
     private string[] _strings = [];

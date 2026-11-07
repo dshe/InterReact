@@ -1,5 +1,5 @@
 ﻿using System.Net;
-namespace ConnectTests;
+namespace ConnectionTests;
 
 public class AllArgs(ITestOutputHelper output) : OutputHelperTestBase(output)
 {
