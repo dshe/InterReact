@@ -1,5 +1,4 @@
-﻿using System.Drawing;
-using System.Net;
+﻿using System.Net;
 using System.Threading;
 namespace ClientServer;
 
@@ -17,13 +16,13 @@ public static partial class Program
 
         CancellationTokenSource serverCt = new();
         _ = Task.Run(() => RunServerAsync(endPoint, serverLogger, serverCt.Token));
-        await Task.Delay(200);
+        await Task.Delay(500);
 
         await RunClientAsync(endPoint, clientLogger, clientLibLogger);
 
-        serverCt.Cancel();
+        await serverCt.CancelAsync();
 
-        await Task.Delay(100);
+        await Task.Delay(500);
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("\npress a key to continue...");
         await Console.In.ReadLineAsync();

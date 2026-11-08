@@ -4,9 +4,10 @@
 
 public static partial class Xtensions
 {
-    [LoggerMessage(EventId = 2, EventName = "ResponseMessage", Level = LogLevel.Debug, Message = "{Message}")]
+    [LoggerMessage(EventId = 1, EventName = "RequestMessage", Level = LogLevel.Debug, Message = "{MemberName}({Strings}]).")]
+    internal static partial void LogRequestMessage(this ILogger logger, string memberName, string strings);
+
+    [LoggerMessage(EventId = 2, EventName = "ResponseMessage", Level = LogLevel.Debug, Message = "{Message}.")]
     internal static partial void LogResponseMessage(this ILogger logger, string message);
 
-    [LoggerMessage(EventId = 1, EventName = "ResponseString", Level = LogLevel.Trace, Message = "{CallerInfo}\r\n\t\"{Input}\" => {Output} ({TypeName}).")]
-    internal static partial void LogResponseString(this ILogger logger, string callerInfo, string input, string output, string typeName);
 }

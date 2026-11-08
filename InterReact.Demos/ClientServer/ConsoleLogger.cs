@@ -6,9 +6,7 @@ public sealed class ConsoleLogger(
     string categoryName, LogLevel logLevel, ConsoleColor color) : ILogger
 {
     private static readonly Lock _gate = new();
-    private readonly string _categoryName = categoryName;
     private readonly LogLevel _logLevel = logLevel;
-    private readonly ConsoleColor _color = color;
 
     public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
     {
@@ -16,8 +14,8 @@ public sealed class ConsoleLogger(
             return;
         lock (_gate)
         {
-            Console.ForegroundColor = _color;
-            Console.WriteLine(_categoryName + formatter(state, exception));
+            Console.ForegroundColor = color;
+            Console.WriteLine(categoryName + formatter(state, exception));
         }
     }
 

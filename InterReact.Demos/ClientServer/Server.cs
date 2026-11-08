@@ -22,15 +22,15 @@ public static partial class Program
             logger.LogCritical("Client connection accepted.");
 
             string str = await clientSocketWrapper.ReceiveOneNullTerminatedStringAsync(ct);
-            logger.LogCritical("Received: [{0}]", str.Stringify(false));
+            logger.LogCritical("Received: [{String}].", str);
             Trace.Assert(str == "API");
 
             string[] message1 = await clientSocketWrapper.ReceiveOneMessageAsync(ct);
-            logger.LogCritical("Received: {0}", message1.Stringify(false));
+            logger.LogCritical("Received: {Message}.", message1.Stringify(false));
             Trace.Assert(message1.Length == 1);
 
             string[] message2 = await clientSocketWrapper.ReceiveOneMessageAsync(ct);
-            logger.LogCritical("Received: {0}", message2.Stringify(false));
+            logger.LogCritical("Received: {Message}.", message2.Stringify(false));
             Trace.Assert(message2.Length == 4);
 
             await clientSocketWrapper.WriteMessageAsync([ServerVersion.BOND_ISSUERID.ToString(), "the date"], ct);
@@ -50,7 +50,7 @@ public static partial class Program
                     }
                     observer.OnCompleted();
                 }
-                catch (EndOfStreamException) // when (ct.IsCancellationRequested)
+                catch (EndOfStreamException)
                 {
                 }
                 catch (OperationCanceledException) when (ct.IsCancellationRequested)
@@ -64,10 +64,10 @@ public static partial class Program
             });
 
             observable.Subscribe(
-                x => logger.LogCritical("Received: " + x.Stringify(false)),
+                x => logger.LogCritical("Received: {Message}.", x.Stringify(false)),
                 ex =>
                 {
-                    logger.LogError(ex, "Socket error: " + ex.Message);
+                    logger.LogError(ex, "Socket error: {Message}.", ex.Message);
                 },
                 () =>
                 {
@@ -75,7 +75,7 @@ public static partial class Program
                 }
             );
 
-            await Task.Delay(TimeSpan.FromSeconds(1), ct);
+            await Task.Delay(TimeSpan.FromMilliseconds(500), ct);
 
             await clientSocketWrapper.WriteMessageAsync(["1", "3", "1", ((int)TickType.LastPrice).ToString(), "10.01", "200", "0"], ct);
             await clientSocketWrapper.WriteMessageAsync(["1", "3", "1", ((int)TickType.LastPrice).ToString(), "10.02", "200", "0"], ct);

@@ -11,7 +11,10 @@ public sealed class RequestMessage(Connection connection, ILogger<Request> logge
     {
         if (Strings.Count == 0)
             throw new InvalidOperationException($"Empty send message: {memberName}.");
-        logger.LogDebug("{Method}({Strings}]).", memberName, Strings.JoinStrings(", "));
+
+        if (logger.IsEnabled(LogLevel.Debug))
+            logger.LogRequestMessage(memberName, Strings.JoinStrings(", "));
+
         await connection.SendMessageAsync(Strings).ConfigureAwait(false);
         Strings.Clear(); // allows the message to be reused
     }
