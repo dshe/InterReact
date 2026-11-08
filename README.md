@@ -1,6 +1,6 @@
 # InterReact&nbsp;&nbsp;
 [![Build & Test](https://github.com/dshe/InterReact/actions/workflows/main.yml/badge.svg)](https://github.com/dshe/InterReact/actions/workflows/main.yml)
-[![Version](https://img.shields.io/badge/Version-0.7.0-blue)](../..)
+[![Version](https://img.shields.io/badge/Version-0.8.0-blue)](../..)
 [![License](https://img.shields.io/badge/license-Apache%202.0-7755BB.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 
